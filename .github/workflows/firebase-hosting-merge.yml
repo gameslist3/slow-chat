@@ -14,4 +14,4 @@ jobs:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_SLOWCHAT_BA812 }}"
           channelId: live
-          projectId: slowchat-ui
+          projectId: slowchat-ba812
