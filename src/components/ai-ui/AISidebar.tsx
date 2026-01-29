@@ -64,8 +64,8 @@ export const AISidebar: React.FC<AISidebarProps> = ({
                     onClick={onGoHome}
                     className="flex flex-col text-left hover:opacity-70 transition-opacity active:scale-95"
                 >
-                    <span className="font-protocol text-[9px] tracking-[0.5em] text-primary opacity-60">SYSTEM_VOICE</span>
-                    <span className="font-protocol text-2xl tracking-tighter text-foreground mt-1">SLOWCHAT</span>
+                    <span className="text-[10px] font-bold tracking-widest text-primary opacity-60 uppercase">Messages</span>
+                    <span className="text-2xl font-black tracking-tighter text-foreground mt-1">SLOWCHAT</span>
                 </button>
                 {onClose && (
                     <motion.button
@@ -83,10 +83,10 @@ export const AISidebar: React.FC<AISidebarProps> = ({
                     whileHover={{ scale: 1.02, y: -2 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setView('chats')}
-                    className={`flex-1 gap-3 h-14 flex items-center justify-center rounded-2xl transition-all font-protocol text-[10px] tracking-[0.2em] ${view === 'chats' ? 'btn-primary' : 'bg-foreground/5 text-muted-foreground hover:bg-foreground/10'}`}
+                    className={`flex-1 gap-3 h-14 flex items-center justify-center rounded-2xl transition-all text-xs font-bold tracking-widest uppercase ${view === 'chats' ? 'btn-primary' : 'bg-foreground/5 text-muted-foreground hover:bg-foreground/10'}`}
                 >
                     <Icon name="message" className="w-4 h-4" />
-                    <span>Transmissions</span>
+                    <span>Chats</span>
                 </motion.button>
 
                 <motion.button
@@ -94,7 +94,7 @@ export const AISidebar: React.FC<AISidebarProps> = ({
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setView('friends')}
                     className={`relative w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${view === 'friends' ? 'btn-secondary' : 'bg-foreground/5 text-muted-foreground hover:text-primary'}`}
-                    title="Friends & Requests"
+                    title="Friends"
                 >
                     <Icon name="users" className="w-5 h-5" />
                     {followReqs.length > 0 && (
@@ -117,15 +117,15 @@ export const AISidebar: React.FC<AISidebarProps> = ({
                 <div className="flex-1 flex flex-col min-h-0 gap-6">
                     <div className="relative group">
                         <Icon name="search" className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground opacity-30 transition-opacity group-focus-within:opacity-100" />
-                        <input className="glass-input pl-14 h-14 bg-foreground/5" placeholder="Filter protocols..." />
+                        <input className="glass-input pl-14 h-14 bg-foreground/5" placeholder="Search chats..." />
                     </div>
 
                     <div className="flex-1 overflow-y-auto space-y-8 custom-scrollbar pr-3">
                         {/* Personal Chats */}
                         {personalChats.length > 0 && (
                             <div className="space-y-3">
-                                <div className="py-2 flex items-center justify-between font-protocol text-[10px] tracking-[0.3em] text-primary opacity-40 px-3 uppercase">
-                                    <span>Direct_Sync</span>
+                                <div className="py-2 flex items-center justify-between text-[10px] font-bold tracking-widest text-primary opacity-40 px-3 uppercase">
+                                    <span>Direct Messages</span>
                                     <span className="w-4 h-4 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-[8px]">{personalChats.length}</span>
                                 </div>
                                 {personalChats.map((chat) => {
@@ -160,7 +160,7 @@ export const AISidebar: React.FC<AISidebarProps> = ({
                                                         </motion.span>
                                                     )}
                                                 </div>
-                                                <p className={`text-[11px] truncate font-medium mt-0.5 ${isActive ? 'text-white/60' : 'opacity-40'}`}>{chat.lastMessage || 'Link Stable'}</p>
+                                                <p className={`text-[11px] truncate font-medium mt-0.5 ${isActive ? 'text-white/60' : 'opacity-40'}`}>{chat.lastMessage || 'Connected'}</p>
                                             </div>
                                         </motion.button>
                                     );
@@ -170,8 +170,8 @@ export const AISidebar: React.FC<AISidebarProps> = ({
 
                         {/* Groups */}
                         <div className="space-y-3">
-                            <div className="py-2 flex items-center justify-between font-protocol text-[10px] tracking-[0.3em] text-primary opacity-40 px-3 uppercase">
-                                <span>Nexus_Clusters</span>
+                            <div className="py-2 flex items-center justify-between text-[10px] font-bold tracking-widest text-primary opacity-40 px-3 uppercase">
+                                <span>Groups</span>
                                 <span className="w-4 h-4 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-[8px]">{groups.length}</span>
                             </div>
                             {groups.map((group) => {
@@ -209,7 +209,7 @@ export const AISidebar: React.FC<AISidebarProps> = ({
                                                     <span className="text-[9px] font-black">{group.members}</span>
                                                 </div>
                                             </div>
-                                            <p className={`text-[11px] truncate font-medium mt-0.5 ${isActive ? 'text-white/60' : 'opacity-40'}`}>{group.lastMessage || 'Sync Active'}</p>
+                                            <p className={`text-[11px] truncate font-medium mt-0.5 ${isActive ? 'text-white/60' : 'opacity-40'}`}>{group.lastMessage || 'Active'}</p>
                                         </div>
                                     </motion.button>
                                 );
@@ -224,7 +224,7 @@ export const AISidebar: React.FC<AISidebarProps> = ({
                     <motion.button
                         whileHover={{ x: 8, color: 'var(--primary)' }}
                         onClick={onBrowseGroups}
-                        className="flex items-center gap-4 px-2 h-10 font-protocol text-[9px] tracking-[0.4em] text-muted-foreground transition-all uppercase"
+                        className="flex items-center gap-4 px-2 h-10 text-[9px] font-bold tracking-widest text-muted-foreground transition-all uppercase"
                     >
                         <Icon name="compass" className="w-4 h-4 opacity-40" />
                         <span>Discover</span>
@@ -241,7 +241,7 @@ export const AISidebar: React.FC<AISidebarProps> = ({
                 </div>
 
                 <motion.div
-                    whileHover={{ y: -4, backgroundColor: 'rgba(255,255,255,0.02)' }}
+                    whileHover={{ y: -4 }}
                     className="glass-card p-4 flex items-center gap-4 cursor-pointer group rounded-[1.75rem]"
                     onClick={onOpenSettings}
                 >
@@ -249,11 +249,11 @@ export const AISidebar: React.FC<AISidebarProps> = ({
                         {user?.username?.[0].toUpperCase() || 'U'}
                     </div>
                     <div className="flex-1 min-w-0">
-                        <p className="font-bold truncate text-sm tracking-tight">{user?.username || 'User'}</p>
-                        <p className="font-protocol text-[8px] text-primary truncate tracking-[0.3em] mt-0.5 opacity-60 uppercase">Verified_Link</p>
+                        <p className="font-bold truncate text-sm tracking-tight text-foreground">{user?.username || 'User'}</p>
+                        <p className="text-[8px] font-bold text-primary truncate tracking-widest mt-0.5 opacity-60 uppercase">Online</p>
                     </div>
-                    <div className="p-2 rounded-xl bg-foreground/5 group-hover:rotate-90 transition-transform">
-                        <Icon name="settings" className="w-4 h-4 text-muted-foreground" />
+                    <div className="p-2 rounded-xl bg-foreground/10 group-hover:rotate-90 transition-transform">
+                        <Icon name="settings" className="w-4 h-4 text-primary" />
                     </div>
                 </motion.div>
 

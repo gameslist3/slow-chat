@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { User, Check, X, UserPlus, Clock, ArrowLeft } from 'lucide-react';
 import { getPendingRequests, acceptFollowRequest, declineFollowRequest } from '../../services/firebaseFollowService';
 import { FollowRequest } from '../../types';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Icon } from '../common/Icon';
 
 interface FollowRequestsProps {
     onBack: () => void;
@@ -31,38 +31,35 @@ export const FollowRequests: React.FC<FollowRequestsProps> = ({ onBack }) => {
 
     return (
         <div className="flex flex-col h-full bg-transparent animate-in fade-in duration-700">
-            <header className="px-8 py-10 border-b border-border/5">
+            <header className="px-4 md:px-8 py-8 border-b border-white/5">
                 <motion.button
                     whileHover={{ x: -4, color: 'var(--primary)' }}
                     onClick={onBack}
-                    className="font-protocol text-[9px] tracking-[0.4em] text-muted-foreground uppercase flex items-center gap-3 mb-10 transition-all"
+                    className="flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-white transition-colors mb-6"
                 >
-                    <ArrowLeft className="w-3.5 h-3.5" /> Back_to_Workspace
+                    <Icon name="arrowLeft" className="w-5 h-5" /> Back
                 </motion.button>
-                <div className="flex items-center gap-6">
-                    <div className="w-16 h-16 glass-panel rounded-2xl flex items-center justify-center text-primary shadow-2xl shadow-primary/20">
-                        <UserPlus className="w-7 h-7" />
+                <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 glass-panel rounded-xl flex items-center justify-center text-primary shadow-lg">
+                        <Icon name="userPlus" className="w-6 h-6" />
                     </div>
-                    <div>
-                        <span className="font-protocol text-[9px] tracking-[0.5em] text-primary opacity-50 uppercase">Network_Integrity</span>
-                        <h1 className="text-4xl font-black tracking-tighter uppercase italic leading-none mt-1">Connection_Protocols</h1>
-                    </div>
+                    <h1 className="text-2xl md:text-3xl font-black tracking-tight text-foreground">Follow Requests</h1>
                 </div>
             </header>
 
-            <div className="flex-1 overflow-y-auto p-6 md:p-12 custom-scrollbar">
-                <div className="max-w-3xl mx-auto space-y-6">
+            <div className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
+                <div className="max-w-3xl mx-auto space-y-4">
                     <AnimatePresence mode="popLayout">
                         {requests.length === 0 ? (
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="py-32 text-center flex flex-col items-center gap-6 opacity-30"
+                                className="py-20 text-center flex flex-col items-center gap-4 opacity-50"
                             >
-                                <div className="w-20 h-20 glass-card rounded-full flex items-center justify-center">
-                                    <Clock className="w-8 h-8" />
+                                <div className="w-16 h-16 glass-card rounded-full flex items-center justify-center">
+                                    <Icon name="checkCircle" className="w-8 h-8 text-gray-400" />
                                 </div>
-                                <p className="font-protocol text-[11px] uppercase tracking-[0.4em] italic">All_Transmissions_Synchronized</p>
+                                <p className="text-sm font-bold uppercase tracking-widest text-gray-500">All caught up</p>
                             </motion.div>
                         ) : (
                             requests.map(req => (
@@ -72,41 +69,38 @@ export const FollowRequests: React.FC<FollowRequestsProps> = ({ onBack }) => {
                                     initial={{ opacity: 0, scale: 0.95, y: 20 }}
                                     animate={{ opacity: 1, scale: 1, y: 0 }}
                                     exit={{ opacity: 0, scale: 0.95, filter: 'blur(10px)' }}
-                                    className="glass-panel flex items-center justify-between p-8 rounded-[2.5rem] border border-white/5 hover:border-primary/20 transition-all duration-500 group"
+                                    className="glass-panel flex items-center justify-between p-6 rounded-3xl border border-white/5 hover:border-white/10 transition-all duration-300 group"
                                 >
-                                    <div className="flex items-center gap-6">
-                                        <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center font-black text-2xl text-white shadow-xl shadow-primary/30 transition-transform group-hover:scale-110">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center font-black text-lg text-white shadow-lg">
                                             {req.fromUsername.slice(0, 2).toUpperCase()}
                                         </div>
                                         <div>
-                                            <h3 className="font-black text-2xl uppercase tracking-tight italic leading-none mb-2">{req.fromUsername}</h3>
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                                                <p className="font-protocol text-[9px] font-bold text-primary opacity-40 uppercase tracking-[0.3em]">Identity_Scanned // Sync_Pending</p>
-                                            </div>
+                                            <h3 className="font-bold text-lg text-foreground tracking-tight mb-1">{req.fromUsername}</h3>
+                                            <p className="text-xs font-medium text-primary">Wants to follow you</p>
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center gap-4">
+                                    <div className="flex items-center gap-3">
                                         <motion.button
-                                            whileHover={{ scale: 1.1, y: -2 }}
+                                            whileHover={{ scale: 1.1 }}
                                             whileTap={{ scale: 0.9 }}
                                             onClick={() => handleAction(req.id, 'accept')}
                                             disabled={loadingId === req.id}
-                                            className="w-14 h-14 rounded-2xl bg-primary text-white flex items-center justify-center shadow-2xl shadow-primary/40 hover:brightness-110 transition-all"
-                                            title="Accept Sync"
+                                            className="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center shadow-lg hover:shadow-primary/30 transition-all"
+                                            title="Accept"
                                         >
-                                            {loadingId === req.id ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Check className="w-6 h-6" />}
+                                            {loadingId === req.id ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Icon name="check" className="w-5 h-5" />}
                                         </motion.button>
                                         <motion.button
-                                            whileHover={{ scale: 1.1, y: -2 }}
+                                            whileHover={{ scale: 1.1 }}
                                             whileTap={{ scale: 0.9 }}
                                             onClick={() => handleAction(req.id, 'decline')}
                                             disabled={loadingId === req.id}
-                                            className="w-14 h-14 rounded-2xl glass-card bg-foreground/5 text-muted-foreground flex items-center justify-center hover:text-destructive hover:bg-destructive/10 hover:border-destructive/20 transition-all border border-border/10"
-                                            title="Terminate Request"
+                                            className="w-10 h-10 rounded-xl glass-card bg-white/5 text-gray-400 flex items-center justify-center hover:text-red-500 hover:bg-red-500/10 transition-all"
+                                            title="Decline"
                                         >
-                                            <X className="w-6 h-6" />
+                                            <Icon name="x" className="w-5 h-5" />
                                         </motion.button>
                                     </div>
                                 </motion.div>

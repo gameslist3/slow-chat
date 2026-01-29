@@ -174,7 +174,7 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                     >
                         <div className="glass-panel rounded-3xl p-4 flex justify-between items-center bg-primary/5 border-primary/10 shadow-2xl">
                             <div className="flex flex-col gap-1 border-l-4 border-primary pl-5">
-                                <span className="font-protocol text-[9px] tracking-[0.4em] text-primary uppercase">SYNC_REPLY: {replyingTo.sender}</span>
+                                <span className="text-[9px] font-bold tracking-widest text-primary uppercase">Replying to: {replyingTo.sender}</span>
                                 <span className="text-muted-foreground truncate max-w-lg opacity-60 text-sm font-medium">{replyingTo.text || `[${replyingTo.type}]`}</span>
                             </div>
                             <motion.button
@@ -203,8 +203,8 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                                 className="w-4 h-4 rounded-full bg-destructive shadow-[0_0_15px_rgba(239,68,68,0.5)]"
                             />
                             <div className="flex flex-col">
-                                <span className="font-protocol text-[8px] tracking-[0.5em] text-destructive uppercase">AUDIO_CAPTURE_LIVE</span>
-                                <span className="font-protocol text-2xl tracking-[0.1em] text-foreground leading-none mt-1">{formatTime(recordingTime)}</span>
+                                <span className="text-[8px] font-bold tracking-widest text-destructive uppercase">Recording</span>
+                                <span className="text-2xl font-bold tracking-[0.1em] text-foreground leading-none mt-1">{formatTime(recordingTime)}</span>
                             </div>
                         </div>
                         <div className="flex items-center gap-4">
@@ -239,7 +239,7 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                                     handleSendText();
                                 }
                             }}
-                            placeholder={cooldown > 0 ? `LINK_LOCKED_${cooldown}S` : "Initiate Transmission..."}
+                            placeholder={cooldown > 0 ? `Slow mode enabled (${cooldown}s)` : "Type a message..."}
                             disabled={cooldown > 0}
                             className="w-full bg-transparent border-none outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:ring-0 px-8 py-6 resize-none text-[17px] max-h-[300px] placeholder:text-muted-foreground/20 font-medium leading-relaxed"
                         />
@@ -280,7 +280,7 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                                             exit={{ opacity: 0, x: 20 }}
                                             className="flex items-center gap-3 px-5 py-2.5 bg-destructive/10 text-destructive rounded-2xl border border-destructive/10"
                                         >
-                                            <span className="font-protocol text-[9px] tracking-[0.3em] font-black">{cooldown}S_RECOVERY</span>
+                                            <span className="text-[9px] font-bold tracking-widest">{cooldown}s cooldown</span>
                                         </motion.div>
                                     )}
                                 </AnimatePresence>

@@ -61,7 +61,7 @@ export const AILayout: React.FC<AILayoutProps> = ({
                         animate={{ opacity: 1, x: 0, scale: 1 }}
                         exit={{ opacity: 0, x: 20, scale: 0.95 }}
                         transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-                        className="fixed top-6 right-6 z-[100] w-full max-w-sm h-[calc(100vh-3rem)]"
+                        className="fixed inset-0 z-[100] md:inset-auto md:top-6 md:right-6 md:w-full md:max-w-sm md:h-[calc(100vh-3rem)]"
                     >
                         <NotificationCenter
                             onClose={() => setShowNotifications(false)}
@@ -78,19 +78,19 @@ export const AILayout: React.FC<AILayoutProps> = ({
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
+                        className="fixed inset-0 z-[90] bg-black/60 backdrop-blur-sm md:hidden"
                         onClick={() => setSidebarOpen(false)}
                     />
                 )}
             </AnimatePresence>
 
             {/* --- Navigation Loop (HUD Container) --- */}
-            <div className="relative z-10 flex w-full h-full p-6 md:p-8 gap-6 md:gap-8">
+            <div className="relative flex w-full h-full p-6 md:p-8 gap-6 md:gap-8">
 
                 {/* Desktop HUD Sidebar (Slim & Minimal) */}
                 <aside className={`
-                    fixed inset-y-6 left-6 z-50 w-80 glass-panel rounded-[2.5rem] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] md:relative md:inset-0 md:flex md:w-80 flex-col shrink-0 overflow-hidden
-                    ${sidebarOpen ? 'translate-x-0 opacity-100 scale-100' : 'translate-x-[-120%] opacity-0 scale-95 md:translate-x-0 md:opacity-100 md:scale-100'}
+                    fixed inset-y-0 left-0 z-[100] w-[300px] glass-panel transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] md:relative md:inset-auto md:flex md:w-80 md:rounded-[2.5rem] flex-col shrink-0 overflow-hidden
+                    ${sidebarOpen ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 md:translate-x-0 md:opacity-100 invisible md:visible pointer-events-none md:pointer-events-auto'}
                 `}>
                     <AISidebar
                         groups={userGroups}
@@ -113,7 +113,7 @@ export const AILayout: React.FC<AILayoutProps> = ({
                 {/* Main Content Workspace (Floating Glass Island) */}
                 <motion.div
                     layout
-                    className="flex-1 flex flex-col min-w-0 glass-panel rounded-[2.5rem] relative overflow-hidden h-full"
+                    className="flex-1 flex flex-col min-w-0 glass-panel rounded-[2.5rem] relative overflow-hidden h-full z-0"
                 >
                     {/* Integrated System Header */}
                     <header className="flex items-center justify-between px-8 py-5 border-b border-border/5 bg-background/5 backdrop-blur-xl sticky top-0 z-40 h-[80px]">
@@ -129,8 +129,7 @@ export const AILayout: React.FC<AILayoutProps> = ({
                                 className="flex items-center gap-4 hover:opacity-70 transition-opacity active:scale-95"
                             >
                                 <div className="flex flex-col">
-                                    <span className="font-protocol text-[10px] uppercase tracking-[0.4em] text-primary">Protocol_Live</span>
-                                    <h1 className="font-bold text-lg tracking-tighter truncate max-w-[240px] leading-none mt-1">{mobileTitle}</h1>
+                                    <h1 className="font-black text-xl tracking-tight truncate max-w-[240px] leading-none text-foreground">{mobileTitle}</h1>
                                 </div>
                             </button>
                         </div>
@@ -143,9 +142,9 @@ export const AILayout: React.FC<AILayoutProps> = ({
                                     relative w-12 h-12 rounded-2xl flex items-center justify-center transition-all active:scale-95
                                     ${showNotifications ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-foreground/5 text-muted-foreground hover:bg-foreground/10'}
                                 `}
-                                title="System Flux"
+                                title="Notifications"
                             >
-                                <Icon name="message" className="w-5 h-5" />
+                                <Icon name="bell" className="w-5 h-5" />
                                 {(user?.unreadCount || 0) > 0 && (
                                     <motion.span
                                         initial={{ scale: 0 }}

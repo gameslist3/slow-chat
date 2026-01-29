@@ -1,12 +1,10 @@
 import React from 'react';
-import * as LucideIcons from 'lucide-react';
-import { LucideProps } from 'lucide-react';
+import * as SolarIcons from '@solar-icons/react';
+import { IconProps as SolarIconProps } from '@solar-icons/react';
 
 /**
  * ICON REGISTRY SYSTEM
- * To manually replace an icon:
- * 1. Drop your SVG/PNG into src/assets/icons/
- * 2. Update the mapping in 'iconRegistry' below
+ * Migrated to Solar Icons (480 Design)
  */
 
 export type IconName =
@@ -15,62 +13,72 @@ export type IconName =
     | 'thumbsUp' | 'thumbsDown' | 'message' | 'check' | 'checkCheck'
     | 'userPlus' | 'userMinus' | 'x' | 'sparkles' | 'users' | 'clock' | 'arrowLeft'
     | 'menu' | 'plus' | 'search' | 'logout' | 'compass' | 'settings' | 'mail'
-    | 'lock' | 'eye' | 'eyeOff' | 'checkCircle' | 'xCircle' | 'arrowRight' | 'shuffle' | 'key' | 'shield' | 'help' | 'save' | 'phone';
+    | 'lock' | 'eye' | 'eyeOff' | 'checkCircle' | 'xCircle' | 'arrowRight' | 'shuffle' | 'key' | 'shield' | 'help' | 'save' | 'phone' | 'bell' | 'bellOff';
 
-interface IconProps extends LucideProps {
+interface IconProps extends React.SVGProps<SVGSVGElement> {
     name: IconName;
     className?: string;
+    size?: number;
 }
 
 const iconRegistry: Record<IconName, React.FC<any>> = {
-    send: LucideIcons.Send,
-    mic: LucideIcons.Mic,
-    paperclip: LucideIcons.Paperclip,
-    smile: LucideIcons.Smile,
-    stop: LucideIcons.StopCircle,
-    play: LucideIcons.Play,
-    pause: LucideIcons.Pause,
-    file: LucideIcons.FileText,
-    image: LucideIcons.ImageIcon,
-    video: LucideIcons.Video,
-    zap: LucideIcons.Zap,
-    user: LucideIcons.User,
-    copy: LucideIcons.Copy,
-    rotate: LucideIcons.RotateCw,
-    thumbsUp: LucideIcons.ThumbsUp,
-    thumbsDown: LucideIcons.ThumbsDown,
-    message: LucideIcons.MessageSquare,
-    check: LucideIcons.Check,
-    checkCheck: LucideIcons.CheckCheck,
-    userPlus: LucideIcons.UserPlus,
-    userMinus: LucideIcons.UserMinus,
-    x: LucideIcons.X,
-    sparkles: LucideIcons.Sparkles,
-    users: LucideIcons.Users,
-    clock: LucideIcons.Clock,
-    arrowLeft: LucideIcons.ArrowLeft,
-    menu: LucideIcons.Menu,
-    plus: LucideIcons.Plus,
-    search: LucideIcons.Search,
-    logout: LucideIcons.LogOut,
-    compass: LucideIcons.Compass,
-    settings: LucideIcons.Settings,
-    mail: LucideIcons.Mail,
-    lock: LucideIcons.Lock,
-    eye: LucideIcons.Eye,
-    eyeOff: LucideIcons.EyeOff,
-    checkCircle: LucideIcons.CheckCircle2,
-    xCircle: LucideIcons.XCircle,
-    arrowRight: LucideIcons.ArrowRight,
-    shuffle: LucideIcons.Shuffle,
-    key: LucideIcons.Key,
-    shield: LucideIcons.Shield,
-    help: LucideIcons.HelpCircle,
-    save: LucideIcons.Save,
-    phone: LucideIcons.Phone,
+    // Messaging
+    send: SolarIcons.Plain,
+    mic: SolarIcons.Microphone,
+    paperclip: SolarIcons.Paperclip,
+    smile: SolarIcons.SmileCircle,
+
+    // Media Controls
+    stop: SolarIcons.Stop,
+    play: SolarIcons.Play,
+    pause: SolarIcons.Pause,
+
+    // Media Types
+    file: SolarIcons.FileText,
+    image: SolarIcons.Gallery,
+    video: SolarIcons.VideocameraRecord,
+
+    // Actions
+    zap: SolarIcons.Bolt,
+    user: SolarIcons.User,
+    copy: SolarIcons.Copy,
+    rotate: SolarIcons.Refresh,
+    thumbsUp: SolarIcons.Like,
+    thumbsDown: SolarIcons.Dislike,
+    message: SolarIcons.ChatRoundDots,
+    check: SolarIcons.CheckCircle,
+    checkCheck: SolarIcons.CheckRead,
+    userPlus: SolarIcons.UserPlus,
+    userMinus: SolarIcons.UserMinus,
+    x: SolarIcons.CloseCircle,
+    sparkles: SolarIcons.Stars,
+    users: SolarIcons.UsersGroupTwoRounded,
+    clock: SolarIcons.ClockCircle,
+    arrowLeft: SolarIcons.AltArrowLeft,
+    arrowRight: SolarIcons.AltArrowRight,
+    menu: SolarIcons.HamburgerMenu,
+    plus: SolarIcons.AddCircle,
+    search: SolarIcons.Magnifer,
+    logout: SolarIcons.Logout,
+    compass: SolarIcons.Compass,
+    settings: SolarIcons.Settings,
+    mail: SolarIcons.Letter,
+    lock: SolarIcons.LockKeyhole,
+    eye: SolarIcons.Eye,
+    eyeOff: SolarIcons.EyeClosed,
+    checkCircle: SolarIcons.CheckCircle,
+    xCircle: SolarIcons.CloseCircle,
+    shuffle: SolarIcons.Reorder,
+    key: SolarIcons.Key,
+    shield: SolarIcons.Shield,
+    help: SolarIcons.QuestionCircle,
+    save: SolarIcons.Diskette,
+    phone: SolarIcons.Phone,
+    bell: SolarIcons.Bell,
+    bellOff: SolarIcons.BellOff,
 };
 
-export const Icon: React.FC<IconProps> = ({ name, ...props }) => {
+export const Icon: React.FC<IconProps> = ({ name, className, size = 24, ...props }) => {
     const IconComponent = iconRegistry[name];
 
     if (!IconComponent) {
@@ -78,5 +86,6 @@ export const Icon: React.FC<IconProps> = ({ name, ...props }) => {
         return null;
     }
 
-    return <IconComponent {...props} />;
+    // Solar icons use 'iconStyle' prop but standard spread works for className
+    return <IconComponent className={className} size={size} {...props} />;
 };

@@ -93,8 +93,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                     </div>
                 ) : messages.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center opacity-30">
-                        <div className="text-8xl mb-6 text-center">💬</div>
-                        <p className="font-black uppercase tracking-[0.3em] text-xs italic text-center">No messages in this chat yet.</p>
+                        <div className="text-8xl mb-6 text-center grayscale">💬</div>
+                        <p className="font-bold uppercase tracking-widest text-xs text-center text-gray-500">No messages yet.</p>
                     </div>
                 ) : (
                     <AIMessageList
@@ -111,9 +111,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             <div className="shrink-0">
                 {chatId === 'system-updates' ? (
                     <div className="p-6 text-center">
-                        <div className="ui-panel py-3 px-6 inline-flex items-center gap-3 text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] italic">
-                            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                            Official updates only
+                        <div className="inline-flex items-center gap-2 text-gray-500 text-xs font-bold uppercase tracking-wider">
+                            <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                            Official Updates
                         </div>
                     </div>
                 ) : (

@@ -141,52 +141,50 @@ const AuthenticatedSection = () => {
             mobileTitle={isPersonal ? personalChatTitle : (activeGroup?.name || "SlowChat")}
         >
             {view === 'home' && (
-                <div className="h-full overflow-y-auto p-8 md:p-16 space-y-16 animate-in fade-in duration-1000 custom-scrollbar">
-                    <div className="max-w-4xl mx-auto space-y-6">
-                        <span className="font-protocol text-[10px] tracking-[0.6em] text-primary uppercase opacity-60">System_Initialization_Success</span>
-                        <h1 className="text-6xl font-black tracking-tighter text-foreground leading-tight uppercase italic">
-                            Welcome, <span className="text-primary underline decoration-primary/20 decoration-8 underline-offset-8">{user?.username?.toUpperCase()}</span>
+                <div className="h-full overflow-y-auto p-4 md:p-8 lg:p-12 space-y-12 animate-in fade-in duration-1000 custom-scrollbar">
+                    <div className="max-w-6xl mx-auto space-y-4 pt-4">
+                        <h1 className="text-4xl md:text-6xl font-black tracking-tighter text-foreground leading-tight">
+                            Hello, <span className="text-primary underline decoration-primary/20 decoration-8 underline-offset-8">{user?.username}</span>
                         </h1>
-                        <p className="font-protocol text-xs tracking-[0.2em] text-muted-foreground max-w-2xl uppercase opacity-40 leading-relaxed">
-                            Connection established // Local node synchronized // All systems operational.
+                        <p className="text-base md:text-lg font-medium text-gray-500 max-w-2xl leading-relaxed">
+                            Your clusters are synced and ready.
                         </p>
                     </div>
 
-                    <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                         {myGroups.length > 0 ? (
                             myGroups.map(g => {
                                 const unread = user ? (g.unreadCounts?.[user.id] || 0) : 0;
                                 return (
                                     <motion.button
                                         key={g.id}
-                                        whileHover={{ y: -8, scale: 1.02 }}
+                                        whileHover={{ y: -5, scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
                                         onClick={() => handleSelectGroup(g.id)}
-                                        className="glass-panel flex items-start gap-8 group hover:border-primary/40 transition-all text-left p-10 rounded-[3rem] border border-white/5 relative overflow-hidden h-full shadow-2xl"
+                                        className="glass-panel flex flex-col items-start gap-6 group hover:border-primary/40 transition-all text-left p-8 rounded-[2.5rem] border border-white/5 relative overflow-hidden h-64 shadow-xl bg-gradient-to-br from-white/5 to-transparent"
                                     >
-                                        <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                                            <Icon name="message" className="w-24 h-24 rotate-12" />
+                                        <div className="absolute top-4 right-4 opacity-10 group-hover:opacity-20 transition-opacity transform group-hover:rotate-12">
+                                            <Icon name="message" className="w-16 h-16" />
                                         </div>
 
-                                        <span className="text-7xl group-hover:scale-110 transition-transform duration-700 block relative z-10">{g.image}</span>
-                                        <div className="flex-1 relative z-10">
-                                            <div className="flex items-center justify-between mb-2">
-                                                <h3 className="font-black text-2xl uppercase tracking-tight italic text-foreground/90">{g.name}</h3>
-                                                {unread > 0 && (
-                                                    <motion.span
-                                                        animate={{ scale: [1, 1.2, 1] }}
-                                                        transition={{ repeat: Infinity, duration: 2 }}
-                                                        className="bg-primary text-white text-[10px] font-black px-3 py-1 rounded-full shadow-xl shadow-primary/40"
-                                                    >
-                                                        {unread}
-                                                    </motion.span>
-                                                )}
-                                            </div>
-                                            <div className="flex items-center gap-4">
-                                                <div className="font-protocol text-[9px] tracking-[0.3em] uppercase text-primary px-3 py-1 bg-primary/10 rounded-lg border border-primary/20">{g.category}</div>
-                                                <div className="flex items-center gap-2 text-[9px] font-protocol uppercase tracking-[0.2em] opacity-40">
-                                                    <Icon name="users" className="w-3.5 h-3.5" />
-                                                    <span>{g.members}_Nodes</span>
+                                        <div className="flex-1 w-full flex flex-col justify-between z-10">
+                                            <span className="text-6xl group-hover:scale-110 transition-transform duration-500 block">{g.image}</span>
+
+                                            <div className="space-y-2 w-full">
+                                                <div className="flex items-center justify-between">
+                                                    <h3 className="font-bold text-xl tracking-tight text-foreground line-clamp-1">{g.name}</h3>
+                                                    {unread > 0 && (
+                                                        <span className="bg-primary text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-lg">
+                                                            {unread}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <span className="text-[10px] font-bold uppercase text-primary px-2 py-1 bg-primary/10 rounded-md">{g.category}</span>
+                                                    <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase text-gray-400">
+                                                        <Icon name="users" className="w-3.5 h-3.5" />
+                                                        <span>{g.members}</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -194,19 +192,19 @@ const AuthenticatedSection = () => {
                                 );
                             })
                         ) : (
-                            <div className="col-span-full glass-panel border-dashed border-white/10 bg-transparent flex flex-col items-center justify-center py-32 text-center gap-10 rounded-[3.5rem]">
-                                <div className="text-8xl opacity-10 animate-pulse">📡</div>
-                                <div className="space-y-3">
-                                    <p className="font-protocol text-[10px] uppercase tracking-[0.5em] text-primary opacity-40">Cluster_Search_Initiated</p>
-                                    <p className="text-2xl font-black text-foreground uppercase tracking-tight italic">No clusters joined yet</p>
+                            <div className="col-span-full glass-panel border-dashed border-white/10 bg-transparent flex flex-col items-center justify-center py-20 text-center gap-6 rounded-[3rem]">
+                                <div className="text-7xl opacity-20 animate-pulse grayscale">📡</div>
+                                <div className="space-y-2">
+                                    <p className="text-xl font-bold text-foreground">No clusters joined yet</p>
+                                    <p className="text-sm font-medium text-gray-500">Explore the network to find your people.</p>
                                 </div>
                                 <motion.button
-                                    whileHover={{ scale: 1.05, y: -4 }}
+                                    whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={() => setView('discovery')}
-                                    className="btn-primary rounded-[2rem] h-20 px-12 text-[11px] font-protocol tracking-[0.4em] shadow-2xl uppercase"
+                                    className="btn-primary rounded-2xl h-14 px-8 text-xs font-bold tracking-widest shadow-xl uppercase mt-4"
                                 >
-                                    Scan For Clusters
+                                    Explore Groups
                                 </motion.button>
                             </div>
                         )}

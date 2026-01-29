@@ -81,11 +81,11 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
                     {image}
                 </motion.div>
                 <div className="flex flex-col">
-                    <h2 className="font-protocol text-base tracking-[0.2em] leading-none text-foreground/90">{title}</h2>
+                    <h2 className="text-base font-bold tracking-tight leading-none text-foreground/90">{title}</h2>
                     <div className="flex items-center gap-3 mt-1.5 opacity-40">
                         <div className={`w-1.5 h-1.5 rounded-full ${muted ? 'bg-muted-foreground' : 'bg-secondary animate-pulse shadow-[0_0_8px_rgba(var(--ui-secondary),1)]'}`} />
-                        <span className="font-protocol text-[9px] tracking-[0.3em] uppercase">
-                            {isPersonal ? 'Active_Protocol' : `${memberCount}_Nodes`} {muted && '• Muted'}
+                        <span className="text-[9px] font-bold tracking-widest uppercase">
+                            {isPersonal ? 'Private Chat' : `${memberCount} Members`} {muted && '• Muted'}
                         </span>
                     </div>
                 </div>
@@ -108,7 +108,7 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
                             whileTap={{ scale: 0.95 }}
                             onClick={() => setShowInfo(true)}
                             className="bg-foreground/5 p-3 rounded-2xl hidden sm:flex text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all border border-transparent hover:border-primary/20"
-                            title="Protocol Details"
+                            title="Details"
                         >
                             <Info className="w-5 h-5" />
                         </motion.button>
@@ -136,17 +136,17 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
                             >
                                 <button
                                     onClick={handleToggleMute}
-                                    className="w-full flex items-center gap-4 px-5 py-4 font-protocol text-[9px] tracking-[0.3em] uppercase text-muted-foreground hover:bg-primary/10 hover:text-primary rounded-2xl transition-all"
+                                    className="w-full flex items-center gap-4 px-5 py-4 text-[10px] font-bold tracking-widest uppercase text-muted-foreground hover:bg-primary/10 hover:text-primary rounded-2xl transition-all"
                                 >
                                     {muted ? <Bell className="w-4 h-4" /> : <BellOff className="w-4 h-4" />}
-                                    {muted ? 'Unmute' : 'Mute Link'}
+                                    {muted ? 'Unmute' : 'Mute'}
                                 </button>
                                 {!isPersonal && (
                                     <button
                                         onClick={() => setShowLeaveConfirm(true)}
-                                        className="w-full flex items-center gap-4 px-5 py-4 font-protocol text-[9px] tracking-[0.3em] uppercase text-destructive hover:bg-destructive/10 rounded-2xl transition-all"
+                                        className="w-full flex items-center gap-4 px-5 py-4 text-[10px] font-bold tracking-widest uppercase text-destructive hover:bg-destructive/10 rounded-2xl transition-all"
                                     >
-                                        <LogOut className="w-4 h-4" /> Terminate Link
+                                        <LogOut className="w-4 h-4" /> Leave Group
                                     </button>
                                 )}
                             </motion.div>
@@ -173,11 +173,11 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
                             >
                                 <div className="text-6xl mx-auto w-20 h-20 bg-destructive/10 flex items-center justify-center rounded-[2rem] text-destructive border border-destructive/20 shadow-inner">⚠️</div>
                                 <div className="space-y-3">
-                                    <h3 className="font-protocol text-xl tracking-tighter text-foreground">Terminating Link?</h3>
-                                    <p className="text-muted-foreground text-sm font-medium leading-relaxed opacity-60">This action will sever the connection to this cluster. Proceed with caution.</p>
+                                    <h3 className="text-xl font-bold tracking-tight text-foreground">Leave Group?</h3>
+                                    <p className="text-muted-foreground text-sm font-medium leading-relaxed opacity-60">Are you sure you want to leave this group?</p>
                                 </div>
                                 <div className="flex flex-col gap-4">
-                                    <button onClick={handleLeave} className="btn-primary bg-destructive hover:bg-destructive shadow-destructive/20 h-16 rounded-3xl">CONFIRM_TERMINATE</button>
+                                    <button onClick={handleLeave} className="btn-primary bg-destructive hover:bg-destructive shadow-destructive/20 h-16 rounded-3xl">LEAVE GROUP</button>
                                     <button onClick={() => setShowLeaveConfirm(false)} className="btn-ghost h-12 opacity-60">CANCEL</button>
                                 </div>
                             </motion.div>
@@ -209,17 +209,17 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
                             </div>
 
                             <div>
-                                <span className="font-protocol text-[10px] tracking-[0.5em] text-primary opacity-60 mb-2 block">CLUSTER_ID: {groupId.slice(0, 8)}</span>
-                                <h3 className="font-protocol text-5xl tracking-tighter text-foreground leading-none">{title}</h3>
-                                <div className="flex items-center gap-3 mt-4 text-muted-foreground font-protocol text-[9px] tracking-[0.3em] opacity-40 uppercase">
+                                <span className="text-[10px] font-bold tracking-widest text-primary opacity-60 mb-2 block uppercase">Group ID: {groupId.slice(0, 8)}</span>
+                                <h3 className="text-5xl font-black tracking-tighter text-foreground leading-none">{title}</h3>
+                                <div className="flex items-center gap-3 mt-4 text-muted-foreground text-[9px] font-bold tracking-widest opacity-40 uppercase">
                                     <Calendar className="w-3.5 h-3.5" />
-                                    <span>Sync_Init: {new Date(createdAt || Date.now()).toLocaleDateString()}</span>
+                                    <span>Created: {new Date(createdAt || Date.now()).toLocaleDateString()}</span>
                                 </div>
                             </div>
 
                             <div className="space-y-6">
-                                <div className="flex items-center justify-between font-protocol text-[9px] tracking-[0.4em] opacity-40 uppercase pb-2 border-b border-white/5">
-                                    <span>Active_Nodes ({memberCount})</span>
+                                <div className="flex items-center justify-between text-[9px] font-bold tracking-widest opacity-40 uppercase pb-2 border-b border-white/5">
+                                    <span>Members ({memberCount})</span>
                                     <Users className="w-4 h-4" />
                                 </div>
                                 <div className="max-h-64 overflow-y-auto space-y-4 custom-scrollbar pr-4">
@@ -229,8 +229,8 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
                                                 {id.slice(0, 2).toUpperCase()}
                                             </div>
                                             <div className="flex-1">
-                                                <p className="font-bold text-base tracking-tight text-foreground/90">Node_{id.slice(0, 5)}</p>
-                                                <p className="font-protocol text-[8px] text-primary tracking-[0.3em] uppercase opacity-40 mt-1">Verified_Identity</p>
+                                                <p className="font-bold text-base tracking-tight text-foreground/90">Member_{id.slice(0, 5)}</p>
+                                                <p className="text-[8px] font-bold text-primary tracking-widest uppercase opacity-40 mt-1">Member</p>
                                             </div>
                                         </div>
                                     ))}

@@ -36,9 +36,9 @@
     --font-body: 'Albert Sans', sans-serif;
 
     /* Glass V3 */
-    --glass-surface: rgba(255, 255, 255, 0.5);
-    --glass-border: rgba(0, 0, 0, 0.04);
-    --glass-shadow: rgba(0, 0, 0, 0.02);
+    --glass-surface: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(0, 0, 0, 0.08);
+    --glass-shadow: rgba(0, 0, 0, 0.05);
 
     --radius: 1.5rem;
   }
@@ -127,13 +127,13 @@
 
   .glass-card:hover {
     @apply translate-y-[-4px];
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(var(--primary-rgb), 0.05);
     border-color: rgba(var(--primary-rgb), 0.2);
     box-shadow: 0 20px 40px -10px var(--glass-shadow);
   }
 
   .dark .glass-card:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(var(--primary-rgb), 0.1);
   }
 
   /* Premium Buttons */
