@@ -15,9 +15,9 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
     ({ className, type, error, label, icon, ...props }, ref) => {
         return (
-            <div className="w-full space-y-1.5 lead">
+            <div className="w-full space-y-3 lead">
                 {label && (
-                    <label className="text-sm font-medium leading-none text-gray-900 ml-1">
+                    <label className="font-protocol text-[9px] tracking-[0.4em] uppercase text-primary opacity-50 ml-6">
                         {label}
                     </label>
                 )}
@@ -25,22 +25,22 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                     <input
                         type={type}
                         className={cn(
-                            "flex h-12 w-full rounded-2xl border border-border/50 bg-surface2 px-4 py-2 text-sm placeholder:text-muted-foreground/30 focus:outline-none focus:ring-0 focus:border-primary/30 disabled:cursor-not-allowed disabled:opacity-50 transition-all shadow-sm group-hover:border-primary/20",
-                            icon && "pl-11",
-                            error && "border-danger focus:border-danger",
+                            "flex h-16 w-full rounded-2xl border border-white/5 bg-foreground/5 px-6 py-4 text-sm font-medium placeholder:text-muted-foreground/20 focus:outline-none focus:ring-0 focus:border-primary/40 disabled:cursor-not-allowed disabled:opacity-50 transition-all shadow-sm group-hover:border-primary/20 backdrop-blur-xl",
+                            icon && "pl-14",
+                            error && "border-destructive focus:border-destructive",
                             className
                         )}
                         ref={ref}
                         {...props}
                     />
                     {icon && (
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 transition-colors group-focus-within:text-indigo-500">
+                        <div className="absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground opacity-30 transition-all group-focus-within:text-primary group-focus-within:opacity-100">
                             {icon}
                         </div>
                     )}
                 </div>
                 {error && (
-                    <p className="text-sm font-medium text-red-500 animate-in fade-in slide-in-from-top-1 ml-1">
+                    <p className="font-protocol text-[10px] tracking-widest text-destructive animate-in fade-in slide-in-from-top-1 ml-6 uppercase">
                         {error}
                     </p>
                 )}

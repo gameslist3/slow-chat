@@ -4,6 +4,7 @@ import { Button } from '../ui/Button';
 import { useToast } from '../../context/ToastContext';
 import { Icon } from '../common/Icon';
 import { generateAnonymousName } from '../../services/firebaseAuthService';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export const AccountSettings = ({ onBack }: { onBack: () => void }) => {
     const { user, updateUsername, resetPassword } = useAuth();
@@ -57,103 +58,161 @@ export const AccountSettings = ({ onBack }: { onBack: () => void }) => {
     };
 
     return (
-        <div className="h-full flex flex-col bg-white">
+        <div className="h-full flex flex-col bg-transparent animate-in fade-in duration-700">
             {/* Minimal Header */}
-            <div className="p-6 pb-2 flex items-center gap-4 animate-in fade-in slide-in-from-top-2">
-                <Button variant="ghost" size="icon" onClick={onBack} className="hover:bg-gray-100 rounded-full"><Icon name="arrowLeft" className="w-6 h-6 text-gray-800" /></Button>
-                <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Settings</h1>
+            <div className="p-8 pb-4 flex items-center justify-between">
+                <div className="flex items-center gap-6">
+                    <motion.button
+                        whileHover={{ scale: 1.1, backgroundColor: 'rgba(var(--primary-rgb), 0.1)' }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={onBack}
+                        className="w-12 h-12 glass-panel rounded-2xl flex items-center justify-center text-primary transition-all"
+                    >
+                        <Icon name="arrowLeft" className="w-5 h-5" />
+                    </motion.button>
+                    <div className="flex flex-col">
+                        <span className="font-protocol text-[9px] tracking-[0.5em] text-primary opacity-50 uppercase">User_Control_Center</span>
+                        <h1 className="text-4xl font-black text-foreground tracking-tighter uppercase italic leading-none mt-1">Settings</h1>
+                    </div>
+                </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-6 md:px-20 py-8">
-                <div className="max-w-xl mx-auto space-y-12">
+            <div className="flex-1 overflow-y-auto px-8 md:px-24 py-12 custom-scrollbar">
+                <div className="max-w-3xl mx-auto space-y-16">
 
                     {/* Identity Section */}
-                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 delay-100">
+                    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-1000">
                         <div>
-                            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Identity</h2>
+                            <div className="flex items-center gap-4 mb-8">
+                                <div className="w-1 h-8 bg-primary rounded-full shadow-[0_0_15px_rgba(var(--primary-rgb),0.5)]" />
+                                <h2 className="font-protocol text-[10px] text-primary uppercase tracking-[0.4em] opacity-60">Identity_Module</h2>
+                            </div>
 
                             {!isEditing ? (
-                                <div className="flex items-center justify-between group">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-16 h-16 rounded-full bg-slate-900 text-white flex items-center justify-center text-xl font-bold">
-                                            {user?.username[0]}
+                                <div className="glass-panel p-10 rounded-[2.5rem] flex items-center justify-between group relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                                        <Icon name="users" className="w-32 h-32 rotate-12" />
+                                    </div>
+
+                                    <div className="flex items-center gap-8 relative z-10">
+                                        <div className="w-24 h-24 rounded-[2rem] bg-primary flex items-center justify-center text-4xl font-black text-white shadow-2xl shadow-primary/40 transition-transform group-hover:scale-105">
+                                            {user?.username?.[0].toUpperCase()}
                                         </div>
                                         <div>
-                                            <h3 className="text-xl font-bold text-gray-900">{user?.username}</h3>
-                                            <p className="text-gray-500">{user?.email}</p>
+                                            <h3 className="text-3xl font-black text-foreground tracking-tight uppercase italic">{user?.username}</h3>
+                                            <p className="font-protocol text-[10px] tracking-[0.2em] text-primary opacity-60 mt-1 uppercase">{user?.email}</p>
                                         </div>
                                     </div>
                                     {lockDate ? (
-                                        <Button disabled variant="outline" className="rounded-full border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed opacity-75">
-                                            Change Name <span className="ml-2 px-1.5 py-0.5 bg-gray-200 text-gray-500 text-[10px] rounded-sm font-bold">Available {lockDate.toLocaleDateString()}</span>
-                                        </Button>
+                                        <div className="flex flex-col items-end gap-3 opacity-50 relative z-10">
+                                            <span className="font-protocol text-[9px] tracking-[0.3em] uppercase text-primary">Nexus_Lock_Active</span>
+                                            <div className="px-4 py-2 glass-card rounded-xl text-[9px] font-protocol tracking-widest text-muted-foreground uppercase bg-background/5">
+                                                Available {lockDate.toLocaleDateString()}
+                                            </div>
+                                        </div>
                                     ) : (
-                                        <Button variant="outline" onClick={startEditing} className="rounded-full border-gray-200 hover:border-gray-900 hover:bg-transparent transition-all">
-                                            Change Name
-                                        </Button>
+                                        <motion.button
+                                            whileHover={{ scale: 1.05, y: -2 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            onClick={startEditing}
+                                            className="btn-primary px-8 h-14 rounded-2xl text-[10px] font-protocol tracking-[0.3em] uppercase shadow-2xl relative z-10"
+                                        >
+                                            Modify Alias
+                                        </motion.button>
                                     )}
                                 </div>
                             ) : (
-                                <div className="bg-gray-50 rounded-3xl p-8 space-y-8 animate-in zoom-in-95">
+                                <div className="glass-panel rounded-[3rem] p-12 space-y-12 animate-in zoom-in-95 duration-700 relative overflow-hidden backdrop-blur-2xl">
                                     <div className="flex justify-between items-center">
-                                        <h3 className="font-bold text-gray-900 text-lg">Change Name</h3>
-                                        <Button variant="ghost" size="icon" onClick={() => setIsEditing(false)}><Icon name="arrowLeft" className="w-4 h-4" /></Button>
+                                        <h3 className="font-protocol text-base text-primary tracking-[0.4em] uppercase">Protocol_Update</h3>
+                                        <button onClick={() => setIsEditing(false)} className="w-10 h-10 rounded-xl hover:bg-foreground/5 flex items-center justify-center transition-all"><Icon name="x" className="w-4 h-4" /></button>
                                     </div>
 
-                                    <div className="text-center py-4">
-                                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">NEW ALIAS</p>
-                                        <p className="text-3xl font-black text-indigo-600 animate-in fade-in slide-in-from-bottom-2 key={tempName}">{tempName}</p>
+                                    <div className="text-center py-6 space-y-4">
+                                        <p className="font-protocol text-[9px] text-primary opacity-40 uppercase tracking-[0.5em]">NEW_TRANSMISSION_ID</p>
+                                        <p className="text-5xl font-black text-primary tracking-tighter uppercase italic animate-in fade-in slide-in-from-bottom-4" key={tempName}>{tempName}</p>
                                     </div>
 
-                                    <div className="flex gap-4">
-                                        <Button variant="outline" onClick={handleShuffle} className="flex-1 bg-white border-gray-200 h-12 rounded-xl hover:border-indigo-300 hover:text-indigo-600 transition-all">
-                                            <Icon name="shuffle" className="w-4 h-4 mr-2" /> Shuffle
-                                        </Button>
-                                        <Button onClick={handleSaveName} className="flex-1 bg-indigo-600 h-12 rounded-xl text-white shadow-lg shadow-indigo-200">
-                                            Confirm
-                                        </Button>
+                                    <div className="flex gap-6">
+                                        <motion.button
+                                            whileHover={{ scale: 1.02, y: -2 }}
+                                            whileTap={{ scale: 0.98 }}
+                                            onClick={handleShuffle}
+                                            className="flex-1 glass-card bg-foreground/5 h-16 rounded-2xl flex items-center justify-center font-protocol text-[10px] tracking-[0.3em] uppercase hover:border-primary/40 transition-all border-border/10"
+                                        >
+                                            <Icon name="shuffle" className="w-4 h-4 mr-3" /> Re-Scan
+                                        </motion.button>
+                                        <motion.button
+                                            whileHover={{ scale: 1.02, y: -2 }}
+                                            whileTap={{ scale: 0.98 }}
+                                            onClick={handleSaveName}
+                                            className="flex-1 btn-primary h-16 rounded-2xl text-[10px] font-protocol tracking-[0.3em] uppercase shadow-primary/30"
+                                        >
+                                            Confirm_Sync
+                                        </motion.button>
                                     </div>
-                                    <p className="text-xs text-center text-gray-400 max-w-xs mx-auto">This change will be locked for 7 days once confirmed.</p>
+                                    <p className="font-protocol text-[8px] text-center text-muted-foreground tracking-[0.4em] opacity-40 uppercase">7-Day cooldown applied on success</p>
                                 </div>
                             )}
                         </div>
                     </div>
 
-                    <hr className="border-gray-100" />
-
                     {/* Security Section */}
-                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 delay-200">
-                        <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Security</h2>
+                    <div className="animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
+                        <div className="flex items-center gap-4 mb-8">
+                            <div className="w-1 h-8 bg-secondary rounded-full shadow-[0_0_15px_rgba(var(--ui-secondary),0.5)]" />
+                            <h2 className="font-protocol text-[10px] text-secondary uppercase tracking-[0.4em] opacity-60">Security_Protocols</h2>
+                        </div>
 
-                        <div className="flex items-center justify-between py-2">
-                            <div className="flex items-center gap-4">
-                                <div className="p-3 bg-gray-50 rounded-full text-gray-600"><Icon name="key" className="w-5 h-5" /></div>
-                                <div>
-                                    <p className="font-bold text-gray-900">Password</p>
-                                    <p className="text-sm text-gray-500">Secure your account</p>
+                        <div className="glass-panel p-8 rounded-[2.5rem] flex items-center justify-between hover:border-secondary/20 transition-all duration-700">
+                            <div className="flex items-center gap-6">
+                                <div className="w-16 h-16 bg-secondary/10 rounded-2xl text-secondary flex items-center justify-center border border-secondary/10 shadow-inner">
+                                    <Icon name="key" className="w-7 h-7" />
+                                </div>
+                                <div className="flex flex-col">
+                                    <p className="font-bold text-xl tracking-tight text-foreground/90 uppercase">Passkey_Auth</p>
+                                    <p className="font-protocol text-[9px] text-secondary opacity-40 tracking-[0.2em] mt-1 uppercase">Secure transmission layer</p>
                                 </div>
                             </div>
-                            <Button variant="ghost" className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 font-medium" onClick={handlePasswordReset}>
-                                Reset
-                            </Button>
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                className="px-6 h-12 glass-card bg-secondary/5 text-secondary border-secondary/20 hover:bg-secondary/10 font-protocol text-[9px] tracking-[0.3em] uppercase rounded-xl transition-all"
+                                onClick={handlePasswordReset}
+                            >
+                                Reset_Key
+                            </motion.button>
                         </div>
                     </div>
 
-                    <hr className="border-gray-100" />
-
                     {/* Support Section */}
-                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 delay-300">
-                        <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Support</h2>
+                    <div className="animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-500 pb-12">
+                        <div className="flex items-center gap-4 mb-8">
+                            <div className="w-1 h-8 bg-muted-foreground/40 rounded-full" />
+                            <h2 className="font-protocol text-[10px] text-muted-foreground uppercase tracking-[0.4em] opacity-60">Network_Support</h2>
+                        </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <a href="mailto:support@slowchat.com" className="flex flex-col items-center justify-center gap-3 p-6 bg-gray-50 hover:bg-indigo-50 hover:text-indigo-600 rounded-3xl transition-colors group cursor-pointer border border-transparent hover:border-indigo-100">
-                                <div className="p-3 bg-white rounded-full text-gray-600 group-hover:text-indigo-600 shadow-sm"><Icon name="mail" className="w-6 h-6" /></div>
-                                <span className="font-bold text-sm">Email Support</span>
-                            </a>
-                            <a href="tel:+18005550123" className="flex flex-col items-center justify-center gap-3 p-6 bg-gray-50 hover:bg-indigo-50 hover:text-indigo-600 rounded-3xl transition-colors group cursor-pointer border border-transparent hover:border-indigo-100">
-                                <div className="p-3 bg-white rounded-full text-gray-600 group-hover:text-indigo-600 shadow-sm"><Icon name="phone" className="w-6 h-6" /></div>
-                                <span className="font-bold text-sm">Call Support</span>
-                            </a>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <motion.a
+                                whileHover={{ y: -6, backgroundColor: 'rgba(var(--primary-rgb), 0.05)' }}
+                                href="mailto:support@slowchat.com"
+                                className="glass-panel p-8 flex flex-col items-center justify-center gap-4 rounded-[2.5rem] transition-all group border-border/10"
+                            >
+                                <div className="w-14 h-14 glass-card bg-foreground/5 rounded-full flex items-center justify-center text-muted-foreground group-hover:text-primary group-hover:bg-primary/10 transition-all border border-transparent group-hover:border-primary/20">
+                                    <Icon name="mail" className="w-6 h-6" />
+                                </div>
+                                <span className="font-protocol text-[10px] tracking-[0.3em] uppercase opacity-60 group-hover:opacity-100 group-hover:text-primary transition-all">Email_Link</span>
+                            </motion.a>
+                            <motion.a
+                                whileHover={{ y: -6, backgroundColor: 'rgba(var(--ui-secondary), 0.05)' }}
+                                href="tel:+18005550123"
+                                className="glass-panel p-8 flex flex-col items-center justify-center gap-4 rounded-[2.5rem] transition-all group border-border/10"
+                            >
+                                <div className="w-14 h-14 glass-card bg-foreground/5 rounded-full flex items-center justify-center text-muted-foreground group-hover:text-secondary group-hover:bg-secondary/10 transition-all border border-transparent group-hover:border-secondary/20">
+                                    <Icon name="phone" className="w-6 h-6" />
+                                </div>
+                                <span className="font-protocol text-[10px] tracking-[0.3em] uppercase opacity-60 group-hover:opacity-100 group-hover:text-secondary transition-all">Voice_Link</span>
+                            </motion.a>
                         </div>
                     </div>
 

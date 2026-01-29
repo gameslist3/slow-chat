@@ -31,7 +31,6 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose,
         if (!note.read) await markAsRead(note.id);
 
         if (note.senderName === 'System' || note.type === 'follow_request') {
-            // System notices or requests don't open chats directly
             return;
         }
 
@@ -45,112 +44,100 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose,
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4">
-            <motion.div
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-black/60 backdrop-blur-md"
-                onClick={onClose}
-            />
+        <div className="flex flex-col h-full glass-panel rounded-[2.5rem] overflow-hidden shadow-2xl border-white/5">
+            <header className="px-8 py-6 border-b border-white/5 flex items-center justify-between bg-foreground/5 backdrop-blur-3xl">
+                <div className="flex flex-col">
+                    <span className="font-protocol text-[9px] tracking-[0.4em] text-primary opacity-60 mb-1 uppercase">Flux_Control</span>
+                    <h2 className="font-protocol text-xl tracking-tighter text-foreground leading-none">NOTIFICATIONS</h2>
+                </div>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => markAllAsRead()}
+                        className="p-2.5 rounded-xl bg-foreground/5 hover:bg-primary/10 hover:text-primary transition-all text-muted-foreground"
+                        title="Clear All"
+                    >
+                        <RotateCw className="w-5 h-5" />
+                    </button>
+                    <button onClick={onClose} className="p-2.5 rounded-xl bg-foreground/5 hover:bg-destructive/10 hover:text-destructive transition-all text-muted-foreground"><X className="w-5 h-5" /></button>
+                </div>
+            </header>
 
-            <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                className="glass-panel w-full max-w-lg relative z-10 p-0 overflow-hidden flex flex-col max-h-[80vh] border border-white/10"
-            >
-                <header className="p-6 border-b border-white/5 flex items-center justify-between bg-white/5 backdrop-blur-sm">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center text-primary shadow-lg shadow-primary/10">
-                            <Bell className="w-5 h-5 animate-pulse" />
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-8">
+                <AnimatePresence mode="popLayout">
+                    {notifications.length === 0 ? (
+                        <div className="py-20 text-center opacity-20 flex flex-col items-center gap-6">
+                            <div className="text-7xl drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]">🌪️</div>
+                            <span className="font-protocol text-[10px] tracking-[0.4em] uppercase">No_Active_Signals</span>
                         </div>
-                        <h2 className="text-xl font-black uppercase tracking-tighter italic text-white/90">Notifications</h2>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <button
-                            onClick={() => markAllAsRead()}
-                            className="bg-white/5 hover:bg-white/10 p-2 rounded-xl text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-white transition-all"
-                        >
-                            Mark all read
-                        </button>
-                        <button onClick={onClose} className="btn-ghost p-2 rounded-full"><X className="w-5 h-5" /></button>
-                    </div>
-                </header>
-
-                <div className="flex-1 overflow-y-auto custom-scrollbar p-2">
-                    <AnimatePresence mode="popLayout">
-                        {notifications.length === 0 ? (
-                            <div className="py-20 text-center opacity-30 flex flex-col items-center gap-4">
-                                <div className="text-6xl drop-shadow-lg">🔔</div>
-                                <p className="font-black uppercase tracking-[0.3em] text-[10px] text-white">No new notifications</p>
-                            </div>
-                        ) : (
-                            <div className="space-y-6">
-                                {/* Connection Protocols Section */}
-                                {notifications.filter(n => n.type === 'follow_request' && !n.read).length > 0 && (
-                                    <div className="px-2">
-                                        <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-3 pl-2 italic drop-shadow-md">Connection Protocols</h3>
-                                        {notifications
-                                            .filter(n => n.type === 'follow_request' && !n.read)
-                                            .map(note => (
-                                                <FollowRequestItem key={note.id} note={note} />
-                                            ))}
+                    ) : (
+                        <div className="space-y-10">
+                            {/* Pending Handshakes */}
+                            {notifications.filter(n => n.type === 'follow_request' && !n.read).length > 0 && (
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between px-2 text-[9px] font-protocol tracking-[0.5em] text-secondary opacity-60 uppercase">
+                                        <span>Connection_Handshakes</span>
+                                        <div className="w-1.5 h-1.5 rounded-full bg-secondary animate-ping" />
                                     </div>
-                                )}
-
-                                {/* Standard Notifications Section */}
-                                <div className="px-2 py-2">
-                                    {notifications.filter(n => n.type !== 'follow_request' || n.read).length > 0 && (
-                                        <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground mb-3 pl-2">Recent Updates</h3>
-                                    )}
                                     {notifications
-                                        .filter(n => n.type !== 'follow_request' || n.read)
+                                        .filter(n => n.type === 'follow_request' && !n.read)
                                         .map(note => (
-                                            <motion.div
-                                                key={note.id}
-                                                layout
-                                                initial={{ opacity: 0, x: -10 }}
-                                                animate={{ opacity: 1, x: 0 }}
-                                                exit={{ opacity: 0, x: 10 }}
-                                                onClick={() => handleSelect(note)}
-                                                className={`
-                                                    group relative p-4 rounded-2xl transition-all cursor-pointer border mb-1 backdrop-blur-md
-                                                    ${note.read
-                                                        ? 'opacity-50 grayscale bg-white/5 border-transparent'
-                                                        : 'glass-card border-white/10 hover:border-primary/30 hover:bg-white/10'}
-                                                `}
-                                            >
-                                                <div className="flex gap-4">
-                                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-lg border border-white/5
-                                                        ${note.type === 'mention' ? 'bg-purple-500/20 text-purple-400' :
-                                                            note.type === 'reply' ? 'bg-blue-500/20 text-blue-400' :
-                                                                'bg-white/5 text-muted-foreground'}
-                                                    `}>
-                                                        <IconForType type={note.type} />
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="flex items-center justify-between gap-2 mb-1">
-                                                            <span className="font-black text-xs uppercase tracking-tight text-white/90">{note.senderName}</span>
-                                                            <span className="text-[9px] font-black opacity-30 uppercase">{new Date(note.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                                        </div>
-                                                        <p className="text-sm font-medium line-clamp-2 text-muted-foreground leading-snug group-hover:text-white/80 transition-colors">
-                                                            {note.text}
-                                                        </p>
-                                                    </div>
-                                                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <Zap className="w-4 h-4 text-primary drop-shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
-                                                    </div>
-                                                </div>
-                                                {!note.read && (
-                                                    <div className="absolute top-4 right-4 w-2 h-2 bg-primary rounded-full animate-pulse shadow-[0_0_10px_#3b82f6]" />
-                                                )}
-                                            </motion.div>
+                                            <FollowRequestItem key={note.id} note={note} />
                                         ))}
                                 </div>
+                            )}
+
+                            {/* Signal History */}
+                            <div className="space-y-4">
+                                {notifications.filter(n => n.type !== 'follow_request' || n.read).length > 0 && (
+                                    <div className="px-2 text-[9px] font-protocol tracking-[0.5em] text-primary opacity-40 uppercase">
+                                        <span>Signal_History</span>
+                                    </div>
+                                )}
+                                {notifications
+                                    .filter(n => n.type !== 'follow_request' || n.read)
+                                    .map(note => (
+                                        <motion.div
+                                            key={note.id}
+                                            layout
+                                            initial={{ opacity: 0, x: 20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: -20 }}
+                                            onClick={() => handleSelect(note)}
+                                            className={`
+                                                group relative p-5 rounded-3xl transition-all cursor-pointer border
+                                                ${note.read
+                                                    ? 'opacity-40 grayscale bg-foreground/5 border-transparent'
+                                                    : 'bg-foreground/5 border-white/5 hover:border-primary/40 hover:bg-primary/5'}
+                                            `}
+                                        >
+                                            <div className="flex gap-5 items-start">
+                                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border transition-transform group-hover:scale-110
+                                                    ${note.type === 'mention' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' :
+                                                        note.type === 'reply' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
+                                                            'bg-foreground/5 text-muted-foreground border-white/5'}
+                                                `}>
+                                                    <IconForType type={note.type} />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center justify-between gap-2 mb-1.5">
+                                                        <span className="font-bold text-sm tracking-tight text-foreground/90">{note.senderName}</span>
+                                                        <span className="font-protocol text-[8px] opacity-30 tracking-widest uppercase">{new Date(note.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                    </div>
+                                                    <p className="text-sm font-medium line-clamp-2 text-muted-foreground leading-relaxed group-hover:text-foreground transition-colors">
+                                                        {note.text}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            {!note.read && (
+                                                <div className="absolute top-5 right-5 w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary-rgb),1)]" />
+                                            )}
+                                        </motion.div>
+                                    ))}
                             </div>
-                        )}
-                    </AnimatePresence>
-                </div>
-            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
+            </div>
         </div>
     );
 };
@@ -173,21 +160,21 @@ const FollowRequestItem = ({ note }: { note: Notification }) => {
                 limit(1)
             );
             const snap = await getDocs(q);
-            if (snap.empty) throw new Error("Request no longer exists");
+            if (snap.empty) throw new Error("Link target offline");
 
             const requestId = snap.docs[0].id;
 
             if (action === 'accept') {
                 await acceptFollowRequest(requestId);
-                toast(`Connection established with ${note.senderName}`, 'success');
+                toast(`Sync established: ${note.senderName}`, 'success');
             } else {
                 await declineFollowRequest(requestId);
-                toast(`Request declined`, 'info');
+                toast(`Handshake Declined`, 'info');
             }
 
             await markAsRead(note.id);
         } catch (err: any) {
-            toast(err.message || "Action failed", 'error');
+            toast(err.message || "Protocol Failure", 'error');
         } finally {
             setLoading(false);
         }
@@ -196,36 +183,36 @@ const FollowRequestItem = ({ note }: { note: Notification }) => {
     return (
         <motion.div
             layout
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="p-5 rounded-3xl glass-card border border-primary/20 shadow-[0_0_30px_-10px_rgba(59,130,246,0.2)] mb-3 space-y-4 relative overflow-hidden"
+            className="p-6 rounded-[2rem] bg-secondary/5 border border-secondary/20 relative overflow-hidden group shadow-xl"
         >
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-20" />
+            <div className="absolute inset-0 bg-gradient-to-br from-secondary/10 to-transparent opacity-30 transition-opacity group-hover:opacity-50" />
 
-            <div className="flex gap-4 items-center relative z-10">
-                <div className="w-12 h-12 bg-primary text-white rounded-2xl flex items-center justify-center font-black text-lg shadow-lg border border-white/20">
+            <div className="flex gap-5 items-center relative z-10">
+                <div className="w-14 h-14 bg-secondary text-black rounded-2xl flex items-center justify-center font-black text-xl shadow-lg border border-white/10 group-hover:scale-105 transition-transform">
                     {note.senderName.slice(0, 2).toUpperCase()}
                 </div>
                 <div className="flex-1">
-                    <p className="text-sm font-black uppercase tracking-tight text-white">{note.senderName}</p>
-                    <p className="text-xs text-primary font-bold italic tracking-wide">Sent a connection protocol</p>
+                    <p className="font-bold text-base tracking-tight text-white">{note.senderName}</p>
+                    <p className="font-protocol text-[9px] text-secondary tracking-[0.2em] uppercase opacity-70 mt-1">Incoming_Handshake</p>
                 </div>
             </div>
-            <div className="flex gap-2 relative z-10">
+            <div className="flex gap-3 relative z-10 mt-6">
                 <button
                     onClick={() => handleAction('accept')}
                     disabled={loading}
-                    className="flex-1 h-11 btn-primary text-white rounded-xl font-black uppercase tracking-widest text-[10px] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+                    className="flex-1 h-14 bg-secondary text-black rounded-2xl font-protocol text-[10px] tracking-[0.2em] hover:scale-[1.05] active:scale-[0.95] transition-all disabled:opacity-50 shadow-xl shadow-secondary/20"
                 >
-                    {loading ? 'Processing...' : '✅ Accept'}
+                    {loading ? 'SYNCING...' : 'ACCEPT'}
                 </button>
                 <button
                     onClick={() => handleAction('decline')}
                     disabled={loading}
-                    className="flex-1 h-11 btn-danger text-white rounded-xl font-black uppercase tracking-widest text-[10px] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+                    className="flex-1 h-14 bg-foreground/5 text-muted-foreground border border-white/5 rounded-2xl font-protocol text-[10px] tracking-[0.2em] hover:bg-destructive/10 hover:text-destructive transition-all disabled:opacity-50"
                 >
-                    {loading ? '...' : '❌ Decline'}
+                    {loading ? '...' : 'DECLINE'}
                 </button>
             </div>
         </motion.div>

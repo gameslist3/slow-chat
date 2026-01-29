@@ -84,7 +84,7 @@ export const AIComposer: React.FC<AIComposerProps> = ({
             };
 
             mediaRecorder.current = recorder;
-            recorder.start(200); // 200ms slices for reliability
+            recorder.start(200);
             setIsRecording(true);
             setRecordingTime(0);
             timerRef.current = setInterval(() => setRecordingTime((prev: number) => prev + 1), 1000);
@@ -140,7 +140,6 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                 type
             });
 
-            // Clear reply state after successful media upload
             if (replyingTo) onCancelReply?.();
         } catch (err) {
             console.error('Upload failed', err);
@@ -154,8 +153,6 @@ export const AIComposer: React.FC<AIComposerProps> = ({
         if (!text.trim() || cooldown > 0) return;
         onSend({ text: text.trim(), type: 'text' });
         setText('');
-
-        // Clear reply state after successful text send
         if (replyingTo) onCancelReply?.();
     };
 
@@ -166,27 +163,27 @@ export const AIComposer: React.FC<AIComposerProps> = ({
     };
 
     return (
-        <div className="flex flex-col gap-3 p-4">
+        <div className="flex flex-col gap-4 p-8 pt-0 w-full max-w-6xl mx-auto">
             <AnimatePresence>
                 {replyingTo && (
                     <motion.div
-                        initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                        initial={{ opacity: 0, y: 20, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 10, scale: 0.98 }}
-                        className="mx-auto w-full max-w-4xl px-2"
+                        exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                        className="px-6"
                     >
-                        <div className="glass-panel rounded-[1.5rem] p-3 flex justify-between items-center text-xs shadow-xl">
-                            <div className="flex flex-col gap-0.5 border-l-3 border-primary pl-4">
-                                <span className="font-black text-primary uppercase tracking-tight italic">Replying to {replyingTo.sender}</span>
-                                <span className="text-muted-foreground truncate max-w-md opacity-70">{replyingTo.text || `[${replyingTo.type}]`}</span>
+                        <div className="glass-panel rounded-3xl p-4 flex justify-between items-center bg-primary/5 border-primary/10 shadow-2xl">
+                            <div className="flex flex-col gap-1 border-l-4 border-primary pl-5">
+                                <span className="font-protocol text-[9px] tracking-[0.4em] text-primary uppercase">SYNC_REPLY: {replyingTo.sender}</span>
+                                <span className="text-muted-foreground truncate max-w-lg opacity-60 text-sm font-medium">{replyingTo.text || `[${replyingTo.type}]`}</span>
                             </div>
                             <motion.button
-                                whileHover={{ scale: 1.1, backgroundColor: 'rgba(255,255,255,0.1)' }}
+                                whileHover={{ scale: 1.1, backgroundColor: 'rgba(255,255,255,0.05)' }}
                                 whileTap={{ scale: 0.9 }}
                                 onClick={onCancelReply}
-                                className="p-2 rounded-full"
+                                className="p-3 rounded-2xl"
                             >
-                                <Icon name="x" className="w-4 h-4" />
+                                <Icon name="x" className="w-5 h-5 opacity-40" />
                             </motion.button>
                         </div>
                     </motion.div>
@@ -195,39 +192,42 @@ export const AIComposer: React.FC<AIComposerProps> = ({
 
             <motion.div
                 layout
-                className={`glass-panel max-w-4xl mx-auto w-full p-2 transition-all duration-500 shadow-2xl ${cooldown > 0 ? 'opacity-50 grayscale pointer-events-none' : ''}`}
+                className={`glass-panel rounded-[2.5rem] p-3 transition-all duration-700 shadow-2xl ${cooldown > 0 ? 'opacity-40 grayscale pointer-events-none' : ''} border-white/5`}
             >
                 {isRecording ? (
-                    <div className="flex items-center justify-between w-full px-4 h-[56px] animate-in fade-in slide-in-from-bottom-2">
-                        <div className="flex items-center gap-4">
+                    <div className="flex items-center justify-between w-full px-8 h-[72px]">
+                        <div className="flex items-center gap-6">
                             <motion.div
-                                animate={{ scale: [1, 1.2, 1] }}
-                                transition={{ repeat: Infinity, duration: 1 }}
-                                className="w-3 h-3 rounded-full bg-destructive shadow-lg shadow-destructive/20"
+                                animate={{ scale: [1, 1.3, 1], opacity: [0.5, 1, 0.5] }}
+                                transition={{ repeat: Infinity, duration: 2 }}
+                                className="w-4 h-4 rounded-full bg-destructive shadow-[0_0_15px_rgba(239,68,68,0.5)]"
                             />
-                            <span className="font-mono font-black text-lg tracking-widest text-destructive">{formatTime(recordingTime)}</span>
+                            <div className="flex flex-col">
+                                <span className="font-protocol text-[8px] tracking-[0.5em] text-destructive uppercase">AUDIO_CAPTURE_LIVE</span>
+                                <span className="font-protocol text-2xl tracking-[0.1em] text-foreground leading-none mt-1">{formatTime(recordingTime)}</span>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-4">
                             <motion.button
-                                whileHover={{ scale: 1.05 }}
+                                whileHover={{ scale: 1.05, backgroundColor: 'rgba(239,68,68,0.05)' }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={cancelRecording}
-                                className="p-3 text-destructive rounded-xl transition-all"
+                                className="p-4 text-destructive/60 rounded-2xl transition-all"
                             >
-                                <Icon name="x" className="w-5 h-5" />
+                                <Icon name="x" className="w-6 h-6" />
                             </motion.button>
                             <motion.button
-                                whileHover={{ scale: 1.1 }}
+                                whileHover={{ scale: 1.1, y: -2 }}
                                 whileTap={{ scale: 0.9 }}
                                 onClick={stopRecording}
-                                className="bg-destructive text-white p-4 rounded-full shadow-2xl shadow-destructive/40"
+                                className="bg-destructive text-white p-5 rounded-[1.5rem] shadow-2xl shadow-destructive/40"
                             >
-                                <Icon name="stop" className="w-5 h-5" />
+                                <Icon name="stop" className="w-6 h-6" />
                             </motion.button>
                         </div>
                     </div>
                 ) : (
-                    <>
+                    <div className="flex flex-col">
                         <textarea
                             ref={textareaRef}
                             rows={1}
@@ -239,11 +239,12 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                                     handleSendText();
                                 }
                             }}
-                            placeholder={cooldown > 0 ? `LOCKED (${cooldown}s)` : "Premium AI Experience..."}
+                            placeholder={cooldown > 0 ? `LINK_LOCKED_${cooldown}S` : "Initiate Transmission..."}
                             disabled={cooldown > 0}
-                            className="w-full bg-transparent border-none outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:ring-0 px-5 py-4 resize-none text-[16px] max-h-[240px] placeholder:text-muted-foreground/30 font-bold tracking-tight"
+                            className="w-full bg-transparent border-none outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:ring-0 px-8 py-6 resize-none text-[17px] max-h-[300px] placeholder:text-muted-foreground/20 font-medium leading-relaxed"
                         />
-                        <div className="flex items-center justify-between px-3 pb-2 pt-1 border-t border-border/5">
+
+                        <div className="flex items-center justify-between px-5 pb-3 pt-3 border-t border-white/5 mt-2">
                             <div className="flex items-center gap-2">
                                 <input
                                     type="file"
@@ -253,67 +254,63 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                                     accept="image/*,video/*,application/pdf,.doc,.docx"
                                 />
                                 <motion.button
-                                    whileHover={{ scale: 1.1, backgroundColor: 'rgba(91, 125, 203, 0.1)' }}
+                                    whileHover={{ scale: 1.1, backgroundColor: 'rgba(var(--primary-rgb), 0.05)' }}
                                     whileTap={{ scale: 0.9 }}
                                     onClick={() => fileInputRef.current?.click()}
-                                    className="w-11 h-11 rounded-2xl text-muted-foreground hover:text-primary transition-all flex items-center justify-center"
+                                    className="w-12 h-12 rounded-2xl text-muted-foreground hover:text-primary transition-all flex items-center justify-center border border-transparent hover:border-primary/10"
                                 >
                                     <Icon name="paperclip" className="w-5 h-5" />
                                 </motion.button>
                                 <motion.button
-                                    whileHover={{ scale: 1.1, backgroundColor: 'rgba(91, 125, 203, 0.1)' }}
+                                    whileHover={{ scale: 1.1, backgroundColor: 'rgba(var(--primary-rgb), 0.05)' }}
                                     whileTap={{ scale: 0.9 }}
                                     onClick={startRecording}
-                                    className={`w-11 h-11 rounded-2xl text-muted-foreground hover:text-primary transition-all flex items-center justify-center ${uploading ? 'animate-pulse' : ''}`}
+                                    className={`w-12 h-12 rounded-2xl text-muted-foreground hover:text-primary transition-all flex items-center justify-center border border-transparent hover:border-primary/10 ${uploading ? 'animate-pulse' : ''}`}
                                 >
                                     <Icon name="mic" className="w-5 h-5" />
                                 </motion.button>
                             </div>
 
-                            <div className="flex items-center gap-3">
-                                <ScaleAnimate show={cooldown > 0}>
-                                    <div className="flex items-center gap-2 px-4 py-2 bg-destructive/10 text-destructive rounded-2xl text-[10px] font-black uppercase tracking-widest border border-destructive/10">
-                                        <Icon name="zap" className="w-3 h-3 fill-destructive" />
-                                        <span>{cooldown}s</span>
-                                    </div>
-                                </ScaleAnimate>
+                            <div className="flex items-center gap-4">
+                                <AnimatePresence>
+                                    {cooldown > 0 && (
+                                        <motion.div
+                                            initial={{ opacity: 0, x: 20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: 20 }}
+                                            className="flex items-center gap-3 px-5 py-2.5 bg-destructive/10 text-destructive rounded-2xl border border-destructive/10"
+                                        >
+                                            <span className="font-protocol text-[9px] tracking-[0.3em] font-black">{cooldown}S_RECOVERY</span>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
 
                                 <motion.button
-                                    whileHover={text.trim() ? { scale: 1.1, x: 2 } : {}}
+                                    whileHover={text.trim() ? { scale: 1.1, y: -2 } : {}}
                                     whileTap={text.trim() ? { scale: 0.9 } : {}}
                                     onClick={handleSendText}
                                     disabled={cooldown > 0 || !text.trim()}
                                     className={`
-                                        rounded-[1.25rem] h-12 w-12 flex items-center justify-center transition-all shadow-xl overflow-hidden
-                                        ${text.trim() ? 'bg-primary text-white shadow-primary/30' : 'bg-foreground/5 text-muted-foreground/30'}
+                                        rounded-[1.75rem] h-14 min-w-[56px] px-5 flex items-center justify-center transition-all shadow-2xl overflow-hidden font-protocol text-[10px] tracking-[0.2em]
+                                        ${text.trim() ? 'bg-primary text-white shadow-primary/40' : 'bg-foreground/5 text-muted-foreground opacity-20'}
                                     `}
                                 >
                                     {text.trim() && sendAnimation ? (
-                                        <div className="w-10 h-10 scale-150">
+                                        <div className="w-10 h-10 scale-[1.8] pointer-events-none">
                                             <Lottie animationData={sendAnimation} loop={true} />
                                         </div>
-                                    ) : <Icon name="send" className="w-6 h-6" />}
+                                    ) : (
+                                        <div className="flex items-center gap-3">
+                                            <Icon name="send" className="w-5 h-5 mr-1" />
+                                            <span className="hidden sm:inline">SEND</span>
+                                        </div>
+                                    )}
                                 </motion.button>
                             </div>
                         </div>
-                    </>
+                    </div>
                 )}
             </motion.div>
         </div>
     );
 };
-
-const ScaleAnimate: React.FC<{ show: boolean, children: React.ReactNode }> = ({ show, children }) => (
-    <AnimatePresence>
-        {show && (
-            <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-            >
-                {children}
-            </motion.div>
-        )}
-    </AnimatePresence>
-);
-

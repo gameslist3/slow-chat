@@ -1,0 +1,103 @@
+
+> slow-chat@0.0.0 build
+> vite build
+
+[36mvite v5.4.21 [32mbuilding for production...[36m[39m
+transforming...
+node.exe : 
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" "C:\U
+sers\User\AppData\Roaming\n 
+...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
+    + CategoryInfo          
+    : NotSpecified: (:Stri  
+  ng) [], RemoteException
+    + FullyQualifiedErrorId 
+    : NativeCommandError
+ 
+[1m[33mwarn[39m[22m - 
+The class `ease-[cubic-bezie
+r(0.23,1,0.32,1)]` is 
+ambiguous and matches 
+multiple utilities.
+[1m[33mwarn[39m[22m - 
+If this is content and not 
+a class, replace it with `ea
+se-&lsqb;cubic-bezier(0.23,1
+,0.32,1)&rsqb;` to silence 
+this warning.
+[32m???[39m 5 modules transformed.
+[31mx[39m Build failed in 
+725ms
+[31merror during build:
+[31m[vite:css] [postcss] 
+E:/art 
+works/code/antigravity prjts
+/slow-chat/src/index.css:111
+:5: The 
+`ease-[cubic-bezier(0.23,` 
+class does not exist. If 
+`ease-[cubic-bezier(0.23,` 
+is a custom class, make 
+sure it is defined within a 
+`@layer` directive.[31m
+file: [36mE:/art 
+works/code/antigravity prjts
+/slow-chat/src/index.css:111
+:4[31m
+    at Input.error (E:\art 
+works\code\antigravity prjts
+\slow-chat\node_modules\post
+css\lib\input.js:135:16)
+    at AtRule.error (E:\art 
+works\code\antigravity prjts
+\slow-chat\node_modules\post
+css\lib\node.js:146:32)
+    at processApply (E:\art 
+works\code\antigravity prjts
+\slow-chat\node_modules\tail
+windcss\lib\lib\expandApplyA
+tRules.js:380:29)
+    at E:\art 
+works\code\antigravity prjts
+\slow-chat\node_modules\tail
+windcss\lib\lib\expandApplyA
+tRules.js:551:9
+    at E:\art 
+works\code\antigravity prjts
+\slow-chat\node_modules\tail
+windcss\lib\processTailwindF
+eatures.js:55:50
+    at async plugins 
+(E:\art 
+works\code\antigravity prjts
+\slow-chat\node_modules\tail
+windcss\lib\plugin.js:38:17)
+    at async 
+LazyResult.runAsync (E:\art 
+works\code\antigravity prjts
+\slow-chat\node_modules\post
+css\lib\lazy-result.js:293:1
+1)
+    at async compileCSS (fil
+e:///E:/art%20works/code/ant
+igravity%20prjts/slow-chat/n
+ode_modules/vite/dist/node/c
+hunks/dep-BK3b2jBa.js:36898:
+21)
+    at async 
+Object.transform (file:///E:
+/art%20works/code/antigravit
+y%20prjts/slow-chat/node_mod
+ules/vite/dist/node/chunks/d
+ep-BK3b2jBa.js:36171:11)
+    at async transform (file
+:///E:/art%20works/code/anti
+gravity%20prjts/slow-chat/no
+de_modules/rollup/dist/es/sh
+ared/node-entry.js:21239:16)
+[39m

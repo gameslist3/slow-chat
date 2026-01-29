@@ -54,7 +54,7 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
             await toggleMuteGroup(groupId, user.id, !muted);
             setMuted(!muted);
             setShowMore(false);
-            toast(muted ? "Unmuted" : "Notifications muted", "success");
+            toast(muted ? "Link Unmuted" : "Link Muted", "success");
         } catch (error) {
             toast("Failed to update settings", "error");
         }
@@ -64,55 +64,55 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
         if (!user) return;
         try {
             await leaveGroup(groupId, user.id);
-            toast("Left group", "success");
+            toast("Connection Terminated", "success");
             onLeave?.();
         } catch (error) {
-            toast("Failed to leave group", "error");
+            toast("Failed to terminate", "error");
         }
     };
 
     return (
-        <header className="flex items-center justify-between px-6 py-4 border-b border-border/10 bg-background/5 backdrop-blur-md sticky top-0 z-40 h-[72px] transition-all">
-            <div className="flex items-center gap-4">
+        <header className="flex items-center justify-between px-8 py-5 border-b border-border/5 bg-background/5 backdrop-blur-xl sticky top-0 z-40 h-[80px]">
+            <div className="flex items-center gap-5">
                 <motion.div
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                    className="text-3xl drop-shadow-sm cursor-default"
+                    whileHover={{ scale: 1.1, rotate: -5 }}
+                    className="text-4xl drop-shadow-[0_0_15px_rgba(var(--primary-rgb),0.2)] cursor-default"
                 >
                     {image}
                 </motion.div>
-                <div>
-                    <h2 className="font-black text-lg leading-tight tracking-tight uppercase italic text-foreground/90">{title}</h2>
-                    <div className="flex items-center gap-2">
-                        <span className={`w-2 h-2 rounded-full ${muted ? 'bg-border' : 'bg-primary animate-pulse'}`} />
-                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest leading-none">
-                            {isPersonal ? 'Active' : `${memberCount} members`} {muted && '• Muted'}
+                <div className="flex flex-col">
+                    <h2 className="font-protocol text-base tracking-[0.2em] leading-none text-foreground/90">{title}</h2>
+                    <div className="flex items-center gap-3 mt-1.5 opacity-40">
+                        <div className={`w-1.5 h-1.5 rounded-full ${muted ? 'bg-muted-foreground' : 'bg-secondary animate-pulse shadow-[0_0_8px_rgba(var(--ui-secondary),1)]'}`} />
+                        <span className="font-protocol text-[9px] tracking-[0.3em] uppercase">
+                            {isPersonal ? 'Active_Protocol' : `${memberCount}_Nodes`} {muted && '• Muted'}
                         </span>
                     </div>
                 </div>
             </div>
 
-            <div className="flex items-center gap-2 relative">
+            <div className="flex items-center gap-3 relative">
                 {!isPersonal && (
                     <>
                         <motion.button
-                            whileHover={{ scale: 1.05 }}
+                            whileHover={{ scale: 1.05, y: -2 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={handleShare}
-                            className="bg-primary/10 border border-primary/10 p-2 rounded-xl hidden sm:flex text-muted-foreground hover:text-primary hover:bg-primary/20 transition-all"
-                            title="Share Group"
+                            className="bg-foreground/5 p-3 rounded-2xl hidden sm:flex text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all border border-transparent hover:border-primary/20"
+                            title="Share Link"
                         >
-                            {copied ? <Check className="w-4 h-4 text-primary" /> : <Share2 className="w-4 h-4" />}
+                            {copied ? <Check className="w-5 h-5 text-secondary" /> : <Share2 className="w-5 h-5" />}
                         </motion.button>
                         <motion.button
-                            whileHover={{ scale: 1.05 }}
+                            whileHover={{ scale: 1.05, y: -2 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => setShowInfo(true)}
-                            className="bg-primary/10 border border-primary/10 p-2 rounded-xl hidden sm:flex text-muted-foreground hover:text-primary hover:bg-primary/20 transition-all"
-                            title="Group Info"
+                            className="bg-foreground/5 p-3 rounded-2xl hidden sm:flex text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all border border-transparent hover:border-primary/20"
+                            title="Protocol Details"
                         >
-                            <Info className="w-4 h-4" />
+                            <Info className="w-5 h-5" />
                         </motion.button>
-                        <div className="h-4 w-[1px] mx-2 bg-border/20 hidden sm:block" />
+                        <div className="h-4 w-[1px] mx-1 bg-border/20 hidden sm:block" />
                     </>
                 )}
 
@@ -121,32 +121,32 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => setShowMore(!showMore)}
-                        className={`p-2 rounded-xl transition-all border ${showMore ? 'bg-primary/10 text-primary border-primary/20' : 'text-muted-foreground hover:text-primary border-transparent'}`}
+                        className={`p-3 rounded-2xl transition-all border ${showMore ? 'bg-primary/10 text-primary border-primary/30' : 'text-muted-foreground hover:text-primary bg-foreground/5 border-transparent'}`}
                     >
-                        <MoreVertical className="w-5 h-5" />
+                        <MoreVertical className="w-6 h-6" />
                     </motion.button>
 
                     <AnimatePresence>
                         {showMore && (
                             <motion.div
-                                initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                                className="absolute right-0 mt-3 w-56 glass-panel rounded-2xl overflow-hidden z-50 py-2"
+                                initial={{ opacity: 0, scale: 0.95, y: 10, filter: 'blur(10px)' }}
+                                animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
+                                exit={{ opacity: 0, scale: 0.95, y: 10, filter: 'blur(10px)' }}
+                                className="absolute right-0 mt-4 w-60 glass-panel rounded-[2rem] overflow-hidden z-50 py-3 p-2 shadow-2xl"
                             >
                                 <button
                                     onClick={handleToggleMute}
-                                    className="w-full flex items-center gap-3 px-5 py-4 text-xs font-black uppercase tracking-widest text-muted-foreground hover:bg-primary/5 hover:text-primary transition-all"
+                                    className="w-full flex items-center gap-4 px-5 py-4 font-protocol text-[9px] tracking-[0.3em] uppercase text-muted-foreground hover:bg-primary/10 hover:text-primary rounded-2xl transition-all"
                                 >
                                     {muted ? <Bell className="w-4 h-4" /> : <BellOff className="w-4 h-4" />}
-                                    {muted ? 'Unmute' : 'Mute'}
+                                    {muted ? 'Unmute' : 'Mute Link'}
                                 </button>
                                 {!isPersonal && (
                                     <button
                                         onClick={() => setShowLeaveConfirm(true)}
-                                        className="w-full flex items-center gap-3 px-5 py-4 text-xs font-black uppercase tracking-widest text-destructive hover:bg-destructive/5 transition-all"
+                                        className="w-full flex items-center gap-4 px-5 py-4 font-protocol text-[9px] tracking-[0.3em] uppercase text-destructive hover:bg-destructive/10 rounded-2xl transition-all"
                                     >
-                                        <LogOut className="w-4 h-4" /> Leave Group
+                                        <LogOut className="w-4 h-4" /> Terminate Link
                                     </button>
                                 )}
                             </motion.div>
@@ -155,28 +155,30 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
                 </div>
             </div>
 
-            {/* Leave Confirm Modal - Portaled to Body to escape stacking contexts */}
+            {/* Modals Path */}
             {createPortal(
                 <AnimatePresence>
                     {showLeaveConfirm && (
-                        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+                        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6">
                             <motion.div
                                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                                className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+                                className="absolute inset-0 bg-black/90 backdrop-blur-xl"
                                 onClick={() => setShowLeaveConfirm(false)}
                             />
                             <motion.div
-                                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                                initial={{ opacity: 0, scale: 0.9, y: 40 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                                className="glass-card w-full max-w-sm relative z-10 p-8 text-center space-y-6 border border-destructive/30 shadow-[0_0_50px_-12px_rgba(var(--destructive-rgb),0.5)]"
+                                exit={{ opacity: 0, scale: 0.9, y: 40 }}
+                                className="glass-panel w-full max-w-sm relative z-10 p-10 text-center space-y-8 border-destructive/20 shadow-[0_0_100px_-20px_rgba(239,68,68,0.2)]"
                             >
-                                <div className="text-5xl mx-auto w-16 h-16 bg-destructive/10 flex items-center justify-center rounded-2xl text-destructive mb-2 border border-destructive/20">🚿</div>
-                                <h3 className="text-2xl font-black tracking-tighter uppercase italic leading-none text-foreground">Leave Group?</h3>
-                                <p className="text-muted-foreground text-sm font-medium">You will no longer receive messages. You can rejoin later.</p>
-                                <div className="flex flex-col gap-3">
-                                    <button onClick={handleLeave} className="btn-danger h-14 font-black uppercase tracking-widest text-xs">Confirm</button>
-                                    <button onClick={() => setShowLeaveConfirm(false)} className="btn-ghost h-12 font-black uppercase tracking-widest text-[10px] opacity-60">Cancel</button>
+                                <div className="text-6xl mx-auto w-20 h-20 bg-destructive/10 flex items-center justify-center rounded-[2rem] text-destructive border border-destructive/20 shadow-inner">⚠️</div>
+                                <div className="space-y-3">
+                                    <h3 className="font-protocol text-xl tracking-tighter text-foreground">Terminating Link?</h3>
+                                    <p className="text-muted-foreground text-sm font-medium leading-relaxed opacity-60">This action will sever the connection to this cluster. Proceed with caution.</p>
+                                </div>
+                                <div className="flex flex-col gap-4">
+                                    <button onClick={handleLeave} className="btn-primary bg-destructive hover:bg-destructive shadow-destructive/20 h-16 rounded-3xl">CONFIRM_TERMINATE</button>
+                                    <button onClick={() => setShowLeaveConfirm(false)} className="btn-ghost h-12 opacity-60">CANCEL</button>
                                 </div>
                             </motion.div>
                         </div>
@@ -185,57 +187,57 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
                 document.body
             )}
 
-            {/* Info Modal - Portaled to Body */}
-            {createPortal(
+            {showInfo && !isPersonal && createPortal(
                 <AnimatePresence>
-                    {showInfo && !isPersonal && (
-                        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-                            <motion.div
-                                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                                className="absolute inset-0 bg-black/80 backdrop-blur-md"
-                                onClick={() => setShowInfo(false)}
-                            />
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                                className="glass-panel w-full max-w-md relative z-10 p-10 space-y-8 border-border/10"
-                            >
-                                <div className="flex justify-between items-start">
-                                    <div className="text-6xl drop-shadow-[0_0_15px_rgba(var(--primary-rgb),0.3)]">{image}</div>
-                                    <button onClick={() => setShowInfo(false)} className="btn-ghost p-3 rounded-full hover:bg-foreground/5"><X className="w-6 h-6 text-foreground" /></button>
+                    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6">
+                        <motion.div
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-black/90 backdrop-blur-xl"
+                            onClick={() => setShowInfo(false)}
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 40 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 40 }}
+                            className="glass-panel w-full max-w-lg relative z-10 p-12 space-y-10 border-white/5"
+                        >
+                            <div className="flex justify-between items-start">
+                                <div className="text-8xl drop-shadow-[0_0_30px_rgba(var(--primary-rgb),0.3)] select-none">
+                                    <motion.div animate={{ rotate: [0, 5, -5, 0] }} transition={{ duration: 5, repeat: Infinity }}>{image}</motion.div>
                                 </div>
+                                <button onClick={() => setShowInfo(false)} className="w-12 h-12 rounded-2xl bg-foreground/5 hover:bg-foreground/10 flex items-center justify-center transition-all"><X className="w-6 h-6" /></button>
+                            </div>
 
-                                <div>
-                                    <h3 className="text-4xl font-black tracking-tighter mb-2 uppercase italic leading-none text-foreground">{title}</h3>
-                                    <div className="flex items-center gap-2 text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] italic">
-                                        <Calendar className="w-3 h-3" />
-                                        <span>Sync Initialized {new Date(createdAt || Date.now()).toLocaleDateString()}</span>
-                                    </div>
+                            <div>
+                                <span className="font-protocol text-[10px] tracking-[0.5em] text-primary opacity-60 mb-2 block">CLUSTER_ID: {groupId.slice(0, 8)}</span>
+                                <h3 className="font-protocol text-5xl tracking-tighter text-foreground leading-none">{title}</h3>
+                                <div className="flex items-center gap-3 mt-4 text-muted-foreground font-protocol text-[9px] tracking-[0.3em] opacity-40 uppercase">
+                                    <Calendar className="w-3.5 h-3.5" />
+                                    <span>Sync_Init: {new Date(createdAt || Date.now()).toLocaleDateString()}</span>
                                 </div>
+                            </div>
 
-                                <div className="space-y-4">
-                                    <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.3em] opacity-40 italic text-foreground">
-                                        <span>Sync Participants ({memberCount})</span>
-                                        <Users className="w-4 h-4" />
-                                    </div>
-                                    <div className="max-h-60 overflow-y-auto space-y-3 custom-scrollbar pr-3">
-                                        {memberIds.map(id => (
-                                            <div key={id} className="flex items-center gap-4 p-3 rounded-[1.5rem] bg-foreground/5 border border-border/10 group hover:bg-foreground/10 transition-colors">
-                                                <div className="w-11 h-11 rounded-2xl bg-primary flex items-center justify-center text-white font-black text-xs shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform border border-border/10">
-                                                    {id.slice(0, 2).toUpperCase()}
-                                                </div>
-                                                <div className="flex-1">
-                                                    <p className="font-black text-sm uppercase tracking-tight text-foreground/90">Sync_{id.slice(0, 4)}</p>
-                                                    <p className="text-[9px] text-muted-foreground uppercase tracking-widest font-black opacity-40">Verified Identity</p>
-                                                </div>
+                            <div className="space-y-6">
+                                <div className="flex items-center justify-between font-protocol text-[9px] tracking-[0.4em] opacity-40 uppercase pb-2 border-b border-white/5">
+                                    <span>Active_Nodes ({memberCount})</span>
+                                    <Users className="w-4 h-4" />
+                                </div>
+                                <div className="max-h-64 overflow-y-auto space-y-4 custom-scrollbar pr-4">
+                                    {memberIds.map(id => (
+                                        <div key={id} className="flex items-center gap-5 p-4 rounded-3xl bg-foreground/5 border border-white/5 group hover:bg-foreground/10 transition-all">
+                                            <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center text-white font-black text-sm shadow-xl shadow-primary/20 group-hover:scale-105 transition-transform border border-white/10">
+                                                {id.slice(0, 2).toUpperCase()}
                                             </div>
-                                        ))}
-                                    </div>
+                                            <div className="flex-1">
+                                                <p className="font-bold text-base tracking-tight text-foreground/90">Node_{id.slice(0, 5)}</p>
+                                                <p className="font-protocol text-[8px] text-primary tracking-[0.3em] uppercase opacity-40 mt-1">Verified_Identity</p>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
-                            </motion.div>
-                        </div>
-                    )}
+                            </div>
+                        </motion.div>
+                    </div>
                 </AnimatePresence>,
                 document.body
             )}

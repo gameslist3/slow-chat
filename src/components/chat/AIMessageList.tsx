@@ -116,12 +116,12 @@ const MessageItem = ({
                     <div className={`flex items-center gap-3 mb-2 animate-in fade-in duration-1000 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
                         <button
                             onClick={() => onUserClick(message.senderId)}
-                            className="font-black text-[10px] uppercase tracking-[0.2em] opacity-30 hover:opacity-100 transition-opacity"
+                            className="font-protocol text-[9px] uppercase tracking-[0.34em] text-primary opacity-40 hover:opacity-100 transition-opacity"
                         >
                             {message.sender}
                         </button>
                         <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-bold opacity-20 mt-0.5">{new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                            <span className="text-[9px] font-bold opacity-20 font-protocol tracking-widest mt-0.5">{new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                             {isOwn && message.status && <StatusIcon status={message.status} />}
                         </div>
                     </div>
@@ -132,16 +132,16 @@ const MessageItem = ({
                         {message.replyTo && (
                             <div
                                 onClick={() => onJumpToReply(message.replyTo!.messageId)}
-                                className={`cursor-pointer border-l-4 border-primary/40 bg-muted/30 p-4 rounded-2xl mb-1 text-xs transition-all hover:bg-muted/50 ${isOwn ? 'text-right' : 'text-left'}`}
+                                className={`cursor-pointer glass-card p-4 rounded-2xl mb-1 text-xs transition-all hover:bg-foreground/5 ${isOwn ? 'text-right' : 'text-left'}`}
                             >
-                                <p className="font-black text-primary lowercase italic mb-1 tracking-wider">{message.replyTo.sender}</p>
+                                <p className="font-protocol text-[9px] text-primary tracking-[0.2em] mb-1 italic">{message.replyTo.sender}</p>
                                 <p className="text-muted-foreground truncate opacity-70 font-medium">{message.replyTo.text}</p>
                             </div>
                         )}
 
                         <div className={`
-                            text-[15px] leading-relaxed shadow-sm p-4 rounded-[1.75rem] border transition-all duration-500 relative
-                            ${isOwn ? 'bg-surface2 border-border/50 text-right rounded-tr-sm hover:border-primary/20' : 'bg-surface border-border text-left rounded-tl-sm hover:border-primary/20'}
+                            text-[15px] leading-relaxed shadow-sm p-5 rounded-[2rem] border transition-all duration-500 relative glass-card
+                            ${isOwn ? 'text-right rounded-tr-sm' : 'text-left rounded-tl-sm'}
                         `}>
                             {message.type === 'text' && (
                                 <div className="markdown-content font-medium opacity-90 whitespace-pre-wrap break-words">
@@ -155,22 +155,22 @@ const MessageItem = ({
                             {message.media && (
                                 <div className={`space-y-4 ${isOwn ? 'flex flex-col items-end' : ''}`}>
                                     {message.type === 'image' && (
-                                        <div className="relative group/img overflow-hidden rounded-2xl border border-border/30">
+                                        <div className="relative group/img overflow-hidden rounded-2xl border border-border/10">
                                             <img src={message.media.url} alt={message.media.name} className="max-h-[500px] w-auto transition-transform duration-700 group-hover/img:scale-105" />
                                         </div>
                                     )}
                                     {message.type === 'video' && (
-                                        <video src={message.media.url} controls className="rounded-2xl max-h-[500px] w-full shadow-ui border border-border/30" />
+                                        <video src={message.media.url} controls className="rounded-2xl max-h-[500px] w-full shadow-ui border border-border/10" />
                                     )}
                                     {message.type === 'audio' && (
                                         <AudioPlayer src={message.media.url} isOwn={isOwn} />
                                     )}
                                     {['pdf', 'doc'].includes(message.type) && (
-                                        <a href={message.media.url} target="_blank" rel="noreferrer" className="flex items-center gap-4 p-4 bg-muted/50 rounded-2xl hover:bg-muted transition-all border border-border/20 group/file">
+                                        <a href={message.media.url} target="_blank" rel="noreferrer" className="flex items-center gap-4 p-4 glass-card bg-foreground/5 rounded-2xl hover:bg-foreground/10 transition-all border border-border/10 group/file">
                                             <div className="w-12 h-12 bg-primary/10 rounded-[1rem] flex items-center justify-center text-primary transition-transform group-hover/file:scale-110"><Icon name="file" className="w-6 h-6" /></div>
                                             <div className="flex-1 text-left">
-                                                <p className="font-black text-xs truncate max-w-[220px] uppercase tracking-tight">{message.media.name}</p>
-                                                <p className="text-[10px] opacity-40 uppercase font-black tracking-widest mt-0.5">{Math.round(message.media.size / 1024)} KB • {message.type}</p>
+                                                <p className="font-protocol text-[10px] tracking-tight truncate max-w-[220px] uppercase">{message.media.name}</p>
+                                                <p className="text-[9px] opacity-40 uppercase font-black tracking-widest mt-0.5">{Math.round(message.media.size / 1024)} KB • {message.type}</p>
                                             </div>
                                             <Icon name="clock" className="w-4 h-4 opacity-20 group-hover/file:opacity-100 transition-opacity" />
                                         </a>
@@ -185,10 +185,10 @@ const MessageItem = ({
                                         <button
                                             key={r.emoji}
                                             onClick={() => onReaction(r.emoji)}
-                                            className="h-6 px-1.5 flex items-center gap-1 bg-surface border border-border shadow-md rounded-full text-[13px] hover:border-primary/50 transition-all font-bold"
+                                            className="h-7 px-2 flex items-center gap-1.5 glass-card shadow-xl rounded-full text-[13px] hover:border-primary/50 transition-all font-bold"
                                         >
-                                            <span>{r.emoji}</span>
-                                            <span className="text-[10px] opacity-60">{r.userIds.length}</span>
+                                            <span className="scale-110">{r.emoji}</span>
+                                            <span className="text-[10px] opacity-60 font-protocol">{r.userIds.length}</span>
                                         </button>
                                     ))}
                                 </div>
@@ -196,11 +196,17 @@ const MessageItem = ({
                         </div>
 
                         {/* Interaction Bar */}
-                        <div className={`flex items-center gap-1 transition-all opacity-0 group-hover/bubble:opacity-100 mt-1 ${isOwn ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`flex items-center gap-2 transition-all opacity-0 group-hover/bubble:opacity-100 mt-2 ${isOwn ? 'justify-end' : 'justify-start'}`}>
                             <ReactionButton onReact={onReaction} isOwn={isOwn} />
-                            <button onClick={onReply} className="w-8 h-8 rounded-lg hover:bg-surface2 text-muted-foreground flex items-center justify-center transition-all hover:text-primary" title="Reply">
+                            <motion.button
+                                whileHover={{ scale: 1.1, backgroundColor: 'rgba(var(--primary-rgb), 0.1)' }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={onReply}
+                                className="w-9 h-9 rounded-xl glass-card text-muted-foreground flex items-center justify-center transition-all hover:text-primary"
+                                title="Reply"
+                            >
                                 <Icon name="message" className="w-4 h-4" />
-                            </button>
+                            </motion.button>
                         </div>
                     </div>
                 </div>
