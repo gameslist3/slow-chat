@@ -4,84 +4,81 @@
 
 @layer base {
   :root {
-    /* Obsidian & Steel Palette - Light Mode Mapping (Inverted for readability or kept dark if "dark mode only" app) */
-    /* Since the user asked for "Dark Obsidian/Steel palette", we will prioritize the dark look as default or Ensure Dark Mode is the primary feel. 
-       However, for standard shadcn/tailwind, we usually map "background" to white in light mode. 
-       But allowing for a 'Steel' feel even in light mode: */
-
-    --background: 220 15% 96%;
-    /* #F1F3F6 - Light Steel */
+    /* --- Premium 2026 AI Light Theme --- */
+    --background: 210 20% 98%;
     --foreground: 224 71% 4%;
-    /* #0B0D12 - Obsidian */
-
-    --card: 0 0% 100%;
-    --card-foreground: 224 71% 4%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 224 71% 4%;
-
-    --primary: 222 51% 58%;
-    /* #5B7DCB - Frequency Blue */
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 220 18% 13%;
-    /* #1A1D26 - Steel (used as secondary in light mode for contrast) */
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 220 14.3% 95.9%;
-    --muted-foreground: 220 8.9% 46.1%;
-
-    --accent: 168 53% 58%;
-    /* #5BCBAB - Accent Green */
-    --accent-foreground: 224 71% 4%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 224 71% 4%;
-    /* Obsidian Ring */
-
-    --radius: 0.75rem;
-  }
-
-  .dark {
-    --background: 224 25% 6%;
-    /* #0B0D12 - Obsidian (Darker, richer black-blue) */
-    --foreground: 210 40% 98%;
-
-    --card: 222 19% 13%;
-    /* #1A1D26 - Steel (Card background) */
-    --card-foreground: 210 40% 98%;
-
-    --popover: 224 25% 6%;
-    /* Match background */
-    --popover-foreground: 210 40% 98%;
 
     --primary: 222 51% 58%;
     /* #5B7DCB */
-    --primary-foreground: 222 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    /* Slightly lighter steel for interaction states */
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 168 53% 58%;
+    /* #5BCBAB */
+    --secondary-foreground: 224 71% 4%;
 
-    --muted: 222 19% 13%;
-    /* Steel */
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 220 14% 90%;
+    --muted-foreground: 220 10% 40%;
 
     --accent: 168 53% 58%;
-    /* #5BCBAB */
     --accent-foreground: 224 71% 4%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 222 19% 13%;
-    /* Steel border */
-    --input: 222 19% 13%;
-    --ring: 212.7 26.8% 83.9%;
+    --border: 220 14% 85%;
+    --input: 220 14% 85%;
+    --ring: 222 51% 58%;
+
+    /* Glass Tokens Light */
+    --glass-surface: rgba(255, 255, 255, 0.4);
+    --glass-border: rgba(255, 255, 255, 0.5);
+    --glass-shadow: rgba(0, 0, 0, 0.05);
+
+    /* 3D Shapes */
+    --shape-1: #5B7DCB;
+    --shape-2: #5BCBAB;
+    --shape-3: #E0E7FF;
+
+    --radius: 1.25rem;
+  }
+
+  .dark {
+    /* --- Premium 2026 AI Dark Theme --- */
+    --background: 162 10% 12%;
+    /* Based on #485651 */
+    --foreground: 210 40% 98%;
+
+    --primary: 222 51% 58%;
+    /* #5B7DCB */
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 168 50% 30%;
+    /* #485651 area */
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 225 15% 15%;
+    /* Based on #414659 */
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 168 53% 58%;
+    --accent-foreground: 224 71% 4%;
+
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 225 10% 20%;
+    --input: 225 10% 20%;
+    --ring: 222 51% 58%;
+
+    /* Glass Tokens Dark */
+    --glass-surface: rgba(25, 30, 35, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-shadow: rgba(0, 0, 0, 0.4);
+
+    /* 3D Shapes Dark */
+    --shape-1: #5B7DCB;
+    --shape-2: #485651;
+    --shape-3: #414659;
   }
 }
 
@@ -91,103 +88,137 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased selection:bg-primary/20;
+    @apply bg-background text-foreground antialiased selection:bg-primary/30;
     font-feature-settings: "rlig" 1, "calt" 1;
+    overflow: hidden;
+    transition: background-color 0.5s ease-in-out;
   }
 }
 
 @layer components {
 
-  /* Button System */
-  .ui-button {
-    @apply inline-flex items-center justify-center rounded-xl px-4 py-2 font-medium transition-all focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98];
+  /* -------------------------------------------------------------
+     Premium Design System V2
+     ------------------------------------------------------------- */
+
+  .glass-panel {
+    background: var(--glass-surface);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 32px 0 var(--glass-shadow);
   }
 
-  .ui-button-primary {
-    @apply ui-button bg-primary text-white hover:bg-opacity-90 shadow-ui;
+  .glass-card {
+    background: var(--glass-surface);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    @apply transition-all duration-300;
   }
 
-  .ui-button-secondary {
-    @apply ui-button bg-secondary text-white hover:bg-opacity-90 shadow-ui;
+  .glass-card:hover {
+    @apply translate-y-[-2px] shadow-lg shadow-black/5;
+    background: rgba(255, 255, 255, 0.05);
   }
 
-  .ui-button-ghost {
-    @apply ui-button hover:bg-muted text-foreground;
+  .dark .glass-card:hover {
+    background: rgba(255, 255, 255, 0.1);
   }
 
-  .ui-button-danger {
-    @apply ui-button bg-danger text-white hover:bg-opacity-90 shadow-ui;
+  /* Premium Buttons */
+  .btn-premium {
+    @apply relative inline-flex items-center justify-center rounded-[1.25rem] px-6 py-3 font-bold transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none overflow-hidden;
   }
 
-  /* Form Elements */
-  .ui-input {
-    @apply flex h-11 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+  .btn-primary {
+    @apply btn-premium bg-primary text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:brightness-110;
   }
 
-  .ui-textarea {
-    @apply flex min-h-[80px] w-full rounded-xl border border-border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+  .btn-secondary {
+    @apply btn-premium bg-secondary text-secondary-foreground shadow-lg shadow-secondary/10 hover:brightness-110;
   }
 
-  /* Containers */
-  .ui-card {
-    @apply rounded-2xl border border-border bg-surface p-6 shadow-ui;
+  .btn-ghost {
+    @apply btn-premium bg-transparent text-muted-foreground hover:bg-white/5 hover:text-foreground;
   }
 
-  .ui-panel {
-    @apply rounded-[24px] border border-border bg-surface2 p-6;
+  .dark .btn-ghost:hover {
+    @apply bg-white/10;
   }
 
-  /* Components */
-  .ui-badge {
-    @apply inline-flex items-center rounded-full border border-border px-2.5 py-0.5 text-xs font-semibold bg-muted text-muted-foreground;
+  /* Inputs */
+  .glass-input {
+    @apply h-12 w-full rounded-2xl border border-border/50 bg-background/50 px-4 py-2 text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:bg-background/80 transition-all backdrop-blur-sm;
   }
 
-  .ui-divider {
-    @apply h-[1px] w-full bg-border my-4;
-  }
-
-  /* Skeleton Loaders */
-  .ui-skeleton {
-    @apply animate-pulse bg-muted rounded-md;
-  }
-
-  /* Chat Specific */
-  .ui-composer {
-    @apply sticky bottom-0 w-full max-w-4xl mx-auto p-4 md:p-6;
-    background: linear-gradient(0deg, var(--ui-background) 60%, transparent 100%);
-  }
-
-  .ui-composer-inner {
-    @apply relative flex flex-col p-2 rounded-[24px] border border-border bg-surface shadow-ui transition-all duration-300 focus-within:border-primary/30;
+  /* UI Containers */
+  .ui-composer-island {
+    @apply relative flex items-end gap-2 p-2 rounded-[2rem] glass-panel transition-all duration-500 focus-within:ring-2 focus-within:ring-primary/20;
   }
 }
 
-/* Animations */
-@keyframes pulse-highlight {
-  0% {
-    transform: scale(1);
-  }
+/* -------------------------------------------------------------
+   Premium Abstract Motion Background
+   ------------------------------------------------------------- */
 
-  30% {
-    transform: scale(1.02);
-    box-shadow: 0 0 0 10px hsla(var(--ui-primary), 0.2);
-  }
+.motion-bg-container {
+  @apply fixed inset-0 z-[-1] overflow-hidden bg-background;
+}
 
+.abstract-shape {
+  @apply absolute rounded-full blur-[100px] opacity-30 pointer-events-none transition-colors duration-1000;
+  animation: premium-float 30s ease-in-out infinite;
+}
+
+.shape-1 {
+  background: var(--shape-1);
+  width: 60vw;
+  height: 60vw;
+  top: -10vw;
+  left: -10vw;
+}
+
+.shape-2 {
+  background: var(--shape-2);
+  width: 50vw;
+  height: 50vw;
+  bottom: -10vw;
+  right: -10vw;
+  animation-delay: -10s;
+  animation-duration: 40s;
+}
+
+.shape-3 {
+  background: var(--shape-3);
+  width: 40vw;
+  height: 40vw;
+  top: 20vh;
+  left: 30vw;
+  animation-delay: -5s;
+  animation-duration: 25s;
+  opacity: 0.15;
+}
+
+@keyframes premium-float {
+
+  0%,
   100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0px hsla(var(--ui-primary), 0);
+    transform: translate(0, 0) scale(1) rotate(0deg);
+  }
+
+  33% {
+    transform: translate(5vw, -10vh) scale(1.1) rotate(20deg);
+  }
+
+  66% {
+    transform: translate(-3vw, 5vh) scale(0.9) rotate(-15deg);
   }
 }
 
-.pulse-highlight {
-  animation: pulse-highlight 1.5s ease-in-out infinite;
-  z-index: 50;
-  position: relative;
-  border-color: hsl(var(--ui-primary)) !important;
-}
-
+/* Scrollbar Polish */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 5px;
+  width: 6px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -195,10 +226,10 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: hsl(var(--ui-border));
+  background: rgba(150, 150, 150, 0.2);
   border-radius: 10px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--ui-primary));
+  background: rgba(150, 150, 150, 0.3);
 }

@@ -166,36 +166,64 @@ export const AIComposer: React.FC<AIComposerProps> = ({
     };
 
     return (
-        <div className="ui-composer flex flex-col gap-2">
+        <div className="flex flex-col gap-3 p-4">
             <AnimatePresence>
                 {replyingTo && (
                     <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        className="mx-auto w-full max-w-4xl px-4 md:px-6"
+                        initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.98 }}
+                        className="mx-auto w-full max-w-4xl px-2"
                     >
-                        <div className="bg-surface2 border border-border rounded-t-2xl p-3 flex justify-between items-center text-xs">
-                            <div className="flex flex-col gap-0.5 border-l-2 border-primary pl-3">
-                                <span className="font-bold text-primary italic">Replying to {replyingTo.sender}</span>
-                                <span className="text-muted-foreground truncate max-w-md">{replyingTo.text || `[${replyingTo.type}]`}</span>
+                        <div className="glass-panel rounded-[1.5rem] p-3 flex justify-between items-center text-xs shadow-xl">
+                            <div className="flex flex-col gap-0.5 border-l-3 border-primary pl-4">
+                                <span className="font-black text-primary uppercase tracking-tight italic">Replying to {replyingTo.sender}</span>
+                                <span className="text-muted-foreground truncate max-w-md opacity-70">{replyingTo.text || `[${replyingTo.type}]`}</span>
                             </div>
-                            <button onClick={onCancelReply} className="ui-button-ghost p-1 rounded-full"><Icon name="x" className="w-4 h-4" /></button>
+                            <motion.button
+                                whileHover={{ scale: 1.1, backgroundColor: 'rgba(255,255,255,0.1)' }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={onCancelReply}
+                                className="p-2 rounded-full"
+                            >
+                                <Icon name="x" className="w-4 h-4" />
+                            </motion.button>
                         </div>
                     </motion.div>
                 )}
             </AnimatePresence>
 
-            <div className={`ui-composer-inner max-w-4xl mx-auto w-full p-2 transition-all duration-300 ${cooldown > 0 ? 'opacity-50 border-danger/20' : ''}`}>
+            <motion.div
+                layout
+                className={`glass-panel max-w-4xl mx-auto w-full p-2 transition-all duration-500 shadow-2xl ${cooldown > 0 ? 'opacity-50 grayscale pointer-events-none' : ''}`}
+            >
                 {isRecording ? (
-                    <div className="flex items-center justify-between w-full px-4 h-[52px] animate-in fade-in slide-in-from-left-4">
-                        <div className="flex items-center gap-3">
-                            <div className="w-2 h-2 rounded-full bg-danger animate-pulse" />
-                            <span className="font-mono font-bold text-sm tracking-widest">{formatTime(recordingTime)}</span>
+                    <div className="flex items-center justify-between w-full px-4 h-[56px] animate-in fade-in slide-in-from-bottom-2">
+                        <div className="flex items-center gap-4">
+                            <motion.div
+                                animate={{ scale: [1, 1.2, 1] }}
+                                transition={{ repeat: Infinity, duration: 1 }}
+                                className="w-3 h-3 rounded-full bg-destructive shadow-lg shadow-destructive/20"
+                            />
+                            <span className="font-mono font-black text-lg tracking-widest text-destructive">{formatTime(recordingTime)}</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <button onClick={cancelRecording} className="ui-button-ghost p-2 text-danger hover:bg-danger/5 rounded-xl transition-all" title="Cancel"><Icon name="x" className="w-5 h-5" /></button>
-                            <button onClick={stopRecording} className="bg-danger text-white p-3 rounded-full hover:scale-105 active:scale-95 shadow-lg shadow-danger/20 transition-all" title="Finish Recording"><Icon name="stop" className="w-5 h-5" /></button>
+                        <div className="flex items-center gap-3">
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={cancelRecording}
+                                className="p-3 text-destructive rounded-xl transition-all"
+                            >
+                                <Icon name="x" className="w-5 h-5" />
+                            </motion.button>
+                            <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={stopRecording}
+                                className="bg-destructive text-white p-4 rounded-full shadow-2xl shadow-destructive/40"
+                            >
+                                <Icon name="stop" className="w-5 h-5" />
+                            </motion.button>
                         </div>
                     </div>
                 ) : (
@@ -211,12 +239,12 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                                     handleSendText();
                                 }
                             }}
-                            placeholder={cooldown > 0 ? `Wait ${cooldown}s...` : "Type a message..."}
+                            placeholder={cooldown > 0 ? `LOCKED (${cooldown}s)` : "Premium AI Experience..."}
                             disabled={cooldown > 0}
-                            className="w-full bg-transparent border-none outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:ring-0 px-4 py-3 resize-none text-[15px] max-h-[200px] placeholder:text-muted-foreground/30 font-medium"
+                            className="w-full bg-transparent border-none outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:ring-0 px-5 py-4 resize-none text-[16px] max-h-[240px] placeholder:text-muted-foreground/30 font-bold tracking-tight"
                         />
-                        <div className="flex items-center justify-between px-2 pb-1">
-                            <div className="flex items-center gap-1">
+                        <div className="flex items-center justify-between px-3 pb-2 pt-1 border-t border-border/5">
+                            <div className="flex items-center gap-2">
                                 <input
                                     type="file"
                                     ref={fileInputRef}
@@ -224,53 +252,68 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                                     onChange={handleFileChange}
                                     accept="image/*,video/*,application/pdf,.doc,.docx"
                                 />
-                                <button
+                                <motion.button
+                                    whileHover={{ scale: 1.1, backgroundColor: 'rgba(91, 125, 203, 0.1)' }}
+                                    whileTap={{ scale: 0.9 }}
                                     onClick={() => fileInputRef.current?.click()}
-                                    className="ui-button-ghost w-10 h-10 rounded-xl text-muted-foreground hover:text-primary transition-all"
-                                    title="Attach"
+                                    className="w-11 h-11 rounded-2xl text-muted-foreground hover:text-primary transition-all flex items-center justify-center"
                                 >
                                     <Icon name="paperclip" className="w-5 h-5" />
-                                </button>
-                                <button
+                                </motion.button>
+                                <motion.button
+                                    whileHover={{ scale: 1.1, backgroundColor: 'rgba(91, 125, 203, 0.1)' }}
+                                    whileTap={{ scale: 0.9 }}
                                     onClick={startRecording}
-                                    className={`ui-button-ghost w-10 h-10 rounded-xl text-muted-foreground hover:text-primary transition-all ${uploading ? 'animate-pulse opacity-50 pointer-events-none' : ''}`}
-                                    title="Voice Message"
+                                    className={`w-11 h-11 rounded-2xl text-muted-foreground hover:text-primary transition-all flex items-center justify-center ${uploading ? 'animate-pulse' : ''}`}
                                 >
                                     <Icon name="mic" className="w-5 h-5" />
-                                </button>
+                                </motion.button>
                             </div>
 
-                            <div className="flex items-center gap-2">
-                                {cooldown > 0 && (
-                                    <div className="flex items-center gap-2 px-3 py-1.5 bg-danger/10 text-danger rounded-xl text-[10px] font-black uppercase tracking-tighter shadow-sm border border-danger/20">
-                                        <Icon name="zap" className="w-3 h-3 fill-danger" />
-                                        <span>{cooldown}s Cooldown</span>
+                            <div className="flex items-center gap-3">
+                                <ScaleAnimate show={cooldown > 0}>
+                                    <div className="flex items-center gap-2 px-4 py-2 bg-destructive/10 text-destructive rounded-2xl text-[10px] font-black uppercase tracking-widest border border-destructive/10">
+                                        <Icon name="zap" className="w-3 h-3 fill-destructive" />
+                                        <span>{cooldown}s</span>
                                     </div>
-                                )}
+                                </ScaleAnimate>
 
-                                <button
+                                <motion.button
+                                    whileHover={text.trim() ? { scale: 1.1, x: 2 } : {}}
+                                    whileTap={text.trim() ? { scale: 0.9 } : {}}
                                     onClick={handleSendText}
                                     disabled={cooldown > 0 || !text.trim()}
                                     className={`
-                                        rounded-2xl h-11 w-11 flex items-center justify-center transition-all shadow-xl overflow-hidden
-                                        ${text.trim() ? 'bg-primary text-white hover:scale-105 active:scale-95 shadow-primary/20' : 'bg-surface2 text-muted-foreground/40'}
+                                        rounded-[1.25rem] h-12 w-12 flex items-center justify-center transition-all shadow-xl overflow-hidden
+                                        ${text.trim() ? 'bg-primary text-white shadow-primary/30' : 'bg-foreground/5 text-muted-foreground/30'}
                                     `}
-                                    title="Send"
                                 >
                                     {text.trim() && sendAnimation ? (
-                                        <div className="w-8 h-8 scale-150">
+                                        <div className="w-10 h-10 scale-150">
                                             <Lottie animationData={sendAnimation} loop={true} />
                                         </div>
-                                    ) : <Icon name="send" className="w-5 h-5" />}
-                                </button>
+                                    ) : <Icon name="send" className="w-6 h-6" />}
+                                </motion.button>
                             </div>
                         </div>
                     </>
                 )}
-            </div>
-            <div className="mt-1 text-center opacity-20 hover:opacity-100 transition-opacity">
-                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.3em]">End-to-end encrypted</span>
-            </div>
+            </motion.div>
         </div>
     );
 };
+
+const ScaleAnimate: React.FC<{ show: boolean, children: React.ReactNode }> = ({ show, children }) => (
+    <AnimatePresence>
+        {show && (
+            <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+            >
+                {children}
+            </motion.div>
+        )}
+    </AnimatePresence>
+);
+

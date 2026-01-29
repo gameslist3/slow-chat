@@ -48,7 +48,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose,
         <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4">
             <motion.div
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-background/80 backdrop-blur-md"
+                className="absolute inset-0 bg-black/60 backdrop-blur-md"
                 onClick={onClose}
             />
 
@@ -56,23 +56,23 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose,
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                className="ui-card w-full max-w-lg relative z-10 p-0 overflow-hidden flex flex-col max-h-[80vh] border-2 shadow-2xl"
+                className="glass-panel w-full max-w-lg relative z-10 p-0 overflow-hidden flex flex-col max-h-[80vh] border border-white/10"
             >
-                <header className="p-6 border-b border-border flex items-center justify-between bg-surface/50">
+                <header className="p-6 border-b border-white/5 flex items-center justify-between bg-white/5 backdrop-blur-sm">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+                        <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center text-primary shadow-lg shadow-primary/10">
                             <Bell className="w-5 h-5 animate-pulse" />
                         </div>
-                        <h2 className="text-xl font-black uppercase tracking-tighter italic">Notifications</h2>
+                        <h2 className="text-xl font-black uppercase tracking-tighter italic text-white/90">Notifications</h2>
                     </div>
                     <div className="flex items-center gap-2">
                         <button
                             onClick={() => markAllAsRead()}
-                            className="ui-button-ghost p-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-all"
+                            className="bg-white/5 hover:bg-white/10 p-2 rounded-xl text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-white transition-all"
                         >
                             Mark all read
                         </button>
-                        <button onClick={onClose} className="ui-button-ghost p-2 rounded-full"><X className="w-5 h-5" /></button>
+                        <button onClick={onClose} className="btn-ghost p-2 rounded-full"><X className="w-5 h-5" /></button>
                     </div>
                 </header>
 
@@ -80,15 +80,15 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose,
                     <AnimatePresence mode="popLayout">
                         {notifications.length === 0 ? (
                             <div className="py-20 text-center opacity-30 flex flex-col items-center gap-4">
-                                <div className="text-6xl">🔔</div>
-                                <p className="font-black uppercase tracking-[0.3em] text-[10px]">No new notifications</p>
+                                <div className="text-6xl drop-shadow-lg">🔔</div>
+                                <p className="font-black uppercase tracking-[0.3em] text-[10px] text-white">No new notifications</p>
                             </div>
                         ) : (
                             <div className="space-y-6">
                                 {/* Connection Protocols Section */}
                                 {notifications.filter(n => n.type === 'follow_request' && !n.read).length > 0 && (
                                     <div className="px-2">
-                                        <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-3 pl-2 italic">Connection Protocols</h3>
+                                        <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-3 pl-2 italic drop-shadow-md">Connection Protocols</h3>
                                         {notifications
                                             .filter(n => n.type === 'follow_request' && !n.read)
                                             .map(note => (
@@ -113,33 +113,35 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose,
                                                 exit={{ opacity: 0, x: 10 }}
                                                 onClick={() => handleSelect(note)}
                                                 className={`
-                                                    group relative p-4 rounded-2xl transition-all cursor-pointer border border-transparent mb-1
-                                                    ${note.read ? 'opacity-60 grayscale-[0.5]' : 'bg-surface2/30 border-primary/10 hover:border-primary/30'}
+                                                    group relative p-4 rounded-2xl transition-all cursor-pointer border mb-1 backdrop-blur-md
+                                                    ${note.read
+                                                        ? 'opacity-50 grayscale bg-white/5 border-transparent'
+                                                        : 'glass-card border-white/10 hover:border-primary/30 hover:bg-white/10'}
                                                 `}
                                             >
                                                 <div className="flex gap-4">
-                                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm
-                                                        ${note.type === 'mention' ? 'bg-secondary/10 text-secondary' :
-                                                            note.type === 'reply' ? 'bg-primary/10 text-primary' :
-                                                                'bg-surface2 text-muted-foreground'}
+                                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-lg border border-white/5
+                                                        ${note.type === 'mention' ? 'bg-purple-500/20 text-purple-400' :
+                                                            note.type === 'reply' ? 'bg-blue-500/20 text-blue-400' :
+                                                                'bg-white/5 text-muted-foreground'}
                                                     `}>
                                                         <IconForType type={note.type} />
                                                     </div>
                                                     <div className="flex-1 min-w-0">
                                                         <div className="flex items-center justify-between gap-2 mb-1">
-                                                            <span className="font-black text-xs uppercase tracking-tight">{note.senderName}</span>
+                                                            <span className="font-black text-xs uppercase tracking-tight text-white/90">{note.senderName}</span>
                                                             <span className="text-[9px] font-black opacity-30 uppercase">{new Date(note.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                                         </div>
-                                                        <p className="text-sm font-medium line-clamp-2 text-muted-foreground leading-snug">
+                                                        <p className="text-sm font-medium line-clamp-2 text-muted-foreground leading-snug group-hover:text-white/80 transition-colors">
                                                             {note.text}
                                                         </p>
                                                     </div>
                                                     <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <Zap className="w-4 h-4 text-primary" />
+                                                        <Zap className="w-4 h-4 text-primary drop-shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
                                                     </div>
                                                 </div>
                                                 {!note.read && (
-                                                    <div className="absolute top-4 right-4 w-2 h-2 bg-primary rounded-full animate-pulse" />
+                                                    <div className="absolute top-4 right-4 w-2 h-2 bg-primary rounded-full animate-pulse shadow-[0_0_10px_#3b82f6]" />
                                                 )}
                                             </motion.div>
                                         ))}
@@ -197,29 +199,31 @@ const FollowRequestItem = ({ note }: { note: Notification }) => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="p-5 rounded-3xl bg-surface border-2 border-primary/20 shadow-xl mb-3 space-y-4"
+            className="p-5 rounded-3xl glass-card border border-primary/20 shadow-[0_0_30px_-10px_rgba(59,130,246,0.2)] mb-3 space-y-4 relative overflow-hidden"
         >
-            <div className="flex gap-4 items-center">
-                <div className="w-12 h-12 bg-primary text-white rounded-2xl flex items-center justify-center font-black text-lg shadow-lg">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-20" />
+
+            <div className="flex gap-4 items-center relative z-10">
+                <div className="w-12 h-12 bg-primary text-white rounded-2xl flex items-center justify-center font-black text-lg shadow-lg border border-white/20">
                     {note.senderName.slice(0, 2).toUpperCase()}
                 </div>
                 <div className="flex-1">
-                    <p className="text-sm font-black uppercase tracking-tight">{note.senderName}</p>
-                    <p className="text-xs text-muted-foreground font-medium italic">Sent a connection protocol</p>
+                    <p className="text-sm font-black uppercase tracking-tight text-white">{note.senderName}</p>
+                    <p className="text-xs text-primary font-bold italic tracking-wide">Sent a connection protocol</p>
                 </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 relative z-10">
                 <button
                     onClick={() => handleAction('accept')}
                     disabled={loading}
-                    className="flex-1 h-11 bg-secondary text-white rounded-xl font-black uppercase tracking-widest text-[10px] hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-secondary/20 disabled:opacity-50"
+                    className="flex-1 h-11 btn-primary text-white rounded-xl font-black uppercase tracking-widest text-[10px] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
                 >
                     {loading ? 'Processing...' : '✅ Accept'}
                 </button>
                 <button
                     onClick={() => handleAction('decline')}
                     disabled={loading}
-                    className="flex-1 h-11 bg-danger text-white rounded-xl font-black uppercase tracking-widest text-[10px] hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-danger/20 disabled:opacity-50"
+                    className="flex-1 h-11 btn-danger text-white rounded-xl font-black uppercase tracking-widest text-[10px] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
                 >
                     {loading ? '...' : '❌ Decline'}
                 </button>
