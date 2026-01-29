@@ -5,29 +5,26 @@
 @layer base {
   :root {
     /* --- Premium 2026 AI Light Theme --- */
-    --background: 210 20% 98%;
-    --foreground: 224 71% 4%;
+    --ui-background: 210 20% 98%;
+    --ui-text: 224 71% 4%;
 
-    --primary: 222 51% 58%;
+    --ui-primary: 222 51% 58%;
     /* #5B7DCB */
-    --primary-foreground: 210 40% 98%;
+    --primary-rgb: 91, 125, 203;
 
-    --secondary: 168 53% 58%;
+    --ui-secondary: 168 53% 58%;
     /* #5BCBAB */
-    --secondary-foreground: 224 71% 4%;
 
-    --muted: 220 14% 90%;
-    --muted-foreground: 220 10% 40%;
+    --ui-muted: 220 14% 90%;
+    --ui-muted-text: 220 10% 40%;
 
-    --accent: 168 53% 58%;
-    --accent-foreground: 224 71% 4%;
+    --ui-success: 142 71% 45%;
+    --ui-warning: 38 92% 50%;
+    --ui-danger: 0 84% 60%;
+    --destructive-rgb: 239, 68, 68;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 220 14% 85%;
-    --input: 220 14% 85%;
-    --ring: 222 51% 58%;
+    --ui-border: 220 14% 85%;
+    --ui-ring: 222 51% 58%;
 
     /* Glass Tokens Light */
     --glass-surface: rgba(255, 255, 255, 0.4);
@@ -44,34 +41,26 @@
 
   .dark {
     /* --- Premium 2026 AI Dark Theme --- */
-    --background: 162 10% 12%;
-    /* Based on #485651 */
-    --foreground: 210 40% 98%;
+    --ui-background: 222 47% 11%;
+    /* Darker deep slate/blue */
+    --ui-text: 210 40% 98%;
 
-    --primary: 222 51% 58%;
-    /* #5B7DCB */
-    --primary-foreground: 210 40% 98%;
+    --ui-primary: 222 51% 58%;
 
-    --secondary: 168 50% 30%;
-    /* #485651 area */
-    --secondary-foreground: 210 40% 98%;
+    --ui-secondary: 168 50% 30%;
 
-    --muted: 225 15% 15%;
-    /* Based on #414659 */
-    --muted-foreground: 215 20% 65%;
+    --ui-muted: 225 10% 20%;
+    --ui-muted-text: 215 20% 65%;
 
-    --accent: 168 53% 58%;
-    --accent-foreground: 224 71% 4%;
+    --ui-success: 142 71% 45%;
+    --ui-warning: 38 92% 50%;
+    --ui-danger: 0 62% 30%;
 
-    --destructive: 0 62% 30%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 225 10% 20%;
-    --input: 225 10% 20%;
-    --ring: 222 51% 58%;
+    --ui-border: 225 10% 20%;
+    --ui-ring: 222 51% 58%;
 
     /* Glass Tokens Dark */
-    --glass-surface: rgba(25, 30, 35, 0.6);
+    --glass-surface: rgba(15, 20, 25, 0.6);
     --glass-border: rgba(255, 255, 255, 0.08);
     --glass-shadow: rgba(0, 0, 0, 0.4);
 

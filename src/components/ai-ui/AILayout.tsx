@@ -8,6 +8,7 @@ import { getPendingRequests } from '../../services/firebaseFollowService';
 import { NotificationCenter } from '../chat/NotificationCenter';
 import { AbstractBackground } from '../ui/AbstractBackground';
 import { HeroOrb } from '../ui/HeroOrb';
+import { FriendsList } from '../social/FriendsList';
 
 interface AILayoutProps {
     children: React.ReactNode;
@@ -193,11 +194,7 @@ interface AISidebarProps {
     onClose?: () => void;
 }
 
-import { FriendsList } from '../social/FriendsList';
 
-/* ... imports ... */
-
-/* ... interfaces ... */
 
 const AISidebar: React.FC<AISidebarProps> = ({
     groups,
