@@ -72,6 +72,7 @@ export const createGroup = async (
         category,
         image,
         members: 1,
+        memberCount: 1, // Explicit field for auto-delete rules
         memberIds: [creatorId],
         createdAt: now,
         createdBy: creatorId,
@@ -105,6 +106,7 @@ export const joinGroup = async (groupId: string, userId: string): Promise<void> 
 
         transaction.update(groupRef, {
             members: increment(1),
+            memberCount: increment(1),
             memberIds: arrayUnion(userId),
             lastActivity: Date.now()
         });
@@ -128,6 +130,7 @@ export const leaveGroup = async (groupId: string, userId: string): Promise<void>
 
         transaction.update(groupRef, {
             members: increment(-1),
+            memberCount: increment(-1),
             memberIds: arrayRemove(userId)
         });
 
@@ -220,6 +223,45 @@ export const initializeSeedGroups = async (): Promise<void> => {
                 mutedBy: []
             });
         }
+    }
+};
+
+/**
+ * DANGER: ONE-TIME CLEANUP
+ * Removes all groups, their messages, and clears user membership.
+ */
+export const dangerouslyNukeAllGroups = async (): Promise<void> => {
+    try {
+        const groupsSnap = await getDocs(collection(db, 'groups'));
+        const usersSnap = await getDocs(collection(db, 'users'));
+        const batch = writeBatch(db);
+
+        // 1. Delete all groups and messages
+        for (const groupDoc of groupsSnap.docs) {
+            const groupId = groupDoc.id;
+            // Delete messages subcollection
+            const messagesSnap = await getDocs(collection(db, `groups/${groupId}/messages`));
+            messagesSnap.docs.forEach(m => batch.delete(m.ref));
+            // Delete group doc
+            batch.delete(groupDoc.ref);
+        }
+
+        // 2. Clear user group references
+        usersSnap.docs.forEach(u => {
+            batch.update(u.ref, {
+                joinedGroups: [],
+                mutedGroups: [],
+                unreadCount: 0
+            });
+        });
+
+        await batch.commit();
+        console.log("SUCCESS: Database purged of legacy group data.");
+
+        // 3. Re-initialize system group
+        await initializeSystemGroup();
+    } catch (error) {
+        console.error("Cleanup failed:", error);
     }
 };
 

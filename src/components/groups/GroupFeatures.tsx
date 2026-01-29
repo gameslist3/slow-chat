@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Users, ArrowRight, Loader2, Plus, Hash, Tag, Info, X } from 'lucide-react';
+import { Icon } from '../common/Icon';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Skeleton } from '../ui/Skeleton';
@@ -12,7 +12,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 const GroupCard = ({ group, isJoined, onAction }: { group: Group, isJoined: boolean, onAction: () => void }) => (
     <div className="group relative bg-surface border border-border/50 rounded-3xl p-6 shadow-sm hover:shadow-2xl hover:border-primary/20 transition-all duration-500 flex flex-col h-full overflow-hidden">
         <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-20 transition-opacity">
-            <Hash className="w-20 h-20 -rotate-12" />
+            <Icon name="message" className="w-20 h-20 -rotate-12" />
         </div>
 
         <div className="flex justify-between items-start mb-6 relative z-10">
@@ -27,7 +27,7 @@ const GroupCard = ({ group, isJoined, onAction }: { group: Group, isJoined: bool
 
         <div className="mt-auto flex items-center justify-between pt-6 border-t border-border/30 relative z-10">
             <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                <Users className="w-3 h-3" />
+                <Icon name="users" className="w-3 h-3" />
                 <span>{group.members} Members</span>
             </div>
             <button
@@ -76,7 +76,7 @@ export const GroupDiscovery = ({ onJoinGroup, onSelectGroup, joinedGroupIds }: a
                         placeholder="Search groups or categories..."
                         value={filter}
                         onChange={e => setFilter(e.target.value)}
-                        icon={<Search className="w-5 h-5 text-muted-foreground" />}
+                        icon={<Icon name="search" className="w-5 h-5 text-muted-foreground" />}
                         className="h-16 rounded-3xl text-lg font-bold bg-surface border-2 focus:ring-4 focus:ring-primary/10"
                     />
                 </div>
@@ -190,7 +190,7 @@ export const CreateGroup = ({ onGroupCreated }: { onGroupCreated: (id: string) =
                     className="ui-button-primary w-full h-16 text-sm font-black uppercase tracking-[0.3em] shadow-2xl disabled:opacity-30 disabled:grayscale transition-all"
                     disabled={!name || !cat || loading}
                 >
-                    {loading ? "Creating..." : "Create Group"}
+                    {loading ? <Icon name="rotate" className="w-5 h-5 animate-spin" /> : "Create Group"}
                 </button>
             </form>
         </div>

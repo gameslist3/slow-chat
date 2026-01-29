@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Paperclip, Smile, Mic, X, StopCircle, Play, Pause, FileText, ImageIcon, Video, Zap } from 'lucide-react';
+import { Icon } from '../common/Icon';
 import Lottie from 'lottie-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { uploadMedia, uploadVoice } from '../../services/cloudinaryService';
@@ -180,7 +180,7 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                                 <span className="font-bold text-primary italic">Replying to {replyingTo.sender}</span>
                                 <span className="text-muted-foreground truncate max-w-md">{replyingTo.text || `[${replyingTo.type}]`}</span>
                             </div>
-                            <button onClick={onCancelReply} className="ui-button-ghost p-1 rounded-full"><X className="w-4 h-4" /></button>
+                            <button onClick={onCancelReply} className="ui-button-ghost p-1 rounded-full"><Icon name="x" className="w-4 h-4" /></button>
                         </div>
                     </motion.div>
                 )}
@@ -194,8 +194,8 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                             <span className="font-mono font-bold text-sm tracking-widest">{formatTime(recordingTime)}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <button onClick={cancelRecording} className="ui-button-ghost p-2 text-danger hover:bg-danger/5 rounded-xl transition-all" title="Cancel"><X className="w-5 h-5" /></button>
-                            <button onClick={stopRecording} className="bg-danger text-white p-3 rounded-full hover:scale-105 active:scale-95 shadow-lg shadow-danger/20 transition-all" title="Finish Recording"><StopCircle className="w-5 h-5" /></button>
+                            <button onClick={cancelRecording} className="ui-button-ghost p-2 text-danger hover:bg-danger/5 rounded-xl transition-all" title="Cancel"><Icon name="x" className="w-5 h-5" /></button>
+                            <button onClick={stopRecording} className="bg-danger text-white p-3 rounded-full hover:scale-105 active:scale-95 shadow-lg shadow-danger/20 transition-all" title="Finish Recording"><Icon name="stop" className="w-5 h-5" /></button>
                         </div>
                     </div>
                 ) : (
@@ -213,7 +213,7 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                             }}
                             placeholder={cooldown > 0 ? `Wait ${cooldown}s...` : "Type a message..."}
                             disabled={cooldown > 0}
-                            className="w-full bg-transparent border-none focus:ring-0 px-4 py-3 resize-none text-[15px] max-h-[200px] placeholder:text-muted-foreground/30 font-medium"
+                            className="w-full bg-transparent border-none outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:ring-0 px-4 py-3 resize-none text-[15px] max-h-[200px] placeholder:text-muted-foreground/30 font-medium"
                         />
                         <div className="flex items-center justify-between px-2 pb-1">
                             <div className="flex items-center gap-1">
@@ -229,21 +229,21 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                                     className="ui-button-ghost w-10 h-10 rounded-xl text-muted-foreground hover:text-primary transition-all"
                                     title="Attach"
                                 >
-                                    <Paperclip className="w-5 h-5" />
+                                    <Icon name="paperclip" className="w-5 h-5" />
                                 </button>
                                 <button
                                     onClick={startRecording}
                                     className={`ui-button-ghost w-10 h-10 rounded-xl text-muted-foreground hover:text-primary transition-all ${uploading ? 'animate-pulse opacity-50 pointer-events-none' : ''}`}
                                     title="Voice Message"
                                 >
-                                    <Mic className="w-5 h-5" />
+                                    <Icon name="mic" className="w-5 h-5" />
                                 </button>
                             </div>
 
                             <div className="flex items-center gap-2">
                                 {cooldown > 0 && (
                                     <div className="flex items-center gap-2 px-3 py-1.5 bg-danger/10 text-danger rounded-xl text-[10px] font-black uppercase tracking-tighter shadow-sm border border-danger/20">
-                                        <Zap className="w-3 h-3 fill-danger" />
+                                        <Icon name="zap" className="w-3 h-3 fill-danger" />
                                         <span>{cooldown}s Cooldown</span>
                                     </div>
                                 )}
@@ -261,7 +261,7 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                                         <div className="w-8 h-8 scale-150">
                                             <Lottie animationData={sendAnimation} loop={true} />
                                         </div>
-                                    ) : <Send className="w-5 h-5" />}
+                                    ) : <Icon name="send" className="w-5 h-5" />}
                                 </button>
                             </div>
                         </div>

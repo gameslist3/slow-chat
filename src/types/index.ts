@@ -63,6 +63,7 @@ export interface Group {
     category: string;
     image: string; // Emoji
     members: number;
+    memberCount: number;
     memberIds: string[];
     createdAt: number;
     createdBy: string;

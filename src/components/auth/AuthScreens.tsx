@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowRight, Mail, KeyRound, ArrowLeft, Shuffle, Lock, User, Eye, EyeOff, CheckCircle2, XCircle } from 'lucide-react';
+import { Icon } from '../common/Icon';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { validateEmail, registerUserStep1, loginUserWithPassword, generateAnonymousName } from '../../services/firebaseAuthService';
@@ -11,7 +11,7 @@ export const WelcomeScreen = ({ onSignIn, onSignUp }: { onSignIn: () => void, on
     <div className="w-full max-w-md mx-auto p-4 animate-in fade-in slide-in-from-bottom-8 duration-700">
         <div className="text-center mb-10 space-y-4">
             <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 text-3xl shadow-sm rotate-3">👋</div>
-            <h1 className="text-3xl font-black tracking-tighter text-foreground leading-none">SLOWCHAT</h1>
+            <h1 className="text-3xl font-black tracking-tighter text-foreground leading-none uppercase italic">SLOWCHAT</h1>
             <p className="text-muted-foreground font-medium">Step into a calmer way of connecting.</p>
         </div>
         <div className="space-y-4">
@@ -50,7 +50,7 @@ export const SignInScreen = ({ onBack, onSuccess, onForgotPassword }: any) => {
     return (
         <div className="w-full max-w-md mx-auto p-4 animate-in fade-in slide-in-from-right-8 duration-500">
             <button onClick={onBack} className="ui-button-ghost mb-6 -ml-2 text-muted-foreground text-sm flex items-center gap-2">
-                <ArrowLeft className="w-4 h-4" /> Back
+                <Icon name="arrowLeft" className="w-4 h-4" /> Back
             </button>
             <h1 className="text-3xl font-black tracking-tight mb-2">Welcome back</h1>
             <p className="text-muted-foreground mb-8">Sign in to continue your discussions.</p>
@@ -61,7 +61,7 @@ export const SignInScreen = ({ onBack, onSuccess, onForgotPassword }: any) => {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    icon={<Mail className="w-4 h-4" />}
+                    icon={<Icon name="mail" className="w-4 h-4" />}
                     autoFocus
                     className="ui-input"
                 />
@@ -72,7 +72,7 @@ export const SignInScreen = ({ onBack, onSuccess, onForgotPassword }: any) => {
                         type={showPassword ? "text" : "password"}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        icon={<Lock className="w-4 h-4" />}
+                        icon={<Icon name="lock" className="w-4 h-4" />}
                         className="ui-input pr-12"
                     />
                     <button
@@ -80,7 +80,7 @@ export const SignInScreen = ({ onBack, onSuccess, onForgotPassword }: any) => {
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-4 bottom-3 text-muted-foreground hover:text-foreground transition-colors"
                     >
-                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        {showPassword ? <Icon name="eyeOff" className="w-5 h-5" /> : <Icon name="eye" className="w-5 h-5" />}
                     </button>
                 </div>
 
@@ -93,12 +93,7 @@ export const SignInScreen = ({ onBack, onSuccess, onForgotPassword }: any) => {
                     disabled={loading || !email || !password}
                 >
                     {loading ? (
-                        <div className="w-8 h-8">
-                            <Lottie
-                                path="https://lottie.host/5ad263fd-441f-445a-8b17-73d09a56391a/g4nsc9vN7b.json"
-                                loop={true}
-                            />
-                        </div>
+                        <Icon name="rotate" className="w-8 h-8 animate-spin text-white" />
                     ) : 'Sign In'}
                 </button>
             </form>
@@ -166,7 +161,7 @@ export const SignUpScreen = ({ onBack, onSuccess }: any) => {
     return (
         <div className="w-full max-w-md mx-auto p-4 animate-in fade-in slide-in-from-right-8 duration-500">
             <button onClick={onBack} className="ui-button-ghost mb-6 -ml-2 text-muted-foreground text-sm flex items-center gap-2">
-                <ArrowLeft className="w-4 h-4" /> Back
+                <Icon name="arrowLeft" className="w-4 h-4" /> Back
             </button>
             <h1 className="text-3xl font-black tracking-tight mb-2">Join SlowChat</h1>
             <p className="text-muted-foreground mb-8">Start your journey toward meaningful connection.</p>
@@ -177,7 +172,7 @@ export const SignUpScreen = ({ onBack, onSuccess }: any) => {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    icon={<Mail className="w-4 h-4" />}
+                    icon={<Icon name="mail" className="w-4 h-4" />}
                     autoFocus
                     className="ui-input"
                 />
@@ -189,7 +184,7 @@ export const SignUpScreen = ({ onBack, onSuccess }: any) => {
                             type={showPassword ? "text" : "password"}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            icon={<Lock className="w-4 h-4" />}
+                            icon={<Icon name="lock" className="w-4 h-4" />}
                             className="ui-input pr-12"
                         />
                         <button
@@ -197,7 +192,7 @@ export const SignUpScreen = ({ onBack, onSuccess }: any) => {
                             onClick={() => setShowPassword(!showPassword)}
                             className="absolute right-4 bottom-3 text-muted-foreground hover:text-foreground transition-colors"
                         >
-                            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                            {showPassword ? <Icon name="eyeOff" className="w-5 h-5" /> : <Icon name="eye" className="w-5 h-5" />}
                         </button>
                     </div>
 
@@ -232,7 +227,7 @@ export const SignUpScreen = ({ onBack, onSuccess }: any) => {
                                 />
                             </div>
                         ) : (
-                            <>Create Account <ArrowRight className="ml-2 w-4 h-4" /></>
+                            <>Create Account <Icon name="arrowRight" className="ml-2 w-4 h-4" /></>
                         )}
                     </button>
                 </div>
@@ -263,11 +258,8 @@ export const ForgotPasswordScreen = ({ onBack }: any) => {
 
     if (sent) return (
         <div className="w-full max-w-md mx-auto p-4 text-center animate-in fade-in zoom-in-95">
-            <div className="w-32 h-32 mx-auto mb-6">
-                <Lottie
-                    path="https://lottie.host/8099684c-70d5-494b-919a-3286f9260124/H1u49uQv7V.json"
-                    loop={false}
-                />
+            <div className="w-32 h-32 mx-auto mb-6 flex items-center justify-center bg-secondary/10 rounded-full">
+                <Icon name="checkCircle" className="w-16 h-16 text-secondary" />
             </div>
             <h1 className="text-3xl font-black tracking-tight mb-2">Check your email</h1>
             <p className="text-muted-foreground mb-8">We sent a reset link to <b className="text-foreground">{email}</b></p>
@@ -278,7 +270,7 @@ export const ForgotPasswordScreen = ({ onBack }: any) => {
     return (
         <div className="w-full max-w-md mx-auto p-4 animate-in fade-in slide-in-from-right-8 duration-500">
             <button onClick={onBack} className="ui-button-ghost mb-6 -ml-2 text-muted-foreground text-sm flex items-center gap-2">
-                <ArrowLeft className="w-4 h-4" /> Back
+                <Icon name="arrowLeft" className="w-4 h-4" /> Back
             </button>
             <h1 className="text-3xl font-black tracking-tight mb-2">Reset Password</h1>
             <p className="text-muted-foreground mb-8">Enter your email and we'll send you a link to reset your password.</p>
@@ -288,7 +280,7 @@ export const ForgotPasswordScreen = ({ onBack }: any) => {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    icon={<Mail className="w-4 h-4" />}
+                    icon={<Icon name="mail" className="w-4 h-4" />}
                     autoFocus
                     className="ui-input"
                 />
@@ -322,19 +314,14 @@ export const NameScreen = ({ onNameSelected }: { onNameSelected: (name: string) 
                         className="ui-button-ghost flex-1 h-12 border border-border"
                         onClick={() => setName(generateAnonymousName())}
                     >
-                        <Shuffle className="mr-2 w-4 h-4" /> Cycle
+                        <Icon name="shuffle" className="mr-2 w-4 h-4" /> Cycle
                     </button>
                     <button
                         className="ui-button-primary flex-[1.5] h-12 text-sm font-black tracking-widest uppercase flex items-center justify-center"
                         onClick={() => { setLoading(true); setTimeout(() => onNameSelected(name), 1500); }}
                     >
                         {loading ? (
-                            <div className="w-10 h-10">
-                                <Lottie
-                                    path="https://lottie.host/5ad263fd-441f-445a-8b17-73d09a56391a/g4nsc9vN7b.json"
-                                    loop={true}
-                                />
-                            </div>
+                            <Icon name="rotate" className="w-10 h-10 animate-spin text-white" />
                         ) : 'Confirm'}
                     </button>
                 </div>

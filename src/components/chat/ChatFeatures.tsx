@@ -77,9 +77,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 onLeave={onLeave}
             />
 
-            <div className="flex-1 min-h-0 relative">
+            {/* Message List Area - Fixed Scrollable Body */}
+            <div className="flex-1 min-h-0 relative overflow-hidden flex flex-col">
                 {loading && messages.length === 0 ? (
-                    <div className="max-w-4xl mx-auto py-10 space-y-8 px-4">
+                    <div className="max-w-4xl mx-auto py-10 space-y-8 px-4 flex-1 w-full">
                         {[1, 2, 3].map(i => (
                             <div key={i} className="flex gap-4 animate-pulse">
                                 <div className="w-12 h-12 bg-muted rounded-2xl shrink-0" />
@@ -91,9 +92,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                         ))}
                     </div>
                 ) : messages.length === 0 ? (
-                    <div className="flex-1 h-full flex flex-col items-center justify-center opacity-30 py-20">
-                        <div className="text-8xl mb-6">💬</div>
-                        <p className="font-black uppercase tracking-[0.3em] text-xs italic">No messages in this chat yet.</p>
+                    <div className="flex-1 flex flex-col items-center justify-center opacity-30">
+                        <div className="text-8xl mb-6 text-center">💬</div>
+                        <p className="font-black uppercase tracking-[0.3em] text-xs italic text-center">No messages in this chat yet.</p>
                     </div>
                 ) : (
                     <AIMessageList
@@ -106,23 +107,26 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 )}
             </div>
 
-            {chatId === 'system-updates' ? (
-                <div className="p-6 text-center">
-                    <div className="ui-panel py-3 px-6 inline-flex items-center gap-3 text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] italic">
-                        <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                        Official updates only
+            {/* Composer - Fixed at Bottom */}
+            <div className="shrink-0">
+                {chatId === 'system-updates' ? (
+                    <div className="p-6 text-center">
+                        <div className="ui-panel py-3 px-6 inline-flex items-center gap-3 text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] italic">
+                            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                            Official updates only
+                        </div>
                     </div>
-                </div>
-            ) : (
-                <AIComposer
-                    groupId={chatId}
-                    userId={user?.id || ''}
-                    onSend={handleSendMessage}
-                    replyingTo={replyingTo}
-                    onCancelReply={cancelReply}
-                    cooldown={remaining}
-                />
-            )}
+                ) : (
+                    <AIComposer
+                        groupId={chatId}
+                        userId={user?.id || ''}
+                        onSend={handleSendMessage}
+                        replyingTo={replyingTo}
+                        onCancelReply={cancelReply}
+                        cooldown={remaining}
+                    />
+                )}
+            </div>
         </div>
     );
 };

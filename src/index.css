@@ -4,35 +4,84 @@
 
 @layer base {
   :root {
-    --ui-background: 0 0% 100%;
-    --ui-surface: 240 5% 98%;
-    --ui-surface2: 240 5% 94%;
-    --ui-text: 240 10% 4%;
-    --ui-muted-text: 240 5% 45%;
-    --ui-border: 240 6% 90%;
-    --ui-ring: 224 80% 64%;
-    --ui-primary: 224 53% 58%;
-    --ui-secondary: 163 53% 58%;
-    --ui-success: 142 71% 45%;
-    --ui-warning: 38 92% 50%;
-    --ui-danger: 0 84% 60%;
-    --ui-muted: 240 5% 96%;
+    /* Obsidian & Steel Palette - Light Mode Mapping (Inverted for readability or kept dark if "dark mode only" app) */
+    /* Since the user asked for "Dark Obsidian/Steel palette", we will prioritize the dark look as default or Ensure Dark Mode is the primary feel. 
+       However, for standard shadcn/tailwind, we usually map "background" to white in light mode. 
+       But allowing for a 'Steel' feel even in light mode: */
+
+    --background: 220 15% 96%;
+    /* #F1F3F6 - Light Steel */
+    --foreground: 224 71% 4%;
+    /* #0B0D12 - Obsidian */
+
+    --card: 0 0% 100%;
+    --card-foreground: 224 71% 4%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71% 4%;
+
+    --primary: 222 51% 58%;
+    /* #5B7DCB - Frequency Blue */
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 220 18% 13%;
+    /* #1A1D26 - Steel (used as secondary in light mode for contrast) */
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 220 14.3% 95.9%;
+    --muted-foreground: 220 8.9% 46.1%;
+
+    --accent: 168 53% 58%;
+    /* #5BCBAB - Accent Green */
+    --accent-foreground: 224 71% 4%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 224 71% 4%;
+    /* Obsidian Ring */
+
+    --radius: 0.75rem;
   }
 
   .dark {
-    --ui-background: 240 10% 4%;
-    --ui-surface: 240 10% 8%;
-    --ui-surface2: 240 10% 12%;
-    --ui-text: 0 0% 98%;
-    --ui-muted-text: 240 5% 65%;
-    --ui-border: 240 6% 16%;
-    --ui-ring: 224 53% 58%;
-    --ui-primary: 224 53% 58%;
-    --ui-secondary: 163 53% 58%;
-    --ui-success: 142 71% 45%;
-    --ui-warning: 38 92% 50%;
-    --ui-danger: 0 84% 60%;
-    --ui-muted: 240 10% 10%;
+    --background: 224 25% 6%;
+    /* #0B0D12 - Obsidian (Darker, richer black-blue) */
+    --foreground: 210 40% 98%;
+
+    --card: 222 19% 13%;
+    /* #1A1D26 - Steel (Card background) */
+    --card-foreground: 210 40% 98%;
+
+    --popover: 224 25% 6%;
+    /* Match background */
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 222 51% 58%;
+    /* #5B7DCB */
+    --primary-foreground: 222 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    /* Slightly lighter steel for interaction states */
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 222 19% 13%;
+    /* Steel */
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 168 53% 58%;
+    /* #5BCBAB */
+    --accent-foreground: 224 71% 4%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 222 19% 13%;
+    /* Steel border */
+    --input: 222 19% 13%;
+    --ring: 212.7 26.8% 83.9%;
   }
 }
 

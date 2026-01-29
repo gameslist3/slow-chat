@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Sparkles, User, Copy, RotateCw, ThumbsUp, ThumbsDown, MessageSquare, Play, Pause, FileText, Download, Check, CheckCheck, UserPlus, UserMinus, X } from 'lucide-react';
+import { Icon } from '../common/Icon';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Message, Reaction, User as InternalUser } from '../../types';
 import { getUserById } from '../../services/firebaseAuthService';
@@ -108,7 +108,7 @@ const MessageItem = ({
                         ${isOwn ? 'bg-surface border-border text-foreground hover:border-primary/30' : `${getAvatarColor(message.senderId)} border-white/20 text-white shadow-lg`}
                     `}
                 >
-                    {isOwn ? <User className="w-5 h-5" /> : <span className="font-black text-xs">{message.sender.slice(0, 2).toUpperCase()}</span>}
+                    {isOwn ? <Icon name="user" className="w-5 h-5" /> : <span className="font-black text-xs">{message.sender.slice(0, 2).toUpperCase()}</span>}
                 </button>
 
                 <div className={`flex-1 min-w-0 flex flex-col ${isOwn ? 'items-end' : 'items-start'}`}>
@@ -167,12 +167,12 @@ const MessageItem = ({
                                     )}
                                     {['pdf', 'doc'].includes(message.type) && (
                                         <a href={message.media.url} target="_blank" rel="noreferrer" className="flex items-center gap-4 p-4 bg-muted/50 rounded-2xl hover:bg-muted transition-all border border-border/20 group/file">
-                                            <div className="w-12 h-12 bg-primary/10 rounded-[1rem] flex items-center justify-center text-primary transition-transform group-hover/file:scale-110"><FileText className="w-6 h-6" /></div>
+                                            <div className="w-12 h-12 bg-primary/10 rounded-[1rem] flex items-center justify-center text-primary transition-transform group-hover/file:scale-110"><Icon name="file" className="w-6 h-6" /></div>
                                             <div className="flex-1 text-left">
                                                 <p className="font-black text-xs truncate max-w-[220px] uppercase tracking-tight">{message.media.name}</p>
                                                 <p className="text-[10px] opacity-40 uppercase font-black tracking-widest mt-0.5">{Math.round(message.media.size / 1024)} KB • {message.type}</p>
                                             </div>
-                                            <Download className="w-4 h-4 opacity-20 group-hover/file:opacity-100 transition-opacity" />
+                                            <Icon name="clock" className="w-4 h-4 opacity-20 group-hover/file:opacity-100 transition-opacity" />
                                         </a>
                                     )}
                                 </div>
@@ -199,7 +199,7 @@ const MessageItem = ({
                         <div className={`flex items-center gap-1 transition-all opacity-0 group-hover/bubble:opacity-100 mt-1 ${isOwn ? 'justify-end' : 'justify-start'}`}>
                             <ReactionButton onReact={onReaction} isOwn={isOwn} />
                             <button onClick={onReply} className="w-8 h-8 rounded-lg hover:bg-surface2 text-muted-foreground flex items-center justify-center transition-all hover:text-primary" title="Reply">
-                                <MessageSquare className="w-4 h-4" />
+                                <Icon name="message" className="w-4 h-4" />
                             </button>
                         </div>
                     </div>
@@ -210,9 +210,9 @@ const MessageItem = ({
 };
 
 const StatusIcon = ({ status }: { status: 'sent' | 'delivered' | 'seen' }) => {
-    if (status === 'sent') return <Check className="w-3 h-3 opacity-20" />;
-    if (status === 'delivered') return <CheckCheck className="w-3 h-3 opacity-20" />;
-    if (status === 'seen') return <CheckCheck className="w-3 h-3 text-secondary" />;
+    if (status === 'sent') return <Icon name="check" className="w-3 h-3 opacity-20" />;
+    if (status === 'delivered') return <Icon name="checkCheck" className="w-3 h-3 opacity-20" />;
+    if (status === 'seen') return <Icon name="checkCheck" className="w-3 h-3 text-secondary" />;
     return null;
 };
 
@@ -223,7 +223,7 @@ const ReactionButton = ({ onReact, isOwn }: { onReact: (e: string) => void, isOw
     return (
         <div className="relative">
             <button onClick={() => setOpen(!open)} className="w-8 h-8 rounded-lg hover:bg-surface2 text-muted-foreground flex items-center justify-center transition-all hover:text-primary" title="React">
-                <ThumbsUp className="w-4 h-4" />
+                <Icon name="thumbsUp" className="w-4 h-4" />
             </button>
             <AnimatePresence>
                 {open && (
@@ -270,7 +270,7 @@ const AudioPlayer = ({ src, isOwn }: { src: string, isOwn: boolean }) => {
     return (
         <div className={`flex items-center gap-4 p-4 bg-muted/40 rounded-[1.5rem] min-w-[240px] border border-border/20 ${isOwn ? 'flex-row-reverse' : ''}`}>
             <button onClick={toggle} className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center shadow-lg active:scale-95 transition-all group/play">
-                {playing ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-1 group-hover/play:scale-110 transition-transform" />}
+                {playing ? <Icon name="pause" className="w-6 h-6" /> : <Icon name="play" className="w-6 h-6 ml-1 group-hover/play:scale-110 transition-transform" />}
             </button>
             <div className="flex-1 space-y-2">
                 <div className="h-1.5 w-full bg-border/40 rounded-full overflow-hidden">
@@ -375,12 +375,12 @@ const UserProfileCard = ({ userId, currentUserId, onClose }: { userId: string, c
                     onClick={onClose}
                     className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-surface2 rounded-full transition-all"
                 >
-                    <X className="w-5 h-5" />
+                    <Icon name="x" className="w-5 h-5" />
                 </button>
 
                 {loading ? (
                     <div className="py-20 flex flex-col items-center justify-center gap-4">
-                        <RotateCw className="w-10 h-10 animate-spin text-primary opacity-50" />
+                        <Icon name="rotate" className="w-10 h-10 animate-spin text-primary opacity-50" />
                         <p className="text-[10px] uppercase font-black tracking-widest opacity-30">Fetching Identity...</p>
                     </div>
                 ) : profile ? (
@@ -404,9 +404,9 @@ const UserProfileCard = ({ userId, currentUserId, onClose }: { userId: string, c
                                                 'bg-primary text-white hover:scale-105 active:scale-95 shadow-primary/20 hover:shadow-primary/40'}
                                     `}
                                 >
-                                    {status === 'accepted' ? <Check className="w-5 h-5" /> :
-                                        status === 'pending' ? <RotateCw className="w-5 h-5 animate-spin" /> :
-                                            <UserPlus className="w-5 h-5" />}
+                                    {status === 'accepted' ? <Icon name="check" className="w-5 h-5" /> :
+                                        status === 'pending' ? <Icon name="rotate" className="w-5 h-5 animate-spin" /> :
+                                            <Icon name="userPlus" className="w-5 h-5" />}
 
                                     {status === 'accepted' ? 'Connected' :
                                         status === 'pending' ? 'Requested' :
@@ -420,7 +420,7 @@ const UserProfileCard = ({ userId, currentUserId, onClose }: { userId: string, c
                     </>
                 ) : (
                     <div className="py-20 flex flex-col items-center gap-4">
-                        <X className="w-10 h-10 text-danger opacity-20" />
+                        <Icon name="x" className="w-10 h-10 text-danger opacity-20" />
                         <p className="text-muted-foreground italic uppercase font-black tracking-widest opacity-40">Identity Not Located</p>
                         <button onClick={onClose} className="ui-button-ghost text-[10px] font-black uppercase tracking-widest">Close</button>
                     </div>

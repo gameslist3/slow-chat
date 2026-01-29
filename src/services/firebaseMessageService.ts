@@ -103,8 +103,11 @@ export async function sendMessage(
 
         // --- Notifications Logic ---
 
+        // Track who has been notified to prevent duplicates (e.g. Reply + Mention)
+        const notifiedUserIds = new Set<string>();
+
         if (content.isPersonal) {
-            // Personal chat alerts
+            // Personal chat alerts: Always notify recipient
             if (content.recipientId) {
                 await createNotification(content.recipientId, {
                     type: 'message',
@@ -113,32 +116,50 @@ export async function sendMessage(
                     groupId: targetId,
                     messageId: docRef.id
                 });
+                notifiedUserIds.add(content.recipientId);
             }
         } else {
-            // Group chat alerts for all members (except sender)
-            const groupSnap = await getDoc(doc(db, 'groups', targetId));
-            if (groupSnap.exists()) {
-                const memberIds = groupSnap.data().memberIds || [];
-                const notificationPromises = memberIds
-                    .filter((mid: string) => mid !== senderId)
-                    .map((mid: string) => createNotification(mid, {
-                        type: 'message',
+            // Group Chat: Filtered Notifications (Mentions & Replies Only)
+
+            // 1. Check for Replies
+            if (content.replyTo) {
+                // We need to resolve the username to a UID. 
+                // In a real app we'd have this ID in reply metadata.
+                // Fallback to query.
+                const replyToUserId = await getUserIdByUsername(content.replyTo.sender);
+
+                if (replyToUserId && replyToUserId !== senderId) {
+                    await createNotification(replyToUserId, {
+                        type: 'message', // Using 'message' type but with clarity in text
                         senderName: senderUsername,
-                        text: content.text || `shared a ${content.type}`,
+                        text: `replied to you: "${content.text?.substring(0, 50)}${content.text && content.text.length > 50 ? '...' : ''}"`,
                         groupId: targetId,
                         messageId: docRef.id
-                    }));
-                await Promise.all(notificationPromises);
+                    });
+                    notifiedUserIds.add(replyToUserId);
+                }
             }
-        }
 
-        // Special alerts: Reply & Mention (These can overlap with basic message alerts)
-        if (content.replyTo) {
-            const replyToUserId = await getUserIdByUsername(content.replyTo.sender);
-            if (replyToUserId && replyToUserId !== senderId) {
-                // If it's a group, the generic message notification above already exists
-                // We could add a more specific 'reply' notification if we want, 
-                // but for now, the generic one covers the unread badge.
+            // 2. Check for Mentions in text
+            if (content.text) {
+                const mentionMatches = content.text.match(/@\w+/g) || [];
+                const mentionedUsernames = mentionMatches.map(m => m.slice(1)); // remove @
+
+                if (mentionedUsernames.length > 0) {
+                    for (const username of mentionedUsernames) {
+                        const uid = await getUserIdByUsername(username);
+                        if (uid && uid !== senderId && !notifiedUserIds.has(uid)) {
+                            await createNotification(uid, {
+                                type: 'message',
+                                senderName: senderUsername,
+                                text: `mentioned you: "${content.text?.substring(0, 50)}..."`,
+                                groupId: targetId,
+                                messageId: docRef.id
+                            });
+                            notifiedUserIds.add(uid);
+                        }
+                    }
+                }
             }
         }
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../ui/Button';
 import { useToast } from '../../context/ToastContext';
-import { ArrowLeft, User, Shield, HelpCircle, Save, CheckCircle, RefreshCw, Key, Shuffle, Mail, Phone } from 'lucide-react';
+import { Icon } from '../common/Icon';
 import { generateAnonymousName } from '../../services/firebaseAuthService';
 
 export const AccountSettings = ({ onBack }: { onBack: () => void }) => {
@@ -60,7 +60,7 @@ export const AccountSettings = ({ onBack }: { onBack: () => void }) => {
         <div className="h-full flex flex-col bg-white">
             {/* Minimal Header */}
             <div className="p-6 pb-2 flex items-center gap-4 animate-in fade-in slide-in-from-top-2">
-                <Button variant="ghost" size="icon" onClick={onBack} className="hover:bg-gray-100 rounded-full"><ArrowLeft className="w-6 h-6 text-gray-800" /></Button>
+                <Button variant="ghost" size="icon" onClick={onBack} className="hover:bg-gray-100 rounded-full"><Icon name="arrowLeft" className="w-6 h-6 text-gray-800" /></Button>
                 <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Settings</h1>
             </div>
 
@@ -97,7 +97,7 @@ export const AccountSettings = ({ onBack }: { onBack: () => void }) => {
                                 <div className="bg-gray-50 rounded-3xl p-8 space-y-8 animate-in zoom-in-95">
                                     <div className="flex justify-between items-center">
                                         <h3 className="font-bold text-gray-900 text-lg">Change Name</h3>
-                                        <Button variant="ghost" size="icon" onClick={() => setIsEditing(false)}><ArrowLeft className="w-4 h-4" /></Button>
+                                        <Button variant="ghost" size="icon" onClick={() => setIsEditing(false)}><Icon name="arrowLeft" className="w-4 h-4" /></Button>
                                     </div>
 
                                     <div className="text-center py-4">
@@ -107,7 +107,7 @@ export const AccountSettings = ({ onBack }: { onBack: () => void }) => {
 
                                     <div className="flex gap-4">
                                         <Button variant="outline" onClick={handleShuffle} className="flex-1 bg-white border-gray-200 h-12 rounded-xl hover:border-indigo-300 hover:text-indigo-600 transition-all">
-                                            <Shuffle className="w-4 h-4 mr-2" /> Shuffle
+                                            <Icon name="shuffle" className="w-4 h-4 mr-2" /> Shuffle
                                         </Button>
                                         <Button onClick={handleSaveName} className="flex-1 bg-indigo-600 h-12 rounded-xl text-white shadow-lg shadow-indigo-200">
                                             Confirm
@@ -127,7 +127,7 @@ export const AccountSettings = ({ onBack }: { onBack: () => void }) => {
 
                         <div className="flex items-center justify-between py-2">
                             <div className="flex items-center gap-4">
-                                <div className="p-3 bg-gray-50 rounded-full text-gray-600"><Key className="w-5 h-5" /></div>
+                                <div className="p-3 bg-gray-50 rounded-full text-gray-600"><Icon name="key" className="w-5 h-5" /></div>
                                 <div>
                                     <p className="font-bold text-gray-900">Password</p>
                                     <p className="text-sm text-gray-500">Secure your account</p>
@@ -147,11 +147,11 @@ export const AccountSettings = ({ onBack }: { onBack: () => void }) => {
 
                         <div className="grid grid-cols-2 gap-4">
                             <a href="mailto:support@slowchat.com" className="flex flex-col items-center justify-center gap-3 p-6 bg-gray-50 hover:bg-indigo-50 hover:text-indigo-600 rounded-3xl transition-colors group cursor-pointer border border-transparent hover:border-indigo-100">
-                                <div className="p-3 bg-white rounded-full text-gray-600 group-hover:text-indigo-600 shadow-sm"><Mail className="w-6 h-6" /></div>
+                                <div className="p-3 bg-white rounded-full text-gray-600 group-hover:text-indigo-600 shadow-sm"><Icon name="mail" className="w-6 h-6" /></div>
                                 <span className="font-bold text-sm">Email Support</span>
                             </a>
                             <a href="tel:+18005550123" className="flex flex-col items-center justify-center gap-3 p-6 bg-gray-50 hover:bg-indigo-50 hover:text-indigo-600 rounded-3xl transition-colors group cursor-pointer border border-transparent hover:border-indigo-100">
-                                <div className="p-3 bg-white rounded-full text-gray-600 group-hover:text-indigo-600 shadow-sm"><Phone className="w-6 h-6" /></div>
+                                <div className="p-3 bg-white rounded-full text-gray-600 group-hover:text-indigo-600 shadow-sm"><Icon name="phone" className="w-6 h-6" /></div>
                                 <span className="font-bold text-sm">Call Support</span>
                             </a>
                         </div>

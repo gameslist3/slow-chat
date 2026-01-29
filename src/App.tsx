@@ -10,7 +10,7 @@ import { FollowRequests } from './components/auth/FollowRequests';
 import { subscribeToGroups, joinGroup } from './services/firebaseGroupService';
 import { Group, User, PersonalChat } from './types';
 import { AILayout } from './components/ai-ui/AILayout';
-import { Users } from 'lucide-react';
+import { Icon } from './components/common/Icon';
 import { useInbox } from './hooks/useChat';
 
 const AppContent = () => {
@@ -168,7 +168,7 @@ const AuthenticatedSection = () => {
                                             <div className="flex items-center gap-4">
                                                 <div className="ui-badge lowercase font-black bg-primary/10 text-primary border-primary/20">{g.category}</div>
                                                 <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest opacity-40">
-                                                    <Users className="w-4 h-4" />
+                                                    <Icon name="users" className="w-4 h-4" />
                                                     <span>{g.members} Members</span>
                                                 </div>
                                             </div>

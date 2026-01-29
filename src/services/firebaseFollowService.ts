@@ -202,3 +202,88 @@ export const getPendingRequests = (callback: (requests: FollowRequest[]) => void
         callback(reqs);
     });
 };
+/**
+ * Subscribe to mutual friends (accepted follow requests)
+ */
+export const subscribeToFriends = (userId: string, callback: (friends: any[]) => void) => {
+    const q1 = query(collection(db, 'follow_requests'),
+        where('fromId', '==', userId),
+        where('status', '==', 'accepted')
+    );
+    const q2 = query(collection(db, 'follow_requests'),
+        where('toId', '==', userId),
+        where('status', '==', 'accepted')
+    );
+
+    let results1: any[] = [];
+    let results2: any[] = [];
+
+    const update = () => {
+        const friends1 = results1.map(d => {
+            const data = d.data();
+            return {
+                requestId: d.id,
+                uid: data.toId,
+                username: data.toUsername || 'User',
+                direction: 'outgoing'
+            };
+        });
+
+        const friends2 = results2.map(d => {
+            const data = d.data();
+            return {
+                requestId: d.id,
+                uid: data.fromId,
+                username: data.fromUsername || 'User',
+                direction: 'incoming'
+            };
+        });
+
+        const combined = [...friends1, ...friends2];
+        const uniqueFriends = Array.from(new Map(combined.map(item => [item.uid, item])).values());
+
+        callback(uniqueFriends);
+    };
+
+    const unsub1 = onSnapshot(q1, (snap) => {
+        results1 = snap.docs;
+        update();
+    });
+
+    const unsub2 = onSnapshot(q2, (snap) => {
+        results2 = snap.docs;
+        update();
+    });
+
+    return () => {
+        unsub1();
+        unsub2();
+    };
+};
+
+/**
+ * Get all friends (Accepted connections)
+ */
+export const getFriends = async (userId: string): Promise<any[]> => {
+    const requestsRef = collection(db, 'follow_requests');
+    const q1 = query(requestsRef, where('fromId', '==', userId), where('status', '==', 'accepted'));
+    const q2 = query(requestsRef, where('toId', '==', userId), where('status', '==', 'accepted'));
+
+    const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+
+    const friends: any[] = [];
+
+    // I'll use a Map to avoid duplicates and handle user details
+    const friendMap = new Map();
+
+    for (const d of snap1.docs) {
+        const data = d.data();
+        friendMap.set(data.toId, { id: data.toId, username: '...' }); // Needs detail fetching
+    }
+    for (const d of snap2.docs) {
+        const data = d.data();
+        friendMap.set(data.fromId, { id: data.fromId, username: data.fromUsername });
+    }
+
+    return Array.from(friendMap.values());
+};
