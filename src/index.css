@@ -86,8 +86,8 @@
     --ui-surface2: 225 10% 8%;
 
     /* Glass V3 Dark */
-    --glass-surface: rgba(12, 14, 18, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.05);
+    --glass-surface: rgba(12, 14, 18, 0.8);
+    --glass-border: rgba(255, 255, 255, 0.15);
     --glass-shadow: rgba(0, 0, 0, 0.5);
   }
 }

@@ -43,7 +43,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
             <aside className={`${drawerClasses} flex flex-col h-full border-r border-gray-200`}>
                 <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 z-10">
-                    <Logo className="h-8 w-auto" />
+                    <h2 className="text-xl font-bold text-indigo-600 tracking-tight flex items-center gap-2">
+                        Gapes
+                    </h2>
                     {/* Close button on mobile */}
                     <div className="md:hidden">
                         <Button variant="ghost" size="icon" onClick={onClose}>
@@ -123,6 +125,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </div>
 
                 <div className="p-4 border-t border-gray-100 bg-gray-50/50">
+                    <div className="mb-4 flex justify-center md:justify-start">
+                        <Logo className="h-8 w-auto opacity-50 grayscale hover:grayscale-0 transition-all" />
+                    </div>
                     <Button
                         variant="outline"
                         className="w-full justify-start border-dashed border-gray-300 text-gray-600 hover:text-indigo-600 hover:border-indigo-300 hover:bg-white"

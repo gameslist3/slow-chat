@@ -63,7 +63,7 @@ export const AILayout: React.FC<AILayoutProps> = ({
 
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
         const currentScrollY = e.currentTarget.scrollTop;
-        if (currentScrollY > lastScrollY.current && currentScrollY > 20) {
+        if (currentScrollY > lastScrollY.current && currentScrollY > 50) {
             setShowBottomNav(false);
         } else {
             setShowBottomNav(true);
@@ -189,7 +189,7 @@ export const AILayout: React.FC<AILayoutProps> = ({
                     </header>
 
                     <main
-                        className={`flex-1 overflow-hidden flex flex-col relative w-full h-full mobile-scroll-fix ${activeChatId ? 'pt-[20%]' : ''}`}
+                        className={`flex-1 overflow-y-auto flex flex-col relative w-full h-full mobile-scroll-fix ${activeChatId ? 'pt-[10%] md:pt-0' : ''}`}
                         onScroll={handleScroll}
                     >
                         {children}
@@ -216,10 +216,10 @@ export const AILayout: React.FC<AILayoutProps> = ({
                             <>
                                 <button
                                     onClick={() => setSidebarOpen(true)}
-                                    className="px-4 py-2 rounded-full bg-primary/10 text-primary font-bold text-xs uppercase tracking-wider hover:bg-primary/20 transition-all flex items-center gap-2"
+                                    className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground active:scale-95 transition-all p-2"
                                 >
-                                    <Icon name="compass" className="w-4 h-4" />
-                                    Explore
+                                    <Icon name="menu" className="w-5 h-5" />
+                                    <span className="text-[9px] font-bold uppercase tracking-wider">Menu</span>
                                 </button>
                                 <button
                                     onClick={onBrowseGroups}
