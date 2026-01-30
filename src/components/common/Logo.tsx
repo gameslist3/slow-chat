@@ -9,9 +9,9 @@ export const Logo: React.FC<LogoProps> = ({ className = "w-auto h-8", showText =
     return (
         <div className={`relative flex items-center gap-2 ${className}`}>
             <img
-                src="/src/assets/logo.png"
+                src="/logo.png"
                 alt="Gapes Logo"
-                className="w-full h-full object-contain"
+                className="w-full h-full object-contain brightness-100"
             />
         </div>
     );

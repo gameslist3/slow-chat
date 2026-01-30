@@ -6,6 +6,7 @@ import { Group, User, PersonalChat, FollowRequest } from '../../types';
 import { useInbox } from '../../hooks/useChat';
 import { getPendingRequests } from '../../services/firebaseFollowService';
 import { FriendsList } from '../social/FriendsList';
+import { Logo } from '../common/Logo';
 
 interface AISidebarProps {
     groups: Group[];
@@ -64,18 +65,30 @@ export const AISidebar: React.FC<AISidebarProps> = ({
                     onClick={onGoHome}
                     className="flex flex-col text-left hover:opacity-70 transition-opacity active:scale-95"
                 >
-                    <span className="text-[10px] font-bold tracking-widest text-primary opacity-60 uppercase">Messages</span>
-                    <span className="text-2xl font-black tracking-tighter text-foreground mt-1">SLOWCHAT</span>
+                    <Logo className="h-8 w-auto" />
                 </button>
-                {onClose && (
+
+                <div className="flex items-center gap-2">
                     <motion.button
+                        whileHover={{ scale: 1.1, backgroundColor: 'rgba(var(--primary-rgb), 0.1)' }}
                         whileTap={{ scale: 0.9 }}
-                        onClick={onClose}
-                        className="md:hidden opacity-50 p-2"
+                        onClick={onBrowseGroups}
+                        className="w-10 h-10 rounded-xl bg-foreground/5 flex items-center justify-center text-muted-foreground hover:text-primary transition-all"
+                        title="Explore"
                     >
-                        <Icon name="x" className="w-6 h-6" />
+                        <Icon name="compass" className="w-5 h-5" />
                     </motion.button>
-                )}
+
+                    <motion.button
+                        whileHover={{ scale: 1.1, backgroundColor: 'rgba(var(--primary-rgb), 0.1)' }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={onCreateGroup}
+                        className="w-10 h-10 rounded-xl bg-foreground/5 flex items-center justify-center text-muted-foreground hover:text-primary transition-all"
+                        title="Create Group"
+                    >
+                        <Icon name="plus" className="w-5 h-5" />
+                    </motion.button>
+                </div>
             </div>
 
             <div className="flex gap-3">
@@ -220,25 +233,8 @@ export const AISidebar: React.FC<AISidebarProps> = ({
             )}
 
             <div className="mt-auto space-y-6 pt-6 border-t border-border/10">
-                <div className="flex items-center justify-between">
-                    <motion.button
-                        whileHover={{ scale: 1.1, backgroundColor: 'rgba(var(--primary-rgb), 0.1)' }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={onBrowseGroups}
-                        className="w-10 h-10 rounded-xl bg-foreground/5 flex items-center justify-center text-muted-foreground hover:text-primary transition-all"
-                        title="Shuffle Groups"
-                    >
-                        <Icon name="shuffle" className="w-5 h-5" />
-                    </motion.button>
-
-                    <motion.button
-                        whileHover={{ scale: 1.1, backgroundColor: 'rgba(var(--primary-rgb), 0.1)' }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={onCreateGroup}
-                        className="w-10 h-10 rounded-xl bg-foreground/5 flex items-center justify-center text-muted-foreground hover:text-primary transition-all"
-                    >
-                        <Icon name="plus" className="w-5 h-5" />
-                    </motion.button>
+                <div className="flex items-center justify-center">
+                    <span className="text-[10px] font-bold text-muted-foreground/30 uppercase tracking-[0.2em]">GAPES PROTOCOL V1.0</span>
                 </div>
 
                 <motion.div

@@ -189,51 +189,56 @@ export const AILayout: React.FC<AILayoutProps> = ({
                     </header>
 
                     <main
-                        className={`flex-1 overflow-y-auto flex flex-col relative w-full h-full mobile-scroll-fix ${activeChatId ? 'pt-[10%] md:pt-0' : ''}`}
+                        className={`flex-1 overflow-y-auto flex flex-col relative w-full h-full mobile-scroll-fix ${activeChatId ? 'pt-[20%] md:pt-0' : ''}`}
                         onScroll={handleScroll}
                     >
                         {children}
                     </main>
 
                     {/* Mobile Bottom Nav */}
-                    <motion.div
-                        className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-background/80 backdrop-blur-xl border-t border-white/5 flex items-center justify-around px-2 z-50 pb-safe"
-                        initial={{ y: 0 }}
-                        animate={{ y: showBottomNav ? 0 : '100%' }}
-                        transition={{ duration: 0.3 }}
-                    >
-                        <button
-                            onClick={() => setSidebarOpen(true)}
-                            className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground active:scale-95 transition-all p-2"
-                        >
-                            <Icon name="menu" className="w-5 h-5" />
-                            <span className="text-[9px] font-bold uppercase tracking-wider">Menu</span>
-                        </button>
-                        <button
-                            onClick={onBrowseGroups}
-                            className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground active:scale-95 transition-all p-2"
-                        >
-                            <Icon name="search" className="w-5 h-5" />
-                            <span className="text-[9px] font-bold uppercase tracking-wider">Search</span>
-                        </button>
-                        <button
-                            onClick={() => setShowNotifications(true)}
-                            className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground active:scale-95 transition-all p-2 relative"
-                        >
-                            <Icon name="bell" className="w-5 h-5" />
-                            {(user?.unreadCount || 0) > 0 && (
-                                <div className="absolute top-1 right-3 w-2 h-2 bg-secondary rounded-full border border-background" />
-                            )}
-                            <span className="text-[9px] font-bold uppercase tracking-wider">Activity</span>
-                        </button>
-                        <button
-                            onClick={onOpenSettings}
-                            className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground active:scale-95 transition-all p-2"
-                        >
-                            <Icon name="user" className="w-5 h-5" />
-                            <span className="text-[9px] font-bold uppercase tracking-wider">Profile</span>
-                        </button>
-                    </motion.div>
+                    <AnimatePresence>
+                        {!activeChatId && (
+                            <motion.div
+                                className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-background/80 backdrop-blur-xl border-t border-white/5 flex items-center justify-around px-2 z-50 pb-safe"
+                                initial={{ y: '100%' }}
+                                animate={{ y: showBottomNav ? 0 : '100%' }}
+                                exit={{ y: '100%' }}
+                                transition={{ duration: 0.3 }}
+                            >
+                                <button
+                                    onClick={() => setSidebarOpen(true)}
+                                    className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground active:scale-95 transition-all p-2"
+                                >
+                                    <Icon name="menu" className="w-5 h-5" />
+                                    <span className="text-[9px] font-bold uppercase tracking-wider">Menu</span>
+                                </button>
+                                <button
+                                    onClick={onBrowseGroups}
+                                    className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground active:scale-95 transition-all p-2"
+                                >
+                                    <Icon name="search" className="w-5 h-5" />
+                                    <span className="text-[9px] font-bold uppercase tracking-wider">Search</span>
+                                </button>
+                                <button
+                                    onClick={() => setShowNotifications(true)}
+                                    className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground active:scale-95 transition-all p-2 relative"
+                                >
+                                    <Icon name="bell" className="w-5 h-5" />
+                                    {(user?.unreadCount || 0) > 0 && (
+                                        <div className="absolute top-1 right-3 w-2 h-2 bg-secondary rounded-full border border-background" />
+                                    )}
+                                    <span className="text-[9px] font-bold uppercase tracking-wider">Activity</span>
+                                </button>
+                                <button
+                                    onClick={onOpenSettings}
+                                    className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground active:scale-95 transition-all p-2"
+                                >
+                                    <Icon name="user" className="w-5 h-5" />
+                                    <span className="text-[9px] font-bold uppercase tracking-wider">Profile</span>
+                                </button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </motion.div>
             </div>
         </div>

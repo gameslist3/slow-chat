@@ -93,6 +93,12 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
     return (
         <header className="flex items-center justify-between px-8 py-5 border-b border-border/5 bg-background/5 backdrop-blur-xl sticky top-0 z-40 h-[80px]">
             <div className="flex items-center gap-5">
+                <button
+                    onClick={onLeave}
+                    className="md:hidden p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
+                >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
+                </button>
                 <motion.div
                     whileHover={{ scale: 1.1, rotate: -5 }}
                     className="text-4xl drop-shadow-[0_0_15px_rgba(var(--primary-rgb),0.2)] cursor-default"
@@ -134,13 +140,6 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
                         <div className="h-4 w-[1px] mx-1 bg-border/20 hidden sm:block" />
                     </>
                 )}
-
-                <button
-                    onClick={onLeave}
-                    className="md:hidden p-3 -mr-2 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
-                >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
-                </button>
 
                 <div className="relative">
                     <motion.button
