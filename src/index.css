@@ -233,3 +233,14 @@
 *:hover::-webkit-scrollbar-thumb:hover {
   background: rgba(var(--primary-rgb), 0.4);
 }
+
+/* Mobile Polish */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 20px);
+}
+
+.mobile-scroll-fix {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}

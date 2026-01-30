@@ -14,6 +14,8 @@ interface AIComposerProps {
     userId: string;
 }
 
+type RecordingState = 'idle' | 'recording' | 'review';
+
 export const AIComposer: React.FC<AIComposerProps> = ({
     onSend,
     replyingTo,
@@ -23,17 +25,21 @@ export const AIComposer: React.FC<AIComposerProps> = ({
     userId
 }) => {
     const [text, setText] = useState('');
-    const [isRecording, setIsRecording] = useState(false);
+    const [recState, setRecState] = useState<RecordingState>('idle');
     const [recordingTime, setRecordingTime] = useState(0);
     const [uploading, setUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [sendAnimation, setSendAnimation] = useState<any>(null);
+    const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const mediaRecorder = useRef<MediaRecorder | null>(null);
     const timerRef = useRef<any>(null);
     const audioChunks = useRef<Blob[]>([]);
+    const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
 
     useEffect(() => {
         const loadLottie = async () => {
@@ -58,13 +64,20 @@ export const AIComposer: React.FC<AIComposerProps> = ({
     useEffect(() => {
         const handleEsc = (e: KeyboardEvent) => {
             if (e.key === 'Escape') {
-                if (isRecording) cancelRecording();
+                if (recState !== 'idle') cancelRecording();
                 else if (replyingTo) onCancelReply?.();
             }
         };
         window.addEventListener('keydown', handleEsc);
         return () => window.removeEventListener('keydown', handleEsc);
-    }, [isRecording, replyingTo, onCancelReply]);
+    }, [recState, replyingTo, onCancelReply]);
+
+    // Audio Playback cleanup
+    useEffect(() => {
+        return () => {
+            if (audioUrl) URL.revokeObjectURL(audioUrl);
+        };
+    }, [audioUrl]);
 
     const startRecording = async () => {
         try {
@@ -76,16 +89,17 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                 if (e.data.size > 0) audioChunks.current.push(e.data);
             };
 
-            recorder.onstop = async () => {
-                if (audioChunks.current.length === 0) return;
-                const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
-                await handleUpload(audioBlob, 'audio');
+            recorder.onstop = () => {
+                const blob = new Blob(audioChunks.current, { type: 'audio/webm' });
+                setAudioBlob(blob);
+                const url = URL.createObjectURL(blob);
+                setAudioUrl(url);
                 stream.getTracks().forEach(track => track.stop());
             };
 
             mediaRecorder.current = recorder;
             recorder.start(200);
-            setIsRecording(true);
+            setRecState('recording');
             setRecordingTime(0);
             timerRef.current = setInterval(() => setRecordingTime((prev: number) => prev + 1), 1000);
         } catch (err) {
@@ -96,7 +110,7 @@ export const AIComposer: React.FC<AIComposerProps> = ({
     const stopRecording = () => {
         if (mediaRecorder.current && mediaRecorder.current.state === 'recording') {
             mediaRecorder.current.stop();
-            setIsRecording(false);
+            setRecState('review');
             clearInterval(timerRef.current);
         }
     };
@@ -106,9 +120,38 @@ export const AIComposer: React.FC<AIComposerProps> = ({
             mediaRecorder.current.onstop = null;
             mediaRecorder.current.stop();
             audioChunks.current = [];
-            setIsRecording(false);
-            clearInterval(timerRef.current);
         }
+        setRecState('idle');
+        setAudioBlob(null);
+        setAudioUrl(null);
+        clearInterval(timerRef.current);
+        if (audioPlayerRef.current) {
+            audioPlayerRef.current.pause();
+            audioPlayerRef.current = null;
+        }
+        setIsPlaying(false);
+    };
+
+    const sendRecording = async () => {
+        if (!audioBlob) return;
+        await handleUpload(audioBlob, 'audio');
+        cancelRecording(); // Reset state after sending
+    };
+
+    const togglePlayback = () => {
+        if (!audioUrl) return;
+
+        if (!audioPlayerRef.current) {
+            audioPlayerRef.current = new Audio(audioUrl);
+            audioPlayerRef.current.onended = () => setIsPlaying(false);
+        }
+
+        if (isPlaying) {
+            audioPlayerRef.current.pause();
+        } else {
+            audioPlayerRef.current.play();
+        }
+        setIsPlaying(!isPlaying);
     };
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -184,18 +227,73 @@ export const AIComposer: React.FC<AIComposerProps> = ({
             </AnimatePresence>
 
             <motion.div layout className={`glass-panel rounded-[1.5rem] md:rounded-[2rem] p-1.5 md:p-2 flex items-end gap-2 shadow-xl border-white/5 bg-background/40 backdrop-blur-xl ${cooldown > 0 ? 'opacity-50' : ''}`}>
-                {isRecording ? (
-                    <div className="flex items-center justify-between w-full px-4 h-[56px]">
-                        <div className="flex items-center gap-3">
-                            <motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 2 }} className="w-3 h-3 rounded-full bg-destructive" />
-                            <span className="text-destructive font-mono text-lg font-medium">{formatTime(recordingTime)}</span>
+
+                {/* --- Recording UI --- */}
+                {recState === 'recording' && (
+                    <div className="flex items-center justify-between w-full px-4 h-[56px] animate-in slide-in-from-bottom-2 duration-300">
+                        <div className="flex items-center gap-4">
+                            <motion.div
+                                animate={{ scale: [1, 1.3, 1], opacity: [0.5, 1, 0.5] }}
+                                transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                                className="w-3 h-3 rounded-full bg-destructive shadow-[0_0_10px_rgba(239,68,68,0.5)]"
+                            />
+                            <span className="text-foreground font-mono text-lg font-bold tracking-widest">{formatTime(recordingTime)}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <button onClick={cancelRecording} className="p-2 text-muted-foreground hover:text-destructive"><Icon name="trash" className="w-5 h-5" /></button>
-                            <button onClick={stopRecording} className="p-2 bg-destructive text-white rounded-full"><Icon name="send" className="w-5 h-5" /></button>
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mr-4 animate-pulse">Recording...</span>
+                            <button
+                                onClick={stopRecording}
+                                className="w-10 h-10 rounded-full bg-destructive flex items-center justify-center text-white shadow-lg shadow-destructive/30 hover:scale-105 active:scale-95 transition-all"
+                            >
+                                <Icon name="stop" className="w-5 h-5" />
+                            </button>
                         </div>
                     </div>
-                ) : (
+                )}
+
+                {/* --- Review UI --- */}
+                {recState === 'review' && (
+                    <div className="flex items-center justify-between w-full px-2 h-[56px] animate-in slide-in-from-bottom-2 duration-300">
+                        <button
+                            onClick={cancelRecording}
+                            className="w-10 h-10 rounded-full bg-foreground/5 flex items-center justify-center text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all active:scale-95"
+                        >
+                            <Icon name="trash" className="w-5 h-5" />
+                        </button>
+
+                        <div className="flex-1 mx-4 h-10 bg-foreground/5 rounded-xl flex items-center justify-center relative overflow-hidden group cursor-pointer" onClick={togglePlayback}>
+                            {/* Simulated Waveform */}
+                            <div className="absolute inset-0 flex items-center justify-center gap-1 opacity-30">
+                                {[...Array(20)].map((_, i) => (
+                                    <motion.div
+                                        key={i}
+                                        animate={{ height: isPlaying ? [10, 24, 10] : 10 }}
+                                        transition={{ repeat: Infinity, duration: 0.5, delay: i * 0.05 }}
+                                        className="w-1 bg-primary rounded-full transition-all"
+                                        style={{ height: '10px' }}
+                                    />
+                                ))}
+                            </div>
+                            <div className="z-10 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center backdrop-blur-sm">
+                                <Icon name={isPlaying ? 'pause' : 'play'} className="w-4 h-4 text-primary ml-0.5" />
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={sendRecording}
+                            className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white shadow-xl shadow-primary/30 hover:scale-105 active:scale-95 transition-all"
+                        >
+                            {uploading ? (
+                                <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }} className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full" />
+                            ) : (
+                                <Icon name="send" className="w-5 h-5 translate-x-0.5" />
+                            )}
+                        </button>
+                    </div>
+                )}
+
+                {/* --- Default Text UI --- */}
+                {recState === 'idle' && (
                     <>
                         <button onClick={() => fileInputRef.current?.click()} className="p-3 text-muted-foreground hover:text-primary transition-colors flex-shrink-0">
                             <Icon name="paperclip" className="w-6 h-6" />

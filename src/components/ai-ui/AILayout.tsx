@@ -48,6 +48,16 @@ export const AILayout: React.FC<AILayoutProps> = ({
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
 
+    // Prevent body scroll when sidebar is open on mobile
+    useEffect(() => {
+        if (sidebarOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => { document.body.style.overflow = ''; };
+    }, [sidebarOpen]);
+
     return (
         <div className="relative flex h-screen w-full overflow-hidden text-foreground font-sans selection:bg-primary/20">
             {/* --- Atmospheric Background --- */}
@@ -67,6 +77,8 @@ export const AILayout: React.FC<AILayoutProps> = ({
                             onClose={() => setShowNotifications(false)}
                             onSelectChat={onSelectNotification}
                         />
+                        {/* Mobile close overlay */}
+                        <div className="absolute inset-0 -z-10 md:hidden" onClick={() => setShowNotifications(false)} />
                     </motion.div>
                 )}
             </AnimatePresence>
@@ -115,10 +127,10 @@ export const AILayout: React.FC<AILayoutProps> = ({
                     layout
                     className="flex-1 flex flex-col min-w-0 glass-panel rounded-none md:rounded-[2.5rem] relative overflow-hidden h-full z-0 p-2 md:p-0"
                 >
-                    {/* Header (Desktop: Full, Mobile: Conditional based on chat state) */}
+                    {/* Header: Always rendered, conditionally styled */}
                     <header className={`
                         flex items-center justify-between px-4 py-3 md:px-8 md:py-5 border-b border-border/5 bg-background/5 backdrop-blur-xl sticky top-0 z-40 h-[60px] md:h-[80px]
-                        ${activeChatId ? 'flex md:flex' : 'hidden md:flex'}
+                        ${activeChatId ? 'flex' : 'flex'} 
                     `}>
                         <div className="flex items-center gap-4 md:gap-6">
                             {/* Mobile: Back Button if Chat Open, else Logo Toggles Sidebar */}
@@ -134,7 +146,6 @@ export const AILayout: React.FC<AILayoutProps> = ({
                                     className="md:hidden flex items-center gap-3 active:scale-95 transition-transform"
                                     onClick={() => setSidebarOpen(true)}
                                 >
-                                    {/* Logo Placeholder or Simple Text */}
                                     <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center text-white font-black text-xs">
                                         SC
                                     </div>
@@ -178,40 +189,46 @@ export const AILayout: React.FC<AILayoutProps> = ({
                         </div>
                     </header>
 
-                    <main className="flex-1 overflow-hidden flex flex-col relative w-full h-full">
+                    <main className="flex-1 overflow-hidden flex flex-col relative w-full h-full mobile-scroll-fix">
                         {children}
                     </main>
 
                     {/* Mobile Bottom Nav (Visible only when NO chat is open) */}
                 </motion.div>
 
-                {/* Bottom Navigation Bar for Mobile (Home, Menu, etc.) */}
+                {/* Bottom Navigation Bar for Mobile */}
                 {!activeChatId && (
-                    <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-background/80 backdrop-blur-xl border-t border-white/5 flex items-center justify-around px-4 z-50">
+                    <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-background/80 backdrop-blur-xl border-t border-white/5 flex items-center justify-around px-2 z-50 pb-safe">
                         <button
                             onClick={() => setSidebarOpen(true)}
-                            className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground active:scale-95 transition-all"
+                            className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground active:scale-95 transition-all p-2"
                         >
-                            <Icon name="menu" className="w-6 h-6" />
-                            <span className="text-[10px] font-bold uppercase tracking-wider">Menu</span>
+                            <Icon name="menu" className="w-5 h-5" />
+                            <span className="text-[9px] font-bold uppercase tracking-wider">Menu</span>
                         </button>
                         <button
-                            onClick={onGoHome}
-                            className="flex flex-col items-center gap-1 text-primary hover:text-primary/80 active:scale-95 transition-all"
+                            onClick={onBrowseGroups}
+                            className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground active:scale-95 transition-all p-2"
                         >
-                            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                                <div className="w-5 h-5 rounded-md bg-primary" />
-                            </div>
+                            <Icon name="compass" className="w-5 h-5" />
+                            <span className="text-[9px] font-bold uppercase tracking-wider">Explore</span>
                         </button>
                         <button
                             onClick={() => setShowNotifications(true)}
-                            className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground active:scale-95 transition-all relative"
+                            className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground active:scale-95 transition-all p-2 relative"
                         >
-                            <Icon name="bell" className="w-6 h-6" />
+                            <Icon name="bell" className="w-5 h-5" />
                             {(user?.unreadCount || 0) > 0 && (
-                                <div className="absolute top-0 right-1 w-2.5 h-2.5 bg-secondary rounded-full border border-background" />
+                                <div className="absolute top-1 right-3 w-2 h-2 bg-secondary rounded-full border border-background" />
                             )}
-                            <span className="text-[10px] font-bold uppercase tracking-wider">Activity</span>
+                            <span className="text-[9px] font-bold uppercase tracking-wider">Activity</span>
+                        </button>
+                        <button
+                            onClick={onOpenSettings}
+                            className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground active:scale-95 transition-all p-2"
+                        >
+                            <Icon name="user" className="w-5 h-5" />
+                            <span className="text-[9px] font-bold uppercase tracking-wider">Profile</span>
                         </button>
                     </div>
                 )}
