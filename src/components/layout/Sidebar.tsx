@@ -3,6 +3,7 @@ import { Plus, Compass, LogOut, MessageSquare, X } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useAuth } from '../../context/AuthContext';
 import { Group } from '../../types';
+import { Logo } from '../common/Logo';
 
 interface SidebarProps {
     groups: Group[];
@@ -42,9 +43,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
             <aside className={`${drawerClasses} flex flex-col h-full border-r border-gray-200`}>
                 <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 z-10">
-                    <h2 className="text-xl font-bold text-indigo-600 tracking-tight flex items-center gap-2">
-                        SlowChat
-                    </h2>
+                    <Logo className="h-8 w-auto" />
                     {/* Close button on mobile */}
                     <div className="md:hidden">
                         <Button variant="ghost" size="icon" onClick={onClose}>

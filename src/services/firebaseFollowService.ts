@@ -158,6 +158,37 @@ export const cancelFollowRequest = async (toUserId: string): Promise<void> => {
 };
 
 /**
+ * Unfollow a user (Delete connection and chat)
+ */
+export const unfollowUser = async (otherUserId: string): Promise<void> => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) throw new Error("Auth required");
+
+    const batch = writeBatch(db);
+    const requestsRef = collection(db, 'follow_requests');
+
+    // 1. Find the accepted request (could be in either direction)
+    const q1 = query(requestsRef, where('fromId', '==', currentUser.uid), where('toId', '==', otherUserId), where('status', '==', 'accepted'));
+    const q2 = query(requestsRef, where('fromId', '==', otherUserId), where('toId', '==', currentUser.uid), where('status', '==', 'accepted'));
+
+    const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+    snap1.docs.forEach(d => batch.delete(d.ref));
+    snap2.docs.forEach(d => batch.delete(d.ref));
+
+    // 2. Delete the personal chat
+    const chatIds = [currentUser.uid, otherUserId].sort();
+    const chatId = chatIds.join('_');
+    const chatRef = doc(db, 'personal_chats', chatId);
+    batch.delete(chatRef);
+
+    // 3. Delete messages for this chat (Optional but cleaner)
+    // Deleting subcollections is hard in client SDK, but we can leave them orphaned or use cloud function.
+    // For now, we just break the link by deleting the parent chat doc.
+
+    await batch.commit();
+};
+
+/**
  * Get follow status between two users
  */
 export const getFollowStatus = async (toUserId: string): Promise<'none' | 'pending' | 'accepted'> => {

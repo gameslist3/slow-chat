@@ -9,6 +9,7 @@ import { NotificationCenter } from '../chat/NotificationCenter';
 import { AbstractBackground } from '../ui/AbstractBackground';
 import { FriendsList } from '../social/FriendsList';
 import { AISidebar } from './AISidebar';
+import { Logo } from '../common/Logo';
 
 interface AILayoutProps {
     children: React.ReactNode;
@@ -47,6 +48,8 @@ export const AILayout: React.FC<AILayoutProps> = ({
 }) => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
+    const [showBottomNav, setShowBottomNav] = useState(true);
+    const lastScrollY = React.useRef(0);
 
     // Prevent body scroll when sidebar is open on mobile
     useEffect(() => {
@@ -57,6 +60,16 @@ export const AILayout: React.FC<AILayoutProps> = ({
         }
         return () => { document.body.style.overflow = ''; };
     }, [sidebarOpen]);
+
+    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        const currentScrollY = e.currentTarget.scrollTop;
+        if (currentScrollY > lastScrollY.current && currentScrollY > 20) {
+            setShowBottomNav(false);
+        } else {
+            setShowBottomNav(true);
+        }
+        lastScrollY.current = currentScrollY;
+    };
 
     return (
         <div className="relative flex h-screen w-full overflow-hidden text-foreground font-sans selection:bg-primary/20">
@@ -125,42 +138,28 @@ export const AILayout: React.FC<AILayoutProps> = ({
                 {/* Main Content Workspace */}
                 <motion.div
                     layout
-                    className="flex-1 flex flex-col min-w-0 glass-panel rounded-none md:rounded-[2.5rem] relative overflow-hidden h-full z-0 p-2 md:p-0"
+                    className="flex-1 flex flex-col min-w-0 glass-panel rounded-none md:rounded-[2.5rem] relative overflow-hidden h-full z-0 p-0 md:p-0"
                 >
-                    {/* Header: Always rendered, conditionally styled */}
+                    {/* Header: Conditionally hidden on mobile when chat is active */}
                     <header className={`
                         flex items-center justify-between px-4 py-3 md:px-8 md:py-5 border-b border-border/5 bg-background/5 backdrop-blur-xl sticky top-0 z-40 h-[60px] md:h-[80px]
-                        ${activeChatId ? 'flex' : 'flex'} 
+                        ${activeChatId ? 'hidden md:flex' : 'flex'} 
                     `}>
                         <div className="flex items-center gap-4 md:gap-6">
-                            {/* Mobile: Back Button if Chat Open, else Logo Toggles Sidebar */}
-                            {activeChatId ? (
-                                <button
-                                    onClick={onGoHome}
-                                    className="md:hidden w-10 h-10 rounded-full bg-foreground/5 flex items-center justify-center text-foreground hover:bg-foreground/10 transition-all active:scale-95"
-                                >
-                                    <Icon name="arrowLeft" className="w-5 h-5" />
-                                </button>
-                            ) : (
-                                <button
-                                    className="md:hidden flex items-center gap-3 active:scale-95 transition-transform"
-                                    onClick={() => setSidebarOpen(true)}
-                                >
-                                    <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center text-white font-black text-xs">
-                                        SC
-                                    </div>
-                                    <span className="font-black text-lg tracking-tight text-foreground">{mobileTitle}</span>
-                                </button>
-                            )}
+                            {/* Standard Logo/Title on Mobile Home */}
+                            <button
+                                className="md:hidden flex items-center gap-3 active:scale-95 transition-transform"
+                                onClick={() => setSidebarOpen(true)}
+                            >
+                                <Logo className="h-8 w-auto" />
+                            </button>
 
                             {/* Desktop: Standard Logo/Title */}
                             <button
                                 onClick={onGoHome}
                                 className="hidden md:flex items-center gap-4 hover:opacity-70 transition-opacity active:scale-95"
                             >
-                                <div className="flex flex-col">
-                                    <h1 className="font-black text-xl tracking-tight truncate max-w-[240px] leading-none text-foreground">{mobileTitle}</h1>
-                                </div>
+                                <Logo className="h-10 w-auto" />
                             </button>
                         </div>
 
@@ -189,49 +188,67 @@ export const AILayout: React.FC<AILayoutProps> = ({
                         </div>
                     </header>
 
-                    <main className="flex-1 overflow-hidden flex flex-col relative w-full h-full mobile-scroll-fix">
+                    <main
+                        className={`flex-1 overflow-hidden flex flex-col relative w-full h-full mobile-scroll-fix ${activeChatId ? 'pt-[20%]' : ''}`}
+                        onScroll={handleScroll}
+                    >
                         {children}
                     </main>
 
-                    {/* Mobile Bottom Nav (Visible only when NO chat is open) */}
+                    {/* Mobile Bottom Nav */}
+                    <motion.div
+                        className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-background/80 backdrop-blur-xl border-t border-white/5 flex items-center justify-around px-2 z-50 pb-safe"
+                        initial={{ y: 0 }}
+                        animate={{ y: showBottomNav ? 0 : '100%' }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        {activeChatId ? (
+                            // Chat Bottom Bar with Back Button
+                            <button
+                                onClick={onGoHome}
+                                className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground active:scale-95 transition-all p-2 w-full"
+                            >
+                                <Icon name="arrowLeft" className="w-5 h-5" />
+                                <span className="text-[9px] font-bold uppercase tracking-wider">Back</span>
+                            </button>
+                        ) : (
+                            // Home Bottom Bar
+                            <>
+                                <button
+                                    onClick={() => setSidebarOpen(true)}
+                                    className="px-4 py-2 rounded-full bg-primary/10 text-primary font-bold text-xs uppercase tracking-wider hover:bg-primary/20 transition-all flex items-center gap-2"
+                                >
+                                    <Icon name="compass" className="w-4 h-4" />
+                                    Explore
+                                </button>
+                                <button
+                                    onClick={onBrowseGroups}
+                                    className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground active:scale-95 transition-all p-2"
+                                >
+                                    <Icon name="search" className="w-5 h-5" />
+                                    <span className="text-[9px] font-bold uppercase tracking-wider">Search</span>
+                                </button>
+                                <button
+                                    onClick={() => setShowNotifications(true)}
+                                    className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground active:scale-95 transition-all p-2 relative"
+                                >
+                                    <Icon name="bell" className="w-5 h-5" />
+                                    {(user?.unreadCount || 0) > 0 && (
+                                        <div className="absolute top-1 right-3 w-2 h-2 bg-secondary rounded-full border border-background" />
+                                    )}
+                                    <span className="text-[9px] font-bold uppercase tracking-wider">Activity</span>
+                                </button>
+                                <button
+                                    onClick={onOpenSettings}
+                                    className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground active:scale-95 transition-all p-2"
+                                >
+                                    <Icon name="user" className="w-5 h-5" />
+                                    <span className="text-[9px] font-bold uppercase tracking-wider">Profile</span>
+                                </button>
+                            </>
+                        )}
+                    </motion.div>
                 </motion.div>
-
-                {/* Bottom Navigation Bar for Mobile */}
-                {!activeChatId && (
-                    <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-background/80 backdrop-blur-xl border-t border-white/5 flex items-center justify-around px-2 z-50 pb-safe">
-                        <button
-                            onClick={() => setSidebarOpen(true)}
-                            className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground active:scale-95 transition-all p-2"
-                        >
-                            <Icon name="menu" className="w-5 h-5" />
-                            <span className="text-[9px] font-bold uppercase tracking-wider">Menu</span>
-                        </button>
-                        <button
-                            onClick={onBrowseGroups}
-                            className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground active:scale-95 transition-all p-2"
-                        >
-                            <Icon name="compass" className="w-5 h-5" />
-                            <span className="text-[9px] font-bold uppercase tracking-wider">Explore</span>
-                        </button>
-                        <button
-                            onClick={() => setShowNotifications(true)}
-                            className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground active:scale-95 transition-all p-2 relative"
-                        >
-                            <Icon name="bell" className="w-5 h-5" />
-                            {(user?.unreadCount || 0) > 0 && (
-                                <div className="absolute top-1 right-3 w-2 h-2 bg-secondary rounded-full border border-background" />
-                            )}
-                            <span className="text-[9px] font-bold uppercase tracking-wider">Activity</span>
-                        </button>
-                        <button
-                            onClick={onOpenSettings}
-                            className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground active:scale-95 transition-all p-2"
-                        >
-                            <Icon name="user" className="w-5 h-5" />
-                            <span className="text-[9px] font-bold uppercase tracking-wider">Profile</span>
-                        </button>
-                    </div>
-                )}
             </div>
         </div>
     );

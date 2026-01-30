@@ -147,7 +147,7 @@ const AuthenticatedSection = () => {
                             Hello, <span className="text-primary underline decoration-primary/20 decoration-8 underline-offset-8">{user?.username}</span>
                         </h1>
                         <p className="text-base md:text-lg font-medium text-gray-500 max-w-2xl leading-relaxed">
-                            Your clusters are synced and ready.
+                            joined groups
                         </p>
                     </div>
 

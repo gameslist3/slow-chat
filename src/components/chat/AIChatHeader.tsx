@@ -4,6 +4,7 @@ import { Settings, Info, Share2, MoreVertical, X, Calendar, Users, BellOff, LogO
 import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '../../context/ToastContext';
 import { toggleMuteGroup, leaveGroup, isMuted } from '../../services/firebaseGroupService';
+import { unfollowUser } from '../../services/firebaseFollowService';
 import { useAuth } from '../../context/AuthContext';
 
 interface AIChatHeaderProps {
@@ -30,6 +31,7 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
     const [showInfo, setShowInfo] = useState(false);
     const [showMore, setShowMore] = useState(false);
     const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+    const [showUnfollowConfirm, setShowUnfollowConfirm] = useState(false);
     const [muted, setMuted] = useState(false);
     const [copied, setCopied] = useState(false);
     const { toast } = useToast();
@@ -68,6 +70,23 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
             onLeave?.();
         } catch (error) {
             toast("Failed to terminate", "error");
+        }
+    };
+
+    const handleUnfollow = async () => {
+        if (!user || !isPersonal) return;
+        try {
+            // Find the other user ID from the chat ID (userId_otherId)
+            const ids = groupId.split('_');
+            const otherId = ids.find(id => id !== user.id);
+            if (otherId) {
+                await unfollowUser(otherId);
+                toast("Unfollowed user", "success");
+                onLeave?.();
+            }
+        } catch (error) {
+            console.error(error);
+            toast("Failed to unfollow", "error");
         }
     };
 
@@ -141,7 +160,14 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
                                     {muted ? <Bell className="w-4 h-4" /> : <BellOff className="w-4 h-4" />}
                                     {muted ? 'Unmute' : 'Mute'}
                                 </button>
-                                {!isPersonal && (
+                                {isPersonal ? (
+                                    <button
+                                        onClick={() => setShowUnfollowConfirm(true)}
+                                        className="w-full flex items-center gap-4 px-5 py-4 text-[10px] font-bold tracking-widest uppercase text-destructive hover:bg-destructive/10 rounded-2xl transition-all"
+                                    >
+                                        <LogOut className="w-4 h-4" /> Unfollow
+                                    </button>
+                                ) : (
                                     <button
                                         onClick={() => setShowLeaveConfirm(true)}
                                         className="w-full flex items-center gap-4 px-5 py-4 text-[10px] font-bold tracking-widest uppercase text-destructive hover:bg-destructive/10 rounded-2xl transition-all"
@@ -179,6 +205,31 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
                                 <div className="flex flex-col gap-4">
                                     <button onClick={handleLeave} className="btn-primary bg-destructive hover:bg-destructive shadow-destructive/20 h-16 rounded-3xl">LEAVE GROUP</button>
                                     <button onClick={() => setShowLeaveConfirm(false)} className="btn-ghost h-12 opacity-60">CANCEL</button>
+                                </div>
+                            </motion.div>
+                        </div>
+                    )}
+                    {showUnfollowConfirm && (
+                        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6">
+                            <motion.div
+                                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                                className="absolute inset-0 bg-black/90 backdrop-blur-xl"
+                                onClick={() => setShowUnfollowConfirm(false)}
+                            />
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9, y: 40 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.9, y: 40 }}
+                                className="glass-panel w-full max-w-sm relative z-10 p-10 text-center space-y-8 border-destructive/20 shadow-[0_0_100px_-20px_rgba(239,68,68,0.2)]"
+                            >
+                                <div className="text-6xl mx-auto w-20 h-20 bg-destructive/10 flex items-center justify-center rounded-[2rem] text-destructive border border-destructive/20 shadow-inner">⚠️</div>
+                                <div className="space-y-3">
+                                    <h3 className="text-xl font-bold tracking-tight text-foreground">Unfollow User?</h3>
+                                    <p className="text-muted-foreground text-sm font-medium leading-relaxed opacity-60">This will remove the user from your contacts and delete this private conversation.</p>
+                                </div>
+                                <div className="flex flex-col gap-4">
+                                    <button onClick={handleUnfollow} className="btn-primary bg-destructive hover:bg-destructive shadow-destructive/20 h-16 rounded-3xl">UNFOLLOW</button>
+                                    <button onClick={() => setShowUnfollowConfirm(false)} className="btn-ghost h-12 opacity-60">CANCEL</button>
                                 </div>
                             </motion.div>
                         </div>

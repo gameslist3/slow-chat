@@ -28,7 +28,7 @@ const GroupCard = ({ group, isJoined, onAction }: { group: Group, isJoined: bool
         <div className="mt-auto flex items-center justify-between pt-8 border-t border-border/5 relative z-10">
             <div className="flex items-center gap-2 text-[9px] font-protocol tracking-[0.2em] text-muted-foreground uppercase opacity-40">
                 <Icon name="users" className="w-3 h-3" />
-                <span>{group.members} Nexus_Links</span>
+                <span>{group.members}</span>
             </div>
             <motion.button
                 whileHover={{ scale: 1.05, y: -2 }}
@@ -39,7 +39,7 @@ const GroupCard = ({ group, isJoined, onAction }: { group: Group, isJoined: bool
                     ${isJoined ? 'bg-secondary/10 text-secondary border border-secondary/20' : 'btn-primary shadow-xl'}
                 `}
             >
-                {isJoined ? "Access" : "Initialize"}
+                {isJoined ? "open" : "join"}
             </motion.button>
         </div>
     </div>
@@ -71,10 +71,10 @@ export const GroupDiscovery = ({ onJoinGroup, onSelectGroup, joinedGroupIds }: a
                 <div className="text-center py-12 space-y-6">
                     <div className="inline-flex items-center gap-3 px-4 py-2 glass-card rounded-full font-protocol text-[9px] tracking-[0.4em] text-primary uppercase mb-4">
                         <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                        Network_Scan_Active
+                        Explore
                     </div>
-                    <h1 className="text-6xl font-black tracking-tighter uppercase italic leading-none">Global Nexus Cluster</h1>
-                    <p className="text-muted-foreground font-medium text-xl max-w-2xl mx-auto italic opacity-60">Authenticate your presence across public transmission hubs.</p>
+                    <h1 className="text-6xl font-black tracking-tighter uppercase italic leading-none">Explore</h1>
+                    <p className="text-muted-foreground font-medium text-xl max-w-2xl mx-auto italic opacity-60">Discover communities and new chats.</p>
                 </div>
 
                 <div className="relative max-w-3xl mx-auto group">
@@ -140,7 +140,7 @@ export const CreateGroup = ({ onGroupCreated }: { onGroupCreated: (id: string) =
                 <div className="w-1.5 h-16 bg-primary rounded-full shadow-[0_0_20px_rgba(var(--primary-rgb),0.5)]" />
                 <div className="flex flex-col">
                     <span className="font-protocol text-[10px] tracking-[0.5em] text-primary opacity-50 uppercase">Initialization_Module</span>
-                    <h2 className="text-5xl font-black tracking-tighter uppercase italic leading-none mt-2">New Protocol</h2>
+                    <h2 className="text-5xl font-black tracking-tighter uppercase italic leading-none mt-2">New Group</h2>
                 </div>
             </div>
 
@@ -168,7 +168,7 @@ export const CreateGroup = ({ onGroupCreated }: { onGroupCreated: (id: string) =
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                     <div className="space-y-4">
-                        <label className="font-protocol text-[9px] uppercase tracking-[0.4em] text-primary opacity-60 ml-2">Protocol_Name</label>
+                        <label className="font-protocol text-[9px] uppercase tracking-[0.4em] text-primary opacity-60 ml-2">group name</label>
                         <input
                             value={name}
                             onChange={e => setName(e.target.value)}

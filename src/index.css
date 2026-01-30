@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Alata&family=Albert+Sans:wght@300;400;500;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Capriola&family=Albert+Sans:wght@300;400;500;700;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,13 +6,28 @@
 
 @layer base {
   :root {
+
+    /* Hide scrollbar globally */
+    * {
+      -ms-overflow-style: none;
+      /* IE and Edge */
+      scrollbar-width: none;
+      /* Firefox */
+    }
+
+    *::-webkit-scrollbar {
+      display: none;
+    }
+
     /* --- Phase 10: System Protocol Aesthetic (Light) --- */
     --ui-background: 210 20% 98%;
     --ui-text: 224 71% 4%;
 
     --ui-primary: 222 51% 58%;
     /* #5B7DCB */
-    --primary-rgb: 91, 125, 203;
+    --primary-rgb: 91,
+    125,
+    203;
 
     --ui-secondary: 168 53% 58%;
     /* #5BCBAB */
@@ -23,7 +38,9 @@
     --ui-success: 142 71% 45%;
     --ui-warning: 38 92% 50%;
     --ui-danger: 0 84% 60%;
-    --destructive-rgb: 239, 68, 68;
+    --destructive-rgb: 239,
+    68,
+    68;
 
     --ui-border: 220 14% 85%;
     --ui-ring: 222 51% 58%;
@@ -32,8 +49,10 @@
     --ui-surface2: 210 20% 95%;
 
     /* Design System Tokens */
-    --font-protocol: 'Alata', sans-serif;
-    --font-body: 'Albert Sans', sans-serif;
+    --font-protocol: 'Capriola',
+    sans-serif;
+    --font-body: 'Albert Sans',
+    sans-serif;
 
     /* Glass V3 */
     --glass-surface: rgba(255, 255, 255, 0.7);
