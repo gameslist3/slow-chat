@@ -100,15 +100,7 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
                     {image}
                 </motion.div>
                 <div className="flex flex-col">
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={onLeave}
-                            className="md:hidden p-1 -ml-1 text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
-                        </button>
-                        <h2 className="text-base font-bold tracking-tight leading-none text-foreground/90">{title}</h2>
-                    </div>
+                    <h2 className="text-base font-bold tracking-tight leading-none text-foreground/90">{title}</h2>
                     <div className="flex items-center gap-3 mt-1.5 opacity-40">
                         <div className={`w-1.5 h-1.5 rounded-full ${muted ? 'bg-muted-foreground' : 'bg-secondary animate-pulse shadow-[0_0_8px_rgba(var(--ui-secondary),1)]'}`} />
                         <span className="text-[9px] font-bold tracking-widest uppercase">
@@ -142,6 +134,13 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
                         <div className="h-4 w-[1px] mx-1 bg-border/20 hidden sm:block" />
                     </>
                 )}
+
+                <button
+                    onClick={onLeave}
+                    className="md:hidden p-3 -mr-2 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
+                >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
+                </button>
 
                 <div className="relative">
                     <motion.button
