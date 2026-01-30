@@ -125,7 +125,7 @@ export const AISidebar: React.FC<AISidebarProps> = ({
                         {personalChats.length > 0 && (
                             <div className="space-y-3">
                                 <div className="py-2 flex items-center justify-between text-[10px] font-bold tracking-widest text-primary opacity-40 px-3 uppercase">
-                                    <span>Direct Messages</span>
+                                    <span>Messages</span>
                                     <span className="w-4 h-4 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-[8px]">{personalChats.length}</span>
                                 </div>
                                 {personalChats.map((chat) => {
@@ -222,12 +222,13 @@ export const AISidebar: React.FC<AISidebarProps> = ({
             <div className="mt-auto space-y-6 pt-6 border-t border-border/10">
                 <div className="flex items-center justify-between">
                     <motion.button
-                        whileHover={{ x: 8, color: 'var(--primary)' }}
+                        whileHover={{ scale: 1.1, backgroundColor: 'rgba(var(--primary-rgb), 0.1)' }}
+                        whileTap={{ scale: 0.9 }}
                         onClick={onBrowseGroups}
-                        className="flex items-center gap-4 px-2 h-10 text-[9px] font-bold tracking-widest text-muted-foreground transition-all uppercase"
+                        className="w-10 h-10 rounded-xl bg-foreground/5 flex items-center justify-center text-muted-foreground hover:text-primary transition-all"
+                        title="Shuffle Groups"
                     >
-                        <Icon name="compass" className="w-4 h-4 opacity-40" />
-                        <span>Discover</span>
+                        <Icon name="shuffle" className="w-5 h-5" />
                     </motion.button>
 
                     <motion.button

@@ -15,6 +15,18 @@ interface NotificationCenterProps {
 
 export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose, onSelectChat }) => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
+    const containerRef = React.useRef<HTMLDivElement>(null);
+
+    // Close on click outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+                onClose();
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [onClose]);
 
     useEffect(() => {
         const unsubscribe = subscribeToNotifications(setNotifications);
@@ -44,7 +56,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose,
     };
 
     return (
-        <div className="flex flex-col h-full glass-panel rounded-none md:rounded-[2.5rem] overflow-hidden shadow-2xl border-white/5">
+        <div ref={containerRef} className="flex flex-col h-full glass-panel rounded-none md:rounded-[2.5rem] overflow-hidden shadow-2xl border-white/5">
             <header className="px-6 md:px-8 py-5 md:py-6 border-b border-white/5 flex items-center justify-between bg-foreground/5 backdrop-blur-3xl">
                 <div className="flex flex-col">
                     <span className="text-[9px] font-bold tracking-widest text-primary opacity-60 mb-1 uppercase">Notifications</span>
@@ -64,7 +76,8 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose,
 
             <div className="flex-1 overflow-y-auto custom-scrollbar p-5 md:p-6 space-y-8">
                 <AnimatePresence mode="popLayout">
-                    {notifications.length === 0 ? (
+                    {/* Filter out read notifications */}
+                    {notifications.filter(n => !n.read).length === 0 ? (
                         <div className="py-20 text-center opacity-20 flex flex-col items-center gap-6">
                             <div className="text-7xl drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]">🔔</div>
                             <span className="text-[10px] font-bold tracking-widest uppercase">All caught up</span>

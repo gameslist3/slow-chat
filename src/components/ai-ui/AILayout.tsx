@@ -85,7 +85,7 @@ export const AILayout: React.FC<AILayoutProps> = ({
             </AnimatePresence>
 
             {/* --- Navigation Loop (HUD Container) --- */}
-            <div className="relative flex w-full h-full p-6 md:p-8 gap-6 md:gap-8">
+            <div className="relative flex w-full h-full p-0 md:p-8 gap-0 md:gap-8">
 
                 {/* Desktop HUD Sidebar (Slim & Minimal) */}
                 <aside className={`
@@ -110,23 +110,42 @@ export const AILayout: React.FC<AILayoutProps> = ({
                     />
                 </aside>
 
-                {/* Main Content Workspace (Floating Glass Island) */}
+                {/* Main Content Workspace */}
                 <motion.div
                     layout
-                    className="flex-1 flex flex-col min-w-0 glass-panel rounded-[2.5rem] relative overflow-hidden h-full z-0"
+                    className="flex-1 flex flex-col min-w-0 glass-panel rounded-none md:rounded-[2.5rem] relative overflow-hidden h-full z-0 p-2 md:p-0"
                 >
-                    {/* Integrated System Header */}
-                    <header className="flex items-center justify-between px-8 py-5 border-b border-border/5 bg-background/5 backdrop-blur-xl sticky top-0 z-40 h-[80px]">
-                        <div className="flex items-center gap-6">
-                            <button
-                                className="md:hidden w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-muted-foreground hover:text-primary transition-all active:scale-90"
-                                onClick={() => setSidebarOpen(true)}
-                            >
-                                <Icon name="menu" className="w-6 h-6" />
-                            </button>
+                    {/* Header (Desktop: Full, Mobile: Conditional based on chat state) */}
+                    <header className={`
+                        flex items-center justify-between px-4 py-3 md:px-8 md:py-5 border-b border-border/5 bg-background/5 backdrop-blur-xl sticky top-0 z-40 h-[60px] md:h-[80px]
+                        ${activeChatId ? 'flex md:flex' : 'hidden md:flex'}
+                    `}>
+                        <div className="flex items-center gap-4 md:gap-6">
+                            {/* Mobile: Back Button if Chat Open, else Logo Toggles Sidebar */}
+                            {activeChatId ? (
+                                <button
+                                    onClick={onGoHome}
+                                    className="md:hidden w-10 h-10 rounded-full bg-foreground/5 flex items-center justify-center text-foreground hover:bg-foreground/10 transition-all active:scale-95"
+                                >
+                                    <Icon name="arrowLeft" className="w-5 h-5" />
+                                </button>
+                            ) : (
+                                <button
+                                    className="md:hidden flex items-center gap-3 active:scale-95 transition-transform"
+                                    onClick={() => setSidebarOpen(true)}
+                                >
+                                    {/* Logo Placeholder or Simple Text */}
+                                    <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center text-white font-black text-xs">
+                                        SC
+                                    </div>
+                                    <span className="font-black text-lg tracking-tight text-foreground">{mobileTitle}</span>
+                                </button>
+                            )}
+
+                            {/* Desktop: Standard Logo/Title */}
                             <button
                                 onClick={onGoHome}
-                                className="flex items-center gap-4 hover:opacity-70 transition-opacity active:scale-95"
+                                className="hidden md:flex items-center gap-4 hover:opacity-70 transition-opacity active:scale-95"
                             >
                                 <div className="flex flex-col">
                                     <h1 className="font-black text-xl tracking-tight truncate max-w-[240px] leading-none text-foreground">{mobileTitle}</h1>
@@ -134,12 +153,12 @@ export const AILayout: React.FC<AILayoutProps> = ({
                             </button>
                         </div>
 
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 md:gap-4">
                             {/* HUD Notification Toggle */}
                             <button
                                 onClick={() => setShowNotifications(!showNotifications)}
                                 className={`
-                                    relative w-12 h-12 rounded-2xl flex items-center justify-center transition-all active:scale-95
+                                    relative w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center transition-all active:scale-95
                                     ${showNotifications ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-foreground/5 text-muted-foreground hover:bg-foreground/10'}
                                 `}
                                 title="Notifications"
@@ -149,7 +168,7 @@ export const AILayout: React.FC<AILayoutProps> = ({
                                     <motion.span
                                         initial={{ scale: 0 }}
                                         animate={{ scale: 1 }}
-                                        className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-secondary text-black text-[9px] font-black rounded-full flex items-center justify-center border-2 border-background"
+                                        className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 bg-secondary text-black text-[9px] font-black rounded-full flex items-center justify-center border-2 border-background"
                                     >
                                         {user?.unreadCount}
                                     </motion.span>
@@ -162,7 +181,40 @@ export const AILayout: React.FC<AILayoutProps> = ({
                     <main className="flex-1 overflow-hidden flex flex-col relative w-full h-full">
                         {children}
                     </main>
+
+                    {/* Mobile Bottom Nav (Visible only when NO chat is open) */}
                 </motion.div>
+
+                {/* Bottom Navigation Bar for Mobile (Home, Menu, etc.) */}
+                {!activeChatId && (
+                    <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-background/80 backdrop-blur-xl border-t border-white/5 flex items-center justify-around px-4 z-50">
+                        <button
+                            onClick={() => setSidebarOpen(true)}
+                            className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground active:scale-95 transition-all"
+                        >
+                            <Icon name="menu" className="w-6 h-6" />
+                            <span className="text-[10px] font-bold uppercase tracking-wider">Menu</span>
+                        </button>
+                        <button
+                            onClick={onGoHome}
+                            className="flex flex-col items-center gap-1 text-primary hover:text-primary/80 active:scale-95 transition-all"
+                        >
+                            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                <div className="w-5 h-5 rounded-md bg-primary" />
+                            </div>
+                        </button>
+                        <button
+                            onClick={() => setShowNotifications(true)}
+                            className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground active:scale-95 transition-all relative"
+                        >
+                            <Icon name="bell" className="w-6 h-6" />
+                            {(user?.unreadCount || 0) > 0 && (
+                                <div className="absolute top-0 right-1 w-2.5 h-2.5 bg-secondary rounded-full border border-background" />
+                            )}
+                            <span className="text-[10px] font-bold uppercase tracking-wider">Activity</span>
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );

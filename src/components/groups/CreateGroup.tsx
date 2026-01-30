@@ -40,8 +40,8 @@ export const CreateGroup: React.FC<CreateGroupProps> = ({ onGroupCreated }) => {
     };
 
     return (
-        <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100 max-w-2xl mx-auto animate-in slide-in-from-bottom-4 duration-300 w-full">
-            <div className="mb-8">
+        <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100 max-w-2xl mx-auto animate-in slide-in-from-bottom-4 duration-300 w-full max-h-[85vh] overflow-y-auto custom-scrollbar flex flex-col">
+            <div className="mb-6 flex-shrink-0">
                 <h2 className="text-2xl font-bold text-gray-900">Create New Group</h2>
                 <p className="text-gray-500">Start a thoughtful conversation.</p>
             </div>
