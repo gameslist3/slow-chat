@@ -20,10 +20,10 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
 
             {/* Avatar (Left) - Only if not continual */}
             {!isMe && (
-                <div className={`w-8 h-8 mr-2 flex-shrink-0 ${isContinual ? 'opacity-0' : ''}`}>
+                <div className={`w-10 h-10 mr-4 flex-shrink-0 ${isContinual ? 'opacity-0' : ''}`}>
                     {!isContinual && (
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center text-xs font-bold text-gray-700 ring-2 ring-white shadow-sm">
-                            {message.sender[0].toUpperCase()}
+                        <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-[10px] font-black text-primary border border-primary/20 shadow-sm uppercase tracking-tighter">
+                            {message.sender.slice(0, 2)}
                         </div>
                     )}
                 </div>
@@ -31,7 +31,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
 
             <div className={`max-w-[75%] md:max-w-[60%] flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
                 {!isMe && !isContinual && (
-                    <span className="text-[10px] uppercase font-bold text-gray-400 ml-1 mb-1 tracking-wider">{message.sender}</span>
+                    <span className="text-[9px] uppercase font-black text-primary/60 ml-1 mb-1.5 tracking-[0.2em]">{message.sender}</span>
                 )}
 
                 {/* Reply Context */}
@@ -45,25 +45,25 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                 )}
 
                 <div className={`
-          relative px-4 py-2.5 text-base shadow-sm break-words
-          ${isMe
-                        ? 'bg-indigo-600 text-white rounded-2xl rounded-tr-sm'
-                        : 'bg-white text-gray-900 border border-gray-100 rounded-2xl rounded-tl-sm'
+                    relative px-5 py-3.5 text-[15px] font-medium leading-relaxed tracking-tight
+                    ${isMe
+                        ? 'bg-primary text-white rounded-[1.5rem] rounded-tr-none shadow-lg shadow-primary/20'
+                        : 'glass-panel rounded-[1.5rem] rounded-tl-none border border-white/10'
                     }
-          ${message.type === 'image' || message.type === 'video' ? 'p-1 bg-transparent border-0 shadow-none' : ''}
-        `}>
+                    ${message.type === 'image' || message.type === 'video' ? 'p-1.5 bg-transparent border-0 shadow-none' : ''}
+                `}>
                     {message.type === 'text' && message.text}
 
-                    {(message.type === 'image' || message.type === 'gif') && (
-                        <img src={message.mediaUrl} alt="media" className="rounded-xl max-h-60 object-cover shadow-sm" />
+                    {message.type === 'image' && (
+                        <img src={message.media?.url} alt="media" className="rounded-xl max-h-60 object-cover shadow-sm" />
                     )}
 
                     {message.type === 'video' && (
-                        <video src={message.mediaUrl} controls className="rounded-xl max-h-60 bg-black" />
+                        <video src={message.media?.url} controls className="rounded-xl max-h-60 bg-black" />
                     )}
 
                     {message.type === 'text' && (
-                        <span className={`text-[10px] ml-2 opacity-60 inline-block align-bottom ${isMe ? 'text-indigo-100' : 'text-gray-400'}`}>
+                        <span className={`text-[9px] font-black ml-3 opacity-40 inline-block align-bottom uppercase tracking-widest ${isMe ? 'text-white' : 'text-muted-foreground'}`}>
                             {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                     )}

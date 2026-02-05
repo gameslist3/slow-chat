@@ -91,27 +91,29 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
     };
 
     return (
-        <header className="flex items-center justify-between px-8 py-5 border-b border-border/5 bg-background/5 backdrop-blur-xl sticky top-0 z-40 h-[80px]">
-            <div className="flex items-center gap-5">
-                <button
+        <header className="flex items-center justify-between px-6 py-6 md:px-12 md:py-8 border-b border-border/5 bg-background/5 backdrop-blur-xl sticky top-0 z-40 h-[100px] md:h-[120px]">
+            <div className="flex items-center gap-6">
+                <motion.button
+                    whileHover={{ x: -4 }}
+                    whileTap={{ scale: 0.9 }}
                     onClick={onLeave}
-                    className="md:hidden p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
+                    className="md:hidden p-2 -ml-2 text-muted-foreground hover:text-primary transition-all active:scale-95"
                 >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
-                </button>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-9-9 9-9" /></svg>
+                </motion.button>
+
                 <motion.div
                     whileHover={{ scale: 1.1, rotate: -5 }}
-                    className="text-4xl drop-shadow-[0_0_15px_rgba(var(--primary-rgb),0.2)] cursor-default"
+                    className="text-4xl drop-shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] cursor-default select-none"
                 >
                     {image}
                 </motion.div>
+
                 <div className="flex flex-col">
-                    <h2 className="text-base font-bold tracking-tight leading-none text-foreground/90">{title}</h2>
-                    <div className="flex items-center gap-3 mt-1.5 opacity-40">
-                        <div className={`w-1.5 h-1.5 rounded-full ${muted ? 'bg-muted-foreground' : 'bg-secondary animate-pulse shadow-[0_0_8px_rgba(var(--ui-secondary),1)]'}`} />
-                        <span className="text-[9px] font-bold tracking-widest uppercase">
-                            {isPersonal ? 'Private Chat' : `${memberCount} Members`} {muted && '• Muted'}
-                        </span>
+                    <h2 className="text-xl md:text-2xl font-black tracking-tight text-foreground truncate max-w-[180px] md:max-w-md leading-none mb-1">{title}</h2>
+                    <div className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">Connected Cluster</span>
                     </div>
                 </div>
             </div>

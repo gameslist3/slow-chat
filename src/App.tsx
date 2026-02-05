@@ -14,6 +14,8 @@ import { AILayout } from './components/ai-ui/AILayout';
 import { Icon } from './components/common/Icon';
 import { useInbox } from './hooks/useChat';
 
+import { LandingPage } from './components/landing/LandingPage';
+
 const AppContent = () => {
     const { isAuthenticated } = useAuth();
     const [showPolicy, setShowPolicy] = useState(false);
@@ -29,7 +31,7 @@ const AppContent = () => {
     };
 
     return (
-        <div className="min-h-screen bg-background font-sans">
+        <div className="min-h-screen bg-background font-sans selection:bg-primary/20">
             {showPolicy && <StoragePolicyModal onAccept={handleAcceptPolicy} />}
             {isAuthenticated ? <AuthenticatedSection /> : <AuthSection />}
         </div>
@@ -38,7 +40,7 @@ const AppContent = () => {
 
 const AuthSection = () => {
     const { user, completeLogin, loginWithData } = useAuth();
-    const [step, setStep] = useState('welcome');
+    const [step, setStep] = useState('landing');
 
     if (user && !user.username) {
         return (
@@ -52,13 +54,39 @@ const AuthSection = () => {
 
     if (!user?.username) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-background p-4">
-                <div className="w-full max-w-md animate-in fade-in zoom-in duration-500">
-                    {step === 'welcome' && <WelcomeScreen onSignIn={() => setStep('signin')} onSignUp={() => setStep('signup')} />}
-                    {step === 'signin' && <SignInScreen onBack={() => setStep('welcome')} onSuccess={loginWithData} onForgotPassword={() => setStep('forgot-password')} />}
-                    {step === 'signup' && <SignUpScreen onBack={() => setStep('welcome')} onSuccess={loginWithData} />}
-                    {step === 'forgot-password' && <ForgotPasswordScreen onBack={() => setStep('signin')} />}
-                </div>
+            <div className="min-h-screen w-full relative">
+                <AnimatePresence mode="wait">
+                    {step === 'landing' && (
+                        <motion.div
+                            key="landing"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            transition={{ duration: 0.5 }}
+                        >
+                            <LandingPage
+                                onGetStarted={() => setStep('signup')}
+                                onSignIn={() => setStep('signin')}
+                            />
+                        </motion.div>
+                    )}
+                    {(step === 'signin' || step === 'signup' || step === 'welcome' || step === 'forgot-password') && (
+                        <motion.div
+                            key="auth-form"
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="min-h-screen flex items-center justify-center bg-background/50 backdrop-blur-3xl p-4"
+                        >
+                            <div className="w-full max-w-md">
+                                {step === 'welcome' && <WelcomeScreen onSignIn={() => setStep('signin')} onSignUp={() => setStep('signup')} />}
+                                {step === 'signin' && <SignInScreen onBack={() => setStep('landing')} onSuccess={loginWithData} onForgotPassword={() => setStep('forgot-password')} />}
+                                {step === 'signup' && <SignUpScreen onBack={() => setStep('landing')} onSuccess={loginWithData} />}
+                                {step === 'forgot-password' && <ForgotPasswordScreen onBack={() => setStep('signin')} />}
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
         );
     }

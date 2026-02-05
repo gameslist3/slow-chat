@@ -206,7 +206,7 @@ export const AIComposer: React.FC<AIComposerProps> = ({
     };
 
     return (
-        <div className="p-3 md:p-8 md:pt-0 w-full max-w-6xl mx-auto">
+        <div className="p-4 md:p-10 md:pt-0 w-full max-w-5xl mx-auto">
             <AnimatePresence>
                 {replyingTo && (
                     <motion.div
@@ -294,43 +294,55 @@ export const AIComposer: React.FC<AIComposerProps> = ({
 
                 {/* --- Default Text UI --- */}
                 {recState === 'idle' && (
-                    <>
-                        <button onClick={() => fileInputRef.current?.click()} className="p-3 text-muted-foreground hover:text-primary transition-colors flex-shrink-0">
-                            <Icon name="paperclip" className="w-6 h-6" />
-                        </button>
-                        <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileChange} accept="image/*,video/*,application/pdf" />
-
-                        <textarea
-                            ref={textareaRef}
-                            value={text}
-                            onChange={(e) => setText(e.target.value)}
-                            onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendText(); } }}
-                            placeholder={cooldown > 0 ? `Wait ${cooldown}s...` : "Message..."}
-                            disabled={cooldown > 0}
-                            rows={1}
-                            className="flex-1 bg-transparent border-none outline-none resize-none py-3.5 max-h-[120px] text-[16px] placeholder:text-muted-foreground/40 leading-relaxed font-normal min-h-[50px]"
-                        />
-
-                        {text.trim() ? (
+                    <motion.div
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        className="glass-panel rounded-[2.5rem] p-4 flex flex-col gap-3 shadow-2xl border-white/10"
+                    >
+                        <div className="flex items-end gap-4">
                             <motion.button
+                                whileHover={{ scale: 1.1, rotate: 10 }}
                                 whileTap={{ scale: 0.9 }}
-                                onClick={handleSendText}
-                                disabled={cooldown > 0}
-                                className="p-3 bg-primary text-white rounded-full flex-shrink-0 shadow-lg mb-1 mr-1"
+                                onClick={() => fileInputRef.current?.click()}
+                                className="w-12 h-12 rounded-2xl bg-foreground/5 flex items-center justify-center text-muted-foreground hover:text-primary transition-all border border-transparent hover:border-primary/20"
                             >
-                                <Icon name="send" className="w-5 h-5 translate-x-0.5" />
+                                <Icon name="plus" className="w-6 h-6" />
                             </motion.button>
-                        ) : (
-                            <motion.button
-                                whileTap={{ scale: 0.9 }}
-                                onClick={startRecording}
-                                className="p-3 text-muted-foreground hover:text-primary transition-colors flex-shrink-0 mb-1"
-                            >
-                                <Icon name="mic" className="w-6 h-6" />
-                            </motion.button>
-                        )}
-                    </>
-                )}
+
+                            <div className="flex-1 relative">
+                                <textarea
+                                    ref={textareaRef}
+                                    value={text}
+                                    onChange={(e) => setText(e.target.value)}
+                                    onKeyDown={handleKeyDown}
+                                    placeholder="Message cluster..."
+                                    className="w-full bg-foreground/[0.03] border border-transparent focus:border-primary/20 rounded-2xl px-5 py-3.5 text-base font-medium placeholder:text-muted-foreground/30 outline-none transition-all resize-none min-h-[50px] max-h-[200px]"
+                                />
+                            </div>
+
+                            {text.trim() ? (
+                                <motion.button
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={handleSendText}
+                                    className="w-12 h-12 rounded-2xl bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20"
+                                >
+                                    <Icon name="send" className="w-5 h-5" />
+                                </motion.button>
+                            ) : (
+                                <motion.button
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={startRecording}
+                                    className="w-12 h-12 rounded-2xl bg-foreground/5 flex items-center justify-center text-primary transition-all border border-transparent hover:border-primary/20"
+                                >
+                                    <Icon name="mic" className="w-5 h-5" />
+                                </motion.button>
+                            )}
+                        </div>
+                    </motion.div>)}
             </motion.div>
         </div>
     );

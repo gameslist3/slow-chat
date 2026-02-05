@@ -59,213 +59,80 @@ export const AISidebar: React.FC<AISidebarProps> = ({
     };
 
     return (
-        <div className="flex flex-col h-full p-8 gap-8 relative z-10">
-            <div className="flex items-center justify-between px-2 pt-2">
-                <button
-                    onClick={onGoHome}
-                    className="flex flex-col text-left hover:opacity-70 transition-opacity active:scale-95"
-                >
-                    <Logo className="h-8 w-auto" />
-                </button>
-
-                <div className="flex items-center gap-2">
-                    <motion.button
-                        whileHover={{ scale: 1.1, backgroundColor: 'rgba(var(--primary-rgb), 0.1)' }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={onBrowseGroups}
-                        className="w-10 h-10 rounded-xl bg-foreground/5 flex items-center justify-center text-muted-foreground hover:text-primary transition-all"
-                        title="Explore"
-                    >
-                        <Icon name="compass" className="w-5 h-5" />
-                    </motion.button>
-
-                    <motion.button
-                        whileHover={{ scale: 1.1, backgroundColor: 'rgba(var(--primary-rgb), 0.1)' }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={onCreateGroup}
-                        className="w-10 h-10 rounded-xl bg-foreground/5 flex items-center justify-center text-muted-foreground hover:text-primary transition-all"
-                        title="Create Group"
-                    >
-                        <Icon name="plus" className="w-5 h-5" />
-                    </motion.button>
+        <aside className="h-full flex flex-col bg-background/20 relative z-30 w-full">
+            {/* Header */}
+            <div className="p-8 pb-4 flex items-center justify-between">
+                <button onClick={onGoHome} className="active:scale-95 transition-transform"><Logo className="h-9 w-auto" /></button>
+                <div className="flex gap-3">
+                    <button onClick={onBrowseGroups} className="w-10 h-10 glass-card rounded-xl flex items-center justify-center text-muted-foreground"><Icon name="compass" className="w-5 h-5" /></button>
+                    <button onClick={onCreateGroup} className="w-10 h-10 glass-card rounded-xl flex items-center justify-center text-muted-foreground"><Icon name="plus" className="w-5 h-5" /></button>
                 </div>
             </div>
 
-            <div className="flex gap-3">
-                <motion.button
-                    whileHover={{ scale: 1.02, y: -2 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setView('chats')}
-                    className={`flex-1 gap-3 h-14 flex items-center justify-center rounded-2xl transition-all text-xs font-bold tracking-widest uppercase ${view === 'chats' ? 'btn-primary' : 'bg-foreground/5 text-muted-foreground hover:bg-foreground/10'}`}
-                >
-                    <Icon name="message" className="w-4 h-4" />
-                    <span>Chats</span>
-                </motion.button>
+            {/* Search */}
+            <div className="px-6 py-4">
+                <div className="relative">
+                    <Icon name="search" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/30" />
+                    <input className="w-full h-12 bg-foreground/5 rounded-2xl pl-12 pr-4 text-sm font-medium outline-none border border-transparent focus:border-primary/20 transition-all" placeholder="Search clusters..." />
+                </div>
+            </div>
 
-                <motion.button
-                    whileHover={{ scale: 1.05, y: -2 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setView('friends')}
-                    className={`relative w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${view === 'friends' ? 'btn-secondary' : 'bg-foreground/5 text-muted-foreground hover:text-primary'}`}
-                    title="Friends"
-                >
+            {/* Tab Controller */}
+            <div className="px-6 flex gap-3 mb-6">
+                <button onClick={() => setView('chats')} className={`flex-1 h-12 rounded-2xl text-xs font-black uppercase tracking-widest ${view === 'chats' ? 'btn-primary' : 'bg-foreground/5 text-muted-foreground'}`}>Chats</button>
+                <button onClick={() => setView('friends')} className={`relative w-12 h-12 rounded-2xl flex items-center justify-center ${view === 'friends' ? 'btn-secondary' : 'bg-foreground/5 text-muted-foreground'}`}>
                     <Icon name="users" className="w-5 h-5" />
-                    {followReqs.length > 0 && (
-                        <motion.span
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className="absolute -top-1 -right-1 w-6 h-6 bg-primary text-white text-[10px] font-black rounded-full flex items-center justify-center border-4 border-background"
-                        >
-                            {followReqs.length}
-                        </motion.span>
-                    )}
-                </motion.button>
+                    {followReqs.length > 0 && <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-[9px] font-black rounded-full flex items-center justify-center border-2 border-background">{followReqs.length}</span>}
+                </button>
             </div>
 
-            {view === 'friends' ? (
-                <div className="flex-1 min-h-0 overflow-hidden">
+            {/* List Area */}
+            <div className="flex-1 min-h-0 overflow-y-auto px-6 space-y-8 pb-32 custom-scrollbar">
+                {view === 'friends' ? (
                     <FriendsList onSelectFriend={handleFriendSelect} />
-                </div>
-            ) : (
-                <div className="flex-1 flex flex-col min-h-0 gap-6">
-                    <div className="relative group">
-                        <Icon name="search" className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground opacity-30 transition-opacity group-focus-within:opacity-100" />
-                        <input className="glass-input pl-14 h-14 bg-foreground/5" placeholder="Search chats..." />
-                    </div>
-
-                    <div className="flex-1 overflow-y-auto space-y-8 custom-scrollbar pr-3">
-                        {/* Personal Chats */}
-                        {personalChats.length > 0 && (
-                            <div className="space-y-3">
-                                <div className="py-2 flex items-center justify-between text-[10px] font-bold tracking-widest text-primary opacity-40 px-3 uppercase">
-                                    <span>Messages</span>
-                                    <span className="w-4 h-4 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-[8px]">{personalChats.length}</span>
-                                </div>
-                                {personalChats.map((chat) => {
-                                    const unread = user ? (chat.unreadCounts[user.id] || 0) : 0;
-                                    const otherUserId = chat.userIds.find(id => id !== user?.id);
-                                    const otherUsername = chat.usernames?.[otherUserId || ''] || `User_${otherUserId?.slice(0, 4)}`;
-                                    const isActive = activeId === chat.id && isPersonalActive;
-
-                                    return (
-                                        <motion.button
-                                            key={chat.id}
-                                            onClick={() => onSelectPersonal(chat.id)}
-                                            whileHover={{ x: 6, backgroundColor: 'rgba(var(--primary-rgb), 0.05)' }}
-                                            whileTap={{ scale: 0.98 }}
-                                            className={`
-                                                w-full flex items-center gap-4 px-4 py-4 rounded-3xl transition-all group relative border
-                                                ${isActive ? 'bg-primary border-primary/30 text-white shadow-xl shadow-primary/20' : 'bg-transparent border-transparent text-muted-foreground hover:text-foreground'}
-                                            `}
-                                        >
-                                            <div className={`w-12 h-12 rounded-[1.25rem] flex items-center justify-center font-bold text-xs transition-all ${isActive ? 'bg-white/20 text-white' : 'bg-foreground/5 text-primary'}`}>
-                                                {otherUsername.slice(0, 2).toUpperCase()}
-                                            </div>
-                                            <div className="flex-1 text-left min-w-0">
-                                                <div className="flex items-center justify-between gap-2">
-                                                    <span className="truncate font-bold text-sm tracking-tight">{otherUsername}</span>
-                                                    {unread > 0 && (
-                                                        <motion.span
-                                                            initial={{ scale: 0 }} animate={{ scale: 1 }}
-                                                            className={`text-[10px] font-black px-2 py-0.5 rounded-full shadow-lg ${isActive ? 'bg-secondary text-black' : 'bg-primary text-white shadow-primary/20'}`}
-                                                        >
-                                                            {unread}
-                                                        </motion.span>
-                                                    )}
-                                                </div>
-                                                <p className={`text-[11px] truncate font-medium mt-0.5 ${isActive ? 'text-white/60' : 'opacity-40'}`}>{chat.lastMessage || 'Connected'}</p>
-                                            </div>
-                                        </motion.button>
-                                    );
-                                })}
-                            </div>
-                        )}
-
-                        {/* Groups */}
+                ) : (
+                    <>
                         <div className="space-y-3">
-                            <div className="py-2 flex items-center justify-between text-[10px] font-bold tracking-widest text-primary opacity-40 px-3 uppercase">
-                                <span>Groups</span>
-                                <span className="w-4 h-4 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-[8px]">{groups.length}</span>
-                            </div>
-                            {groups.map((group) => {
-                                const unread = user ? (group.unreadCounts?.[user.id] || 0) : 0;
-                                const isActive = activeId === group.id && !isPersonalActive;
+                            <div className="text-[10px] font-black text-primary/40 uppercase tracking-[0.2em] px-2 mb-2">Direct Syncs</div>
+                            {personalChats.map(chat => {
+                                const otherId = chat.userIds.find(id => id !== user?.id);
+                                const name = chat.usernames?.[otherId || ''] || 'User';
+                                const active = activeId === chat.id && isPersonalActive;
                                 return (
-                                    <motion.button
-                                        key={group.id}
-                                        onClick={() => onSelectGroup(group.id)}
-                                        whileHover={{ x: 6, backgroundColor: 'rgba(var(--primary-rgb), 0.05)' }}
-                                        whileTap={{ scale: 0.98 }}
-                                        className={`
-                                            w-full flex items-center gap-4 px-4 py-4 rounded-3xl transition-all group relative border
-                                            ${isActive ? 'bg-primary border-primary/30 text-white shadow-xl shadow-primary/20' : 'bg-transparent border-transparent text-muted-foreground hover:text-foreground'}
-                                        `}
-                                    >
-                                        <div className={`w-12 h-12 rounded-[1.25rem] flex items-center justify-center text-xl transition-all ${isActive ? 'bg-white/20' : 'bg-foreground/5'}`}>
-                                            {group.image}
-                                        </div>
-                                        <div className="flex-1 text-left min-w-0">
-                                            <div className="flex items-center justify-between gap-2">
-                                                <div className="flex items-center gap-2 truncate">
-                                                    <span className="truncate font-bold text-sm tracking-tight">{group.name}</span>
-                                                    {unread > 0 && (
-                                                        <motion.span
-                                                            initial={{ scale: 0 }} animate={{ scale: 1 }}
-                                                            className={`text-[9px] font-black px-2 py-0.5 rounded-full shadow-lg ${isActive ? 'bg-secondary text-black' : 'bg-primary text-white shadow-primary/20'}`}
-                                                        >
-                                                            {unread}
-                                                        </motion.span>
-                                                    )}
-                                                </div>
-                                                <div className="flex items-center gap-1 opacity-20 shrink-0">
-                                                    <Icon name="users" className="w-3 h-3" />
-                                                    <span className="text-[9px] font-black">{group.members}</span>
-                                                </div>
-                                            </div>
-                                            <p className={`text-[11px] truncate font-medium mt-0.5 ${isActive ? 'text-white/60' : 'opacity-40'}`}>{group.lastMessage || 'Active'}</p>
-                                        </div>
-                                    </motion.button>
+                                    <button key={chat.id} onClick={() => onSelectPersonal(chat.id)} className={`w-full p-4 rounded-3xl flex items-center gap-4 transition-all ${active ? 'bg-primary text-white shadow-xl shadow-primary/20' : 'hover:bg-foreground/5 text-muted-foreground hover:text-foreground'}`}>
+                                        <div className={`w-12 h-12 rounded-2xl flex-shrink-0 flex items-center justify-center font-black ${active ? 'bg-white/20' : 'bg-primary/10 text-primary'}`}>{name.slice(0, 2).toUpperCase()}</div>
+                                        <div className="text-left"><p className="font-bold text-sm tracking-tight">{name}</p><p className={`text-[10px] truncate opacity-50 ${active ? 'text-white' : ''}`}>{chat.lastMessage || 'Connected'}</p></div>
+                                    </button>
                                 );
                             })}
                         </div>
-                    </div>
-                </div>
-            )}
-
-            <div className="mt-auto space-y-6 pt-6 border-t border-border/10">
-                <div className="flex items-center justify-center">
-                    <span className="text-[10px] font-bold text-muted-foreground/30 uppercase tracking-[0.2em]">GAPES PROTOCOL V1.0</span>
-                </div>
-
-                <motion.div
-                    whileHover={{ y: -4 }}
-                    className="glass-card p-4 flex items-center gap-4 cursor-pointer group rounded-[1.75rem]"
-                    onClick={onOpenSettings}
-                >
-                    <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-white font-black shadow-lg shadow-primary/30 text-lg transition-transform group-hover:scale-110 shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)]">
-                        {user?.username?.[0].toUpperCase() || 'U'}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                        <p className="font-bold truncate text-sm tracking-tight text-foreground">{user?.username || 'User'}</p>
-                        <p className="text-[8px] font-bold text-primary truncate tracking-widest mt-0.5 opacity-60 uppercase">Online</p>
-                    </div>
-                    <div className="p-2 rounded-xl bg-foreground/10 group-hover:rotate-90 transition-transform">
-                        <Icon name="settings" className="w-4 h-4 text-primary" />
-                    </div>
-                </motion.div>
-
-                <div className="flex items-center justify-between px-2">
-                    <ThemeToggle />
-                    <motion.button
-                        whileHover={{ scale: 1.1, backgroundColor: 'rgba(239, 68, 68, 0.1)' }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={onLogout}
-                        className="w-12 h-12 flex items-center justify-center text-destructive rounded-2xl transition-all"
-                    >
-                        <Icon name="logout" className="w-5 h-5" />
-                    </motion.button>
-                </div>
+                        <div className="space-y-3">
+                            <div className="text-[10px] font-black text-primary/40 uppercase tracking-[0.2em] px-2 mb-2">Active Clusters</div>
+                            {groups.map(group => {
+                                const active = activeId === group.id && !isPersonalActive;
+                                return (
+                                    <button key={group.id} onClick={() => onSelectGroup(group.id)} className={`w-full p-4 rounded-3xl flex items-center gap-4 transition-all ${active ? 'bg-primary text-white shadow-xl shadow-primary/20' : 'hover:bg-foreground/5 text-muted-foreground hover:text-foreground'}`}>
+                                        <div className={`w-12 h-12 rounded-2xl flex-shrink-0 flex items-center justify-center text-xl ${active ? 'bg-white/20' : 'bg-foreground/5'}`}>{group.image}</div>
+                                        <div className="text-left"><p className="font-bold text-sm tracking-tight">{group.name}</p><p className={`text-[10px] truncate opacity-50 ${active ? 'text-white' : ''}`}>{group.lastMessage || 'Active'}</p></div>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </>
+                )}
             </div>
-        </div>
+
+            {/* User Footer */}
+            <div className="p-6 border-t border-border/5 bg-foreground/5 mt-auto">
+                <button onClick={onOpenSettings} className="w-full flex items-center gap-3 p-2 rounded-2xl hover:bg-foreground/10 transition-all">
+                    <div className="relative">
+                        <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center text-primary font-black text-xs">{user?.username?.[0].toUpperCase() || 'U'}</div>
+                        <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-green-500 border-2 border-background" />
+                    </div>
+                    <div className="text-left flex-1"><p className="text-sm font-black">{user?.username || 'Gapes User'}</p><p className="text-[9px] font-black text-primary/60 uppercase">Authenticated</p></div>
+                    <Icon name="settings" className="w-4 h-4 text-muted-foreground" />
+                </button>
+            </div>
+        </aside>
     );
 };
