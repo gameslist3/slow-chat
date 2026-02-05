@@ -268,7 +268,7 @@ const AuthenticatedSection = () => {
                 </div>
             )}
 
-            {view === 'settings' && <AccountSettings onBack={() => setView('home')} />}
+            {view === 'settings' && <AccountSettings onBack={() => setView('home')} logout={logout} />}
 
             {view === 'chat' && activeId && (
                 <ChatInterface

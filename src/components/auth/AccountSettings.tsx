@@ -5,7 +5,7 @@ import { useToast } from '../../context/ToastContext';
 import { Icon } from '../common/Icon';
 import { generateAnonymousName } from '../../services/firebaseAuthService';
 import { motion, AnimatePresence } from 'framer-motion';
-export const AccountSettings = ({ onBack }: { onBack: () => void }) => {
+export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout: () => void }) => {
     const { user, updateUsername, resetPassword } = useAuth();
     const { toast } = useToast();
 
@@ -168,30 +168,30 @@ export const AccountSettings = ({ onBack }: { onBack: () => void }) => {
                         </div>
                     </div>
 
-                    {/* Support Section */}
-                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-200 pb-12">
-                        <h2 className="text-sm font-bold text-gray-500 uppercase tracking-widest pl-2">Support</h2>
+                    {/* Support & Session Section */}
+                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-200 pb-20">
+                        <h2 className="text-sm font-bold text-gray-500 uppercase tracking-widest pl-2">Session</h2>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <motion.button
+                                whileHover={{ y: -4 }}
+                                onClick={logout}
+                                className="glass-panel p-6 flex items-center gap-4 rounded-3xl transition-all group hover:bg-destructive/10 border-destructive/10"
+                            >
+                                <div className="w-10 h-10 bg-destructive/10 rounded-full flex items-center justify-center text-destructive group-hover:scale-110 transition-transform">
+                                    <Icon name="logout" className="w-5 h-5" />
+                                </div>
+                                <span className="text-sm font-bold text-destructive">Terminate Session</span>
+                            </motion.button>
                             <motion.a
                                 whileHover={{ y: -4 }}
-                                href="mailto:support@slowchat.com"
+                                href="mailto:support@gapes.com"
                                 className="glass-panel p-6 flex items-center gap-4 rounded-3xl transition-all group hover:bg-white/5"
                             >
                                 <div className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-gray-400 group-hover:text-primary transition-colors">
                                     <Icon name="mail" className="w-5 h-5" />
                                 </div>
-                                <span className="text-sm font-bold text-gray-400 group-hover:text-white transition-colors">Email Support</span>
-                            </motion.a>
-                            <motion.a
-                                whileHover={{ y: -4 }}
-                                href="tel:+18005550123"
-                                className="glass-panel p-6 flex items-center gap-4 rounded-3xl transition-all group hover:bg-white/5"
-                            >
-                                <div className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-gray-400 group-hover:text-primary transition-colors">
-                                    <Icon name="phone" className="w-5 h-5" />
-                                </div>
-                                <span className="text-sm font-bold text-gray-400 group-hover:text-white transition-colors">Voice Support</span>
+                                <span className="text-sm font-bold text-gray-400 group-hover:text-white transition-colors">Support</span>
                             </motion.a>
                         </div>
                     </div>

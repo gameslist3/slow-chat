@@ -70,7 +70,7 @@ export const AILayout: React.FC<AILayoutProps> = ({
     };
 
     return (
-        <div className="relative flex h-screen w-full overflow-hidden text-foreground font-sans selection:bg-primary/20">
+        <div className="relative h-screen w-full overflow-hidden text-foreground font-sans selection:bg-primary/20 flex flex-col">
             <AbstractBackground />
 
             {/* --- Notifications HUD --- */}
@@ -102,11 +102,11 @@ export const AILayout: React.FC<AILayoutProps> = ({
                 )}
             </AnimatePresence>
 
-            <div className="relative flex w-full h-full p-0 md:p-8 gap-0 md:gap-8">
+            <div className="relative flex-1 flex w-full h-full p-0 md:p-8 gap-0 md:gap-8 overflow-hidden">
                 {/* HUD Sidebar */}
                 <aside className={`
-                    fixed inset-y-0 left-0 z-[100] w-[320px] glass-panel transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] md:relative md:inset-auto md:flex md:w-80 md:rounded-[2.5rem] flex-col shrink-0 overflow-hidden
-                    ${sidebarOpen ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 md:translate-x-0 md:opacity-100 invincible md:visible pointer-events-none md:pointer-events-auto'}
+                    fixed inset-y-0 left-0 z-[100] w-[320px] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] md:relative md:inset-auto md:flex md:w-80 md:rounded-[2.5rem] flex-col shrink-0 overflow-hidden glass-panel
+                    ${sidebarOpen ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 md:translate-x-0 md:opacity-100 md:visible pointer-events-none md:pointer-events-auto'}
                 `}>
                     <AISidebar
                         groups={userGroups}
@@ -128,17 +128,17 @@ export const AILayout: React.FC<AILayoutProps> = ({
 
                 <motion.div
                     layout
-                    className="flex-1 flex flex-col min-w-0 glass-panel rounded-none md:rounded-[2.5rem] relative overflow-hidden h-full z-0"
+                    className="flex-1 flex flex-col min-w-0 glass-panel rounded-none md:rounded-[2.5rem] relative h-full overflow-hidden z-0"
                 >
                     <header className={`
                         flex items-center justify-between px-6 py-4 md:px-8 md:py-6 border-b border-border/5 bg-background/5 backdrop-blur-xl sticky top-0 z-40 h-[70px] md:h-[90px]
                         ${activeChatId ? 'hidden md:flex' : 'flex'}
                     `}>
                         <div className="flex items-center gap-4">
-                            <button className="md:hidden" onClick={() => setSidebarOpen(true)}>
+                            <button className="md:hidden active:scale-95 transition-transform" onClick={() => setSidebarOpen(true)}>
                                 <Logo className="h-8 w-auto" />
                             </button>
-                            <button onClick={onGoHome} className="hidden md:block">
+                            <button onClick={onGoHome} className="hidden md:block active:scale-95 transition-transform">
                                 <Logo className="h-10 w-auto" />
                             </button>
                         </div>
@@ -146,7 +146,7 @@ export const AILayout: React.FC<AILayoutProps> = ({
                         <div className="flex items-center gap-4">
                             <button
                                 onClick={() => setShowNotifications(!showNotifications)}
-                                className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${showNotifications ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-foreground/5 text-muted-foreground'}`}
+                                className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${showNotifications ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-foreground/5 text-muted-foreground hover:bg-foreground/10'}`}
                             >
                                 <Icon name="bell" className="w-5 h-5" />
                             </button>
@@ -155,7 +155,7 @@ export const AILayout: React.FC<AILayoutProps> = ({
                     </header>
 
                     <main
-                        className={`flex-1 overflow-y-auto flex flex-col relative w-full h-full mobile-scroll-fix ${activeChatId ? 'pt-[0%] md:pt-0' : 'md:p-0'}`}
+                        className={`flex-1 overflow-hidden flex flex-col relative w-full h-full mobile-scroll-fix ${activeChatId ? 'pt-0' : 'md:p-0'}`}
                         onScroll={handleScroll}
                     >
                         {children}
@@ -165,16 +165,16 @@ export const AILayout: React.FC<AILayoutProps> = ({
                     <AnimatePresence>
                         {!activeChatId && (
                             <motion.div
-                                className="md:hidden fixed bottom-6 left-6 right-6 h-16 glass-panel rounded-2xl flex items-center justify-around z-50 shadow-[0_20px_40px_rgba(0,0,0,0.3)] border-white/10"
+                                className="md:hidden fixed bottom-10 left-6 right-6 h-16 glass-panel rounded-2xl flex items-center justify-around z-50 shadow-[0_20px_40px_rgba(0,0,0,0.3)] border-white/10"
                                 initial={{ y: 100 }}
                                 animate={{ y: showBottomNav ? 0 : 100 }}
                                 exit={{ y: 100 }}
                             >
-                                <button onClick={() => setSidebarOpen(true)} className="w-12 h-12 flex items-center justify-center text-muted-foreground"><Icon name="menu" /></button>
-                                <button onClick={onBrowseGroups} className="w-12 h-12 flex items-center justify-center text-muted-foreground"><Icon name="search" /></button>
+                                <button onClick={() => setSidebarOpen(true)} className="w-12 h-12 flex items-center justify-center text-muted-foreground active:text-primary transition-colors"><Icon name="menu" /></button>
+                                <button onClick={onBrowseGroups} className="w-12 h-12 flex items-center justify-center text-muted-foreground active:text-primary transition-colors"><Icon name="search" /></button>
                                 <button onClick={onGoHome} className="w-12 h-12 flex items-center justify-center text-primary"><Icon name="zap" /></button>
-                                <button onClick={onFollowRequests} className="w-12 h-12 flex items-center justify-center text-muted-foreground"><Icon name="users" /></button>
-                                <button onClick={onOpenSettings} className="w-12 h-12 flex items-center justify-center text-muted-foreground"><Icon name="user" /></button>
+                                <button onClick={onFollowRequests} className="w-12 h-12 flex items-center justify-center text-muted-foreground active:text-primary transition-colors"><Icon name="users" /></button>
+                                <button onClick={onOpenSettings} className="w-12 h-12 flex items-center justify-center text-muted-foreground active:text-primary transition-colors"><Icon name="user" /></button>
                             </motion.div>
                         )}
                     </AnimatePresence>

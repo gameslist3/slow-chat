@@ -65,7 +65,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     };
 
     return (
-        <div className="flex flex-col h-full bg-background relative overflow-hidden">
+        <div className="flex flex-col h-full w-full bg-background relative overflow-hidden">
             <AIChatHeader
                 groupId={chatId}
                 isPersonal={isPersonal}

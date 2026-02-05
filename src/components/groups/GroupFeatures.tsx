@@ -60,10 +60,12 @@ export const GroupDiscovery = ({ onJoinGroup, onSelectGroup, joinedGroupIds }: a
         })();
     }, []);
 
-    const filtered = groups.filter(g =>
-        g.name.toLowerCase().includes(filter.toLowerCase()) ||
-        g.category.toLowerCase().includes(filter.toLowerCase())
-    );
+    const filtered = groups.filter(g => {
+        const matchesQuery = g.name.toLowerCase().includes(filter.toLowerCase()) ||
+            g.category.toLowerCase().includes(filter.toLowerCase());
+        const isAlreadyJoined = joinedGroupIds.includes(g.id);
+        return matchesQuery && !isAlreadyJoined;
+    });
 
     return (
         <div className="h-full overflow-y-auto w-full p-6 md:p-12 custom-scrollbar text-foreground">
@@ -132,83 +134,69 @@ export const CreateGroup = ({ onGroupCreated }: { onGroupCreated: (id: string) =
     };
 
     return (
-        <div className="max-w-3xl mx-auto glass-panel p-12 rounded-[3.5rem] shadow-2xl animate-in fade-in zoom-in-95 duration-1000 relative overflow-hidden">
-            {/* Design detail */}
-            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
-
-            <div className="flex items-center gap-6 mb-16">
-                <div className="w-1.5 h-16 bg-primary rounded-full shadow-[0_0_20px_rgba(var(--primary-rgb),0.5)]" />
+        <div className="w-full max-w-xl mx-auto glass-panel p-8 md:p-12 rounded-[2.5rem] shadow-2xl relative overflow-hidden border-white/10">
+            <div className="flex items-center gap-6 mb-10">
+                <div className="w-1 h-12 bg-primary rounded-full shadow-[0_0_20px_rgba(var(--primary-rgb),0.5)]" />
                 <div className="flex flex-col">
-                    <span className="font-protocol text-[10px] tracking-[0.5em] text-primary opacity-50 uppercase">Initialization_Module</span>
-                    <h2 className="text-5xl font-black tracking-tighter uppercase italic leading-none mt-2">New Group</h2>
+                    <span className="font-protocol text-[9px] tracking-[0.4em] text-primary opacity-50 uppercase">Sync_Init</span>
+                    <h2 className="text-3xl font-black tracking-tighter uppercase italic leading-none mt-1">New Protocol</h2>
                 </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-12">
+            <form onSubmit={handleSubmit} className="space-y-8">
+                <div className="grid grid-cols-6 gap-3 p-4 glass-card bg-foreground/5 rounded-2xl">
+                    {ICONS.slice(0, 12).map(i => (
+                        <motion.button
+                            key={i}
+                            type="button"
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => setIcon(i)}
+                            className={`
+                                aspect-square rounded-xl flex items-center justify-center text-2xl transition-all
+                                ${icon === i ? 'bg-primary text-white shadow-lg' : 'hover:bg-foreground/5'}
+                            `}
+                        >
+                            {i}
+                        </motion.button>
+                    ))}
+                </div>
+
                 <div className="space-y-6">
-                    <label className="font-protocol text-[9px] uppercase tracking-[0.4em] text-primary opacity-60 ml-2">Identify Nexus Avatar</label>
-                    <div className="grid grid-cols-6 sm:grid-cols-9 gap-4 p-6 glass-card bg-foreground/5 rounded-[2.5rem]">
-                        {ICONS.map(i => (
-                            <motion.button
-                                key={i}
+                    <div className="relative group">
+                        <Icon name="message" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-primary opacity-30" />
+                        <input
+                            value={name}
+                            onChange={e => setName(e.target.value)}
+                            placeholder="Designate Nexus Name"
+                            className="w-full bg-foreground/5 h-14 pl-12 pr-4 rounded-xl text-sm font-bold outline-none border border-transparent focus:border-primary/20 transition-all"
+                        />
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                        {CATEGORIES.slice(0, 5).map(c => (
+                            <button
                                 type="button"
-                                whileHover={{ scale: 1.15, rotate: 5 }}
-                                whileTap={{ scale: 0.9 }}
-                                onClick={() => setIcon(i)}
+                                key={c}
+                                onClick={() => setCat(c)}
                                 className={`
-                                    aspect-square rounded-2xl flex items-center justify-center text-3xl transition-all duration-500
-                                    ${icon === i ? 'bg-primary text-white scale-110 shadow-xl shadow-primary/30 z-10' : 'bg-foreground/5 hover:bg-foreground/10'}
+                                    px-4 py-1.5 rounded-full text-[9px] font-protocol tracking-widest border transition-all uppercase
+                                    ${cat === c ? 'bg-primary border-primary text-white' : 'glass-card bg-foreground/5 text-muted-foreground hover:border-primary/20'}
                                 `}
                             >
-                                {i}
-                            </motion.button>
+                                {c}
+                            </button>
                         ))}
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                    <div className="space-y-4">
-                        <label className="font-protocol text-[9px] uppercase tracking-[0.4em] text-primary opacity-60 ml-2">group name</label>
-                        <input
-                            value={name}
-                            onChange={e => setName(e.target.value)}
-                            placeholder="Designate Nexus..."
-                            className="glass-input bg-foreground/5 font-bold h-16 text-lg"
-                        />
-                    </div>
-                    <div className="space-y-6">
-                        <label className="font-protocol text-[9px] uppercase tracking-[0.4em] text-primary opacity-60 ml-2">Sync_Classification</label>
-                        <div className="flex flex-wrap gap-2 mb-4">
-                            {CATEGORIES.slice(0, 4).map(c => (
-                                <button
-                                    type="button"
-                                    key={c}
-                                    onClick={() => setCat(c)}
-                                    className={`
-                                        px-4 py-1.5 rounded-full text-[9px] font-protocol tracking-widest border transition-all uppercase
-                                        ${cat === c ? 'bg-primary border-primary text-white shadow-lg shadow-primary/20' : 'glass-card bg-foreground/5 border-border/10 text-muted-foreground hover:border-primary/40'}
-                                    `}
-                                >
-                                    {c}
-                                </button>
-                            ))}
-                        </div>
-                        <input
-                            value={cat}
-                            onChange={e => setCat(e.target.value)}
-                            placeholder="Custom Cluster..."
-                            className="glass-input bg-foreground/5 font-bold h-16 text-lg"
-                        />
-                    </div>
-                </div>
-
                 <motion.button
-                    whileHover={{ scale: 1.02, y: -4 }}
+                    whileHover={{ y: -2 }}
                     whileTap={{ scale: 0.98 }}
-                    className="btn-primary w-full h-20 text-base font-protocol tracking-[0.44em] shadow-2xl disabled:opacity-30 disabled:grayscale transition-all rounded-[2rem]"
+                    className="btn-primary w-full h-16 text-xs font-protocol tracking-[0.4em] shadow-xl disabled:opacity-30 rounded-2xl uppercase"
                     disabled={!name || !cat || loading}
                 >
-                    {loading ? <Icon name="rotate" className="w-6 h-6 animate-spin" /> : "Initiate Nexus Protocol"}
+                    {loading ? <Icon name="rotate" className="w-5 h-5 animate-spin" /> : "Initiate Sync"}
                 </motion.button>
             </form>
         </div>
