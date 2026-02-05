@@ -43,90 +43,91 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
             <AbstractBackground />
 
             {/* --- Navbar --- */}
-            <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-8 md:px-12">
+            <nav className="fixed top-0 left-0 right-0 z-[100] px-4 py-6 md:px-12 backdrop-blur-md bg-background/20 border-b border-white/5">
                 <div className="max-w-7xl mx-auto flex items-center justify-between">
-                    <Logo className="h-10 w-auto" />
-                    <div className="flex items-center gap-4">
+                    <Logo className="h-8 md:h-10 w-auto flex-shrink-0" />
+                    <div className="flex items-center gap-2 md:gap-4">
                         <button
                             onClick={onSignIn}
-                            className="bg-foreground text-background px-6 h-11 rounded-full text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-xl active:scale-95"
+                            className="bg-foreground text-background px-4 md:px-6 h-9 md:h-11 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all active:scale-95"
                         >
-                            Sign In
+                            Log In
                         </button>
                         <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={onGetStarted}
-                            className="btn-primary rounded-full px-6 h-11 text-[10px] font-black uppercase tracking-widest shadow-xl shadow-primary/30"
+                            className="btn-primary rounded-full px-4 md:px-6 h-9 md:h-11 text-[9px] md:text-[10px] font-black uppercase tracking-widest shadow-xl shadow-primary/30"
                         >
-                            Create Account
+                            Sign Up
                         </motion.button>
                     </div>
                 </div>
             </nav>
 
             {/* --- Hero Section --- */}
-            <section className="relative min-h-screen flex flex-col items-center justify-center pt-24 px-6 overflow-hidden">
+            <section className="relative min-h-[100dvh] flex flex-col items-center justify-center pt-20 px-6 overflow-hidden">
                 <motion.div
                     style={{ scale, opacity }}
-                    className="max-w-4xl mx-auto text-center space-y-10 z-10"
+                    className="max-w-6xl mx-auto text-center space-y-8 md:space-y-12 z-10"
                 >
                     <motion.div
                         initial={{ opacity: 0, scale: 0.9, filter: 'blur(10px)' }}
                         animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
                         transition={{ duration: 1, ease: "easeOut" }}
+                        className="relative"
                     >
-                        <h1 className="text-6xl md:text-8xl lg:text-[10rem] font-black tracking-tighter text-foreground leading-[0.85] mb-8">
+                        <h1 className="text-[clamp(3rem,14vw,10rem)] font-black tracking-[-0.04em] text-foreground leading-[0.9] mb-6 md:mb-10 text-balance">
                             REAL <br />
-                            <span className="text-primary italic">CONVERSATIONS</span> <br />
+                            <span className="text-primary italic tracking-tight">CONVERSATIONS</span> <br />
                             REAL PEOPLE.
                         </h1>
-                        <p className="text-base md:text-xl font-medium text-muted-foreground/60 max-w-2xl mx-auto leading-relaxed">
-                            Gapes is a premium social experience designed for intention, clarity, and deep human connection in the age of noise.
+                        <p className="text-sm md:text-xl font-medium text-muted-foreground/60 max-w-2xl mx-auto leading-relaxed px-4 text-balance">
+                            Gapes is a premium social experience designed for intention, clarity, and deep human connection.
                         </p>
                     </motion.div>
 
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-6 pt-2">
                         <motion.button
                             whileHover={{ scale: 1.02, y: -2 }}
                             whileTap={{ scale: 0.98 }}
                             onClick={onSignIn}
-                            className="bg-foreground text-background w-full sm:w-56 h-16 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] shadow-2xl"
+                            className="bg-foreground text-background w-full sm:w-48 h-14 md:h-16 rounded-2xl text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em] shadow-2xl"
                         >
-                            Sign in
+                            Log in
                         </motion.button>
                         <motion.button
                             whileHover={{ scale: 1.02, y: -2 }}
                             whileTap={{ scale: 0.98 }}
                             onClick={onGetStarted}
-                            className="btn-primary w-full sm:w-56 h-16 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] shadow-2xl shadow-primary/20"
+                            className="btn-primary w-full sm:w-48 h-14 md:h-16 rounded-2xl text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em] shadow-2xl shadow-primary/20"
                         >
-                            Create account
+                            Get Started
                         </motion.button>
                     </div>
                 </motion.div>
 
                 {/* --- Floating UI Preview --- */}
                 <motion.div
-                    initial={{ y: 100, opacity: 0 }}
+                    initial={{ y: 80, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.5, duration: 1.2, ease: "easeOut" }}
-                    className="relative w-full max-w-5xl mt-24 px-4 md:px-0"
+                    className="relative w-full max-w-5xl mt-16 md:mt-24 px-4 md:px-0"
                 >
-                    <div className="glass-panel aspect-video rounded-[3rem] overflow-hidden shadow-[0_40px_100px_-20px_rgba(0,0,0,0.4)] border-white/10 group">
+                    <div className="glass-panel aspect-video rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-[0_40px_100px_-20px_rgba(0,0,0,0.4)] border-white/10 group">
                         <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent pointer-events-none" />
                         {/* Mock Chat UI */}
-                        <div className="p-8 h-full flex gap-8 opacity-40 group-hover:opacity-100 transition-opacity duration-1000">
-                            <div className="w-64 h-full glass-card rounded-[2rem] hidden md:block" />
-                            <div className="flex-1 flex flex-col gap-6">
-                                <div className="h-20 glass-card rounded-[2rem] flex items-center px-8">
-                                    <div className="w-10 h-10 rounded-full bg-primary/20" />
-                                    <div className="ml-4 h-4 w-32 bg-foreground/10 rounded-full" />
+                        <div className="p-4 md:p-8 h-full flex gap-4 md:gap-8 opacity-40 group-hover:opacity-100 transition-opacity duration-1000">
+                            <div className="w-48 md:w-64 h-full glass-card rounded-[1.5rem] md:rounded-[2rem] hidden sm:block" />
+                            <div className="flex-1 flex flex-col gap-4 md:gap-6">
+                                <div className="h-14 md:h-20 glass-card rounded-[1.5rem] md:rounded-[2rem] flex items-center px-4 md:px-8">
+                                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary/20" />
+                                    <div className="ml-3 md:ml-4 h-3 md:h-4 w-24 md:w-32 bg-foreground/10 rounded-full" />
                                 </div>
-                                <div className="flex-1 space-y-6">
-                                    <div className="h-12 w-48 bg-primary/20 rounded-2xl" />
-                                    <div className="h-12 w-64 bg-foreground/5 rounded-2xl self-end ml-auto" />
-                                    <div className="h-12 w-40 bg-primary/20 rounded-2xl" />
+                                <div className="flex-1 space-y-4 md:space-y-6">
+                                    <div className="h-10 md:h-12 w-32 md:w-48 bg-primary/20 rounded-xl md:rounded-2xl" />
+                                    <div className="h-10 md:h-12 w-48 md:w-64 bg-foreground/5 rounded-xl md:rounded-2xl self-end ml-auto" />
+                                    <div className="h-10 md:h-12 w-24 md:w-40 bg-primary/20 rounded-xl md:rounded-2xl" />
                                 </div>
                             </div>
                         </div>

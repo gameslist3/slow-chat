@@ -78,23 +78,23 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             />
 
             {/* Message List Area - Fixed Scrollable Body */}
-            <div className="flex-1 min-h-0 relative overflow-hidden flex flex-col w-full h-full">
+            <div className="flex-1 min-h-0 relative overflow-hidden flex flex-col w-full h-full bg-surface/5">
                 {loading && messages.length === 0 ? (
-                    <div className="max-w-4xl mx-auto py-10 space-y-8 px-4 flex-1 w-full">
-                        {[1, 2, 3].map(i => (
-                            <div key={i} className="flex gap-4 animate-pulse">
-                                <div className="w-12 h-12 bg-muted rounded-2xl shrink-0" />
-                                <div className="flex-1 space-y-3">
-                                    <div className="h-3 bg-muted rounded w-1/4" />
-                                    <div className="h-12 bg-muted rounded-3xl w-3/4" />
+                    <div className="max-w-4xl mx-auto py-10 space-y-8 px-4 flex-1 w-full overflow-hidden">
+                        {[1, 2, 3, 4, 5].map(i => (
+                            <div key={i} className={`flex gap-4 animate-pulse ${i % 2 === 0 ? 'flex-row-reverse' : ''}`}>
+                                <div className="w-12 h-12 bg-muted rounded-2xl shrink-0 opacity-20" />
+                                <div className={`flex-1 space-y-3 ${i % 2 === 0 ? 'items-end flex flex-col' : ''}`}>
+                                    <div className="h-2.5 bg-muted rounded w-24 opacity-20" />
+                                    <div className={`h-14 bg-muted rounded-3xl w-3/4 opacity-20 ${i % 2 === 0 ? 'rounded-tr-none' : 'rounded-tl-none'}`} />
                                 </div>
                             </div>
                         ))}
                     </div>
                 ) : messages.length === 0 ? (
-                    <div className="flex-1 flex flex-col items-center justify-center py-20">
+                    <div className="flex-1 flex flex-col items-center justify-center py-20 animate-in fade-in duration-1000">
                         <div className="text-6xl mb-6 grayscale opacity-20">💬</div>
-                        <p className="font-protocol text-[10px] uppercase tracking-[0.3em] text-muted-foreground/40">Protocol Initialized. No syncs located.</p>
+                        <p className="font-protocol text-[10px] uppercase tracking-[0.3em] text-muted-foreground/30">Protocol Initialized. No syncs located.</p>
                     </div>
                 ) : (
                     <AIMessageList

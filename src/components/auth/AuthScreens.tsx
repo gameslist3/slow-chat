@@ -30,7 +30,7 @@ export const WelcomeScreen = ({ onSignIn, onSignUp }: { onSignIn: () => void, on
             <motion.button
                 whileHover={{ scale: 1.02, y: -2 }}
                 whileTap={{ scale: 0.98 }}
-                className="btn-primary w-full h-16 text-sm font-bold tracking-widest uppercase shadow-xl rounded-2xl"
+                className="btn-primary w-full h-16 md:h-20 text-[10px] md:text-xs font-black tracking-[0.3em] uppercase shadow-2xl shadow-primary/30 rounded-2.5xl"
                 onClick={onSignUp}
             >
                 Get Started
@@ -38,10 +38,10 @@ export const WelcomeScreen = ({ onSignIn, onSignUp }: { onSignIn: () => void, on
             <motion.button
                 whileHover={{ scale: 1.02, y: -1 }}
                 whileTap={{ scale: 0.98 }}
-                className="glass-panel w-full h-16 text-sm font-bold tracking-widest uppercase hover:bg-white/5 transition-all rounded-2xl text-gray-400 hover:text-white border border-white/5"
+                className="glass-panel w-full h-16 md:h-20 text-[10px] md:text-xs font-black tracking-[0.3em] uppercase hover:bg-white/5 transition-all rounded-2.5xl text-muted-foreground hover:text-white border border-white/5"
                 onClick={onSignIn}
             >
-                Sign In
+                Protocol Sign In
             </motion.button>
         </div>
     </div>
