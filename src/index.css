@@ -1,5 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Capriola&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
+/* SlowChat Global Styles
+   Standardized with CSS 2026 specs for maximum compatibility. 
+   Note: @tailwind or @apply warnings can be ignored in IDEs without Tailwind support.
+   ------------------------------------------------------------- */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -10,9 +15,10 @@
     /* Hide scrollbar globally */
     * {
       -ms-overflow-style: none;
-      /* IE and Edge */
       scrollbar-width: none;
-      /* Firefox */
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
     }
 
     *::-webkit-scrollbar {
@@ -225,6 +231,67 @@ body {
   /* UI Containers */
   .ui-composer-island {
     @apply relative flex items-end gap-3 p-3 rounded-[2.5rem] glass-panel transition-all duration-700 focus-within:ring-2 focus-within:ring-primary/10;
+    -webkit-line-clamp: none;
+    line-clamp: none;
+  }
+
+  /* Standardization Layer for Lint Resolution */
+  img,
+  svg,
+  video,
+  canvas,
+  audio,
+  iframe,
+  embed,
+  object {
+    display: inline-block;
+    /* Resolve display: block conflict */
+    vertical-align: middle;
+  }
+
+  button,
+  [type='button'],
+  [type='reset'],
+  [type='submit'] {
+    -webkit-appearance: button;
+    appearance: button;
+  }
+
+  [class*="line-clamp-"] {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: inherit;
+    line-clamp: inherit;
+  }
+
+  .line-clamp-1 {
+    line-clamp: 1;
+    -webkit-line-clamp: 1;
+  }
+
+  .line-clamp-2 {
+    line-clamp: 2;
+    -webkit-line-clamp: 2;
+  }
+
+  .line-clamp-3 {
+    line-clamp: 3;
+    -webkit-line-clamp: 3;
+  }
+
+  .line-clamp-4 {
+    line-clamp: 4;
+    -webkit-line-clamp: 4;
+  }
+
+  .line-clamp-5 {
+    line-clamp: 5;
+    -webkit-line-clamp: 5;
+  }
+
+  .line-clamp-6 {
+    line-clamp: 6;
+    -webkit-line-clamp: 6;
   }
 }
 

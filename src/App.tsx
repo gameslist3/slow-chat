@@ -145,7 +145,12 @@ const AuthenticatedSection = () => {
         setView('chat');
     };
 
-    const activeGroup = !isPersonal ? myGroups.find(g => g.id === activeId) : null;
+    const activeGroup = !isPersonal
+        ? (myGroups.find(g => g.id === activeId) ||
+            // Secondary search if not found in myGroups (e.g. newly joined)
+            ({ id: activeId || '', name: 'Loading Connection...', image: '📡', members: 0, category: 'Syncing', memberIds: [], memberCount: 0, createdAt: Date.now(), createdBy: 'system', lastActivity: Date.now(), mutedBy: [] } as unknown as Group))
+        : null;
+
     const activePersonalChat = isPersonal ? personalChats.find((c: PersonalChat) => c.id === activeId) : null;
     const otherUserId = activePersonalChat?.userIds.find((id: string) => id !== user?.id);
     const personalChatTitle = isPersonal

@@ -1,213 +1,101 @@
-import React, { useRef } from 'react';
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
-import { Logo } from '../common/Logo';
+import React from 'react';
+import { motion } from 'framer-motion';
 import { Icon } from '../common/Icon';
-import { AbstractBackground } from '../ui/AbstractBackground';
 
-interface LandingPageProps {
-    onGetStarted: () => void;
-    onSignIn: () => void;
-}
-
-const FeatureCard = ({ title, description, icon, delay }: { title: string, description: string, icon: string, delay: number }) => (
-    <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8, delay }}
-        whileHover={{ y: -8, scale: 1.02 }}
-        className="glass-card p-8 group relative overflow-hidden"
-    >
-        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-            <span className="text-6xl">{icon}</span>
-        </div>
-        <div className="relative z-10 space-y-4">
-            <h3 className="text-xl font-black tracking-tight text-foreground">{title}</h3>
-            <p className="text-sm font-medium text-muted-foreground leading-relaxed">{description}</p>
-        </div>
-    </motion.div>
-);
-
-export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn }) => {
-    const containerRef = useRef(null);
-    const { scrollYProgress } = useScroll({
-        target: containerRef,
-        offset: ["start start", "end end"]
-    });
-
-    const scale = useTransform(scrollYProgress, [0, 0.2], [1, 0.95]);
-    const opacity = useTransform(scrollYProgress, [0, 0.1], [1, 0]);
-
+export const LandingPage = ({ onGetStarted, onSignIn }: { onGetStarted: () => void, onSignIn: () => void }) => {
     return (
-        <div ref={containerRef} className="relative w-full min-h-screen bg-background overflow-x-hidden">
-            <AbstractBackground />
-
-            {/* --- Navbar --- */}
-            <nav className="fixed top-0 left-0 right-0 z-[100] px-4 py-6 md:px-12 backdrop-blur-md bg-background/20 border-b border-white/5">
-                <div className="max-w-7xl mx-auto flex items-center justify-between">
-                    <Logo className="h-8 md:h-10 w-auto flex-shrink-0" />
-                    <div className="flex items-center gap-2 md:gap-4">
-                        <button
-                            onClick={onSignIn}
-                            className="bg-foreground text-background px-4 md:px-6 h-9 md:h-11 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all active:scale-95"
-                        >
-                            Log In
-                        </button>
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={onGetStarted}
-                            className="btn-primary rounded-full px-4 md:px-6 h-9 md:h-11 text-[9px] md:text-[10px] font-black uppercase tracking-widest shadow-xl shadow-primary/30"
-                        >
-                            Sign Up
-                        </motion.button>
-                    </div>
-                </div>
-            </nav>
-
-            {/* --- Hero Section --- */}
-            <section className="relative min-h-[100dvh] flex flex-col items-center justify-center pt-20 px-6 overflow-hidden">
+        <div className="relative min-h-[100dvh] w-full flex flex-col items-center justify-center p-6 md:p-12 overflow-hidden bg-[#050608]">
+            {/* --- Refined Minimalist Background --- */}
+            <div className="absolute inset-0 pointer-events-none">
                 <motion.div
-                    style={{ scale, opacity }}
-                    className="max-w-6xl mx-auto text-center space-y-8 md:space-y-12 z-10"
+                    animate={{
+                        scale: [1, 1.1, 1],
+                        opacity: [0.1, 0.15, 0.1]
+                    }}
+                    transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100vw] h-[100vw] bg-primary/20 rounded-full blur-[160px]"
+                />
+            </div>
+
+            <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center text-center space-y-12 md:space-y-20">
+                {/* Brand Identifier */}
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                    className="space-y-6"
                 >
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9, filter: 'blur(10px)' }}
-                        animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-                        transition={{ duration: 1, ease: "easeOut" }}
-                        className="relative"
+                    <div className="inline-flex items-center gap-3 px-5 py-2.5 glass-panel rounded-full border border-white/5 shadow-2xl">
+                        <span className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse shadow-[0_0_10px_rgba(var(--primary-rgb),0.5)]" />
+                        <span className="text-[10px] font-protocol font-black tracking-[0.4em] uppercase text-primary/80">Nexus Protocol v4.0</span>
+                    </div>
+
+                    <h1 className="text-[clamp(2.8rem,11vw,9rem)] font-black tracking-[-0.05em] text-foreground leading-[0.82] uppercase italic selection:bg-primary selection:text-white">
+                        SlowChat. <br />
+                        <span className="text-primary italic opacity-90">Connected.</span>
+                    </h1>
+                </motion.div>
+
+                {/* Narrative Layer */}
+                <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.5, duration: 1.2 }}
+                    className="text-muted-foreground/50 text-base md:text-2xl font-medium max-w-2xl leading-relaxed tracking-tight"
+                >
+                    A high-fidelity communication environment built for intention and depth.
+                    Synchronizing human interaction across the decentralized nexus.
+                </motion.p>
+
+                {/* Command Center */}
+                <motion.div
+                    initial={{ opacity: 0, y: 40 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.8, duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                    className="flex flex-col md:flex-row items-center gap-4 md:gap-8 w-full max-w-xl"
+                >
+                    <motion.button
+                        whileHover={{ scale: 1.05, y: -4, boxShadow: "0 25px 50px -12px rgba(var(--primary-rgb), 0.3)" }}
+                        whileTap={{ scale: 0.95 }}
+                        className="btn-primary w-full h-16 md:h-22 text-[10px] md:text-xs font-protocol font-black tracking-[0.4em] uppercase rounded-[2rem]"
+                        onClick={onGetStarted}
                     >
-                        <h1 className="text-[clamp(3rem,14vw,10rem)] font-black tracking-[-0.04em] text-foreground leading-[0.9] mb-6 md:mb-10 text-balance">
-                            REAL <br />
-                            <span className="text-primary italic tracking-tight">CONVERSATIONS</span> <br />
-                            REAL PEOPLE.
-                        </h1>
-                        <p className="text-sm md:text-xl font-medium text-muted-foreground/60 max-w-2xl mx-auto leading-relaxed px-4 text-balance">
-                            Gapes is a premium social experience designed for intention, clarity, and deep human connection.
-                        </p>
-                    </motion.div>
+                        Initiate Sync
+                    </motion.button>
 
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-6 pt-2">
-                        <motion.button
-                            whileHover={{ scale: 1.02, y: -2 }}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={onSignIn}
-                            className="bg-foreground text-background w-full sm:w-48 h-14 md:h-16 rounded-2xl text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em] shadow-2xl"
-                        >
-                            Log in
-                        </motion.button>
-                        <motion.button
-                            whileHover={{ scale: 1.02, y: -2 }}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={onGetStarted}
-                            className="btn-primary w-full sm:w-48 h-14 md:h-16 rounded-2xl text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em] shadow-2xl shadow-primary/20"
-                        >
-                            Get Started
-                        </motion.button>
-                    </div>
+                    <motion.button
+                        whileHover={{ scale: 1.05, backgroundColor: "rgba(255,255,255,0.05)" }}
+                        whileTap={{ scale: 0.95 }}
+                        className="glass-panel w-full h-16 md:h-22 text-[10px] md:text-xs font-protocol font-black tracking-[0.4em] uppercase rounded-[2rem] text-muted-foreground hover:text-white border border-white/5 transition-all duration-500"
+                        onClick={onSignIn}
+                    >
+                        Access Hub
+                    </motion.button>
                 </motion.div>
 
-                {/* --- Floating UI Preview --- */}
+                {/* Sub-system Status */}
                 <motion.div
-                    initial={{ y: 80, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.5, duration: 1.2, ease: "easeOut" }}
-                    className="relative w-full max-w-5xl mt-16 md:mt-24 px-4 md:px-0"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 0.3 }}
+                    transition={{ delay: 1.5, duration: 3 }}
+                    className="flex flex-wrap justify-center items-center gap-x-12 gap-y-6 font-protocol text-[8px] md:text-[10px] tracking-[0.4em] uppercase text-muted-foreground"
                 >
-                    <div className="glass-panel aspect-video rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-[0_40px_100px_-20px_rgba(0,0,0,0.4)] border-white/10 group">
-                        <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent pointer-events-none" />
-                        {/* Mock Chat UI */}
-                        <div className="p-4 md:p-8 h-full flex gap-4 md:gap-8 opacity-40 group-hover:opacity-100 transition-opacity duration-1000">
-                            <div className="w-48 md:w-64 h-full glass-card rounded-[1.5rem] md:rounded-[2rem] hidden sm:block" />
-                            <div className="flex-1 flex flex-col gap-4 md:gap-6">
-                                <div className="h-14 md:h-20 glass-card rounded-[1.5rem] md:rounded-[2rem] flex items-center px-4 md:px-8">
-                                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary/20" />
-                                    <div className="ml-3 md:ml-4 h-3 md:h-4 w-24 md:w-32 bg-foreground/10 rounded-full" />
-                                </div>
-                                <div className="flex-1 space-y-4 md:space-y-6">
-                                    <div className="h-10 md:h-12 w-32 md:w-48 bg-primary/20 rounded-xl md:rounded-2xl" />
-                                    <div className="h-10 md:h-12 w-48 md:w-64 bg-foreground/5 rounded-xl md:rounded-2xl self-end ml-auto" />
-                                    <div className="h-10 md:h-12 w-24 md:w-40 bg-primary/20 rounded-xl md:rounded-2xl" />
-                                </div>
-                            </div>
-                        </div>
+                    <div className="flex items-center gap-3">
+                        <Icon name="users" className="w-4 h-4 opacity-50" />
+                        <span>1,248 Nodes Online</span>
+                    </div>
+                    <div className="hidden md:block w-1 h-1 bg-muted-foreground rounded-full opacity-20" />
+                    <div className="flex items-center gap-3">
+                        <Icon name="message" className="w-4 h-4 opacity-50" />
+                        <span>Decentralized Mesh</span>
                     </div>
                 </motion.div>
-            </section>
+            </div>
 
-            {/* --- Features Section --- */}
-            <section className="py-32 px-6">
-                <div className="max-w-7xl mx-auto space-y-24">
-                    <div className="text-center space-y-4">
-                        <h2 className="text-4xl md:text-5xl font-black tracking-tight text-foreground">A Premium Social Layer</h2>
-                        <p className="text-muted-foreground max-w-xl mx-auto">Built for the next era of digital interaction.</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        <FeatureCard
-                            title="Futuristic Glass UI"
-                            description="A 2026 design standard with deep glassmorphism and smooth multi-layer surfaces."
-                            icon="💎"
-                            delay={0.1}
-                        />
-                        <FeatureCard
-                            title="Decentralized Intent"
-                            description="Real-time syncing across Nexus nodes with focused, intention-based group discovery."
-                            icon="🕸️"
-                            delay={0.2}
-                        />
-                        <FeatureCard
-                            title="Fluid Interactions"
-                            description="Micro-animations and physics-based transitions that make every chat feel alive."
-                            icon="✨"
-                            delay={0.3}
-                        />
-                    </div>
-                </div>
-            </section>
-
-            {/* --- How it Works --- */}
-            <section className="py-32 px-6 bg-foreground/[0.02]">
-                <div className="max-w-5xl mx-auto text-center space-y-16">
-                    <h2 className="text-4xl font-black tracking-tight text-foreground">How it Works</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-                        {[
-                            { step: '01', title: 'Join', text: 'Enter the Gapes protocol via email or stealth nexus.' },
-                            { step: '02', title: 'Explore', text: 'Discover communities that match your interest and frequency.' },
-                            { step: '03', title: 'Connect', text: 'Engage in slow, high-quality human conversations.' }
-                        ].map((item, i) => (
-                            <motion.div
-                                key={i}
-                                initial={{ opacity: 0, x: -20 }}
-                                whileInView={{ opacity: 1, x: 0 }}
-                                transition={{ delay: i * 0.2 }}
-                                className="space-y-4"
-                            >
-                                <span className="text-6xl font-black text-primary/10 italic leading-none">{item.step}</span>
-                                <h4 className="text-xl font-bold">{item.title}</h4>
-                                <p className="text-sm text-muted-foreground">{item.text}</p>
-                            </motion.div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* --- Footer --- */}
-            <footer className="py-20 px-6 border-t border-border/5">
-                <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-12">
-                    <div className="space-y-4 text-center md:text-left">
-                        <Logo className="h-8 w-auto opacity-50 contrast-0 grayscale mx-auto md:mx-0" />
-                        <p className="text-[10px] font-black tracking-[0.3em] uppercase opacity-30">© 2026 Gapes Protocol. All rights reserved.</p>
-                    </div>
-                    <div className="flex gap-8">
-                        {['Mirror', 'X (Twitter)', 'Discord', 'Docs'].map(link => (
-                            <a key={link} href="#" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors">
-                                {link}
-                            </a>
-                        ))}
-                    </div>
-                </div>
-            </footer>
+            {/* Aesthetic Overlays */}
+            <div className="absolute inset-0 border-[40px] border-white/[0.01] pointer-events-none" />
+            <div className="absolute top-0 right-0 w-[50vw] h-[50vw] bg-primary/5 rounded-full blur-[140px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-[50vw] h-[50vw] bg-secondary/5 rounded-full blur-[140px] translate-y-1/2 -translate-x-1/2 pointer-events-none" />
         </div>
     );
 };

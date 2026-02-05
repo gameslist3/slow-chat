@@ -91,19 +91,23 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                             </div>
                         ))}
                     </div>
-                ) : messages.length === 0 ? (
-                    <div className="flex-1 flex flex-col items-center justify-center py-20 animate-in fade-in duration-1000">
-                        <div className="text-6xl mb-6 grayscale opacity-20">💬</div>
-                        <p className="font-protocol text-[10px] uppercase tracking-[0.3em] text-muted-foreground/30">Protocol Initialized. No syncs located.</p>
-                    </div>
                 ) : (
-                    <AIMessageList
-                        messages={messages}
-                        currentUserId={user?.id || ''}
-                        highlightId={highlightMessageId}
-                        onReply={handleReply}
-                        onReaction={toggleReaction}
-                    />
+                    <div className="flex-1 flex flex-col h-full w-full">
+                        {messages.length === 0 ? (
+                            <div className="flex-1 flex flex-col items-center justify-center py-20 animate-in fade-in duration-1000">
+                                <div className="text-6xl mb-6 grayscale opacity-20">💬</div>
+                                <p className="font-protocol text-[10px] uppercase tracking-[0.3em] text-muted-foreground/30">Protocol Initialized. No syncs located.</p>
+                            </div>
+                        ) : (
+                            <AIMessageList
+                                messages={messages}
+                                currentUserId={user?.id || ''}
+                                highlightId={highlightMessageId}
+                                onReply={handleReply}
+                                onReaction={toggleReaction}
+                            />
+                        )}
+                    </div>
                 )}
             </div>
 
