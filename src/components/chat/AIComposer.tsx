@@ -205,6 +205,13 @@ export const AIComposer: React.FC<AIComposerProps> = ({
         return `${m}:${sec.toString().padStart(2, '0')}`;
     };
 
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSendText();
+        }
+    };
+
     return (
         <div className="p-4 md:p-10 md:pt-0 w-full max-w-5xl mx-auto">
             <AnimatePresence>
