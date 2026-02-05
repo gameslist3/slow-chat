@@ -138,8 +138,8 @@ export const CreateGroup = ({ onGroupCreated }: { onGroupCreated: (id: string) =
             <div className="flex items-center gap-6 mb-10">
                 <div className="w-1 h-12 bg-primary rounded-full shadow-[0_0_20px_rgba(var(--primary-rgb),0.5)]" />
                 <div className="flex flex-col">
-                    <span className="font-protocol text-[9px] tracking-[0.4em] text-primary opacity-50 uppercase">Sync_Init</span>
-                    <h2 className="text-3xl font-black tracking-tighter uppercase italic leading-none mt-1">New Protocol</h2>
+                    <span className="font-protocol text-[9px] tracking-[0.4em] text-primary opacity-50 uppercase">Cluster_Init</span>
+                    <h2 className="text-3xl font-black tracking-tighter uppercase italic leading-none mt-1">Create Group</h2>
                 </div>
             </div>
 
@@ -168,25 +168,33 @@ export const CreateGroup = ({ onGroupCreated }: { onGroupCreated: (id: string) =
                         <input
                             value={name}
                             onChange={e => setName(e.target.value)}
-                            placeholder="Designate Nexus Name"
+                            placeholder="Designate Cluster Name"
                             className="w-full bg-foreground/5 h-14 pl-12 pr-4 rounded-xl text-sm font-bold outline-none border border-transparent focus:border-primary/20 transition-all"
                         />
                     </div>
 
-                    <div className="flex flex-wrap gap-2">
-                        {CATEGORIES.slice(0, 5).map(c => (
-                            <button
-                                type="button"
-                                key={c}
-                                onClick={() => setCat(c)}
-                                className={`
-                                    px-4 py-1.5 rounded-full text-[9px] font-protocol tracking-widest border transition-all uppercase
-                                    ${cat === c ? 'bg-primary border-primary text-white' : 'glass-card bg-foreground/5 text-muted-foreground hover:border-primary/20'}
-                                `}
-                            >
-                                {c}
-                            </button>
-                        ))}
+                    <div className="space-y-3">
+                        <div className="flex flex-wrap gap-2">
+                            {CATEGORIES.slice(0, 5).map(c => (
+                                <button
+                                    type="button"
+                                    key={c}
+                                    onClick={() => setCat(c)}
+                                    className={`
+                                        px-4 py-1.5 rounded-full text-[9px] font-protocol tracking-widest border transition-all uppercase
+                                        ${cat === c ? 'bg-primary border-primary text-white' : 'glass-card bg-foreground/5 text-muted-foreground hover:border-primary/20'}
+                                    `}
+                                >
+                                    {c}
+                                </button>
+                            ))}
+                        </div>
+                        <input
+                            value={cat}
+                            onChange={e => setCat(e.target.value)}
+                            placeholder="Custom Category..."
+                            className="w-full bg-foreground/5 h-12 px-4 rounded-xl text-[10px] uppercase tracking-widest font-black outline-none border border-transparent focus:border-primary/20 transition-all"
+                        />
                     </div>
                 </div>
 
@@ -196,7 +204,7 @@ export const CreateGroup = ({ onGroupCreated }: { onGroupCreated: (id: string) =
                     className="btn-primary w-full h-16 text-xs font-protocol tracking-[0.4em] shadow-xl disabled:opacity-30 rounded-2xl uppercase"
                     disabled={!name || !cat || loading}
                 >
-                    {loading ? <Icon name="rotate" className="w-5 h-5 animate-spin" /> : "Initiate Sync"}
+                    {loading ? <Icon name="rotate" className="w-5 h-5 animate-spin" /> : "Create Group"}
                 </motion.button>
             </form>
         </div>

@@ -181,7 +181,7 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
                                 <div className="w-10 h-10 bg-destructive/10 rounded-full flex items-center justify-center text-destructive group-hover:scale-110 transition-transform">
                                     <Icon name="logout" className="w-5 h-5" />
                                 </div>
-                                <span className="text-sm font-bold text-destructive">Terminate Session</span>
+                                <span className="text-sm font-bold text-destructive">Log Out</span>
                             </motion.button>
                             <motion.a
                                 whileHover={{ y: -4 }}

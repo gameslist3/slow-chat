@@ -93,7 +93,10 @@ export const AISidebar: React.FC<AISidebarProps> = ({
                 ) : (
                     <>
                         <div className="space-y-3">
-                            <div className="text-[10px] font-black text-primary/40 uppercase tracking-[0.2em] px-2 mb-2">Direct Syncs</div>
+                            <div className="flex items-center justify-between px-2 mb-2">
+                                <span className="text-[10px] font-black text-primary/40 uppercase tracking-[0.2em]">Direct chat</span>
+                                <span className="text-[10px] font-black text-primary/20">{personalChats.length}</span>
+                            </div>
                             {personalChats.map(chat => {
                                 const otherId = chat.userIds.find(id => id !== user?.id);
                                 const name = chat.usernames?.[otherId || ''] || 'User';
@@ -101,19 +104,22 @@ export const AISidebar: React.FC<AISidebarProps> = ({
                                 return (
                                     <button key={chat.id} onClick={() => onSelectPersonal(chat.id)} className={`w-full p-4 rounded-3xl flex items-center gap-4 transition-all ${active ? 'bg-primary text-white shadow-xl shadow-primary/20' : 'hover:bg-foreground/5 text-muted-foreground hover:text-foreground'}`}>
                                         <div className={`w-12 h-12 rounded-2xl flex-shrink-0 flex items-center justify-center font-black ${active ? 'bg-white/20' : 'bg-primary/10 text-primary'}`}>{name.slice(0, 2).toUpperCase()}</div>
-                                        <div className="text-left"><p className="font-bold text-sm tracking-tight">{name}</p><p className={`text-[10px] truncate opacity-50 ${active ? 'text-white' : ''}`}>{chat.lastMessage || 'Connected'}</p></div>
+                                        <div className="text-left flex-1 min-w-0"><p className="font-bold text-sm tracking-tight truncate">{name}</p><p className={`text-[10px] truncate opacity-50 ${active ? 'text-white' : ''}`}>{chat.lastMessage || 'Connected'}</p></div>
                                     </button>
                                 );
                             })}
                         </div>
                         <div className="space-y-3">
-                            <div className="text-[10px] font-black text-primary/40 uppercase tracking-[0.2em] px-2 mb-2">Active Clusters</div>
+                            <div className="flex items-center justify-between px-2 mb-2">
+                                <span className="text-[10px] font-black text-primary/40 uppercase tracking-[0.2em]">Joined Groups</span>
+                                <span className="text-[10px] font-black text-primary/20">{groups.length}</span>
+                            </div>
                             {groups.map(group => {
                                 const active = activeId === group.id && !isPersonalActive;
                                 return (
                                     <button key={group.id} onClick={() => onSelectGroup(group.id)} className={`w-full p-4 rounded-3xl flex items-center gap-4 transition-all ${active ? 'bg-primary text-white shadow-xl shadow-primary/20' : 'hover:bg-foreground/5 text-muted-foreground hover:text-foreground'}`}>
                                         <div className={`w-12 h-12 rounded-2xl flex-shrink-0 flex items-center justify-center text-xl ${active ? 'bg-white/20' : 'bg-foreground/5'}`}>{group.image}</div>
-                                        <div className="text-left"><p className="font-bold text-sm tracking-tight">{group.name}</p><p className={`text-[10px] truncate opacity-50 ${active ? 'text-white' : ''}`}>{group.lastMessage || 'Active'}</p></div>
+                                        <div className="text-left flex-1 min-w-0"><p className="font-bold text-sm tracking-tight truncate">{group.name}</p><p className={`text-[10px] truncate opacity-50 ${active ? 'text-white' : ''}`}>{group.lastMessage || 'Active'}</p></div>
                                     </button>
                                 );
                             })}

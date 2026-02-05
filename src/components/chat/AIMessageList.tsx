@@ -42,7 +42,7 @@ export const AIMessageList: React.FC<AIMessageListProps> = ({
     }, [messages, highlightId]);
 
     return (
-        <div className="flex-1 overflow-y-auto py-8 space-y-12 px-2 custom-scrollbar relative">
+        <div className="flex-1 overflow-y-auto py-8 space-y-12 px-4 md:px-6 custom-scrollbar relative overscroll-contain">
             {messages.map((msg) => (
                 <MessageItem
                     key={msg.id}
@@ -375,7 +375,7 @@ const UserProfileCard = ({ userId, currentUserId, onClose }: { userId: string, c
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.8, y: 40 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="ui-card w-full max-w-sm relative z-[1000] p-8 text-center space-y-8 border shadow-2xl bg-surface/90 backdrop-blur-xl"
+                className="ui-card w-full max-w-[90vw] md:max-w-sm relative z-[1000] p-6 md:p-8 text-center space-y-8 border shadow-2xl bg-surface/90 backdrop-blur-2xl rounded-[3rem] overflow-hidden"
             >
                 <button
                     onClick={onClose}

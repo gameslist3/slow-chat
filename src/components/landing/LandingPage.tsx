@@ -46,10 +46,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
             <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-8 md:px-12">
                 <div className="max-w-7xl mx-auto flex items-center justify-between">
                     <Logo className="h-10 w-auto" />
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-4">
                         <button
                             onClick={onSignIn}
-                            className="text-xs font-bold tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors hidden sm:block"
+                            className="bg-foreground text-background px-6 h-11 rounded-full text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-xl active:scale-95"
                         >
                             Sign In
                         </button>
@@ -57,53 +57,51 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onSignIn
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={onGetStarted}
-                            className="btn-primary rounded-full px-8 py-3 h-12 flex items-center"
+                            className="btn-primary rounded-full px-6 h-11 text-[10px] font-black uppercase tracking-widest shadow-xl shadow-primary/30"
                         >
-                            Start Chatting
+                            Create Account
                         </motion.button>
                     </div>
                 </div>
             </nav>
 
             {/* --- Hero Section --- */}
-            <section className="relative min-h-screen flex flex-col items-center justify-center pt-32 px-6 overflow-hidden">
+            <section className="relative min-h-screen flex flex-col items-center justify-center pt-24 px-6 overflow-hidden">
                 <motion.div
                     style={{ scale, opacity }}
-                    className="max-w-4xl mx-auto text-center space-y-12 z-10"
+                    className="max-w-4xl mx-auto text-center space-y-10 z-10"
                 >
                     <motion.div
                         initial={{ opacity: 0, scale: 0.9, filter: 'blur(10px)' }}
                         animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
                         transition={{ duration: 1, ease: "easeOut" }}
                     >
-                        <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-8 border border-primary/20">
-                            Protocol 2026 Active
-                        </span>
-                        <h1 className="text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter text-foreground leading-[0.85] mb-8">
+                        <h1 className="text-6xl md:text-8xl lg:text-[10rem] font-black tracking-tighter text-foreground leading-[0.85] mb-8">
                             REAL <br />
                             <span className="text-primary italic">CONVERSATIONS</span> <br />
                             REAL PEOPLE.
                         </h1>
-                        <p className="text-lg md:text-xl font-medium text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                            SlowChat is a premium social experience designed for intention, clarity, and deep human connection in the age of noise.
+                        <p className="text-base md:text-xl font-medium text-muted-foreground/60 max-w-2xl mx-auto leading-relaxed">
+                            Gapes is a premium social experience designed for intention, clarity, and deep human connection in the age of noise.
                         </p>
                     </motion.div>
 
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-8">
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
                         <motion.button
-                            whileHover={{ scale: 1.02 }}
+                            whileHover={{ scale: 1.02, y: -2 }}
                             whileTap={{ scale: 0.98 }}
-                            onClick={onGetStarted}
-                            className="btn-primary w-full sm:w-64 h-16 rounded-2xl text-sm"
+                            onClick={onSignIn}
+                            className="bg-foreground text-background w-full sm:w-56 h-16 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] shadow-2xl"
                         >
-                            Start Chatting
+                            Sign in
                         </motion.button>
                         <motion.button
-                            whileHover={{ scale: 1.02, backgroundColor: 'rgba(var(--primary-rgb), 0.1)' }}
+                            whileHover={{ scale: 1.02, y: -2 }}
                             whileTap={{ scale: 0.98 }}
-                            className="glass-panel w-full sm:w-64 h-16 rounded-2xl text-xs font-black tracking-widest uppercase flex items-center justify-center gap-3"
+                            onClick={onGetStarted}
+                            className="btn-primary w-full sm:w-56 h-16 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] shadow-2xl shadow-primary/20"
                         >
-                            Explore Rooms <Icon name="compass" className="w-4 h-4" />
+                            Create account
                         </motion.button>
                     </div>
                 </motion.div>

@@ -155,7 +155,7 @@ export const AILayout: React.FC<AILayoutProps> = ({
                     </header>
 
                     <main
-                        className={`flex-1 overflow-hidden flex flex-col relative w-full h-full mobile-scroll-fix ${activeChatId ? 'pt-0' : 'md:p-0'}`}
+                        className={`flex-1 overflow-hidden flex flex-col relative w-full h-full min-h-0 mobile-scroll-fix ${activeChatId ? 'pt-0' : 'md:p-0'}`}
                         onScroll={handleScroll}
                     >
                         {children}

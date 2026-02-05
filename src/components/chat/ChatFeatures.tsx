@@ -78,7 +78,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             />
 
             {/* Message List Area - Fixed Scrollable Body */}
-            <div className="flex-1 min-h-0 relative overflow-hidden flex flex-col">
+            <div className="flex-1 min-h-0 relative overflow-hidden flex flex-col w-full h-full">
                 {loading && messages.length === 0 ? (
                     <div className="max-w-4xl mx-auto py-10 space-y-8 px-4 flex-1 w-full">
                         {[1, 2, 3].map(i => (
@@ -92,9 +92,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                         ))}
                     </div>
                 ) : messages.length === 0 ? (
-                    <div className="flex-1 flex flex-col items-center justify-center opacity-30">
-                        <div className="text-8xl mb-6 text-center grayscale">💬</div>
-                        <p className="font-bold uppercase tracking-widest text-xs text-center text-gray-500">No messages yet.</p>
+                    <div className="flex-1 flex flex-col items-center justify-center py-20">
+                        <div className="text-6xl mb-6 grayscale opacity-20">💬</div>
+                        <p className="font-protocol text-[10px] uppercase tracking-[0.3em] text-muted-foreground/40">Protocol Initialized. No syncs located.</p>
                     </div>
                 ) : (
                     <AIMessageList

@@ -45,21 +45,25 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                 )}
 
                 <div className={`
-                    relative px-5 py-3.5 text-[15px] font-medium leading-relaxed tracking-tight
+                    relative px-5 py-3.5 text-[15px] font-medium leading-relaxed tracking-tight break-words overflow-hidden
                     ${isMe
                         ? 'bg-primary text-white rounded-[1.5rem] rounded-tr-none shadow-lg shadow-primary/20'
                         : 'glass-panel rounded-[1.5rem] rounded-tl-none border border-white/10'
                     }
                     ${message.type === 'image' || message.type === 'video' ? 'p-1.5 bg-transparent border-0 shadow-none' : ''}
                 `}>
-                    {message.type === 'text' && message.text}
+                    {message.type === 'text' && (
+                        <div className="max-w-full">
+                            {message.text}
+                        </div>
+                    )}
 
                     {message.type === 'image' && (
-                        <img src={message.media?.url} alt="media" className="rounded-xl max-h-60 object-cover shadow-sm" />
+                        <img src={message.media?.url} alt="media" className="rounded-xl max-h-60 w-full object-cover shadow-sm" />
                     )}
 
                     {message.type === 'video' && (
-                        <video src={message.media?.url} controls className="rounded-xl max-h-60 bg-black" />
+                        <video src={message.media?.url} controls className="rounded-xl max-h-60 w-full bg-black" />
                     )}
 
                     {message.type === 'text' && (
