@@ -3,8 +3,7 @@ import logoDark from "../../assets/Gapes-blue.png";
 import React, { useState, useEffect } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { Icon } from '../common/Icon';
-import logoLight from '../../assets/logo-light.png';
-import logoDark from '../../assets/logo-dark.png';
+
 export const LandingPage = ({ onGetStarted, onSignIn }: { onGetStarted: () => void, onSignIn: () => void }) => {
     const mouseX = useMotionValue(0);
     const mouseY = useMotionValue(0);
