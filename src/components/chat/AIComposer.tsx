@@ -304,16 +304,25 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                     <motion.div
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
-                        className="glass-panel rounded-[2.5rem] p-4 flex flex-col gap-3 shadow-2xl border-white/10"
+                        className="glass-panel w-full rounded-[2rem] p-3 flex flex-col gap-2 shadow-2xl border-white/5 bg-background/60 backdrop-blur-xl"
                     >
-                        <div className="flex items-end gap-4">
+                        {/* Hidden File Input */}
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleFileChange}
+                            className="hidden"
+                            accept="image/*,video/*,application/pdf"
+                        />
+
+                        <div className="flex items-end gap-3">
                             <motion.button
-                                whileHover={{ scale: 1.1, rotate: 10 }}
+                                whileHover={{ scale: 1.1 }}
                                 whileTap={{ scale: 0.9 }}
                                 onClick={() => fileInputRef.current?.click()}
-                                className="w-12 h-12 rounded-2xl bg-foreground/5 flex items-center justify-center text-muted-foreground hover:text-primary transition-all border border-transparent hover:border-primary/20"
+                                className="w-10 h-10 rounded-xl bg-foreground/5 flex items-center justify-center text-muted-foreground hover:text-primary transition-all hover:bg-primary/10"
                             >
-                                <Icon name="plus" className="w-6 h-6" />
+                                <Icon name="plus" className="w-5 h-5" />
                             </motion.button>
 
                             <div className="flex-1 relative">
@@ -322,8 +331,9 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                                     value={text}
                                     onChange={(e) => setText(e.target.value)}
                                     onKeyDown={handleKeyDown}
-                                    placeholder="Message cluster..."
-                                    className="w-full bg-foreground/[0.03] border border-transparent focus:border-primary/20 rounded-2xl px-5 py-3.5 text-base font-medium placeholder:text-muted-foreground/30 outline-none transition-all resize-none min-h-[50px] max-h-[200px]"
+                                    placeholder="Type a message..."
+                                    className="w-full bg-transparent border-none focus:ring-0 p-2 text-base font-medium placeholder:text-muted-foreground/40 outline-none resize-none min-h-[44px] max-h-[150px] leading-relaxed"
+                                    style={{ height: '44px' }}
                                 />
                             </div>
 
@@ -334,7 +344,7 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={handleSendText}
-                                    className="w-12 h-12 rounded-2xl bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20"
+                                    className="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20"
                                 >
                                     <Icon name="send" className="w-5 h-5" />
                                 </motion.button>
@@ -343,7 +353,7 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                                     whileHover={{ scale: 1.1 }}
                                     whileTap={{ scale: 0.9 }}
                                     onClick={startRecording}
-                                    className="w-12 h-12 rounded-2xl bg-foreground/5 flex items-center justify-center text-primary transition-all border border-transparent hover:border-primary/20"
+                                    className="w-10 h-10 rounded-xl bg-foreground/5 flex items-center justify-center text-muted-foreground hover:text-primary transition-all hover:bg-primary/10"
                                 >
                                     <Icon name="mic" className="w-5 h-5" />
                                 </motion.button>

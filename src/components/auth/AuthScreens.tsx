@@ -18,12 +18,12 @@ export const WelcomeScreen = ({ onSignIn, onSignUp }: { onSignIn: () => void, on
                 className="w-24 h-24 glass-panel rounded-3xl flex items-center justify-center mx-auto text-5xl shadow-2xl relative"
             >
                 <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full" />
-                <span className="relative z-10 text-primary">⚡</span>
+                <span className="relative z-10 text-primary">🍇</span>
             </motion.div>
             <div className="space-y-2">
-                <h1 className="text-5xl md:text-6xl font-black tracking-tighter text-foreground leading-none">SLOWCHAT</h1>
+                <h1 className="text-5xl md:text-6xl font-black tracking-tighter text-foreground leading-none">GAPES</h1>
             </div>
-            <p className="text-base font-medium text-gray-400 max-w-xs mx-auto">Connect with intention.</p>
+            <p className="text-base font-medium text-gray-400 max-w-xs mx-auto">The future of connection.</p>
         </div>
 
         <div className="w-full max-w-sm space-y-4">
@@ -41,7 +41,7 @@ export const WelcomeScreen = ({ onSignIn, onSignUp }: { onSignIn: () => void, on
                 className="glass-panel w-full h-16 md:h-20 text-[10px] md:text-xs font-black tracking-[0.3em] uppercase hover:bg-white/5 transition-all rounded-2.5xl text-muted-foreground hover:text-white border border-white/5"
                 onClick={onSignIn}
             >
-                Protocol Sign In
+                Sign In
             </motion.button>
         </div>
     </div>
@@ -203,7 +203,7 @@ export const SignUpScreen = ({ onBack, onSuccess }: any) => {
 
             <div className="mb-10">
                 <h1 className="text-3xl md:text-4xl font-black tracking-tight text-foreground mb-2">Create Account</h1>
-                <p className="text-base font-medium text-gray-400">Join the SlowChat network.</p>
+                <p className="text-base font-medium text-gray-400">Join Gapes today.</p>
             </div>
 
             <form onSubmit={handleSignUp} className="space-y-6">
