@@ -1,3 +1,5 @@
+import logoLight from "../../assets/Gapes.png";
+import logoDark from "../../assets/Gapes-blue.png";
 import React, { useState, useEffect } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { Icon } from '../common/Icon';
