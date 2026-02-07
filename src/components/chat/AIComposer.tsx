@@ -233,11 +233,11 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                 )}
             </AnimatePresence>
 
-            <motion.div layout className={`glass-panel rounded-[1.5rem] md:rounded-[2rem] p-1.5 md:p-2 flex items-end gap-2 shadow-xl border-white/5 bg-background/40 backdrop-blur-xl ${cooldown > 0 ? 'opacity-50' : ''}`}>
+            <motion.div layout className={`w-full max-w-4xl mx-auto mb-4 ${cooldown > 0 ? 'opacity-50' : ''}`}>
 
                 {/* --- Recording UI --- */}
                 {recState === 'recording' && (
-                    <div className="flex items-center justify-between w-full px-4 h-[56px] animate-in slide-in-from-bottom-2 duration-300">
+                    <div className="glass-panel rounded-[2rem] flex items-center justify-between w-full px-4 h-[60px] animate-in slide-in-from-bottom-2 duration-300">
                         <div className="flex items-center gap-4">
                             <motion.div
                                 animate={{ scale: [1, 1.3, 1], opacity: [0.5, 1, 0.5] }}
@@ -260,7 +260,7 @@ export const AIComposer: React.FC<AIComposerProps> = ({
 
                 {/* --- Review UI --- */}
                 {recState === 'review' && (
-                    <div className="flex items-center justify-between w-full px-2 h-[56px] animate-in slide-in-from-bottom-2 duration-300">
+                    <div className="glass-panel rounded-[2rem] flex items-center justify-between w-full px-2 h-[60px] animate-in slide-in-from-bottom-2 duration-300">
                         <button
                             onClick={cancelRecording}
                             className="w-10 h-10 rounded-full bg-foreground/5 flex items-center justify-center text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all active:scale-95"
@@ -304,7 +304,7 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                     <motion.div
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
-                        className="glass-panel w-full rounded-[2rem] p-3 flex flex-col gap-2 shadow-2xl border-white/5 bg-background/60 backdrop-blur-xl"
+                        className="glass-panel w-full rounded-[2rem] p-2 pr-3 flex items-center gap-2 shadow-2xl border-white/5 bg-background/60 backdrop-blur-xl"
                     >
                         {/* Hidden File Input */}
                         <input
@@ -315,50 +315,48 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                             accept="image/*,video/*,application/pdf"
                         />
 
-                        <div className="flex items-end gap-3">
+                        <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => fileInputRef.current?.click()}
+                            className="w-10 h-10 rounded-full bg-foreground/5 flex items-center justify-center text-muted-foreground hover:text-primary transition-all hover:bg-primary/10 shrink-0"
+                        >
+                            <Icon name="plus" className="w-5 h-5" />
+                        </motion.button>
+
+                        <div className="flex-1 relative flex items-center">
+                            <textarea
+                                ref={textareaRef}
+                                value={text}
+                                onChange={(e) => setText(e.target.value)}
+                                onKeyDown={handleKeyDown}
+                                placeholder="Type a message..."
+                                className="w-full bg-transparent border-none focus:ring-0 py-3 px-2 text-base font-medium placeholder:text-muted-foreground/40 outline-none resize-none leading-relaxed"
+                                style={{ height: '48px', minHeight: '48px', maxHeight: '120px' }}
+                            />
+                        </div>
+
+                        {text.trim() ? (
+                            <motion.button
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={handleSendText}
+                                className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20 shrink-0"
+                            >
+                                <Icon name="send" className="w-5 h-5 translate-x-0.5" />
+                            </motion.button>
+                        ) : (
                             <motion.button
                                 whileHover={{ scale: 1.1 }}
                                 whileTap={{ scale: 0.9 }}
-                                onClick={() => fileInputRef.current?.click()}
-                                className="w-10 h-10 rounded-xl bg-foreground/5 flex items-center justify-center text-muted-foreground hover:text-primary transition-all hover:bg-primary/10"
+                                onClick={startRecording}
+                                className="w-10 h-10 rounded-full bg-foreground/5 flex items-center justify-center text-muted-foreground hover:text-primary transition-all hover:bg-primary/10 shrink-0"
                             >
-                                <Icon name="plus" className="w-5 h-5" />
+                                <Icon name="mic" className="w-5 h-5" />
                             </motion.button>
-
-                            <div className="flex-1 relative">
-                                <textarea
-                                    ref={textareaRef}
-                                    value={text}
-                                    onChange={(e) => setText(e.target.value)}
-                                    onKeyDown={handleKeyDown}
-                                    placeholder="Type a message..."
-                                    className="w-full bg-transparent border-none focus:ring-0 p-2 text-base font-medium placeholder:text-muted-foreground/40 outline-none resize-none min-h-[44px] max-h-[150px] leading-relaxed"
-                                    style={{ height: '44px' }}
-                                />
-                            </div>
-
-                            {text.trim() ? (
-                                <motion.button
-                                    initial={{ scale: 0 }}
-                                    animate={{ scale: 1 }}
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={handleSendText}
-                                    className="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20"
-                                >
-                                    <Icon name="send" className="w-5 h-5" />
-                                </motion.button>
-                            ) : (
-                                <motion.button
-                                    whileHover={{ scale: 1.1 }}
-                                    whileTap={{ scale: 0.9 }}
-                                    onClick={startRecording}
-                                    className="w-10 h-10 rounded-xl bg-foreground/5 flex items-center justify-center text-muted-foreground hover:text-primary transition-all hover:bg-primary/10"
-                                >
-                                    <Icon name="mic" className="w-5 h-5" />
-                                </motion.button>
-                            )}
-                        </div>
+                        )}
                     </motion.div>)}
             </motion.div>
         </div>

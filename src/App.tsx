@@ -17,6 +17,8 @@ import { HomeView } from './components/home/HomeView';
 
 import { LandingPage } from './components/landing/LandingPage';
 
+import { CollaborativeBackground } from './components/ui/CollaborativeBackground';
+
 const AppContent = () => {
     const { isAuthenticated } = useAuth();
     const [showPolicy, setShowPolicy] = useState(false);
@@ -32,9 +34,12 @@ const AppContent = () => {
     };
 
     return (
-        <div className="min-h-screen bg-background font-sans selection:bg-primary/20">
-            {showPolicy && <StoragePolicyModal onAccept={handleAcceptPolicy} />}
-            {isAuthenticated ? <AuthenticatedSection /> : <AuthSection />}
+        <div className="min-h-screen bg-background font-sans selection:bg-primary/20 relative">
+            <CollaborativeBackground />
+            <div className="relative z-10 w-full h-full">
+                {showPolicy && <StoragePolicyModal onAccept={handleAcceptPolicy} />}
+                {isAuthenticated ? <AuthenticatedSection /> : <AuthSection />}
+            </div>
         </div>
     );
 };

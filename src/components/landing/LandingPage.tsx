@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { Icon } from '../common/Icon';
-
+import logo from '../../assets/logo.svg';
 export const LandingPage = ({ onGetStarted, onSignIn }: { onGetStarted: () => void, onSignIn: () => void }) => {
     const mouseX = useMotionValue(0);
     const mouseY = useMotionValue(0);
@@ -26,40 +26,30 @@ export const LandingPage = ({ onGetStarted, onSignIn }: { onGetStarted: () => vo
 
     return (
         <div
-            className="relative min-h-[100dvh] w-full flex flex-col items-center justify-center p-6 md:p-12 overflow-hidden bg-[#050608]"
+            className="relative min-h-[100dvh] w-full flex flex-col items-center justify-center p-6 md:p-12 overflow-hidden"
             onMouseMove={handleMouseMove}
         >
-            {/* --- Interactive Background --- */}
-            <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                <motion.div
-                    style={{ x: moveX, y: moveY }}
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vw] bg-primary/10 rounded-full blur-[120px]"
-                />
-                <motion.div
-                    style={{ left: glowX, top: glowY }}
-                    className="absolute w-[600px] h-[600px] bg-secondary/10 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2 transition-opacity duration-1000"
-                />
-            </div>
+            {/* --- Global Background is handled in App.tsx --- */}
 
-            <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center text-center space-y-12 md:space-y-16">
+            <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center text-center space-y-12 md:space-y-16 group">
                 {/* Brand Identifier */}
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                    className="space-y-8"
+                    className="space-y-8 flex flex-col items-center"
                 >
                     <motion.div
                         whileHover={{ scale: 1.05 }}
-                        className="inline-flex items-center justify-center w-20 h-20 md:w-24 md:h-24 rounded-[2rem] bg-gradient-to-br from-primary/20 to-secondary/20 border border-white/10 shadow-2xl backdrop-blur-3xl mb-4"
+                        className="inline-flex items-center justify-center w-24 h-24 md:w-32 md:h-32 mb-4"
                     >
-                        <span className="text-4xl md:text-5xl">🍇</span>
+                        <img src={logo} alt="Gapes Logo" className="w-full h-full drop-shadow-2xl" />
                     </motion.div>
 
-                    <h1 className="text-[clamp(3.5rem,13vw,10rem)] font-black tracking-tighter text-foreground leading-[0.85] select-none">
+                    <h1 className="text-[clamp(3.5rem,13vw,10rem)] font-black tracking-tighter text-foreground leading-[0.85] select-none opacity-30 group-hover:opacity-100 transition-opacity duration-700">
                         Gapes.
                         <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary opacity-90">
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary opacity-80">
                             Connected.
                         </span>
                     </h1>
@@ -70,7 +60,7 @@ export const LandingPage = ({ onGetStarted, onSignIn }: { onGetStarted: () => vo
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.5, duration: 1.2 }}
-                    className="text-muted-foreground/60 text-lg md:text-2xl font-medium max-w-xl leading-relaxed"
+                    className="text-muted-foreground/60 text-lg md:text-2xl font-medium max-w-xl leading-relaxed opacity-0 group-hover:opacity-100 transition-opacity duration-700 delay-100"
                 >
                     Experience the next generation of social interaction.
                     Simple, fast, and beautifully designed.
@@ -81,7 +71,7 @@ export const LandingPage = ({ onGetStarted, onSignIn }: { onGetStarted: () => vo
                     initial={{ opacity: 0, y: 40 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.8, duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                    className="flex flex-col md:flex-row items-center gap-4 md:gap-6 w-full max-w-md"
+                    className="flex flex-col md:flex-row items-center gap-4 md:gap-6 w-full max-w-md opacity-0 group-hover:opacity-100 transition-opacity duration-700 delay-200"
                 >
                     <motion.button
                         whileHover={{ scale: 1.02, y: -2 }}
@@ -102,11 +92,6 @@ export const LandingPage = ({ onGetStarted, onSignIn }: { onGetStarted: () => vo
                     </motion.button>
                 </motion.div>
             </div>
-
-            {/* Aesthetic Overlays */}
-            <div className="absolute inset-0 border-[40px] border-white/[0.01] pointer-events-none" />
-            <div className="absolute top-0 right-0 w-[50vw] h-[50vw] bg-primary/5 rounded-full blur-[140px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-[50vw] h-[50vw] bg-secondary/5 rounded-full blur-[140px] translate-y-1/2 -translate-x-1/2 pointer-events-none" />
         </div>
     );
 };
