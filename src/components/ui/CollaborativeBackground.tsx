@@ -28,14 +28,11 @@ export const CollaborativeBackground = () => {
 
     return (
         <div
-            className="fixed inset-0 pointer-events-none overflow-hidden z-0"
-        // Attach listener to window if possible, but here it's a div. 
-        // Better to attach to a global provider or just let it react to mouse/touch.
+            className="fixed inset-0 pointer-events-none overflow-hidden z-[-1]"
         >
-            {/* We need a global mouse listener if this component is deep in the tree. 
-                 Ideally, the parent layout handles the mouse move and passes coordinates, 
-                 or we use window event listener. Since this is "background", let's use window. */}
             <BackgroundEffect mouseX={mouseX} mouseY={mouseY} />
+            {/* Dark mode overlay adjustment */}
+            <div className="absolute inset-0 bg-background/30 backdrop-blur-[1px]" />
         </div>
     );
 };
@@ -57,8 +54,8 @@ const BackgroundEffect = ({ mouseX, mouseY }: { mouseX: any, mouseY: any }) => {
     const x = useSpring(mouseX, springConfig);
     const y = useSpring(mouseY, springConfig);
 
-    const moveX = useTransform(x, [0, 1], [-50, 50]);
-    const moveY = useTransform(y, [0, 1], [-50, 50]);
+    const moveX = useTransform(x, [0, 1], [-60, 60]);
+    const moveY = useTransform(y, [0, 1], [-60, 60]);
     const glowX = useTransform(x, [0, 1], ['0%', '100%']);
     const glowY = useTransform(y, [0, 1], ['0%', '100%']);
 
@@ -66,14 +63,12 @@ const BackgroundEffect = ({ mouseX, mouseY }: { mouseX: any, mouseY: any }) => {
         <>
             <motion.div
                 style={{ x: moveX, y: moveY }}
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] h-[90vw] bg-primary/5 rounded-full blur-[140px]"
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[160vw] h-[160vw] bg-primary/10 rounded-full blur-[180px]"
             />
             <motion.div
                 style={{ left: glowX, top: glowY }}
-                className="absolute w-[600px] h-[600px] bg-secondary/5 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2 transition-opacity duration-1000 opacity-60"
+                className="absolute w-[120vw] h-[120vw] bg-secondary/10 rounded-full blur-[160px] -translate-x-1/2 -translate-y-1/2 transition-opacity duration-1000 opacity-70"
             />
-            {/* Dark overlay to ensure contrast */}
-            <div className="absolute inset-0 bg-background/80 backdrop-blur-[1px]" />
         </>
     );
 };

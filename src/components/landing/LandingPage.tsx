@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { Icon } from '../common/Icon';
-import logo from '../../assets/logo.svg';
+import logoLight from '../../assets/logo-light.png';
+import logoDark from '../../assets/logo-dark.png';
 export const LandingPage = ({ onGetStarted, onSignIn }: { onGetStarted: () => void, onSignIn: () => void }) => {
     const mouseX = useMotionValue(0);
     const mouseY = useMotionValue(0);
@@ -41,9 +42,10 @@ export const LandingPage = ({ onGetStarted, onSignIn }: { onGetStarted: () => vo
                 >
                     <motion.div
                         whileHover={{ scale: 1.05 }}
-                        className="inline-flex items-center justify-center w-24 h-24 md:w-32 md:h-32 mb-4"
+                        className="inline-flex items-center justify-center w-24 h-24 md:w-32 md:h-32 mb-4 relative"
                     >
-                        <img src={logo} alt="Gapes Logo" className="w-full h-full drop-shadow-2xl" />
+                        <img src={logoLight} alt="Gapes Logo" className="w-full h-full object-contain drop-shadow-2xl dark:hidden block" />
+                        <img src={logoDark} alt="Gapes Logo" className="w-full h-full object-contain drop-shadow-2xl hidden dark:block" />
                     </motion.div>
 
                     <h1 className="text-[clamp(3.5rem,13vw,10rem)] font-black tracking-tighter text-foreground leading-[0.85] select-none opacity-30 group-hover:opacity-100 transition-opacity duration-700">
