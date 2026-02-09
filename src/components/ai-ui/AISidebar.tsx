@@ -48,15 +48,26 @@ export const AISidebar: React.FC<AISidebarProps> = ({
     const { toast } = useToast();
 
     const handleAcceptReq = async (id: string, name: string) => {
+        // Optimistic update
+        setFollowReqs(prev => prev.map(req =>
+            req.id === id ? { ...req, status: 'accepted' as const } : req
+        ));
+
         try {
             await acceptFollowRequest(id);
             toast(`You follow ${name}`, 'success');
         } catch (err: any) {
             toast(err.message || "Failed to accept", 'error');
+            // Error handling: the subscription will eventually reset the state to the server state
         }
     };
 
     const handleDeclineReq = async (id: string) => {
+        // Optimistic update
+        setFollowReqs(prev => prev.map(req =>
+            req.id === id ? { ...req, status: 'declined' as const } : req
+        ));
+
         try {
             await declineFollowRequest(id);
             toast("Request declined", 'info');

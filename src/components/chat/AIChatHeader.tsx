@@ -80,13 +80,18 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
             const ids = groupId.split('_');
             const otherId = ids.find(id => id !== user.id);
             if (otherId) {
-                await unfollowUser(otherId);
-                toast("Unfollowed user", "success");
+                // Optimistic UI: Close menu, show toast, and leave immediately
+                setShowMore(false);
+                setShowUnfollowConfirm(false);
+                toast("Connection terminating...", "info");
                 onLeave?.();
+
+                // Run actual deletion in background
+                await unfollowUser(otherId);
             }
         } catch (error) {
             console.error(error);
-            toast("Failed to unfollow", "error");
+            toast("Failed to terminate sync", "error");
         }
     };
 

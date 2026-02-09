@@ -191,9 +191,9 @@ export const unfollowUser = async (otherUserId: string): Promise<void> => {
     const batch = writeBatch(db);
     const requestsRef = collection(db, 'follow_requests');
 
-    // 1. Find the accepted request (could be in either direction)
-    const q1 = query(requestsRef, where('fromId', '==', currentUser.uid), where('toId', '==', otherUserId), where('status', '==', 'accepted'));
-    const q2 = query(requestsRef, where('fromId', '==', otherUserId), where('toId', '==', currentUser.uid), where('status', '==', 'accepted'));
+    // 1. Delete ALL follow requests between these users (any status)
+    const q1 = query(requestsRef, where('fromId', '==', currentUser.uid), where('toId', '==', otherUserId));
+    const q2 = query(requestsRef, where('fromId', '==', otherUserId), where('toId', '==', currentUser.uid));
 
     const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
     snap1.docs.forEach(d => batch.delete(d.ref));
@@ -205,19 +205,14 @@ export const unfollowUser = async (otherUserId: string): Promise<void> => {
     const chatRef = doc(db, 'personal_chats', chatId);
     batch.delete(chatRef);
 
-    // 3. Delete related notifications
+    // 3. Delete related notifications for CURRENT USER ONLY
     const notificationsRef = collection(db, 'notifications');
-    // Notifications where current user is recipient and other user is "sender" (via groupId)
     const n1 = query(notificationsRef, where('userId', '==', currentUser.uid), where('groupId', '==', otherUserId));
-    // Notifications where other user is recipient and current user is "sender" (via groupId)
-    const n2 = query(notificationsRef, where('userId', '==', otherUserId), where('groupId', '==', currentUser.uid));
-    // Notifications for the personal chat specifically
-    const n3 = query(notificationsRef, where('groupId', '==', chatId));
+    const n3 = query(notificationsRef, where('userId', '==', currentUser.uid), where('groupId', '==', chatId));
 
-    const [sn1, sn2, sn3] = await Promise.all([getDocs(n1), getDocs(n2), getDocs(n3)]);
+    const [sn1, sn3] = await Promise.all([getDocs(n1), getDocs(n3)]);
 
     sn1.docs.forEach(d => batch.delete(d.ref));
-    sn2.docs.forEach(d => batch.delete(d.ref));
     sn3.docs.forEach(d => batch.delete(d.ref));
 
     await batch.commit();

@@ -181,7 +181,12 @@ const FollowRequestItem = ({ note, onSelectPersonal }: { note: Notification; onS
     const { toast } = useToast();
 
     const handleAction = async (action: 'accept' | 'decline') => {
-        setLoading(true);
+        const newStatus = action === 'accept' ? 'accepted' : 'declined';
+
+        // Optimistic UI
+        setActionStatus(newStatus);
+        setLoading(false); // Hide spinner immediately
+
         try {
             const requestsRef = collection(db, 'follow_requests');
             const user = auth.currentUser;
@@ -194,25 +199,27 @@ const FollowRequestItem = ({ note, onSelectPersonal }: { note: Notification; onS
                 limit(1)
             );
             const snap = await getDocs(q);
-            if (snap.empty) throw new Error("Request no longer valid");
+            if (snap.empty) {
+                // If it was already processed elsewhere, just mark notification
+                await markAsRead(note.id, { followStatus: newStatus });
+                return;
+            }
 
             const requestId = snap.docs[0].id;
 
             if (action === 'accept') {
                 await acceptFollowRequest(requestId);
-                setActionStatus('accepted');
                 await markAsRead(note.id, { followStatus: 'accepted' });
                 toast(`You follow ${note.senderName}`, 'success');
             } else {
                 await declineFollowRequest(requestId);
-                setActionStatus('declined');
                 await markAsRead(note.id, { followStatus: 'declined' });
                 toast(`Request declined`, 'info');
             }
         } catch (err: any) {
-            toast(err.message || "Something went wrong", 'error');
-        } finally {
-            setLoading(false);
+            console.error(err);
+            // On hard error, we could revert, but usually with subscription it's better to just log
+            // toast(err.message || "Action failed", 'error'); 
         }
     };
 
