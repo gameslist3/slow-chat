@@ -93,10 +93,10 @@ export const AILayout: React.FC<AILayoutProps> = ({
             <AnimatePresence>
                 {showNotifications && (
                     <motion.div
-                        initial={{ opacity: 0, x: 20, scale: 0.95 }}
+                        initial={{ opacity: 0, x: -20, scale: 0.95 }}
                         animate={{ opacity: 1, x: 0, scale: 1 }}
-                        exit={{ opacity: 0, x: 20, scale: 0.95 }}
-                        className="fixed inset-0 z-[100] md:inset-auto md:top-6 md:right-6 md:w-full md:max-w-sm"
+                        exit={{ opacity: 0, x: -20, scale: 0.95 }}
+                        className="fixed inset-0 z-[100] md:inset-auto md:top-8 md:left-[340px] md:w-full md:max-w-sm"
                     >
                         <NotificationCenter
                             onClose={() => setShowNotifications(false)}
@@ -139,6 +139,9 @@ export const AILayout: React.FC<AILayoutProps> = ({
                         user={user}
                         onLogout={onLogout}
                         onClose={() => setSidebarOpen(false)}
+                        unreadNotifications={unreadNotifications}
+                        showNotifications={showNotifications}
+                        onToggleNotifications={() => setShowNotifications(!showNotifications)}
                     />
                 </aside>
 
@@ -148,7 +151,7 @@ export const AILayout: React.FC<AILayoutProps> = ({
                 >
                     <header className={`
                         flex items-center justify-between px-6 py-4 md:px-8 md:py-6 border-b border-border/5 bg-background/5 backdrop-blur-xl sticky top-0 z-40 h-[70px] md:h-[90px]
-                        ${activeChatId ? 'hidden md:flex' : 'flex'}
+                        ${activeChatId ? 'hidden md:hidden' : 'flex md:hidden'}
                     `}>
                         <div className="flex items-center gap-4">
                             <button className="md:hidden active:scale-95 transition-transform" onClick={() => setSidebarOpen(true)}>

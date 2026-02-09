@@ -24,6 +24,9 @@ interface AISidebarProps {
     user: User | null;
     onLogout: () => void;
     onClose?: () => void;
+    unreadNotifications: number;
+    showNotifications: boolean;
+    onToggleNotifications: () => void;
 }
 
 export const AISidebar: React.FC<AISidebarProps> = ({
@@ -40,7 +43,10 @@ export const AISidebar: React.FC<AISidebarProps> = ({
     onGoHome,
     user,
     onLogout,
-    onClose
+    onClose,
+    unreadNotifications,
+    showNotifications,
+    onToggleNotifications
 }) => {
     const { personalChats } = useInbox();
     const [followReqs, setFollowReqs] = useState<FollowRequest[]>([]);
@@ -94,9 +100,34 @@ export const AISidebar: React.FC<AISidebarProps> = ({
             {/* Header */}
             <div className="p-8 pb-4 flex items-center justify-between">
                 <button onClick={onGoHome} className="active:scale-95 transition-transform"><Logo className="h-9 w-auto" /></button>
-                <div className="flex gap-3">
-                    <button onClick={onBrowseGroups} className="w-10 h-10 glass-card rounded-xl flex items-center justify-center text-muted-foreground"><Icon name="compass" className="w-5 h-5" /></button>
-                    <button onClick={onCreateGroup} className="w-10 h-10 glass-card rounded-xl flex items-center justify-center text-muted-foreground"><Icon name="plus" className="w-5 h-5" /></button>
+                <div className="flex gap-2">
+                    <button
+                        onClick={onToggleNotifications}
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all relative group/bell ${showNotifications ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'glass-card text-muted-foreground hover:bg-foreground/10'}`}
+                    >
+                        <motion.div
+                            animate={unreadNotifications > 0 ? {
+                                rotate: [0, -10, 10, -10, 10, 0],
+                                scale: [1, 1.1, 1]
+                            } : {}}
+                            transition={{
+                                repeat: Infinity,
+                                duration: 2,
+                                repeatDelay: 3
+                            }}
+                        >
+                            <Icon name="bell" className="w-4 h-4" />
+                        </motion.div>
+
+                        {unreadNotifications > 0 && (
+                            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[8px] font-black text-white border-2 border-background shadow-lg">
+                                {unreadNotifications > 9 ? '9+' : unreadNotifications}
+                            </span>
+                        )}
+                    </button>
+                    <ThemeToggle />
+                    <button onClick={onBrowseGroups} className="w-10 h-10 glass-card rounded-xl flex items-center justify-center text-muted-foreground hover:bg-foreground/10 transition-all"><Icon name="compass" className="w-4 h-4" /></button>
+                    <button onClick={onCreateGroup} className="w-10 h-10 glass-card rounded-xl flex items-center justify-center text-muted-foreground hover:bg-foreground/10 transition-all"><Icon name="plus" className="w-4 h-4" /></button>
                 </div>
             </div>
 
