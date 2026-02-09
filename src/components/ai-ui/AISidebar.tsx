@@ -100,34 +100,13 @@ export const AISidebar: React.FC<AISidebarProps> = ({
             {/* Header */}
             <div className="p-8 pb-4 flex items-center justify-between">
                 <button onClick={onGoHome} className="active:scale-95 transition-transform"><Logo className="h-9 w-auto" /></button>
-                <div className="flex gap-2">
-                    <button
-                        onClick={onToggleNotifications}
-                        className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all relative group/bell ${showNotifications ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'glass-card text-muted-foreground hover:bg-foreground/10'}`}
-                    >
-                        <motion.div
-                            animate={unreadNotifications > 0 ? {
-                                rotate: [0, -10, 10, -10, 10, 0],
-                                scale: [1, 1.1, 1]
-                            } : {}}
-                            transition={{
-                                repeat: Infinity,
-                                duration: 2,
-                                repeatDelay: 3
-                            }}
-                        >
-                            <Icon name="bell" className="w-4 h-4" />
-                        </motion.div>
-
-                        {unreadNotifications > 0 && (
-                            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[8px] font-black text-white border-2 border-background shadow-lg">
-                                {unreadNotifications > 9 ? '9+' : unreadNotifications}
-                            </span>
-                        )}
+                <div className="flex gap-4">
+                    <button onClick={onBrowseGroups} className="w-12 h-12 glass-card rounded-xl flex items-center justify-center text-muted-foreground hover:bg-foreground/10 transition-all shadow-sm">
+                        <Icon name="compass" className="w-6 h-6" />
                     </button>
-                    <ThemeToggle />
-                    <button onClick={onBrowseGroups} className="w-10 h-10 glass-card rounded-xl flex items-center justify-center text-muted-foreground hover:bg-foreground/10 transition-all"><Icon name="compass" className="w-4 h-4" /></button>
-                    <button onClick={onCreateGroup} className="w-10 h-10 glass-card rounded-xl flex items-center justify-center text-muted-foreground hover:bg-foreground/10 transition-all"><Icon name="plus" className="w-4 h-4" /></button>
+                    <button onClick={onCreateGroup} className="w-12 h-12 glass-card rounded-xl flex items-center justify-center text-muted-foreground hover:bg-foreground/10 transition-all shadow-sm">
+                        <Icon name="plus" className="w-6 h-6" />
+                    </button>
                 </div>
             </div>
 
@@ -141,10 +120,10 @@ export const AISidebar: React.FC<AISidebarProps> = ({
 
             {/* Tab Controller */}
             <div className="px-6 flex gap-3 mb-6">
-                <button onClick={() => setView('chats')} className={`flex-1 h-12 rounded-2xl text-xs font-black uppercase tracking-widest ${view === 'chats' ? 'btn-primary' : 'bg-foreground/5 text-muted-foreground'}`}>Chats</button>
-                <button onClick={() => setView('friends')} className={`relative w-12 h-12 rounded-2xl flex items-center justify-center ${view === 'friends' ? 'btn-secondary' : 'bg-foreground/5 text-muted-foreground'}`}>
-                    <Icon name="users" className="w-5 h-5" />
-                    {followReqs.length > 0 && <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-[9px] font-black rounded-full flex items-center justify-center border-2 border-background">{followReqs.length}</span>}
+                <button onClick={() => setView('chats')} className={`flex-1 h-12 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${view === 'chats' ? 'btn-primary' : 'bg-foreground/5 text-muted-foreground hover:bg-foreground/10'}`}>Chats</button>
+                <button onClick={() => setView('friends')} className={`relative w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${view === 'friends' ? 'btn-primary' : 'bg-foreground/5 text-muted-foreground hover:bg-foreground/10'}`}>
+                    <Icon name="users" className="w-6 h-6" />
+                    {followReqs.length > 0 && <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-[9px] font-black rounded-full flex items-center justify-center border-2 border-background shadow-lg">{followReqs.length}</span>}
                 </button>
             </div>
 
@@ -253,14 +232,52 @@ export const AISidebar: React.FC<AISidebarProps> = ({
 
             {/* User Footer */}
             <div className="p-6 border-t border-border/5 bg-foreground/5 mt-auto">
-                <button onClick={onOpenSettings} className="w-full flex items-center gap-3 p-2 rounded-2xl hover:bg-foreground/10 transition-all">
-                    <div className="relative">
-                        <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center text-primary font-black text-xs">{user?.username?.[0].toUpperCase() || 'U'}</div>
-                        <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-green-500 border-2 border-background" />
+                <div className="flex items-center gap-3">
+                    <button onClick={onOpenSettings} className="flex-1 flex items-center gap-4 p-2 rounded-2xl hover:bg-foreground/10 transition-all group/profile">
+                        <div className="relative">
+                            <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center text-primary font-black text-sm border border-primary/20">{user?.username?.[0].toUpperCase() || 'U'}</div>
+                            <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-green-500 border-2 border-background shadow-sm" />
+                        </div>
+                        <div className="text-left flex-1 min-w-0">
+                            <p className="text-sm font-black truncate text-foreground/90">{user?.username || 'Gapes User'}</p>
+                            <p className="text-[9px] font-bold text-primary/40 uppercase tracking-widest">Active Link</p>
+                        </div>
+                    </button>
+
+                    <div className="flex gap-2">
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onToggleNotifications(); }}
+                            className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all relative group/bell ${showNotifications ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-foreground/10 text-muted-foreground hover:bg-foreground/20 hover:text-foreground'}`}
+                        >
+                            <motion.div
+                                animate={unreadNotifications > 0 ? {
+                                    rotate: [0, -10, 10, -10, 10, 0],
+                                    scale: [1, 1.1, 1]
+                                } : {}}
+                                transition={{
+                                    repeat: Infinity,
+                                    duration: 2,
+                                    repeatDelay: 3
+                                }}
+                            >
+                                <Icon name="bell" className="w-5 h-5" />
+                            </motion.div>
+
+                            {unreadNotifications > 0 && (
+                                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-black text-white border-2 border-background shadow-lg">
+                                    {unreadNotifications > 9 ? '9+' : unreadNotifications}
+                                </span>
+                            )}
+                        </button>
+
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onOpenSettings(); }}
+                            className="w-12 h-12 bg-foreground/10 text-muted-foreground hover:bg-foreground/20 hover:text-foreground rounded-xl flex items-center justify-center transition-all shadow-sm"
+                        >
+                            <Icon name="settings" className="w-5 h-5" />
+                        </button>
                     </div>
-                    <div className="text-left flex-1"><p className="text-sm font-black">{user?.username || 'Gapes User'}</p></div>
-                    <Icon name="settings" className="w-4 h-4 text-muted-foreground" />
-                </button>
+                </div>
             </div>
         </aside>
     );

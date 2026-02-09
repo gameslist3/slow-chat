@@ -4,11 +4,13 @@ import {
     getPendingRequests,
     subscribeToFriends,
     acceptFollowRequest,
-    declineFollowRequest
+    declineFollowRequest,
+    unfollowUser
 } from '../../services/firebaseFollowService';
 import { auth } from '../../config/firebase';
 import { FollowRequest } from '../../types';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useToast } from '../../context/ToastContext';
 
 interface Friend {
     requestId: string;
@@ -23,6 +25,7 @@ export const FriendsList: React.FC<{ onSelectFriend?: (friendId: string) => void
     const [requests, setRequests] = useState<FollowRequest[]>([]);
     const [loading, setLoading] = useState(true);
     const currentUser = auth.currentUser;
+    const { toast } = useToast();
 
     useEffect(() => {
         if (!currentUser) return;
@@ -63,6 +66,18 @@ export const FriendsList: React.FC<{ onSelectFriend?: (friendId: string) => void
         } catch (error) {
             console.error("Failed to decline request:", error);
             setRequests(originalRequests);
+        }
+    };
+
+    const handleUnfollowFriend = async (friendId: string, username: string) => {
+        if (!confirm(`Are you sure you want to terminate connection with ${username}?`)) return;
+
+        try {
+            await unfollowUser(friendId);
+            toast(`Connection with ${username} terminated.`, 'info');
+        } catch (error) {
+            console.error("Failed to unfollow:", error);
+            toast("Failed to terminate sync", 'error');
         }
     };
 
@@ -124,23 +139,37 @@ export const FriendsList: React.FC<{ onSelectFriend?: (friendId: string) => void
                                     </div>
                                 ) : (
                                     friends.map((friend) => (
-                                        <button
+                                        <div
                                             key={friend.uid}
-                                            onClick={() => onSelectFriend?.(friend.uid)}
-                                            className="group w-full flex items-center justify-between p-3 rounded-2xl glass-card border border-white/5 hover:bg-white/10 transition-all text-left"
+                                            className="group w-full flex items-center justify-between p-4 rounded-2xl glass-card border border-white/5 hover:bg-white/10 transition-all text-left"
                                         >
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-xl bg-primary/20 flex items-center justify-center text-primary font-black text-xs shadow-lg shadow-primary/10">
+                                            <button
+                                                onClick={() => onSelectFriend?.(friend.uid)}
+                                                className="flex flex-1 items-center gap-4 min-w-0"
+                                            >
+                                                <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary font-black text-sm shadow-lg shadow-primary/10 group-hover:scale-110 transition-transform">
                                                     {friend.username.substring(0, 2).toUpperCase()}
                                                 </div>
-                                                <span className="font-bold text-sm text-white/90">{friend.username}</span>
+                                                <span className="font-bold text-sm text-white/90 truncate">{friend.username}</span>
+                                            </button>
+
+                                            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button
+                                                    onClick={() => onSelectFriend?.(friend.uid)}
+                                                    className="p-3 rounded-xl bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all"
+                                                    title="Message"
+                                                >
+                                                    <Icon name="message" className="w-5 h-5" />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleUnfollowFriend(friend.uid, friend.username)}
+                                                    className="p-3 rounded-xl bg-destructive/10 text-destructive hover:bg-destructive hover:text-white transition-all"
+                                                    title="Unfollow"
+                                                >
+                                                    <Icon name="userMinus" className="w-5 h-5" />
+                                                </button>
                                             </div>
-                                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <div className="p-2 rounded-xl bg-primary/10 text-primary">
-                                                    <Icon name="message" className="w-4 h-4" />
-                                                </div>
-                                            </div>
-                                        </button>
+                                        </div>
                                     ))
                                 )}
                             </motion.div>
@@ -163,29 +192,29 @@ export const FriendsList: React.FC<{ onSelectFriend?: (friendId: string) => void
                                     requests.map((req) => (
                                         <div
                                             key={req.id}
-                                            className="p-3 rounded-2xl glass-card flex flex-col gap-3"
+                                            className="p-4 rounded-2xl glass-card flex flex-col gap-4 border border-white/5"
                                         >
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-xl bg-accent/20 flex items-center justify-center text-accent font-black text-xs ring-1 ring-accent/30">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center text-accent font-black text-sm ring-1 ring-accent/30 shadow-lg">
                                                     {req.fromUsername.substring(0, 2).toUpperCase()}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <p className="text-sm font-bold truncate text-white/90">{req.fromUsername}</p>
-                                                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Wants to join your network</p>
+                                                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold opacity-60">Wants to connect</p>
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <button
                                                     onClick={() => handleAccept(req.id!)}
-                                                    className="flex-1 py-2 bg-primary/20 hover:bg-primary text-primary hover:text-white text-xs font-black rounded-xl transition-all flex items-center justify-center gap-1 uppercase tracking-wider"
+                                                    className="flex-1 py-3 bg-primary text-white text-xs font-black rounded-xl transition-all flex items-center justify-center gap-2 uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-105 active:scale-95"
                                                 >
-                                                    <Icon name="check" className="w-3 h-3" /> Accept
+                                                    <Icon name="check" className="w-4 h-4" /> Accept
                                                 </button>
                                                 <button
                                                     onClick={() => handleDecline(req.id!)}
-                                                    className="flex-1 py-2 bg-white/5 hover:bg-red-500/20 text-muted-foreground hover:text-red-400 text-xs font-black rounded-xl transition-all flex items-center justify-center gap-1 uppercase tracking-wider"
+                                                    className="flex-1 py-3 bg-foreground/5 text-muted-foreground hover:bg-destructive hover:text-white text-xs font-black rounded-xl transition-all flex items-center justify-center gap-2 uppercase tracking-widest hover:scale-105 active:scale-95"
                                                 >
-                                                    <Icon name="x" className="w-3 h-3" /> Decline
+                                                    <Icon name="x" className="w-4 h-4" /> Decline
                                                 </button>
                                             </div>
                                         </div>

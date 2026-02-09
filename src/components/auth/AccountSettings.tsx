@@ -5,6 +5,7 @@ import { useToast } from '../../context/ToastContext';
 import { Icon } from '../common/Icon';
 import { generateAnonymousName } from '../../services/firebaseAuthService';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ThemeToggle } from '../ai-ui/ThemeToggle';
 export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout: () => void }) => {
     const { user, updateUsername, resetPassword } = useAuth();
     const { toast } = useToast();
@@ -145,26 +146,43 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
 
                     {/* Security Section */}
                     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-100">
-                        <h2 className="text-sm font-bold text-gray-500 uppercase tracking-widest pl-2">Security</h2>
+                        <h2 className="text-sm font-bold text-gray-500 uppercase tracking-widest pl-2">Security & Preferences</h2>
 
-                        <div className="glass-panel p-6 rounded-3xl flex items-center justify-between hover:border-white/10 transition-all">
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-white/5 rounded-xl text-gray-400 flex items-center justify-center">
-                                    <Icon name="key" className="w-5 h-5" />
+                        <div className="space-y-4">
+                            <div className="glass-panel p-6 rounded-3xl flex items-center justify-between hover:border-white/10 transition-all">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-white/5 rounded-xl text-gray-400 flex items-center justify-center">
+                                        <Icon name="key" className="w-5 h-5" />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <p className="font-bold text-base text-foreground">Password</p>
+                                        <p className="text-xs font-medium text-gray-500">Manage your access key.</p>
+                                    </div>
                                 </div>
-                                <div className="flex flex-col">
-                                    <p className="font-bold text-base text-foreground">Password</p>
-                                    <p className="text-xs font-medium text-gray-500">Manage your access key.</p>
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="px-4 h-10 glass-card bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 text-xs font-bold tracking-wider uppercase rounded-lg transition-all"
+                                    onClick={handlePasswordReset}
+                                >
+                                    Reset
+                                </motion.button>
+                            </div>
+
+                            <div className="glass-panel p-6 rounded-3xl flex items-center justify-between hover:border-white/10 transition-all">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-white/5 rounded-xl text-gray-400 flex items-center justify-center">
+                                        <Icon name="zap" className="w-5 h-5" />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <p className="font-bold text-base text-foreground">Interface Mode</p>
+                                        <p className="text-xs font-medium text-gray-500">Toggle between light and dark.</p>
+                                    </div>
+                                </div>
+                                <div className="p-1 glass-card rounded-xl">
+                                    <ThemeToggle />
                                 </div>
                             </div>
-                            <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                className="px-4 h-10 glass-card bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 text-xs font-bold tracking-wider uppercase rounded-lg transition-all"
-                                onClick={handlePasswordReset}
-                            >
-                                Reset
-                            </motion.button>
                         </div>
                     </div>
 

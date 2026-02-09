@@ -96,7 +96,7 @@ export const AILayout: React.FC<AILayoutProps> = ({
                         initial={{ opacity: 0, x: -20, scale: 0.95 }}
                         animate={{ opacity: 1, x: 0, scale: 1 }}
                         exit={{ opacity: 0, x: -20, scale: 0.95 }}
-                        className="fixed inset-0 z-[100] md:inset-auto md:top-8 md:left-[340px] md:w-full md:max-w-sm"
+                        className="fixed inset-0 z-[100] md:inset-auto md:bottom-28 md:left-[340px] md:w-full md:max-w-sm"
                     >
                         <NotificationCenter
                             onClose={() => setShowNotifications(false)}
