@@ -54,11 +54,11 @@ export const GroupDiscovery: React.FC<GroupDiscoveryProps> = ({
 
                 <div className="max-w-md mx-auto relative p-1 shadow-sm rounded-xl">
                     <Input
-                        placeholder="Search groups..."
+                        placeholder="Connect with a cluster..."
                         value={filter}
                         onChange={e => setFilter(e.target.value)}
-                        className="pl-12 h-14 text-lg shadow-lg border-transparent focus:border-indigo-300 rounded-xl"
-                        icon={<Search className="w-5 h-5 text-gray-400" />}
+                        className="pl-12 h-16 text-lg shadow-2xl border-white/5 bg-background/40 backdrop-blur-xl rounded-2xl focus:ring-primary/20 focus:border-primary/30"
+                        icon={<Search className="w-5 h-5 text-muted-foreground/40" />}
                     />
                 </div>
 

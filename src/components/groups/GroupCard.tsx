@@ -11,48 +11,53 @@ interface GroupCardProps {
 
 export const GroupCard: React.FC<GroupCardProps> = ({ group, isJoined, onAction }) => {
     return (
-        <div className="group relative bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:border-indigo-100 transition-all duration-300 flex flex-col h-full">
-            <div className="flex justify-between items-start mb-6">
-                <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center text-3xl shadow-inner group-hover:scale-110 transition-transform duration-300">
+        <div
+            onClick={onAction}
+            className="group relative glass-panel rounded-[2.5rem] p-8 border border-white/5 shadow-2xl hover:border-primary/30 transition-all duration-500 flex flex-col h-full cursor-pointer overflow-hidden"
+        >
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+
+            <div className="flex justify-between items-start mb-8 relative z-10">
+                <div className="w-16 h-16 glass-card rounded-[1.5rem] flex items-center justify-center text-4xl shadow-2xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 border-white/10">
                     {group.image}
                 </div>
-                <span className="px-3 py-1 bg-gray-50 text-xs font-semibold text-gray-500 rounded-full uppercase tracking-wide">
+                <span className="px-4 py-1.5 glass-card text-[10px] font-black text-primary/60 rounded-full uppercase tracking-[0.2em] border-primary/20">
                     {group.category}
                 </span>
             </div>
 
-            <div className="mb-4">
-                <h3 className="text-xl font-bold text-gray-900 mb-2 leading-tight group-hover:text-indigo-700 transition-colors">
+            <div className="mb-6 relative z-10">
+                <h3 className="text-2xl font-black text-foreground mb-3 leading-none tracking-tight group-hover:text-primary transition-colors">
                     {group.name}
                 </h3>
-                <p className="text-sm text-gray-500 line-clamp-2">
-                    A place for thoughtful conversation about {group.category.toLowerCase()}.
+                <p className="text-sm font-medium text-muted-foreground/60 leading-relaxed line-clamp-2">
+                    {group.description || `A decentralized cluster for human coordination regarding ${group.category.toLowerCase()}.`}
                 </p>
             </div>
 
-            <div className="mt-auto pt-6 border-t border-gray-50 flex items-center justify-between">
-                <div className="flex flex-col gap-1">
-                    <span className="flex items-center text-sm font-medium text-gray-600">
-                        <Users className="w-4 h-4 mr-1.5 text-gray-400" /> {group.members}
+            <div className="mt-auto pt-8 border-t border-white/5 flex items-center justify-between relative z-10">
+                <div className="flex flex-col gap-2">
+                    <span className="flex items-center text-[10px] font-black text-muted-foreground/40 uppercase tracking-widest">
+                        <Users className="w-3.5 h-3.5 mr-2 text-primary/40" /> {group.members || group.memberCount || 0} COORDINATORS
                     </span>
-                    {group.activeUsers.length > 0 && (
-                        <span className="flex items-center text-xs text-green-600 font-medium">
-                            <Activity className="w-3 h-3 mr-1.5" /> {group.activeUsers.length} online
-                        </span>
-                    )}
+                    <div className="flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                        <span className="text-[10px] font-black text-green-500/60 uppercase tracking-widest">Protocol Active</span>
+                    </div>
                 </div>
 
-                <Button
-                    variant={isJoined ? "secondary" : "default"}
-                    size="sm"
+                <button
                     onClick={(e) => {
                         e.stopPropagation();
                         onAction();
                     }}
-                    className={isJoined ? "" : "bg-indigo-600 hover:bg-indigo-700"}
+                    className={`h-12 px-6 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-2 ${isJoined
+                            ? "bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20"
+                            : "btn-primary shadow-lg shadow-primary/20 hover:shadow-primary/40"
+                        }`}
                 >
-                    {isJoined ? "Open" : "Join"} <ArrowRight className="w-4 h-4 ml-1 opacity-60" />
-                </Button>
+                    {isJoined ? "Open" : "Connect"} <ArrowRight className="w-4 h-4 opacity-60 group-hover:translate-x-1 transition-transform" />
+                </button>
             </div>
         </div>
     );

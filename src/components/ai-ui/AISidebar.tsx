@@ -227,7 +227,7 @@ export const AISidebar: React.FC<AISidebarProps> = ({
                         <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center text-primary font-black text-xs">{user?.username?.[0].toUpperCase() || 'U'}</div>
                         <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-green-500 border-2 border-background" />
                     </div>
-                    <div className="text-left flex-1"><p className="text-sm font-black">{user?.username || 'Gapes User'}</p><p className="text-[9px] font-black text-primary/60 uppercase">Authenticated</p></div>
+                    <div className="text-left flex-1"><p className="text-sm font-black">{user?.username || 'Gapes User'}</p></div>
                     <Icon name="settings" className="w-4 h-4 text-muted-foreground" />
                 </button>
             </div>

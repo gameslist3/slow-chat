@@ -384,7 +384,7 @@ const UserProfileCard = ({ userId, currentUserId, onClose }: { userId: string, c
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.8, y: 40 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="ui-card w-full max-w-[90vw] md:max-w-sm relative z-[1000] p-6 md:p-8 text-center space-y-8 border shadow-2xl bg-surface/90 backdrop-blur-2xl rounded-[3rem] overflow-hidden"
+                className="glass-panel w-full max-w-[90vw] md:max-w-sm relative z-[1000] p-10 md:p-12 text-center space-y-8 shadow-[0_40px_100px_rgba(0,0,0,0.5)] rounded-[3rem] overflow-hidden"
             >
                 <button
                     onClick={onClose}
@@ -423,12 +423,12 @@ const UserProfileCard = ({ userId, currentUserId, onClose }: { userId: string, c
                                     {status === 'accepted' ? <Icon name="check" className="w-5 h-5" /> :
                                         status === 'pending' ? <Icon name="rotate" className="w-5 h-5 animate-spin" /> :
                                             status === 'cooldown' ? <Icon name="clock" className="w-5 h-5" /> :
-                                                <Icon name="userPlus" className="w-5 h-5" />}
+                                                <Icon name="plus" className="w-5 h-5" />}
 
                                     {status === 'accepted' ? 'Connected' :
                                         status === 'pending' ? 'Requested' :
                                             status === 'cooldown' ? 'Wait' :
-                                                'Follow'}
+                                                'Connect'}
                                 </button>
                                 {status === 'accepted' && (
                                     <button

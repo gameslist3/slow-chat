@@ -285,11 +285,11 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
 
                             <div className="space-y-6">
                                 <div className="flex items-center justify-between text-[9px] font-bold tracking-widest opacity-40 uppercase pb-2 border-b border-white/5">
-                                    <span>Members ({memberCount})</span>
+                                    <span>Protocol Participants ({memberCount})</span>
                                     <Users className="w-4 h-4" />
                                 </div>
                                 <div className="max-h-64 overflow-y-auto space-y-4 custom-scrollbar pr-4">
-                                    {memberIds.map(id => (
+                                    {memberIds.length > 0 ? memberIds.map(id => (
                                         <div key={id} className="flex items-center gap-5 p-4 rounded-3xl bg-foreground/5 border border-white/5 group hover:bg-foreground/10 transition-all">
                                             <div className="relative">
                                                 <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center text-white font-black text-sm shadow-xl shadow-primary/20 group-hover:scale-105 transition-transform border border-white/10">
@@ -298,15 +298,19 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
                                                 <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-green-500 border-2 border-[#0A0C10] shadow-sm" title="Online" />
                                             </div>
                                             <div className="flex-1">
-                                                <p className="font-bold text-base tracking-tight text-foreground/90">Member_{id.slice(0, 5)}</p>
+                                                <p className="font-bold text-base tracking-tight text-foreground/90">User_{id.slice(0, 5)}</p>
                                                 <div className="flex items-center gap-2 mt-1">
-                                                    <p className="text-[8px] font-bold text-primary tracking-widest uppercase opacity-40">Member</p>
+                                                    <p className="text-[8px] font-bold text-primary tracking-widest uppercase opacity-40">Resident</p>
                                                     <span className="w-1 h-1 rounded-full bg-green-500/50" />
-                                                    <span className="text-[8px] font-bold text-green-500/80 tracking-widest uppercase">Online</span>
+                                                    <span className="text-[8px] font-bold text-green-500/80 tracking-widest uppercase">Active Link</span>
                                                 </div>
                                             </div>
                                         </div>
-                                    ))}
+                                    )) : (
+                                        <div className="p-8 text-center border-2 border-dashed border-white/5 rounded-3xl opacity-30">
+                                            <p className="text-[10px] font-bold tracking-widest uppercase">Syncing member identities...</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </motion.div>
