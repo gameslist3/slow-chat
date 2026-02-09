@@ -105,6 +105,15 @@ export const CreateGroup: React.FC<CreateGroupProps> = ({ onGroupCreated }) => {
                     )}
                 </div>
 
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs text-amber-800 leading-relaxed">
+                    <p className="font-bold mb-1">⚠️ Community Guidelines</p>
+                    <ul className="list-disc pl-4 space-y-1">
+                        <li>Groups with no members for <strong>5 hours</strong> after creation will be automatically deleted.</li>
+                        <li>Groups that become empty will be deleted after <strong>2 hours</strong>.</li>
+                        <li>Group names cannot be changed once created.</li>
+                    </ul>
+                </div>
+
                 <div className="pt-4 flex justify-end gap-3">
                     <Button
                         type="submit"

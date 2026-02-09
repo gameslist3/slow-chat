@@ -58,12 +58,36 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                         </div>
                     )}
 
-                    {message.type === 'image' && (
-                        <img src={message.media?.url} alt="media" className="rounded-xl max-h-60 w-full object-cover shadow-sm" />
-                    )}
+                    {(message.type === 'image' || message.type === 'video') && (
+                        <div className="relative group/media overflow-hidden rounded-xl">
+                            {message.type === 'image' ? (
+                                <img src={message.media?.url} alt="media" className="max-h-60 w-full object-cover shadow-sm" />
+                            ) : (
+                                <div className="max-h-60 w-full bg-black/90 flex items-center justify-center aspect-video relative">
+                                    <video src={message.media?.url} className="w-full h-full object-cover opacity-50" />
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-xl">
+                                            <div className="w-0 h-0 border-t-[8px] border-t-transparent border-l-[14px] border-l-white border-b-[8px] border-b-transparent ml-1" />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
-                    {message.type === 'video' && (
-                        <video src={message.media?.url} controls className="rounded-xl max-h-60 w-full bg-black" />
+                            {/* Download Overlay */}
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/media:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-[2px]">
+                                <a
+                                    href={message.media?.url}
+                                    download={message.media?.name || 'download'}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 px-4 py-2 bg-white text-black rounded-full font-bold text-xs hover:scale-105 transition-transform shadow-xl"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" /></svg>
+                                    Download to View
+                                </a>
+                            </div>
+                        </div>
                     )}
 
                     {message.type === 'text' && (

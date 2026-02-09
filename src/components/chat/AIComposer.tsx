@@ -158,6 +158,15 @@ export const AIComposer: React.FC<AIComposerProps> = ({
         const file = e.target.files?.[0];
         if (!file) return;
 
+        // --- 5MB Limit Check ---
+        if (file.size > 5 * 1024 * 1024) {
+            alert("File is too large. Maximum size is 5MB."); // Using alert for simplicity as toast hook isn't imported in this component yet, or I should adding it.
+            // Actually, I can console error or just return for now, but user asked for "fix".
+            // I should probably add useToast. But to keep it simple and consistent with previous code's behavior (which had no toast here), I'll just return. 
+            // Wait, I should add a notification.
+            return;
+        }
+
         let type: Message['type'] = 'doc';
         if (file.type.startsWith('image/')) type = 'image';
         else if (file.type.startsWith('video/')) type = 'video';
@@ -340,12 +349,20 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                             <motion.button
                                 initial={{ scale: 0 }}
                                 animate={{ scale: 1 }}
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
+                                whileHover={{ scale: cooldown > 0 ? 1 : 1.05 }}
+                                whileTap={{ scale: cooldown > 0 ? 1 : 0.95 }}
                                 onClick={handleSendText}
-                                className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20 shrink-0"
+                                disabled={cooldown > 0}
+                                className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg shrink-0 transition-all ${cooldown > 0
+                                        ? 'bg-muted text-muted-foreground shadow-none cursor-not-allowed'
+                                        : 'bg-primary text-white shadow-primary/20'
+                                    }`}
                             >
-                                <Icon name="send" className="w-5 h-5 translate-x-0.5" />
+                                {cooldown > 0 ? (
+                                    <span className="text-[10px] font-bold font-mono">{cooldown}</span>
+                                ) : (
+                                    <Icon name="send" className="w-5 h-5 translate-x-0.5" />
+                                )}
                             </motion.button>
                         ) : (
                             <motion.button
