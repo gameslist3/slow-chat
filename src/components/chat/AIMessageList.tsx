@@ -3,7 +3,7 @@ import { Icon } from '../common/Icon';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Message, Reaction, User as InternalUser } from '../../types';
 import { getUserById } from '../../services/firebaseAuthService';
-import { sendFollowRequest, getFollowStatus, cancelFollowRequest } from '../../services/firebaseFollowService';
+import { sendFollowRequest, getFollowStatus, cancelFollowRequest, unfollowUser } from '../../services/firebaseFollowService';
 import { useToast } from '../../context/ToastContext';
 
 interface AIMessageListProps {
@@ -430,6 +430,27 @@ const UserProfileCard = ({ userId, currentUserId, onClose }: { userId: string, c
                                             status === 'cooldown' ? 'Wait' :
                                                 'Follow'}
                                 </button>
+                                {status === 'accepted' && (
+                                    <button
+                                        onClick={async () => {
+                                            if (!profile || actionLoading) return;
+                                            setActionLoading(true);
+                                            try {
+                                                await unfollowUser(profile.id);
+                                                setStatus('none');
+                                                toast(`Connection with ${profile.username} terminated.`, 'info');
+                                            } catch (err: any) {
+                                                toast(err.message || "Failed to terminate sync", 'error');
+                                            } finally {
+                                                setActionLoading(false);
+                                            }
+                                        }}
+                                        disabled={actionLoading}
+                                        className="w-full h-12 mt-3 rounded-2xl bg-destructive/5 text-destructive border border-destructive/10 hover:bg-destructive/10 text-[10px] font-black uppercase tracking-widest transition-all"
+                                    >
+                                        TERMINATE SYNC
+                                    </button>
+                                )}
                                 {status === 'pending' && (
                                     <p className="text-[9px] font-black uppercase tracking-widest opacity-30 mt-3 italic animate-pulse">Click to withdraw protocol</p>
                                 )}

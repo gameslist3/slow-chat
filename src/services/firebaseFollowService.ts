@@ -205,9 +205,20 @@ export const unfollowUser = async (otherUserId: string): Promise<void> => {
     const chatRef = doc(db, 'personal_chats', chatId);
     batch.delete(chatRef);
 
-    // 3. Delete messages for this chat (Optional but cleaner)
-    // Deleting subcollections is hard in client SDK, but we can leave them orphaned or use cloud function.
-    // For now, we just break the link by deleting the parent chat doc.
+    // 3. Delete related notifications
+    const notificationsRef = collection(db, 'notifications');
+    // Notifications where current user is recipient and other user is "sender" (via groupId)
+    const n1 = query(notificationsRef, where('userId', '==', currentUser.uid), where('groupId', '==', otherUserId));
+    // Notifications where other user is recipient and current user is "sender" (via groupId)
+    const n2 = query(notificationsRef, where('userId', '==', otherUserId), where('groupId', '==', currentUser.uid));
+    // Notifications for the personal chat specifically
+    const n3 = query(notificationsRef, where('groupId', '==', chatId));
+
+    const [sn1, sn2, sn3] = await Promise.all([getDocs(n1), getDocs(n2), getDocs(n3)]);
+
+    sn1.docs.forEach(d => batch.delete(d.ref));
+    sn2.docs.forEach(d => batch.delete(d.ref));
+    sn3.docs.forEach(d => batch.delete(d.ref));
 
     await batch.commit();
 };
