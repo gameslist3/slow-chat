@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Icon } from '../common/Icon';
 import { ThemeToggle } from './ThemeToggle';
-import { Group, User, PersonalChat, FollowRequest } from '../../types';
+import { Group, User, PersonalChat, FollowRequest, Notification } from '../../types';
 import { useInbox } from '../../hooks/useChat';
 import { getPendingRequests } from '../../services/firebaseFollowService';
+import { subscribeToNotifications } from '../../services/firebaseNotificationService';
 import { NotificationCenter } from '../chat/NotificationCenter';
 import { AbstractBackground } from '../ui/AbstractBackground';
 import { AISidebar } from './AISidebar';
@@ -48,7 +49,16 @@ export const AILayout: React.FC<AILayoutProps> = ({
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
     const [showBottomNav, setShowBottomNav] = useState(true);
+    const [unreadNotifications, setUnreadNotifications] = useState(0);
     const lastScrollY = React.useRef(0);
+
+    useEffect(() => {
+        const unsubscribe = subscribeToNotifications((notices: Notification[]) => {
+            const unread = notices.filter(n => !n.read).length;
+            setUnreadNotifications(unread);
+        });
+        return () => unsubscribe();
+    }, []);
 
     useEffect(() => {
         if (sidebarOpen) {
@@ -146,9 +156,28 @@ export const AILayout: React.FC<AILayoutProps> = ({
                         <div className="flex items-center gap-4">
                             <button
                                 onClick={() => setShowNotifications(!showNotifications)}
-                                className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${showNotifications ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-foreground/5 text-muted-foreground hover:bg-foreground/10'}`}
+                                className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all relative group/bell ${showNotifications ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-foreground/5 text-muted-foreground hover:bg-foreground/10'}`}
                             >
-                                <Icon name="bell" className="w-5 h-5" />
+                                <motion.div
+                                    animate={unreadNotifications > 0 ? {
+                                        rotate: [0, -10, 10, -10, 10, 0],
+                                        scale: [1, 1.1, 1]
+                                    } : {}}
+                                    transition={{
+                                        repeat: Infinity,
+                                        duration: 2,
+                                        repeatDelay: 3
+                                    }}
+                                >
+                                    <Icon name="bell" className="w-5 h-5" />
+                                </motion.div>
+
+                                {unreadNotifications > 0 && (
+                                    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-black text-white border-2 border-background shadow-lg group-hover/bell:scale-110 transition-transform">
+                                        {unreadNotifications > 9 ? '9+' : unreadNotifications}
+                                        <span className="absolute inset-0 rounded-full bg-primary animate-ping opacity-40 -z-10" />
+                                    </span>
+                                )}
                             </button>
                             <ThemeToggle />
                         </div>

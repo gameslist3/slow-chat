@@ -4,9 +4,10 @@ import { Icon } from '../common/Icon';
 import { ThemeToggle } from './ThemeToggle';
 import { Group, User, PersonalChat, FollowRequest } from '../../types';
 import { useInbox } from '../../hooks/useChat';
-import { getPendingRequests } from '../../services/firebaseFollowService';
+import { getPendingRequests, acceptFollowRequest, declineFollowRequest } from '../../services/firebaseFollowService';
 import { FriendsList } from '../social/FriendsList';
 import { Logo } from '../common/Logo';
+import { useToast } from '../../context/ToastContext';
 
 interface AISidebarProps {
     groups: Group[];
@@ -44,6 +45,25 @@ export const AISidebar: React.FC<AISidebarProps> = ({
     const { personalChats } = useInbox();
     const [followReqs, setFollowReqs] = useState<FollowRequest[]>([]);
     const [view, setView] = useState<'chats' | 'friends'>('chats');
+    const { toast } = useToast();
+
+    const handleAcceptReq = async (id: string, name: string) => {
+        try {
+            await acceptFollowRequest(id);
+            toast(`You follow ${name}`, 'success');
+        } catch (err: any) {
+            toast(err.message || "Failed to accept", 'error');
+        }
+    };
+
+    const handleDeclineReq = async (id: string) => {
+        try {
+            await declineFollowRequest(id);
+            toast("Request declined", 'info');
+        } catch (err: any) {
+            toast(err.message || "Failed to decline", 'error');
+        }
+    };
 
     useEffect(() => {
         if (!user?.id) return;
@@ -92,6 +112,42 @@ export const AISidebar: React.FC<AISidebarProps> = ({
                     <FriendsList onSelectFriend={handleFriendSelect} />
                 ) : (
                     <>
+                        {followReqs.length > 0 && (
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between px-2 mb-2">
+                                    <span className="text-[10px] font-black text-secondary uppercase tracking-[0.2em]">Pending Requests</span>
+                                    <span className="text-[10px] font-black text-secondary/40">{followReqs.length}</span>
+                                </div>
+                                {followReqs.map(req => (
+                                    <div key={req.id} className="w-full p-4 rounded-3xl bg-secondary/5 border border-secondary/10 flex flex-col gap-4">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center font-black bg-secondary text-black text-xs">
+                                                {req.fromUsername.slice(0, 2).toUpperCase()}
+                                            </div>
+                                            <div className="text-left flex-1 min-w-0">
+                                                <p className="font-bold text-sm tracking-tight truncate text-white">{req.fromUsername}</p>
+                                                <p className="text-[9px] font-bold text-secondary tracking-widest uppercase opacity-60">Wants to connect</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => handleAcceptReq(req.id, req.fromUsername)}
+                                                className="flex-1 h-9 bg-secondary text-black rounded-xl text-[9px] font-black tracking-widest hover:scale-105 active:scale-95 transition-all shadow-lg shadow-secondary/20"
+                                            >
+                                                ACCEPT
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeclineReq(req.id)}
+                                                className="flex-1 h-9 bg-foreground/5 text-muted-foreground border border-white/5 rounded-xl text-[9px] font-black tracking-widest hover:bg-destructive/10 hover:text-destructive transition-all"
+                                            >
+                                                DECLINE
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                                <div className="h-4" />
+                            </div>
+                        )}
                         <div className="space-y-3">
                             <div className="flex items-center justify-between px-2 mb-2">
                                 <span className="text-[10px] font-black text-primary/40 uppercase tracking-[0.2em]">Direct chat</span>

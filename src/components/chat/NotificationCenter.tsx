@@ -108,13 +108,19 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose,
                                 )}
                                 {notifications
                                     .filter(n => n.type !== 'follow_request' || n.read)
-                                    .map(note => (
+                                    .map((note, index) => (
                                         <motion.div
                                             key={note.id}
                                             layout
-                                            initial={{ opacity: 0, x: 20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            exit={{ opacity: 0, x: -20 }}
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, scale: 0.95 }}
+                                            transition={{
+                                                delay: index * 0.05,
+                                                type: 'spring',
+                                                damping: 20,
+                                                stiffness: 100
+                                            }}
                                             onClick={() => handleSelect(note)}
                                             className={`
                                                 group relative p-4 md:p-5 rounded-3xl transition-all cursor-pointer border
