@@ -91,7 +91,7 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
     };
 
     return (
-        <header className="flex items-center justify-between px-4 py-4 md:px-12 md:py-8 border-b border-border/5 bg-background/80 backdrop-blur-xl sticky top-0 z-40 shrink-0 w-full transition-all">
+        <header className="flex items-center justify-between px-4 py-4 md:px-12 md:py-8 border-b border-border/5 bg-background/95 backdrop-blur-xl sticky top-0 z-40 shrink-0 w-full transition-all shadow-sm">
             <div className="flex items-center gap-6">
                 <motion.button
                     whileHover={{ x: -4 }}
@@ -117,13 +117,6 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
                             {memberCount > 0 ? `${memberCount} Members` : 'Connecting...'}
                         </span>
                     </div>
-                    {/* Deletion Warning for New Groups */}
-                    {memberCount < 2 && (Date.now() - (createdAt || 0)) < 5 * 60 * 60 * 1000 && (
-                        <div className="mt-1 flex items-center gap-1.5 text-[9px] font-bold text-amber-500 uppercase tracking-wider animate-in fade-in slide-in-from-top-1">
-                            <span className="w-1 h-1 rounded-full bg-amber-500" />
-                            <span>Deletion in 5h if empty</span>
-                        </div>
-                    )}
                 </div>
             </div>
 

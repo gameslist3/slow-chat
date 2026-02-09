@@ -124,21 +124,38 @@ export const leaveGroup = async (groupId: string, userId: string): Promise<void>
     const groupRef = doc(db, 'groups', groupId);
     const userRef = doc(db, 'users', userId);
 
-    await runTransaction(db, async (transaction) => {
-        const groupSnap = await transaction.get(groupRef);
-        if (!groupSnap.exists()) return;
+    try {
+        // 1. Data Privacy: Delete all messages sent by this user in this group
+        const messagesRef = collection(db, `groups/${groupId}/messages`);
+        const q = query(messagesRef, where('senderId', '==', userId));
+        const messagesSnap = await getDocs(q);
 
-        transaction.update(groupRef, {
-            members: increment(-1),
-            memberCount: increment(-1),
-            memberIds: arrayRemove(userId)
+        const batch = writeBatch(db);
+        messagesSnap.docs.forEach((doc) => {
+            batch.delete(doc.ref);
         });
+        await batch.commit();
 
-        transaction.update(userRef, {
-            joinedGroups: arrayRemove(groupId),
-            mutedGroups: arrayRemove(groupId)
+        // 2. Remove user from group (Transaction)
+        await runTransaction(db, async (transaction) => {
+            const groupSnap = await transaction.get(groupRef);
+            if (!groupSnap.exists()) return;
+
+            transaction.update(groupRef, {
+                members: increment(-1),
+                memberCount: increment(-1),
+                memberIds: arrayRemove(userId)
+            });
+
+            transaction.update(userRef, {
+                joinedGroups: arrayRemove(groupId),
+                mutedGroups: arrayRemove(groupId)
+            });
         });
-    });
+    } catch (error) {
+        console.error("Error leaving group:", error);
+        throw error;
+    }
 };
 
 /**

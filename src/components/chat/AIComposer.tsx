@@ -311,70 +311,78 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                 {/* --- Default Text UI --- */}
                 {recState === 'idle' && (
                     <motion.div
+                        layout
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
-                        className="glass-panel w-full rounded-[2rem] p-2 pr-3 flex items-center gap-2 shadow-2xl border-white/5 bg-background/60 backdrop-blur-xl"
+                        className="w-full relative z-20"
                     >
-                        {/* Hidden File Input */}
-                        <input
-                            type="file"
-                            ref={fileInputRef}
-                            onChange={handleFileChange}
-                            className="hidden"
-                            accept="image/*,video/*,application/pdf"
-                        />
+                        <div className="absolute inset-0 bg-background/60 backdrop-blur-xl rounded-[2rem] shadow-2xl border border-white/10" />
 
-                        <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={() => fileInputRef.current?.click()}
-                            className="w-10 h-10 rounded-full bg-foreground/5 flex items-center justify-center text-muted-foreground hover:text-primary transition-all hover:bg-primary/10 shrink-0"
-                        >
-                            <Icon name="plus" className="w-5 h-5" />
-                        </motion.button>
-
-                        <div className="flex-1 relative flex items-center">
-                            <textarea
-                                ref={textareaRef}
-                                value={text}
-                                onChange={(e) => setText(e.target.value)}
-                                onKeyDown={handleKeyDown}
-                                placeholder="Type a message..."
-                                className="w-full bg-transparent border-none focus:ring-0 py-3 px-2 text-base font-medium placeholder:text-muted-foreground/40 outline-none resize-none leading-relaxed"
-                                style={{ height: '48px', minHeight: '48px', maxHeight: '120px' }}
+                        <div className="relative flex items-end gap-2 p-2 pl-4">
+                            {/* Hidden File Input */}
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleFileChange}
+                                className="hidden"
+                                accept="image/*,video/*,application/pdf"
                             />
-                        </div>
 
-                        {text.trim() ? (
                             <motion.button
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                whileHover={{ scale: cooldown > 0 ? 1 : 1.05 }}
-                                whileTap={{ scale: cooldown > 0 ? 1 : 0.95 }}
-                                onClick={handleSendText}
-                                disabled={cooldown > 0}
-                                className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg shrink-0 transition-all ${cooldown > 0
-                                        ? 'bg-muted text-muted-foreground shadow-none cursor-not-allowed'
-                                        : 'bg-primary text-white shadow-primary/20'
-                                    }`}
-                            >
-                                {cooldown > 0 ? (
-                                    <span className="text-[10px] font-bold font-mono">{cooldown}</span>
-                                ) : (
-                                    <Icon name="send" className="w-5 h-5 translate-x-0.5" />
-                                )}
-                            </motion.button>
-                        ) : (
-                            <motion.button
-                                whileHover={{ scale: 1.1 }}
+                                whileHover={{ scale: 1.1, rotate: 90 }}
                                 whileTap={{ scale: 0.9 }}
-                                onClick={startRecording}
-                                className="w-10 h-10 rounded-full bg-foreground/5 flex items-center justify-center text-muted-foreground hover:text-primary transition-all hover:bg-primary/10 shrink-0"
+                                onClick={() => fileInputRef.current?.click()}
+                                className="w-10 h-10 mb-1 rounded-full bg-surface/50 flex items-center justify-center text-muted-foreground hover:text-primary transition-all hover:bg-primary/10 shrink-0"
                             >
-                                <Icon name="mic" className="w-5 h-5" />
+                                <Icon name="plus" className="w-5 h-5" />
                             </motion.button>
-                        )}
-                    </motion.div>)}
+
+                            <div className="flex-1 relative py-3">
+                                <textarea
+                                    ref={textareaRef}
+                                    value={text}
+                                    onChange={(e) => setText(e.target.value)}
+                                    onKeyDown={handleKeyDown}
+                                    placeholder="Type a message..."
+                                    className="w-full bg-transparent border-none focus:ring-0 p-0 text-base font-medium placeholder:text-muted-foreground/50 outline-none resize-none leading-relaxed text-foreground max-h-[120px] min-h-[24px]"
+                                    style={{ height: 'auto', overflowY: 'auto' }}
+                                    rows={1}
+                                />
+                            </div>
+
+                            {text.trim() ? (
+                                <motion.button
+                                    initial={{ scale: 0, rotate: -45 }}
+                                    animate={{ scale: 1, rotate: 0 }}
+                                    whileHover={{ scale: cooldown > 0 ? 1 : 1.1 }}
+                                    whileTap={{ scale: cooldown > 0 ? 1 : 0.9 }}
+                                    onClick={handleSendText}
+                                    disabled={cooldown > 0}
+                                    className={`w-12 h-12 mb-0 rounded-full flex items-center justify-center shadow-lg shrink-0 transition-all ${cooldown > 0
+                                        ? 'bg-muted text-muted-foreground shadow-none cursor-not-allowed'
+                                        : 'bg-primary text-primary-foreground shadow-primary/30'
+                                        }`}
+                                >
+                                    {cooldown > 0 ? (
+                                        <span className="text-[10px] font-bold font-mono">{cooldown}</span>
+                                    ) : (
+                                        <Icon name="send" className="w-5 h-5 translate-x-0.5" />
+                                    )}
+                                </motion.button>
+                            ) : (
+                                <motion.button
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={startRecording}
+                                    className="w-10 h-10 mb-1 rounded-full bg-surface/50 flex items-center justify-center text-muted-foreground hover:text-destructive transition-all hover:bg-destructive/10 shrink-0 group"
+                                >
+                                    <div className="absolute inset-0 bg-destructive/20 rounded-full scale-0 group-hover:scale-100 transition-transform duration-300 opacity-0 group-hover:opacity-100 animate-pulse" />
+                                    <Icon name="mic" className="w-5 h-5 relative z-10" />
+                                </motion.button>
+                            )}
+                        </div>
+                    </motion.div>
+                )}
             </motion.div>
         </div>
     );
