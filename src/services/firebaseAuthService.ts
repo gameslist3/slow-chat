@@ -209,8 +209,25 @@ export const loginUserWithPassword = async (creds: UserCredentials): Promise<Use
     }
 };
 
+// Update user status (Presence)
+export const updateUserStatus = async (uid: string, status: 'online' | 'offline'): Promise<void> => {
+    try {
+        const userRef = doc(db, 'users', uid);
+        await updateDoc(userRef, {
+            status,
+            lastSeen: Date.now()
+        });
+    } catch (err) {
+        console.error('[Auth] Status update error:', err);
+    }
+};
+
 // Logout
 export const logoutUser = async (): Promise<void> => {
+    const user = auth.currentUser;
+    if (user) {
+        await updateUserStatus(user.uid, 'offline');
+    }
     await signOut(auth);
 };
 

@@ -18,12 +18,18 @@ export const FollowRequests: React.FC<FollowRequestsProps> = ({ onBack }) => {
     }, []);
 
     const handleAction = async (id: string, action: 'accept' | 'decline') => {
+        // Optimistic UI: remove from list immediately
+        const originalRequests = [...requests];
+        setRequests(prev => prev.filter(r => r.id !== id));
         setLoadingId(id);
+
         try {
             if (action === 'accept') await acceptFollowRequest(id);
             else await declineFollowRequest(id);
         } catch (error) {
             console.error('Follow action failed:', error);
+            // Rollback on error
+            setRequests(originalRequests);
         } finally {
             setLoadingId(null);
         }

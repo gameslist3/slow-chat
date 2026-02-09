@@ -318,7 +318,7 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                     >
                         <div className="absolute inset-0 bg-background/60 backdrop-blur-xl rounded-[2rem] shadow-2xl border border-white/10" />
 
-                        <div className="relative flex items-end gap-2 p-2 pl-4">
+                        <div className="relative flex items-center gap-2 p-2 pl-4">
                             {/* Hidden File Input */}
                             <input
                                 type="file"

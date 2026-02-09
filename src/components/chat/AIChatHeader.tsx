@@ -161,14 +161,14 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
                                 initial={{ opacity: 0, scale: 0.95, y: 10, filter: 'blur(10px)' }}
                                 animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
                                 exit={{ opacity: 0, scale: 0.95, y: 10, filter: 'blur(10px)' }}
-                                className="absolute right-0 mt-4 w-60 glass-panel rounded-[2rem] overflow-hidden z-50 py-3 p-2 shadow-2xl"
+                                className="absolute right-0 mt-4 w-64 bg-background/98 backdrop-blur-2xl border border-primary/20 rounded-[2.5rem] overflow-hidden z-50 py-4 p-3 shadow-[0_20px_50px_rgba(0,0,0,0.5)] ring-1 ring-white/10"
                             >
                                 <button
                                     onClick={handleToggleMute}
-                                    className="w-full flex items-center gap-4 px-5 py-4 text-[10px] font-bold tracking-widest uppercase text-muted-foreground hover:bg-primary/10 hover:text-primary rounded-2xl transition-all"
+                                    className="w-full flex items-center gap-4 px-6 py-4 text-[10px] font-bold tracking-widest uppercase text-muted-foreground hover:bg-primary/10 hover:text-primary rounded-2xl transition-all group"
                                 >
                                     {muted ? <Bell className="w-4 h-4" /> : <BellOff className="w-4 h-4" />}
-                                    {muted ? 'Unmute' : 'Mute'}
+                                    <span className="group-hover:translate-x-1 transition-transform">{muted ? 'Unmute' : 'Mute'}</span>
                                 </button>
                                 {isPersonal ? (
                                     <button
@@ -286,12 +286,19 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
                                 <div className="max-h-64 overflow-y-auto space-y-4 custom-scrollbar pr-4">
                                     {memberIds.map(id => (
                                         <div key={id} className="flex items-center gap-5 p-4 rounded-3xl bg-foreground/5 border border-white/5 group hover:bg-foreground/10 transition-all">
-                                            <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center text-white font-black text-sm shadow-xl shadow-primary/20 group-hover:scale-105 transition-transform border border-white/10">
-                                                {id.slice(0, 2).toUpperCase()}
+                                            <div className="relative">
+                                                <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center text-white font-black text-sm shadow-xl shadow-primary/20 group-hover:scale-105 transition-transform border border-white/10">
+                                                    {id.slice(0, 2).toUpperCase()}
+                                                </div>
+                                                <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-green-500 border-2 border-[#0A0C10] shadow-sm" title="Online" />
                                             </div>
                                             <div className="flex-1">
                                                 <p className="font-bold text-base tracking-tight text-foreground/90">Member_{id.slice(0, 5)}</p>
-                                                <p className="text-[8px] font-bold text-primary tracking-widest uppercase opacity-40 mt-1">Member</p>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                    <p className="text-[8px] font-bold text-primary tracking-widest uppercase opacity-40">Member</p>
+                                                    <span className="w-1 h-1 rounded-full bg-green-500/50" />
+                                                    <span className="text-[8px] font-bold text-green-500/80 tracking-widest uppercase">Online</span>
+                                                </div>
                                             </div>
                                         </div>
                                     ))}

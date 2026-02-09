@@ -19,14 +19,34 @@ import { LandingPage } from './components/landing/LandingPage';
 
 import { CollaborativeBackground } from './components/ui/CollaborativeBackground';
 
+import { updateUserStatus } from './services/firebaseAuthService';
+
 const AppContent = () => {
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, user } = useAuth();
     const [showPolicy, setShowPolicy] = useState(false);
 
     useEffect(() => {
         const accepted = localStorage.getItem('slowchat_storage_accepted');
         if (!accepted) setShowPolicy(true);
     }, []);
+
+    // Presence Heartbeat
+    useEffect(() => {
+        if (!isAuthenticated || !user?.id) return;
+
+        // Set as online
+        updateUserStatus(user.id, 'online');
+
+        const handleUnload = () => {
+            updateUserStatus(user.id, 'offline');
+        };
+
+        window.addEventListener('beforeunload', handleUnload);
+        return () => {
+            handleUnload();
+            window.removeEventListener('beforeunload', handleUnload);
+        };
+    }, [isAuthenticated, user?.id]);
 
     const handleAcceptPolicy = () => {
         localStorage.setItem('slowchat_storage_accepted', 'true');

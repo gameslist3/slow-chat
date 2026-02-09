@@ -334,30 +334,29 @@ const UserProfileCard = ({ userId, currentUserId, onClose }: { userId: string, c
         if (!profile || actionLoading) return;
 
         if (status === 'pending') {
-            // Cancel request
-            setActionLoading(true);
+            // Cancel request (Optimistic)
+            const prevStatus = status;
+            setStatus('none');
+            toast(`Connection protocol withdrawn.`, 'info');
             try {
                 await cancelFollowRequest(profile.id);
-                setStatus('none');
-                toast(`Connection protocol withdrawn.`, 'info');
             } catch (err: any) {
+                setStatus(prevStatus);
                 toast(err.message || "Failed to withdraw request", 'error');
-            } finally {
-                setActionLoading(false);
             }
             return;
         }
 
         if (status !== 'none') return;
-        setActionLoading(true);
+
+        // Follow (Optimistic)
+        setStatus('pending');
+        toast(`Connection request sent to ${profile.username}`, 'success');
         try {
             await sendFollowRequest(profile.id, profile.username);
-            setStatus('pending');
-            toast(`Connection request sent to ${profile.username}`, 'success');
         } catch (err: any) {
+            setStatus('none');
             toast(err.message || "Failed to send request", 'error');
-        } finally {
-            setActionLoading(false);
         }
     };
 

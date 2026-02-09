@@ -45,18 +45,24 @@ export const FriendsList: React.FC<{ onSelectFriend?: (friendId: string) => void
     }, [currentUser]);
 
     const handleAccept = async (reqId: string) => {
+        const originalRequests = [...requests];
+        setRequests(prev => prev.filter(r => r.id !== reqId));
         try {
             await acceptFollowRequest(reqId);
         } catch (error) {
             console.error("Failed to accept request:", error);
+            setRequests(originalRequests);
         }
     };
 
     const handleDecline = async (reqId: string) => {
+        const originalRequests = [...requests];
+        setRequests(prev => prev.filter(r => r.id !== reqId));
         try {
             await declineFollowRequest(reqId);
         } catch (error) {
             console.error("Failed to decline request:", error);
+            setRequests(originalRequests);
         }
     };
 
