@@ -45,17 +45,16 @@ export const sendFollowRequest = async (toUserId: string, toUsername: string): P
         throw new Error("A connection protocol is already active between these users.");
     }
 
-    // Check for Cooldown: If the last request from this user was declined < 5 mins ago
-    const declinedReq = snap1.docs
-        .filter(d => d.data().status === 'declined')
-        .sort((a, b) => b.data().timestamp - a.data().timestamp)[0];
+    // Check for Cooldown: If the last request between these users was declined < 5 mins ago (Either direction)
+    const allDocs = [...snap1.docs, ...snap2.docs].sort((a, b) => (b.data().timestamp || 0) - (a.data().timestamp || 0));
+    const latestDeclined = allDocs.find(d => d.data().status === 'declined');
 
-    if (declinedReq) {
-        const lastDeclinedTime = declinedReq.data().timestamp;
+    if (latestDeclined) {
+        const lastDeclinedTime = latestDeclined.data().timestamp;
         const diff = (Date.now() - lastDeclinedTime) / 1000 / 60; // in minutes
         if (diff < 5) {
             const wait = Math.ceil(5 - diff);
-            throw new Error(`Connection request declined. Protocol reset in ${wait} minute${wait > 1 ? 's' : ''}.`);
+            throw new Error(`Connection protocol reset in progress. Full synchronization available in ${wait} minute${wait > 1 ? 's' : ''}.`);
         }
     }
 
@@ -191,15 +190,18 @@ export const unfollowUser = async (otherUserId: string): Promise<void> => {
     const batch = writeBatch(db);
     const requestsRef = collection(db, 'follow_requests');
 
-    // 1. Delete ALL follow requests between these users (any status)
-    const q1 = query(requestsRef, where('fromId', '==', currentUser.uid), where('toId', '==', otherUserId));
-    const q2 = query(requestsRef, where('fromId', '==', otherUserId), where('toId', '==', currentUser.uid));
+    // 1. Mark existing accepted request as 'declined' to trigger cooldown
+    const q1 = query(requestsRef, where('fromId', '==', currentUser.uid), where('toId', '==', otherUserId), where('status', '==', 'accepted'));
+    const q2 = query(requestsRef, where('fromId', '==', otherUserId), where('toId', '==', currentUser.uid), where('status', '==', 'accepted'));
 
     const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
-    snap1.docs.forEach(d => batch.delete(d.ref));
-    snap2.docs.forEach(d => batch.delete(d.ref));
 
-    // 2. Delete the personal chat
+    // Instead of deleting, we update to 'declined' with fresh timestamp for mutual cooldown
+    const now = Date.now();
+    snap1.docs.forEach(d => batch.update(d.ref, { status: 'declined', updatedAt: now, timestamp: now }));
+    snap2.docs.forEach(d => batch.update(d.ref, { status: 'declined', updatedAt: now, timestamp: now }));
+
+    // 2. Delete the personal chat (this will remove it from sidebars for BOTH sides)
     const chatIds = [currentUser.uid, otherUserId].sort();
     const chatId = chatIds.join('_');
     const chatRef = doc(db, 'personal_chats', chatId);
@@ -233,14 +235,16 @@ export const getFollowStatus = async (toUserId: string): Promise<'none' | 'pendi
 
         const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
 
-        const doc = snap1.docs.sort((a, b) => b.data().timestamp - a.data().timestamp)[0] || snap2.docs[0];
+        const allDocs = [...snap1.docs, ...snap2.docs].sort((a, b) => (b.data().timestamp || 0) - (a.data().timestamp || 0));
+        const doc = allDocs[0];
+
         if (!doc) return 'none';
 
         const data = doc.data();
         if (data.status === 'declined') {
-            // Check if still in cooldown
-            const diff = (Date.now() - data.timestamp) / 1000 / 60;
-            if (diff < 5 && data.fromId === fromUser.uid) return 'cooldown';
+            // Check if still in cooldown (Mutual check)
+            const diff = (Date.now() - (data.timestamp || 0)) / 1000 / 60;
+            if (diff < 5) return 'cooldown';
             return 'none';
         }
         return data.status as 'pending' | 'accepted';

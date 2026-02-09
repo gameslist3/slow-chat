@@ -124,9 +124,10 @@ export const FriendsList: React.FC<{ onSelectFriend?: (friendId: string) => void
                                     </div>
                                 ) : (
                                     friends.map((friend) => (
-                                        <div
+                                        <button
                                             key={friend.uid}
-                                            className="group flex items-center justify-between p-3 rounded-2xl glass-card border border-white/5 hover:bg-white/10 transition-all"
+                                            onClick={() => onSelectFriend?.(friend.uid)}
+                                            className="group w-full flex items-center justify-between p-3 rounded-2xl glass-card border border-white/5 hover:bg-white/10 transition-all text-left"
                                         >
                                             <div className="flex items-center gap-3">
                                                 <div className="w-8 h-8 rounded-xl bg-primary/20 flex items-center justify-center text-primary font-black text-xs shadow-lg shadow-primary/10">
@@ -135,16 +136,11 @@ export const FriendsList: React.FC<{ onSelectFriend?: (friendId: string) => void
                                                 <span className="font-bold text-sm text-white/90">{friend.username}</span>
                                             </div>
                                             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button
-                                                    onClick={() => onSelectFriend?.(friend.uid)}
-                                                    className="p-2 rounded-xl hover:bg-primary text-muted-foreground hover:text-white transition-all active:scale-95"
-                                                    title="Message"
-                                                >
+                                                <div className="p-2 rounded-xl bg-primary/10 text-primary">
                                                     <Icon name="message" className="w-4 h-4" />
-                                                </button>
-                                                {/* Future: Unfollow/Block menu */}
+                                                </div>
                                             </div>
-                                        </div>
+                                        </button>
                                     ))
                                 )}
                             </motion.div>

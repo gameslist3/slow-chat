@@ -434,18 +434,19 @@ const UserProfileCard = ({ userId, currentUserId, onClose }: { userId: string, c
                                     <button
                                         onClick={async () => {
                                             if (!profile || actionLoading) return;
-                                            setActionLoading(true);
+
+                                            // Optimistic Update
+                                            const prevStatus = status;
+                                            setStatus('none');
+                                            toast(`Connection with ${profile.username} terminated.`, 'info');
+
                                             try {
                                                 await unfollowUser(profile.id);
-                                                setStatus('none');
-                                                toast(`Connection with ${profile.username} terminated.`, 'info');
                                             } catch (err: any) {
+                                                setStatus(prevStatus);
                                                 toast(err.message || "Failed to terminate sync", 'error');
-                                            } finally {
-                                                setActionLoading(false);
                                             }
                                         }}
-                                        disabled={actionLoading}
                                         className="w-full h-12 mt-3 rounded-2xl bg-destructive/5 text-destructive border border-destructive/10 hover:bg-destructive/10 text-[10px] font-black uppercase tracking-widest transition-all"
                                     >
                                         TERMINATE SYNC
