@@ -69,9 +69,13 @@ export const subscribeToNotifications = (callback: (notifications: Notification[
 /**
  * Mark a single notification as read
  */
-export const markAsRead = async (notificationId: string): Promise<void> => {
+export const markAsRead = async (notificationId: string, extra?: { followStatus?: 'accepted' | 'declined' }): Promise<void> => {
     const noticeRef = doc(db, 'notifications', notificationId);
-    await updateDoc(noticeRef, { read: true });
+    await updateDoc(noticeRef, {
+        read: true,
+        updatedAt: Date.now(),
+        ...extra
+    });
 };
 
 /**

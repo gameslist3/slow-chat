@@ -5,7 +5,7 @@ import { ThemeToggle } from './ThemeToggle';
 import { Group, User, PersonalChat, FollowRequest, Notification } from '../../types';
 import { useInbox } from '../../hooks/useChat';
 import { getPendingRequests } from '../../services/firebaseFollowService';
-import { subscribeToNotifications } from '../../services/firebaseNotificationService';
+import { subscribeToNotifications, markAllAsRead } from '../../services/firebaseNotificationService';
 import { NotificationCenter } from '../chat/NotificationCenter';
 import { AbstractBackground } from '../ui/AbstractBackground';
 import { AISidebar } from './AISidebar';
@@ -59,6 +59,12 @@ export const AILayout: React.FC<AILayoutProps> = ({
         });
         return () => unsubscribe();
     }, []);
+
+    useEffect(() => {
+        if (showNotifications) {
+            markAllAsRead();
+        }
+    }, [showNotifications]);
 
     useEffect(() => {
         if (sidebarOpen) {

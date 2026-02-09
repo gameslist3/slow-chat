@@ -81,6 +81,7 @@ export interface FollowRequest {
     toId: string;
     status: 'pending' | 'accepted' | 'declined';
     timestamp: number;
+    updatedAt?: number;
 }
 
 export interface Notification {
@@ -93,6 +94,8 @@ export interface Notification {
     text: string;
     timestamp: number;
     read: boolean;
+    updatedAt?: number;
+    followStatus?: 'accepted' | 'declined';
 }
 
 export interface PersonalChat {

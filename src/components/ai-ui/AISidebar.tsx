@@ -118,33 +118,58 @@ export const AISidebar: React.FC<AISidebarProps> = ({
                                     <span className="text-[10px] font-black text-secondary uppercase tracking-[0.2em]">Pending Requests</span>
                                     <span className="text-[10px] font-black text-secondary/40">{followReqs.length}</span>
                                 </div>
-                                {followReqs.map(req => (
-                                    <div key={req.id} className="w-full p-4 rounded-3xl bg-secondary/5 border border-secondary/10 flex flex-col gap-4">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center font-black bg-secondary text-black text-xs">
-                                                {req.fromUsername.slice(0, 2).toUpperCase()}
+                                {followReqs.map(req => {
+                                    const chatId = [user?.id, req.fromId].sort().join('_');
+                                    return (
+                                        <div key={req.id} className="w-full p-4 rounded-3xl bg-secondary/5 border border-secondary/10 flex flex-col gap-4">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center font-black bg-secondary text-black text-xs">
+                                                    {req.fromUsername.slice(0, 2).toUpperCase()}
+                                                </div>
+                                                <div className="text-left flex-1 min-w-0">
+                                                    <p className="font-bold text-sm tracking-tight truncate text-white">{req.fromUsername}</p>
+                                                    <p className="text-[9px] font-bold text-secondary tracking-widest uppercase opacity-60">
+                                                        {req.status === 'accepted' ? 'Connected' : req.status === 'declined' ? 'Request Declined' : 'Wants to connect'}
+                                                    </p>
+                                                </div>
+                                                {req.status === 'accepted' && (
+                                                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                                                )}
                                             </div>
-                                            <div className="text-left flex-1 min-w-0">
-                                                <p className="font-bold text-sm tracking-tight truncate text-white">{req.fromUsername}</p>
-                                                <p className="text-[9px] font-bold text-secondary tracking-widest uppercase opacity-60">Wants to connect</p>
+
+                                            <div className="flex gap-2">
+                                                {req.status === 'pending' ? (
+                                                    <>
+                                                        <button
+                                                            onClick={() => handleAcceptReq(req.id, req.fromUsername)}
+                                                            className="flex-1 h-9 bg-secondary text-black rounded-xl text-[9px] font-black tracking-widest hover:scale-105 active:scale-95 transition-all shadow-lg shadow-secondary/20"
+                                                        >
+                                                            ACCEPT
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDeclineReq(req.id)}
+                                                            className="flex-1 h-9 bg-foreground/5 text-muted-foreground border border-white/5 rounded-xl text-[9px] font-black tracking-widest hover:bg-destructive/10 hover:text-destructive transition-all"
+                                                        >
+                                                            DECLINE
+                                                        </button>
+                                                    </>
+                                                ) : req.status === 'accepted' ? (
+                                                    <button
+                                                        onClick={() => onSelectPersonal(chatId)}
+                                                        className="w-full h-10 bg-green-500 text-white rounded-xl text-[10px] font-black tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-500/20"
+                                                    >
+                                                        <Icon name="message" className="w-4 h-4" />
+                                                        OPEN CHAT
+                                                    </button>
+                                                ) : (
+                                                    <div className="w-full text-center py-2 text-[9px] font-black text-muted-foreground tracking-widest uppercase opacity-40">
+                                                        Protocol Terminated
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={() => handleAcceptReq(req.id, req.fromUsername)}
-                                                className="flex-1 h-9 bg-secondary text-black rounded-xl text-[9px] font-black tracking-widest hover:scale-105 active:scale-95 transition-all shadow-lg shadow-secondary/20"
-                                            >
-                                                ACCEPT
-                                            </button>
-                                            <button
-                                                onClick={() => handleDeclineReq(req.id)}
-                                                className="flex-1 h-9 bg-foreground/5 text-muted-foreground border border-white/5 rounded-xl text-[9px] font-black tracking-widest hover:bg-destructive/10 hover:text-destructive transition-all"
-                                            >
-                                                DECLINE
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                                 <div className="h-4" />
                             </div>
                         )}

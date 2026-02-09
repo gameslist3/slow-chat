@@ -100,7 +100,10 @@ export const acceptFollowRequest = async (requestId: string): Promise<void> => {
         }
 
         // PERFORM ALL WRITES SECOND
-        transaction.update(requestRef, { status: 'accepted' });
+        transaction.update(requestRef, {
+            status: 'accepted',
+            updatedAt: Date.now()
+        });
 
         const chatIds = [data.fromId, data.toId].sort();
         const chatId = chatIds.join('_');
@@ -145,7 +148,10 @@ export const declineFollowRequest = async (requestId: string): Promise<void> => 
     const data = snap.data() as FollowRequest;
     if (data.status !== 'pending') return;
 
-    await updateDoc(requestRef, { status: 'declined' });
+    await updateDoc(requestRef, {
+        status: 'declined',
+        updatedAt: Date.now()
+    });
 
     // Notify requester
     await createNotification(data.fromId, {
@@ -247,13 +253,23 @@ export const getPendingRequests = (callback: (requests: FollowRequest[]) => void
 
     const q = query(collection(db, 'follow_requests'),
         where('toId', '==', user.uid),
-        where('status', '==', 'pending'),
-        orderBy('timestamp', 'desc')
+        orderBy('timestamp', 'desc'),
+        limit(20)
     );
 
     return onSnapshot(q, (snap) => {
         const reqs = snap.docs.map(doc => ({ ...doc.data(), id: doc.id } as FollowRequest));
-        callback(reqs);
+
+        // Filter: Pending OR (Accepted/Declined AND updatedAt within 10 mins)
+        const tenMins = 10 * 60 * 1000;
+        const now = Date.now();
+        const filtered = reqs.filter(r => {
+            if (r.status === 'pending') return true;
+            if (r.updatedAt && (now - r.updatedAt < tenMins)) return true;
+            return false;
+        });
+
+        callback(filtered);
     });
 };
 /**

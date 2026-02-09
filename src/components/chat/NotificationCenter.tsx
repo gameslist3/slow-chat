@@ -55,6 +55,21 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose,
         }
     };
 
+    const tenMins = 10 * 60 * 1000;
+    const now = Date.now();
+
+    const followReqFilter = (n: Notification) =>
+        n.type === 'follow_request' && (!n.read || (n.updatedAt && now - n.updatedAt < tenMins));
+
+    const recentActivityFilter = (n: Notification) => {
+        if (n.type === 'follow_request') {
+            // Only show in recent activity if it's read AND older than 10 mins? 
+            // The user said "no longer available", so I'll hide follow requests entirely after 10 mins.
+            return false;
+        }
+        return true;
+    };
+
     return (
         <div ref={containerRef} className="flex flex-col h-full glass-panel rounded-none md:rounded-[2.5rem] overflow-hidden shadow-2xl border-white/5">
             <header className="px-6 md:px-8 py-5 md:py-6 border-b border-white/5 flex items-center justify-between bg-foreground/5 backdrop-blur-3xl">
@@ -76,8 +91,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose,
 
             <div className="flex-1 overflow-y-auto custom-scrollbar p-5 md:p-6 space-y-8">
                 <AnimatePresence mode="popLayout">
-                    {/* Filter out read notifications */}
-                    {notifications.filter(n => !n.read).length === 0 ? (
+                    {notifications.filter(followReqFilter).length === 0 && notifications.filter(recentActivityFilter).length === 0 ? (
                         <div className="py-20 text-center opacity-20 flex flex-col items-center gap-6">
                             <div className="text-7xl drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]">🔔</div>
                             <span className="text-[10px] font-bold tracking-widest uppercase">All caught up</span>
@@ -85,29 +99,29 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose,
                     ) : (
                         <div className="space-y-10">
                             {/* Pending Requests */}
-                            {notifications.filter(n => n.type === 'follow_request' && !n.read).length > 0 && (
+                            {notifications.filter(followReqFilter).length > 0 && (
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between px-2 text-[9px] font-bold tracking-widest text-secondary opacity-60 uppercase">
                                         <span>Follow Requests</span>
                                         <div className="w-1.5 h-1.5 rounded-full bg-secondary animate-ping" />
                                     </div>
                                     {notifications
-                                        .filter(n => n.type === 'follow_request' && !n.read)
+                                        .filter(followReqFilter)
                                         .map(note => (
-                                            <FollowRequestItem key={note.id} note={note} />
+                                            <FollowRequestItem key={note.id} note={note} onSelectPersonal={(id) => onSelectChat(id, true)} />
                                         ))}
                                 </div>
                             )}
 
                             {/* Recent Activity */}
                             <div className="space-y-4">
-                                {notifications.filter(n => n.type !== 'follow_request' || n.read).length > 0 && (
+                                {notifications.filter(recentActivityFilter).length > 0 && (
                                     <div className="px-2 text-[9px] font-bold tracking-widest text-primary opacity-40 uppercase">
                                         <span>Recent Activity</span>
                                     </div>
                                 )}
                                 {notifications
-                                    .filter(n => n.type !== 'follow_request' || n.read)
+                                    .filter(recentActivityFilter)
                                     .map((note, index) => (
                                         <motion.div
                                             key={note.id}
@@ -161,8 +175,9 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose,
     );
 };
 
-const FollowRequestItem = ({ note }: { note: Notification }) => {
+const FollowRequestItem = ({ note, onSelectPersonal }: { note: Notification; onSelectPersonal: (chatId: string) => void }) => {
     const [loading, setLoading] = useState(false);
+    const [actionStatus, setActionStatus] = useState<'pending' | 'accepted' | 'declined'>(note.followStatus || (note.read ? 'accepted' : 'pending'));
     const { toast } = useToast();
 
     const handleAction = async (action: 'accept' | 'decline') => {
@@ -185,18 +200,27 @@ const FollowRequestItem = ({ note }: { note: Notification }) => {
 
             if (action === 'accept') {
                 await acceptFollowRequest(requestId);
+                setActionStatus('accepted');
+                await markAsRead(note.id, { followStatus: 'accepted' });
                 toast(`You follow ${note.senderName}`, 'success');
             } else {
                 await declineFollowRequest(requestId);
+                setActionStatus('declined');
+                await markAsRead(note.id, { followStatus: 'declined' });
                 toast(`Request declined`, 'info');
             }
-
-            await markAsRead(note.id);
         } catch (err: any) {
             toast(err.message || "Something went wrong", 'error');
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleOpenChat = () => {
+        const user = auth.currentUser;
+        if (!user || !note.groupId) return;
+        const chatId = [user.uid, note.groupId].sort().join('_');
+        onSelectPersonal(chatId);
     };
 
     return (
@@ -215,24 +239,43 @@ const FollowRequestItem = ({ note }: { note: Notification }) => {
                 </div>
                 <div className="flex-1">
                     <p className="font-bold text-base tracking-tight text-white">{note.senderName}</p>
-                    <p className="text-[9px] font-bold text-secondary tracking-widest uppercase opacity-70 mt-1">Follow Request</p>
+                    <p className="text-[9px] font-bold text-secondary tracking-widest uppercase opacity-70 mt-1">
+                        {actionStatus === 'accepted' ? 'Connection Established' : actionStatus === 'declined' ? 'Request Declined' : 'Follow Request'}
+                    </p>
                 </div>
             </div>
+
             <div className="flex gap-3 relative z-10 mt-6">
-                <button
-                    onClick={() => handleAction('accept')}
-                    disabled={loading}
-                    className="flex-1 h-12 md:h-14 bg-secondary text-black rounded-2xl text-[10px] font-bold tracking-widest hover:scale-[1.05] active:scale-[0.95] transition-all disabled:opacity-50 shadow-xl shadow-secondary/20"
-                >
-                    {loading ? '...' : 'ACCEPT'}
-                </button>
-                <button
-                    onClick={() => handleAction('decline')}
-                    disabled={loading}
-                    className="flex-1 h-12 md:h-14 bg-foreground/5 text-muted-foreground border border-white/5 rounded-2xl text-[10px] font-bold tracking-widest hover:bg-destructive/10 hover:text-destructive transition-all disabled:opacity-50"
-                >
-                    {loading ? '...' : 'DECLINE'}
-                </button>
+                {actionStatus === 'pending' ? (
+                    <>
+                        <button
+                            onClick={() => handleAction('accept')}
+                            disabled={loading}
+                            className="flex-1 h-12 md:h-14 bg-secondary text-black rounded-2xl text-[10px] font-bold tracking-widest hover:scale-[1.05] active:scale-[0.95] transition-all disabled:opacity-50 shadow-xl shadow-secondary/20"
+                        >
+                            {loading ? '...' : 'ACCEPT'}
+                        </button>
+                        <button
+                            onClick={() => handleAction('decline')}
+                            disabled={loading}
+                            className="flex-1 h-12 md:h-14 bg-foreground/5 text-muted-foreground border border-white/5 rounded-2xl text-[10px] font-bold tracking-widest hover:bg-destructive/10 hover:text-destructive transition-all disabled:opacity-50"
+                        >
+                            {loading ? '...' : 'DECLINE'}
+                        </button>
+                    </>
+                ) : actionStatus === 'accepted' ? (
+                    <button
+                        onClick={handleOpenChat}
+                        className="w-full h-12 md:h-14 bg-green-500 text-white rounded-2xl text-[10px] font-bold tracking-widest hover:scale-[1.05] active:scale-[0.95] transition-all flex items-center justify-center gap-3 shadow-xl shadow-green-500/20"
+                    >
+                        <MessageSquare className="w-4 h-4" />
+                        MESSAGE NOW
+                    </button>
+                ) : (
+                    <div className="w-full text-center py-4 text-[10px] font-bold text-muted-foreground tracking-widest uppercase opacity-40">
+                        Protocol Terminated
+                    </div>
+                )}
             </div>
         </motion.div>
     );
