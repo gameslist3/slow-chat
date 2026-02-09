@@ -37,8 +37,26 @@ export const sendFollowRequest = async (toUserId: string, toUsername: string): P
 
     const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
 
-    if (!snap1.empty || !snap2.empty) {
+    // Check for active connections (Pending or Accepted)
+    const active1 = snap1.docs.find(d => d.data().status !== 'declined');
+    const active2 = snap2.docs.find(d => d.data().status !== 'declined');
+
+    if (active1 || active2) {
         throw new Error("A connection protocol is already active between these users.");
+    }
+
+    // Check for Cooldown: If the last request from this user was declined < 5 mins ago
+    const declinedReq = snap1.docs
+        .filter(d => d.data().status === 'declined')
+        .sort((a, b) => b.data().timestamp - a.data().timestamp)[0];
+
+    if (declinedReq) {
+        const lastDeclinedTime = declinedReq.data().timestamp;
+        const diff = (Date.now() - lastDeclinedTime) / 1000 / 60; // in minutes
+        if (diff < 5) {
+            const wait = Math.ceil(5 - diff);
+            throw new Error(`Connection request declined. Protocol reset in ${wait} minute${wait > 1 ? 's' : ''}.`);
+        }
     }
 
     await addDoc(requestsRef, {
@@ -191,7 +209,7 @@ export const unfollowUser = async (otherUserId: string): Promise<void> => {
 /**
  * Get follow status between two users
  */
-export const getFollowStatus = async (toUserId: string): Promise<'none' | 'pending' | 'accepted'> => {
+export const getFollowStatus = async (toUserId: string): Promise<'none' | 'pending' | 'accepted' | 'cooldown'> => {
     try {
         const fromUser = auth.currentUser;
         if (!fromUser) return 'none';
@@ -203,12 +221,17 @@ export const getFollowStatus = async (toUserId: string): Promise<'none' | 'pendi
 
         const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
 
-        const doc = snap1.docs[0] || snap2.docs[0];
+        const doc = snap1.docs.sort((a, b) => b.data().timestamp - a.data().timestamp)[0] || snap2.docs[0];
         if (!doc) return 'none';
 
-        const status = doc.data().status;
-        if (status === 'declined') return 'none';
-        return status as 'pending' | 'accepted';
+        const data = doc.data();
+        if (data.status === 'declined') {
+            // Check if still in cooldown
+            const diff = (Date.now() - data.timestamp) / 1000 / 60;
+            if (diff < 5 && data.fromId === fromUser.uid) return 'cooldown';
+            return 'none';
+        }
+        return data.status as 'pending' | 'accepted';
     } catch (err) {
         console.error('[FollowService] getFollowStatus error:', err);
         return 'none';

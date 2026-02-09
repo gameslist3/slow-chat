@@ -305,7 +305,7 @@ const AudioPlayer = ({ src, isOwn }: { src: string, isOwn: boolean }) => {
 // --- Profile Card ---
 const UserProfileCard = ({ userId, currentUserId, onClose }: { userId: string, currentUserId: string, onClose: () => void }) => {
     const [profile, setProfile] = useState<InternalUser | null>(null);
-    const [status, setStatus] = useState<'none' | 'pending' | 'accepted'>('none');
+    const [status, setStatus] = useState<'none' | 'pending' | 'accepted' | 'cooldown'>('none');
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
     const { toast } = useToast();
@@ -319,7 +319,7 @@ const UserProfileCard = ({ userId, currentUserId, onClose }: { userId: string, c
                     getFollowStatus(userId)
                 ]);
                 setProfile(u);
-                setStatus(s || 'none');
+                setStatus(s as any);
             } catch (err: any) {
                 console.error('[ProfileCard] Load error:', err);
                 toast('Failed to load user profile.', 'error');
@@ -332,6 +332,11 @@ const UserProfileCard = ({ userId, currentUserId, onClose }: { userId: string, c
 
     const handleFollow = async () => {
         if (!profile || actionLoading) return;
+
+        if (status === 'cooldown') {
+            toast("Connection protocol resetting. Please wait.", "info");
+            return;
+        }
 
         if (status === 'pending') {
             // Cancel request (Optimistic)
@@ -355,7 +360,12 @@ const UserProfileCard = ({ userId, currentUserId, onClose }: { userId: string, c
         try {
             await sendFollowRequest(profile.id, profile.username);
         } catch (err: any) {
-            setStatus('none');
+            // Check if it was a cooldown error
+            if (err.message.includes('Protocol reset')) {
+                setStatus('cooldown');
+            } else {
+                setStatus('none');
+            }
             toast(err.message || "Failed to send request", 'error');
         }
     };
@@ -402,23 +412,29 @@ const UserProfileCard = ({ userId, currentUserId, onClose }: { userId: string, c
                             <div className="pt-4">
                                 <button
                                     onClick={handleFollow}
-                                    disabled={actionLoading || status === 'accepted'}
+                                    disabled={actionLoading || status === 'accepted' || status === 'cooldown'}
                                     className={`w-full h-14 rounded-2xl flex items-center justify-center gap-3 font-black uppercase tracking-widest text-sm transition-all shadow-lg
                                         ${status === 'accepted' ? 'bg-secondary/10 text-secondary border border-secondary/20 shadow-none' :
                                             status === 'pending' ? 'bg-surface2 text-primary border border-primary/20 hover:bg-surface2/80 active:scale-95 shadow-none' :
-                                                'bg-primary text-white hover:scale-105 active:scale-95 shadow-primary/20 hover:shadow-primary/40'}
+                                                status === 'cooldown' ? 'bg-destructive/10 text-destructive border border-destructive/20 shadow-none opacity-50' :
+                                                    'bg-primary text-white hover:scale-105 active:scale-95 shadow-primary/20 hover:shadow-primary/40'}
                                     `}
                                 >
                                     {status === 'accepted' ? <Icon name="check" className="w-5 h-5" /> :
                                         status === 'pending' ? <Icon name="rotate" className="w-5 h-5 animate-spin" /> :
-                                            <Icon name="userPlus" className="w-5 h-5" />}
+                                            status === 'cooldown' ? <Icon name="clock" className="w-5 h-5" /> :
+                                                <Icon name="userPlus" className="w-5 h-5" />}
 
                                     {status === 'accepted' ? 'Connected' :
                                         status === 'pending' ? 'Requested' :
-                                            'Follow'}
+                                            status === 'cooldown' ? 'Wait' :
+                                                'Follow'}
                                 </button>
                                 {status === 'pending' && (
                                     <p className="text-[9px] font-black uppercase tracking-widest opacity-30 mt-3 italic animate-pulse">Click to withdraw protocol</p>
+                                )}
+                                {status === 'cooldown' && (
+                                    <p className="text-[9px] font-black uppercase tracking-widest text-destructive opacity-40 mt-3 italic">Protocol reset in progress</p>
                                 )}
                             </div>
                         )}
