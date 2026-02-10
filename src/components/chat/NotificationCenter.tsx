@@ -13,6 +13,130 @@ interface NotificationCenterProps {
     onSelectChat: (chatId: string, isPersonal: boolean, messageId?: string) => void;
 }
 
+const IconForType = ({ type }: { type: Notification['type'] }) => {
+    switch (type) {
+        case 'mention': return <AtSign className="w-5 h-5" />;
+        case 'reply': return <Reply className="w-5 h-5" />;
+        case 'message': return <MessageSquare className="w-5 h-5" />;
+        case 'follow_request': return <UserPlus className="w-5 h-5" />;
+        case 'follow_accept': return <Check className="w-5 h-5" />;
+        default: return <Bell className="w-5 h-5" />;
+    }
+};
+
+const FollowRequestItem = ({ note, onSelectPersonal }: { note: Notification; onSelectPersonal: (chatId: string) => void }) => {
+    const [loading, setLoading] = useState(false);
+    const [actionStatus, setActionStatus] = useState<'pending' | 'accepted' | 'declined'>(note.followStatus || (note.read ? 'accepted' : 'pending'));
+    const { toast } = useToast();
+
+    const handleAction = async (action: 'accept' | 'decline') => {
+        const newStatus = action === 'accept' ? 'accepted' : 'declined';
+
+        // Optimistic UI
+        setActionStatus(newStatus);
+        setLoading(false); // Hide spinner immediately
+
+        try {
+            const requestsRef = collection(db, 'follow_requests');
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const q = query(requestsRef,
+                where('fromId', '==', note.groupId),
+                where('toId', '==', user.uid),
+                where('status', '==', 'pending'),
+                limit(1)
+            );
+            const snap = await getDocs(q);
+            if (snap.empty) {
+                // If it was already processed elsewhere, just mark notification
+                await markAsRead(note.id, { followStatus: newStatus });
+                return;
+            }
+
+            const requestId = snap.docs[0].id;
+
+            if (action === 'accept') {
+                await acceptFollowRequest(requestId);
+                await markAsRead(note.id, { followStatus: 'accepted' });
+                toast(`You follow ${note.senderName}`, 'success');
+            } else {
+                await declineFollowRequest(requestId);
+                await markAsRead(note.id, { followStatus: 'declined' });
+                toast(`Request declined`, 'info');
+            }
+        } catch (err: any) {
+            console.error(err);
+            // On hard error, we could revert, but usually with subscription it's better to just log
+            // toast(err.message || "Action failed", 'error'); 
+        }
+    };
+
+    const handleOpenChat = () => {
+        const user = auth.currentUser;
+        if (!user || !note.groupId) return;
+        const chatId = [user.uid, note.groupId].sort().join('_');
+        onSelectPersonal(chatId);
+    };
+
+    return (
+        <motion.div
+            layout
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="p-5 md:p-6 rounded-[2rem] bg-secondary/5 border border-secondary/20 relative overflow-hidden group shadow-xl"
+        >
+            <div className="absolute inset-0 bg-gradient-to-br from-secondary/10 to-transparent opacity-30 transition-opacity group-hover:opacity-50" />
+
+            <div className="flex gap-4 md:gap-5 items-center relative z-10">
+                <div className="w-12 h-12 md:w-14 md:h-14 bg-secondary text-black rounded-2xl flex items-center justify-center font-black text-xl shadow-lg border border-white/10 group-hover:scale-105 transition-transform">
+                    {note.senderName.slice(0, 2).toUpperCase()}
+                </div>
+                <div className="flex-1">
+                    <p className="font-bold text-base tracking-tight text-white">{note.senderName}</p>
+                    <p className="text-[9px] font-bold text-secondary tracking-widest uppercase opacity-70 mt-1">
+                        {actionStatus === 'accepted' ? 'Connection Established' : actionStatus === 'declined' ? 'Request Declined' : 'Follow Request'}
+                    </p>
+                </div>
+            </div>
+
+            <div className="flex gap-3 relative z-10 mt-6">
+                {actionStatus === 'pending' ? (
+                    <>
+                        <button
+                            onClick={() => handleAction('accept')}
+                            disabled={loading}
+                            className="flex-1 h-12 md:h-14 bg-secondary text-black rounded-2xl text-[10px] font-bold tracking-widest hover:scale-[1.05] active:scale-[0.95] transition-all disabled:opacity-50 shadow-xl shadow-secondary/20"
+                        >
+                            {loading ? '...' : 'ACCEPT'}
+                        </button>
+                        <button
+                            onClick={() => handleAction('decline')}
+                            disabled={loading}
+                            className="flex-1 h-12 md:h-14 bg-foreground/5 text-muted-foreground border border-white/5 rounded-2xl text-[10px] font-bold tracking-widest hover:bg-destructive/10 hover:text-destructive transition-all disabled:opacity-50"
+                        >
+                            {loading ? '...' : 'DECLINE'}
+                        </button>
+                    </>
+                ) : actionStatus === 'accepted' ? (
+                    <button
+                        onClick={handleOpenChat}
+                        className="w-full h-12 md:h-14 bg-green-500 text-white rounded-2xl text-[10px] font-bold tracking-widest hover:scale-[1.05] active:scale-[0.95] transition-all flex items-center justify-center gap-3 shadow-xl shadow-green-500/20"
+                    >
+                        <MessageSquare className="w-4 h-4" />
+                        MESSAGE NOW
+                    </button>
+                ) : (
+                    <div className="w-full text-center py-4 text-[10px] font-bold text-muted-foreground tracking-widest uppercase opacity-40">
+                        Protocol Terminated
+                    </div>
+                )}
+            </div>
+        </motion.div>
+    );
+};
+
 export const NotificationList: React.FC<{
     notifications: Notification[];
     onSelectChat: (chatId: string, isPersonal: boolean, messageId?: string) => void;
@@ -188,128 +312,4 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose,
             />
         </div>
     );
-};
-
-const FollowRequestItem = ({ note, onSelectPersonal }: { note: Notification; onSelectPersonal: (chatId: string) => void }) => {
-    const [loading, setLoading] = useState(false);
-    const [actionStatus, setActionStatus] = useState<'pending' | 'accepted' | 'declined'>(note.followStatus || (note.read ? 'accepted' : 'pending'));
-    const { toast } = useToast();
-
-    const handleAction = async (action: 'accept' | 'decline') => {
-        const newStatus = action === 'accept' ? 'accepted' : 'declined';
-
-        // Optimistic UI
-        setActionStatus(newStatus);
-        setLoading(false); // Hide spinner immediately
-
-        try {
-            const requestsRef = collection(db, 'follow_requests');
-            const user = auth.currentUser;
-            if (!user) return;
-
-            const q = query(requestsRef,
-                where('fromId', '==', note.groupId),
-                where('toId', '==', user.uid),
-                where('status', '==', 'pending'),
-                limit(1)
-            );
-            const snap = await getDocs(q);
-            if (snap.empty) {
-                // If it was already processed elsewhere, just mark notification
-                await markAsRead(note.id, { followStatus: newStatus });
-                return;
-            }
-
-            const requestId = snap.docs[0].id;
-
-            if (action === 'accept') {
-                await acceptFollowRequest(requestId);
-                await markAsRead(note.id, { followStatus: 'accepted' });
-                toast(`You follow ${note.senderName}`, 'success');
-            } else {
-                await declineFollowRequest(requestId);
-                await markAsRead(note.id, { followStatus: 'declined' });
-                toast(`Request declined`, 'info');
-            }
-        } catch (err: any) {
-            console.error(err);
-            // On hard error, we could revert, but usually with subscription it's better to just log
-            // toast(err.message || "Action failed", 'error'); 
-        }
-    };
-
-    const handleOpenChat = () => {
-        const user = auth.currentUser;
-        if (!user || !note.groupId) return;
-        const chatId = [user.uid, note.groupId].sort().join('_');
-        onSelectPersonal(chatId);
-    };
-
-    return (
-        <motion.div
-            layout
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="p-5 md:p-6 rounded-[2rem] bg-secondary/5 border border-secondary/20 relative overflow-hidden group shadow-xl"
-        >
-            <div className="absolute inset-0 bg-gradient-to-br from-secondary/10 to-transparent opacity-30 transition-opacity group-hover:opacity-50" />
-
-            <div className="flex gap-4 md:gap-5 items-center relative z-10">
-                <div className="w-12 h-12 md:w-14 md:h-14 bg-secondary text-black rounded-2xl flex items-center justify-center font-black text-xl shadow-lg border border-white/10 group-hover:scale-105 transition-transform">
-                    {note.senderName.slice(0, 2).toUpperCase()}
-                </div>
-                <div className="flex-1">
-                    <p className="font-bold text-base tracking-tight text-white">{note.senderName}</p>
-                    <p className="text-[9px] font-bold text-secondary tracking-widest uppercase opacity-70 mt-1">
-                        {actionStatus === 'accepted' ? 'Connection Established' : actionStatus === 'declined' ? 'Request Declined' : 'Follow Request'}
-                    </p>
-                </div>
-            </div>
-
-            <div className="flex gap-3 relative z-10 mt-6">
-                {actionStatus === 'pending' ? (
-                    <>
-                        <button
-                            onClick={() => handleAction('accept')}
-                            disabled={loading}
-                            className="flex-1 h-12 md:h-14 bg-secondary text-black rounded-2xl text-[10px] font-bold tracking-widest hover:scale-[1.05] active:scale-[0.95] transition-all disabled:opacity-50 shadow-xl shadow-secondary/20"
-                        >
-                            {loading ? '...' : 'ACCEPT'}
-                        </button>
-                        <button
-                            onClick={() => handleAction('decline')}
-                            disabled={loading}
-                            className="flex-1 h-12 md:h-14 bg-foreground/5 text-muted-foreground border border-white/5 rounded-2xl text-[10px] font-bold tracking-widest hover:bg-destructive/10 hover:text-destructive transition-all disabled:opacity-50"
-                        >
-                            {loading ? '...' : 'DECLINE'}
-                        </button>
-                    </>
-                ) : actionStatus === 'accepted' ? (
-                    <button
-                        onClick={handleOpenChat}
-                        className="w-full h-12 md:h-14 bg-green-500 text-white rounded-2xl text-[10px] font-bold tracking-widest hover:scale-[1.05] active:scale-[0.95] transition-all flex items-center justify-center gap-3 shadow-xl shadow-green-500/20"
-                    >
-                        <MessageSquare className="w-4 h-4" />
-                        MESSAGE NOW
-                    </button>
-                ) : (
-                    <div className="w-full text-center py-4 text-[10px] font-bold text-muted-foreground tracking-widest uppercase opacity-40">
-                        Protocol Terminated
-                    </div>
-                )}
-            </div>
-        </motion.div>
-    );
-};
-
-const IconForType = ({ type }: { type: Notification['type'] }) => {
-    switch (type) {
-        case 'mention': return <AtSign className="w-5 h-5" />;
-        case 'reply': return <Reply className="w-5 h-5" />;
-        case 'message': return <MessageSquare className="w-5 h-5" />;
-        case 'follow_request': return <UserPlus className="w-5 h-5" />;
-        case 'follow_accept': return <Check className="w-5 h-5" />;
-        default: return <Bell className="w-5 h-5" />;
-    }
 };
