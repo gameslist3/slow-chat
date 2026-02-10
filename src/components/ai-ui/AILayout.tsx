@@ -49,12 +49,6 @@ export const AILayout: React.FC<AILayoutProps> = ({
     const lastScrollY = React.useRef(0);
 
     useEffect(() => {
-        if (showNotifications) {
-            markAllAsRead();
-        }
-    }, [showNotifications]);
-
-    useEffect(() => {
         if (sidebarOpen) {
             document.body.style.overflow = 'hidden';
         } else {
