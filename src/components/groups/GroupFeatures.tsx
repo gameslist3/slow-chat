@@ -17,25 +17,25 @@ const GroupCard = ({ group, isJoined, onAction }: { group: Group, isJoined: bool
 
         <div className="flex justify-between items-start mb-6 md:mb-8 relative z-10">
             <div className="w-14 h-14 md:w-16 md:h-16 bg-primary/10 rounded-2xl md:rounded-[1.75rem] flex items-center justify-center text-3xl md:text-4xl shadow-lg border border-white/10 group-hover:scale-110 group-hover:bg-primary/20 transition-all duration-700">{group.image}</div>
-            <div className="px-3 py-1 glass-card bg-foreground/[0.03] rounded-full font-protocol text-[8px] md:text-[9px] tracking-[0.2em] text-primary uppercase border border-primary/10">{group.category}</div>
+            <div className="px-3 py-1 glass-card bg-foreground/[0.03] rounded-full text-[10px] font-bold tracking-wider text-primary uppercase border border-primary/10">{group.category}</div>
         </div>
 
         <div className="mb-6 md:mb-8 relative z-10">
-            <h3 className="text-xl md:text-2xl font-black text-foreground mb-2 group-hover:text-primary transition-colors tracking-tight uppercase leading-tight">{group.name}</h3>
-            <p className="text-xs md:text-sm text-muted-foreground/60 line-clamp-2 font-medium leading-relaxed">System protocol initialized. Establishing secure connection to cluster.</p>
+            <h3 className="text-xl md:text-2xl font-black text-foreground mb-2 group-hover:text-primary transition-colors tracking-tight leading-tight">{group.name}</h3>
+            <p className="text-sm text-muted-foreground/60 line-clamp-2 font-medium leading-relaxed">Active cluster.</p>
         </div>
 
         <div className="mt-auto flex items-center justify-between pt-6 md:pt-8 border-t border-white/5 relative z-10">
-            <div className="flex items-center gap-2 text-[8px] md:text-[9px] font-protocol tracking-[0.2em] text-muted-foreground uppercase opacity-40 font-black">
+            <div className="flex items-center gap-2 text-[10px] font-bold tracking-wider text-muted-foreground uppercase opacity-40">
                 <Icon name="users" className="w-3 h-3" />
-                <span>{group.members} syncs</span>
+                <span>{group.members} members</span>
             </div>
             <motion.button
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={onAction}
                 className={`
-                    px-6 md:px-8 h-10 md:h-11 rounded-1.5xl md:rounded-2xl text-[9px] md:text-[10px] font-protocol font-black tracking-[0.2em] uppercase transition-all
+                    px-6 md:px-8 h-10 md:h-11 rounded-1.5xl md:rounded-2xl text-[10px] font-black tracking-widest uppercase transition-all
                     ${isJoined ? 'bg-secondary/10 text-secondary border border-secondary/20' : 'btn-primary shadow-xl'}
                 `}
             >
@@ -71,18 +71,14 @@ export const GroupDiscovery = ({ onJoinGroup, onSelectGroup, joinedGroupIds }: a
         <div className="h-full overflow-y-auto w-full p-6 md:p-12 lg:p-16 custom-scrollbar text-foreground">
             <div className="max-w-7xl mx-auto space-y-12 md:space-y-20">
                 <div className="text-center py-6 md:py-12 space-y-4 md:space-y-6">
-                    <div className="inline-flex items-center gap-2 md:gap-3 px-3 py-1.5 md:px-4 md:py-2 glass-card rounded-full font-protocol text-[8px] md:text-[9px] tracking-[0.3em] text-primary uppercase mb-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_10px_rgba(var(--primary-rgb),0.5)]" />
-                        Network Discovery
-                    </div>
                     <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter uppercase italic leading-[0.8] text-balance">Explore <br className="md:hidden" /><span className="text-primary italic">Nexus</span></h1>
-                    <p className="text-muted-foreground/60 font-medium text-sm md:text-xl max-w-2xl mx-auto text-balance">Locate and establish synchronization with available protocol clusters.</p>
+                    <p className="text-muted-foreground/60 font-medium text-sm md:text-xl max-w-2xl mx-auto text-balance">Join communities and start chatting.</p>
                 </div>
 
                 <div className="relative max-w-2xl mx-auto group">
                     <Icon name="search" className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-primary opacity-20 transition-opacity group-focus-within:opacity-100" />
                     <input
-                        placeholder="Scan protocols or clusters..."
+                        placeholder="Search groups..."
                         value={filter}
                         onChange={e => setFilter(e.target.value)}
                         className="glass-input pl-16 h-16 md:h-20 bg-foreground/[0.02] text-sm md:text-lg font-bold rounded-2.5xl md:rounded-[2rem] border border-white/5 focus:bg-foreground/[0.04] transition-all"
@@ -105,8 +101,7 @@ export const GroupDiscovery = ({ onJoinGroup, onSelectGroup, joinedGroupIds }: a
                         ))}
                         {filtered.length === 0 && (
                             <div className="col-span-full py-24 md:py-32 text-center space-y-6">
-                                <div className="text-8xl md:text-9xl opacity-5 filter blur-lg select-none">🌌</div>
-                                <p className="text-xs md:text-sm font-protocol font-black text-muted-foreground/30 uppercase tracking-[0.4em] italic">Zero nodes detected</p>
+                                <p className="text-xs md:text-sm font-bold text-muted-foreground/30 uppercase tracking-[0.2em]">No groups found</p>
                             </div>
                         )}
                     </div>
@@ -140,14 +135,13 @@ export const CreateGroup = ({ onGroupCreated }: { onGroupCreated: (id: string) =
             <div className="flex items-center gap-4 md:gap-6 mb-8 md:mb-12">
                 <div className="w-1 md:w-1.5 h-10 md:h-14 bg-primary rounded-full shadow-[0_0_25px_rgba(var(--primary-rgb),0.6)]" />
                 <div className="flex flex-col">
-                    <span className="font-protocol text-[8px] md:text-[9px] tracking-[0.3em] font-black text-primary opacity-40 uppercase leading-none mb-1 md:mb-2">system_init</span>
                     <h2 className="text-2xl md:text-4xl font-black tracking-tighter uppercase italic leading-none">Create Cluster</h2>
                 </div>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6 md:space-y-8">
                 <div className="space-y-4">
-                    <label className="font-protocol text-[8px] md:text-[9px] tracking-widest text-muted-foreground/40 uppercase font-black ml-1">Select Identifier</label>
+                    <label className="text-[10px] font-bold tracking-widest text-muted-foreground/40 uppercase ml-1">Icon</label>
                     <div className="grid grid-cols-6 gap-2 md:gap-3 p-3 md:p-4 glass-card bg-foreground/[0.03] rounded-2.5xl">
                         {ICONS.slice(0, 12).map(i => (
                             <motion.button
@@ -173,13 +167,13 @@ export const CreateGroup = ({ onGroupCreated }: { onGroupCreated: (id: string) =
                         <input
                             value={name}
                             onChange={e => setName(e.target.value)}
-                            placeholder="Designate Cluster Name..."
-                            className="w-full bg-foreground/[0.02] h-14 md:h-16 pl-14 pr-6 rounded-2xl text-sm md:text-base font-black outline-none border border-white/5 focus:border-primary/30 transition-all placeholder:text-muted-foreground/20"
+                            placeholder="Cluster Name"
+                            className="w-full bg-foreground/[0.02] h-14 md:h-16 pl-14 pr-6 rounded-2xl text-sm md:text-base font-bold outline-none border border-white/5 focus:border-primary/30 transition-all placeholder:text-muted-foreground/20"
                         />
                     </div>
 
                     <div className="space-y-4">
-                        <label className="font-protocol text-[8px] md:text-[9px] tracking-widest text-muted-foreground/40 uppercase font-black ml-1">Protocol Type</label>
+                        <label className="text-[10px] font-bold tracking-widest text-muted-foreground/40 uppercase ml-1">Category</label>
                         <div className="flex flex-wrap gap-2">
                             {CATEGORIES.slice(0, 5).map(c => (
                                 <button
@@ -187,7 +181,7 @@ export const CreateGroup = ({ onGroupCreated }: { onGroupCreated: (id: string) =
                                     key={c}
                                     onClick={() => setCat(c)}
                                     className={`
-                                        px-4 py-2 rounded-full text-[8px] md:text-[9px] font-protocol font-black tracking-[0.15em] border transition-all uppercase
+                                        px-4 py-2 rounded-full text-[10px] font-bold tracking-wider border transition-all uppercase
                                         ${cat === c ? 'bg-primary border-primary text-white shadow-lg shadow-primary/10' : 'bg-foreground/[0.03] border-white/5 text-muted-foreground/60 hover:border-white/20'}
                                     `}
                                 >
@@ -199,8 +193,8 @@ export const CreateGroup = ({ onGroupCreated }: { onGroupCreated: (id: string) =
                             <input
                                 value={cat}
                                 onChange={e => setCat(e.target.value)}
-                                placeholder="Specify Custom Protocol..."
-                                className="w-full bg-foreground/[0.01] h-12 px-6 rounded-1.5xl border border-white/5 text-[9px] md:text-[10px] uppercase tracking-widest font-black outline-none focus:border-primary/20 transition-all"
+                                placeholder="Custom Category..."
+                                className="w-full bg-foreground/[0.01] h-12 px-6 rounded-1.5xl border border-white/5 text-[10px] md:text-xs uppercase tracking-wider font-bold outline-none focus:border-primary/20 transition-all"
                             />
                         </div>
                     </div>
@@ -209,10 +203,10 @@ export const CreateGroup = ({ onGroupCreated }: { onGroupCreated: (id: string) =
                 <motion.button
                     whileHover={{ scale: 1.01, y: -2 }}
                     whileTap={{ scale: 0.98 }}
-                    className="btn-primary w-full h-16 md:h-20 text-[10px] md:text-xs font-protocol font-black tracking-[0.3em] shadow-2xl shadow-primary/30 disabled:opacity-30 rounded-2.5xl md:rounded-[2rem] uppercase mt-4"
+                    className="btn-primary w-full h-16 md:h-20 text-xs font-black tracking-[0.2em] shadow-2xl shadow-primary/30 disabled:opacity-30 rounded-2.5xl md:rounded-[2rem] uppercase mt-4"
                     disabled={!name || !cat || loading}
                 >
-                    {loading ? <Icon name="rotate" className="w-6 h-6 animate-spin" /> : "Initiate Cluster"}
+                    {loading ? <Icon name="rotate" className="w-6 h-6 animate-spin" /> : "Create"}
                 </motion.button>
             </form>
         </div>

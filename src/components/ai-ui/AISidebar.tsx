@@ -43,6 +43,7 @@ export const AISidebar: React.FC<AISidebarProps> = ({
     onClose
 }) => {
     const { personalChats } = useInbox();
+    const [searchTerm, setSearchTerm] = useState('');
     const [followReqs, setFollowReqs] = useState<FollowRequest[]>([]);
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [view, setView] = useState<'chats' | 'friends' | 'notifications'>('chats');
@@ -53,6 +54,13 @@ export const AISidebar: React.FC<AISidebarProps> = ({
         const unsubscribe = subscribeToNotifications(setNotifications);
         return () => unsubscribe();
     }, []);
+
+    // Subscribe to follow requests
+    useEffect(() => {
+        if (!user?.id) return;
+        const unsubscribe = getPendingRequests(setFollowReqs);
+        return () => unsubscribe();
+    }, [user?.id]);
 
     const unreadNotifications = notifications.filter(n => !n.read).length;
 
@@ -76,7 +84,6 @@ export const AISidebar: React.FC<AISidebarProps> = ({
             toast(`You follow ${name}`, 'success');
         } catch (err: any) {
             toast(err.message || "Failed to accept", 'error');
-            // Error handling: the subscription will eventually reset the state to the server state
         }
     };
 
@@ -94,18 +101,22 @@ export const AISidebar: React.FC<AISidebarProps> = ({
         }
     };
 
-    useEffect(() => {
-        if (!user?.id) return;
-        const unsubscribe = getPendingRequests(setFollowReqs);
-        return () => unsubscribe();
-    }, [user?.id]);
-
     const handleFriendSelect = (friendId: string) => {
         if (!user?.id) return;
         const chatId = [user.id, friendId].sort().join('_');
         onSelectPersonal(chatId);
         if (onClose) onClose();
     };
+
+    // Filter logic
+    const filteredGroups = groups.filter(g =>
+        g.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    const filteredChats = personalChats.filter(chat => {
+        const otherId = chat.userIds.find(id => id !== user?.id);
+        const name = chat.usernames?.[otherId || ''] || 'User';
+        return name.toLowerCase().includes(searchTerm.toLowerCase());
+    });
 
     return (
         <aside className="h-full flex flex-col bg-background/20 relative z-30 w-full">
@@ -126,7 +137,12 @@ export const AISidebar: React.FC<AISidebarProps> = ({
             <div className="px-6 py-4">
                 <div className="relative">
                     <Icon name="search" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/30" />
-                    <input className="w-full h-12 bg-foreground/5 rounded-2xl pl-12 pr-4 text-sm font-medium outline-none border border-transparent focus:border-primary/20 transition-all" placeholder="Search clusters..." />
+                    <input
+                        className="w-full h-12 bg-foreground/5 rounded-2xl pl-12 pr-4 text-sm font-medium outline-none border border-transparent focus:border-primary/20 transition-all placeholder:text-muted-foreground/40"
+                        placeholder="Search..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
                 </div>
             </div>
 
@@ -217,9 +233,9 @@ export const AISidebar: React.FC<AISidebarProps> = ({
                         <div className="space-y-3">
                             <div className="flex items-center justify-between px-2 mb-2">
                                 <span className="text-[10px] font-black text-primary/40 uppercase tracking-[0.2em]">Direct chat</span>
-                                <span className="text-[10px] font-black text-primary/20">{personalChats.length}</span>
+                                <span className="text-[10px] font-black text-primary/20">{filteredChats.length}</span>
                             </div>
-                            {personalChats.map(chat => {
+                            {filteredChats.map(chat => {
                                 const otherId = chat.userIds.find(id => id !== user?.id);
                                 const name = chat.usernames?.[otherId || ''] || 'User';
                                 const active = activeId === chat.id && isPersonalActive;
@@ -234,9 +250,9 @@ export const AISidebar: React.FC<AISidebarProps> = ({
                         <div className="space-y-3">
                             <div className="flex items-center justify-between px-2 mb-2">
                                 <span className="text-[10px] font-black text-primary/40 uppercase tracking-[0.2em]">Joined Groups</span>
-                                <span className="text-[10px] font-black text-primary/20">{groups.length}</span>
+                                <span className="text-[10px] font-black text-primary/20">{filteredGroups.length}</span>
                             </div>
-                            {groups.map(group => {
+                            {filteredGroups.map(group => {
                                 const active = activeId === group.id && !isPersonalActive;
                                 return (
                                     <button key={group.id} onClick={() => onSelectGroup(group.id)} className={`w-full p-4 rounded-3xl flex items-center gap-4 transition-all ${active ? 'bg-primary text-white shadow-xl shadow-primary/20' : 'hover:bg-foreground/5 text-muted-foreground hover:text-foreground'}`}>
@@ -255,12 +271,11 @@ export const AISidebar: React.FC<AISidebarProps> = ({
                 <div className="flex items-center gap-3">
                     <button onClick={onOpenSettings} className="flex-1 flex items-center gap-4 p-2 rounded-2xl hover:bg-foreground/10 transition-all group/profile">
                         <div className="relative">
-                            <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center text-primary font-black text-sm border border-primary/20">{user?.username?.[0].toUpperCase() || 'U'}</div>
-                            <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-green-500 border-2 border-background shadow-sm" />
+                            <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center text-primary font-black text-xs border border-primary/20">{user?.username?.[0].toUpperCase() || 'U'}</div>
+                            <div className="absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-green-500 border-2 border-background shadow-md" />
                         </div>
                         <div className="text-left flex-1 min-w-0">
-                            <p className="text-sm font-black truncate text-foreground/90">{user?.username || 'Gapes User'}</p>
-                            <p className="text-[9px] font-bold text-primary/40 uppercase tracking-widest">Active Link</p>
+                            <p className="text-sm font-bold truncate text-foreground/90">{user?.username || 'User'}</p>
                         </div>
                     </button>
 

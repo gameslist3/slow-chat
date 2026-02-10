@@ -14,23 +14,19 @@ export const HomeView: React.FC<HomeViewProps> = ({ user, myGroups, onSelectGrou
     return (
         <div className="h-full overflow-y-auto p-6 md:p-12 lg:p-16 space-y-12 md:space-y-20 animate-in fade-in duration-1000 custom-scrollbar text-foreground">
             <div className="max-w-7xl mx-auto space-y-6 md:space-y-8 pt-4 md:pt-8">
-                <div className="inline-flex items-center gap-2 md:gap-3 px-3 py-1.5 md:px-4 md:py-2 glass-card rounded-full font-protocol text-[8px] md:text-[9px] tracking-[0.3em] text-primary uppercase mb-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_10px_rgba(var(--primary-rgb),0.5)]" />
-                    Protocol Sync Active
-                </div>
                 <h1 className="text-5xl md:text-7xl lg:text-9xl font-black tracking-tighter text-foreground leading-[0.8] uppercase italic">
                     Welcome, <br />
                     <span className="text-primary italic underline appearance-none decoration-primary/20 decoration-8 underline-offset-8">{user?.username}</span>
                 </h1>
                 <p className="text-muted-foreground/60 font-medium text-sm md:text-xl max-w-2xl leading-relaxed">
-                    Accessing established protocol clusters. All syncs are stable.
+                    Select a chat to begin.
                 </p>
             </div>
 
             <div className="max-w-7xl mx-auto">
                 <div className="flex items-center justify-between mb-8 md:mb-12 border-b border-white/5 pb-4">
-                    <h2 className="font-protocol text-[10px] md:text-xs font-black uppercase tracking-[0.4em] text-muted-foreground/40">Joined Clusters</h2>
-                    <span className="font-protocol text-[10px] md:text-xs font-black text-primary italic">{myGroups.length} Nodes</span>
+                    <h2 className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground/40">Your Groups</h2>
+                    <span className="text-[10px] md:text-xs font-bold text-primary italic">{myGroups.length} Groups</span>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
@@ -62,10 +58,10 @@ export const HomeView: React.FC<HomeViewProps> = ({ user, myGroups, onSelectGrou
                                                 )}
                                             </div>
                                             <div className="flex items-center gap-3">
-                                                <span className="text-[8px] md:text-[9px] font-protocol font-black uppercase text-primary px-3 py-1 bg-primary/10 rounded-lg border border-primary/20">{g.category}</span>
-                                                <div className="flex items-center gap-1.5 text-[8px] md:text-[9px] font-protocol font-black uppercase text-muted-foreground/40">
+                                                <span className="text-[8px] md:text-[9px] font-bold uppercase text-primary px-3 py-1 bg-primary/10 rounded-lg border border-primary/20">{g.category}</span>
+                                                <div className="flex items-center gap-1.5 text-[8px] md:text-[9px] font-bold uppercase text-muted-foreground/40">
                                                     <Icon name="users" className="w-3.5 h-3.5" />
-                                                    <span>{g.members} Syncs</span>
+                                                    <span>{g.members} Members</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -79,16 +75,16 @@ export const HomeView: React.FC<HomeViewProps> = ({ user, myGroups, onSelectGrou
                         <div className="col-span-full glass-panel border-dashed border-white/10 bg-transparent flex flex-col items-center justify-center py-24 md:py-32 text-center gap-8 rounded-[3rem] md:rounded-[4rem]">
                             <div className="text-8xl md:text-9xl opacity-10 animate-pulse grayscale filter blur-sm">📡</div>
                             <div className="space-y-3">
-                                <h1 className="text-xl md:text-2xl font-black text-foreground uppercase tracking-wider">No Clusters Synchronized</h1>
-                                <p className="text-sm md:text-base font-medium text-muted-foreground/40 max-w-xs mx-auto">The SlowChat network is vast. Initiate discovery to find your hub.</p>
+                                <h1 className="text-xl md:text-2xl font-black text-foreground uppercase tracking-wider">No Groups Joined</h1>
+                                <p className="text-sm md:text-base font-medium text-muted-foreground/40 max-w-xs mx-auto">Join a group to start chatting.</p>
                             </div>
                             <motion.button
                                 whileHover={{ scale: 1.05, y: -2 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={onBrowseGroups}
-                                className="btn-primary rounded-2xl md:rounded-3xl h-16 md:h-20 px-10 md:px-12 text-[10px] md:text-xs font-protocol font-black tracking-[0.3em] shadow-2xl shadow-primary/30 uppercase mt-4"
+                                className="btn-primary rounded-2xl md:rounded-3xl h-16 md:h-20 px-10 md:px-12 text-[10px] md:text-xs font-black tracking-[0.2em] shadow-2xl shadow-primary/30 uppercase mt-4"
                             >
-                                Initiate Discovery
+                                Join a Group
                             </motion.button>
                         </div>
                     )}
