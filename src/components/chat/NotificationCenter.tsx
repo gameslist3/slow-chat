@@ -13,26 +13,13 @@ interface NotificationCenterProps {
     onSelectChat: (chatId: string, isPersonal: boolean, messageId?: string) => void;
 }
 
-export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose, onSelectChat }) => {
-    const [notifications, setNotifications] = useState<Notification[]>([]);
-    const containerRef = React.useRef<HTMLDivElement>(null);
+export const NotificationList: React.FC<{
+    notifications: Notification[];
+    onSelectChat: (chatId: string, isPersonal: boolean, messageId?: string) => void;
+    onMarkAllRead?: () => void;
+}> = ({ notifications, onSelectChat, onMarkAllRead }) => {
 
-    // Close on click outside
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-                onClose();
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [onClose]);
-
-    useEffect(() => {
-        const unsubscribe = subscribeToNotifications(setNotifications);
-        return () => unsubscribe();
-    }, []);
-
+    // Logic for processing notifications
     const isPersonalNote = (note: Notification): boolean => {
         const type = note.type;
         const gId = note.groupId || '';
@@ -49,9 +36,6 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose,
         const chatId = note.groupId;
         if (chatId) {
             onSelectChat(chatId, isPersonalNote(note), note.messageId);
-            onClose();
-        } else if (note.type === 'message') {
-            onClose();
         }
     };
 
@@ -63,33 +47,30 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose,
 
     const recentActivityFilter = (n: Notification) => {
         if (n.type === 'follow_request') {
-            // Only show in recent activity if it's read AND older than 10 mins? 
-            // The user said "no longer available", so I'll hide follow requests entirely after 10 mins.
             return false;
         }
         return true;
     };
 
     return (
-        <div ref={containerRef} className="flex flex-col h-full glass-panel rounded-none md:rounded-[2.5rem] overflow-hidden shadow-2xl border-white/5">
-            <header className="px-6 md:px-8 py-5 md:py-6 border-b border-white/5 flex items-center justify-between bg-foreground/5 backdrop-blur-3xl">
+        <div className="flex flex-col h-full">
+            <header className="px-6 py-4 flex items-center justify-between sticky top-0 bg-background/95 backdrop-blur-md z-10 border-b border-border/5">
                 <div className="flex flex-col">
                     <span className="text-[9px] font-bold tracking-widest text-primary opacity-60 mb-1 uppercase">Notifications</span>
                     <h2 className="text-xl font-bold tracking-tight text-foreground leading-none">Activity</h2>
                 </div>
-                <div className="flex items-center gap-2">
+                {onMarkAllRead && (
                     <button
-                        onClick={() => markAllAsRead()}
+                        onClick={onMarkAllRead}
                         className="p-2.5 rounded-xl bg-foreground/5 hover:bg-primary/10 hover:text-primary transition-all text-muted-foreground"
                         title="Mark all as read"
                     >
-                        <RotateCw className="w-5 h-5" />
+                        <RotateCw className="w-4 h-4" />
                     </button>
-                    <button onClick={onClose} className="p-2.5 rounded-xl bg-foreground/5 hover:bg-destructive/10 hover:text-destructive transition-all text-muted-foreground"><X className="w-5 h-5" /></button>
-                </div>
+                )}
             </header>
 
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-5 md:p-6 space-y-8">
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-8">
                 <AnimatePresence mode="popLayout">
                     {notifications.filter(followReqFilter).length === 0 && notifications.filter(recentActivityFilter).length === 0 ? (
                         <div className="py-20 text-center opacity-20 flex flex-col items-center gap-6">
@@ -137,14 +118,14 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose,
                                             }}
                                             onClick={() => handleSelect(note)}
                                             className={`
-                                                group relative p-4 md:p-5 rounded-3xl transition-all cursor-pointer border
+                                                group relative p-4 rounded-3xl transition-all cursor-pointer border
                                                 ${note.read
                                                     ? 'opacity-40 grayscale bg-foreground/5 border-transparent'
                                                     : 'bg-foreground/5 border-white/5 hover:border-primary/40 hover:bg-primary/5'}
                                             `}
                                         >
-                                            <div className="flex gap-4 md:gap-5 items-start">
-                                                <div className={`w-11 h-11 md:w-12 md:h-12 rounded-2xl flex items-center justify-center shrink-0 border transition-transform group-hover:scale-110
+                                            <div className="flex gap-4 items-start">
+                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-transform group-hover:scale-110
                                                     ${note.type === 'mention' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' :
                                                         note.type === 'reply' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
                                                             'bg-foreground/5 text-muted-foreground border-white/5'}
@@ -152,17 +133,17 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose,
                                                     <IconForType type={note.type} />
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <div className="flex items-center justify-between gap-2 mb-1.5">
-                                                        <span className="font-bold text-sm tracking-tight text-foreground/90">{note.senderName}</span>
+                                                    <div className="flex items-center justify-between gap-2 mb-1">
+                                                        <span className="font-bold text-xs tracking-tight text-foreground/90">{note.senderName}</span>
                                                         <span className="text-[8px] font-bold opacity-30 tracking-widest uppercase">{new Date(note.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                                     </div>
-                                                    <p className="text-sm font-medium line-clamp-2 text-muted-foreground leading-relaxed group-hover:text-foreground transition-colors">
+                                                    <p className="text-xs font-medium line-clamp-2 text-muted-foreground leading-relaxed group-hover:text-foreground transition-colors">
                                                         {note.text}
                                                     </p>
                                                 </div>
                                             </div>
                                             {!note.read && (
-                                                <div className="absolute top-5 right-5 w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary-rgb),1)]" />
+                                                <div className="absolute top-4 right-4 w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary-rgb),1)]" />
                                             )}
                                         </motion.div>
                                     ))}
@@ -171,6 +152,40 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose,
                     )}
                 </AnimatePresence>
             </div>
+        </div>
+    );
+};
+
+export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose, onSelectChat }) => {
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const containerRef = React.useRef<HTMLDivElement>(null);
+
+    // Close on click outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+                onClose();
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [onClose]);
+
+    useEffect(() => {
+        const unsubscribe = subscribeToNotifications(setNotifications);
+        return () => unsubscribe();
+    }, []);
+
+    return (
+        <div ref={containerRef} className="flex flex-col h-full glass-panel rounded-none md:rounded-[2.5rem] overflow-hidden shadow-2xl border-white/5">
+            <div className="flex items-center justify-end p-2 md:hidden">
+                <button onClick={onClose} className="p-2"><X className="w-6 h-6" /></button>
+            </div>
+            <NotificationList
+                notifications={notifications}
+                onSelectChat={onSelectChat}
+                onMarkAllRead={() => markAllAsRead()}
+            />
         </div>
     );
 };

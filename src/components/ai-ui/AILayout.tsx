@@ -5,8 +5,6 @@ import { ThemeToggle } from './ThemeToggle';
 import { Group, User, PersonalChat, FollowRequest, Notification } from '../../types';
 import { useInbox } from '../../hooks/useChat';
 import { getPendingRequests } from '../../services/firebaseFollowService';
-import { subscribeToNotifications, markAllAsRead } from '../../services/firebaseNotificationService';
-import { NotificationCenter } from '../chat/NotificationCenter';
 import { AbstractBackground } from '../ui/AbstractBackground';
 import { AISidebar } from './AISidebar';
 import { Logo } from '../common/Logo';
@@ -47,18 +45,8 @@ export const AILayout: React.FC<AILayoutProps> = ({
     mobileTitle = "SlowChat"
 }) => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const [showNotifications, setShowNotifications] = useState(false);
     const [showBottomNav, setShowBottomNav] = useState(true);
-    const [unreadNotifications, setUnreadNotifications] = useState(0);
     const lastScrollY = React.useRef(0);
-
-    useEffect(() => {
-        const unsubscribe = subscribeToNotifications((notices: Notification[]) => {
-            const unread = notices.filter(n => !n.read).length;
-            setUnreadNotifications(unread);
-        });
-        return () => unsubscribe();
-    }, []);
 
     useEffect(() => {
         if (showNotifications) {
@@ -89,35 +77,6 @@ export const AILayout: React.FC<AILayoutProps> = ({
         <div className="relative h-screen w-full overflow-hidden text-foreground font-sans selection:bg-primary/20 flex flex-col">
             <AbstractBackground />
 
-            {/* --- Notifications HUD --- */}
-            <AnimatePresence>
-                {showNotifications && (
-                    <motion.div
-                        initial={{ opacity: 0, x: -20, scale: 0.95 }}
-                        animate={{ opacity: 1, x: 0, scale: 1 }}
-                        exit={{ opacity: 0, x: -20, scale: 0.95 }}
-                        className="fixed inset-0 z-[100] md:inset-auto md:bottom-28 md:left-[340px] md:w-full md:max-w-sm"
-                    >
-                        <NotificationCenter
-                            onClose={() => setShowNotifications(false)}
-                            onSelectChat={onSelectNotification}
-                        />
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            <AnimatePresence>
-                {sidebarOpen && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[90] bg-black/60 backdrop-blur-sm md:hidden"
-                        onClick={() => setSidebarOpen(false)}
-                    />
-                )}
-            </AnimatePresence>
-
             <div className="relative flex-1 flex w-full h-full p-0 md:p-8 gap-0 md:gap-8 overflow-hidden">
                 {/* HUD Sidebar */}
                 <aside className={`
@@ -132,16 +91,12 @@ export const AILayout: React.FC<AILayoutProps> = ({
                         onSelectPersonal={(id) => { onSelectPersonal(id); setSidebarOpen(false); }}
                         onBrowseGroups={() => { onBrowseGroups(); setSidebarOpen(false); }}
                         onFollowRequests={() => { onFollowRequests(); setSidebarOpen(false); }}
-                        onOpenNotifications={() => { setShowNotifications(true); setSidebarOpen(false); }}
                         onCreateGroup={() => { onCreateGroup(); setSidebarOpen(false); }}
                         onOpenSettings={() => { onOpenSettings(); setSidebarOpen(false); }}
                         onGoHome={() => { onGoHome(); setSidebarOpen(false); }}
                         user={user}
                         onLogout={onLogout}
                         onClose={() => setSidebarOpen(false)}
-                        unreadNotifications={unreadNotifications}
-                        showNotifications={showNotifications}
-                        onToggleNotifications={() => setShowNotifications(!showNotifications)}
                     />
                 </aside>
 
@@ -163,30 +118,17 @@ export const AILayout: React.FC<AILayoutProps> = ({
                         </div>
 
                         <div className="flex items-center gap-4">
+                            {/* Mobile Bell - Now opens sidebar to notifications */}
                             <button
-                                onClick={() => setShowNotifications(!showNotifications)}
-                                className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all relative group/bell ${showNotifications ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-foreground/5 text-muted-foreground hover:bg-foreground/10'}`}
+                                onClick={() => {
+                                    setSidebarOpen(true);
+                                    // ideally we'd pass a prop to open directly to notifications, 
+                                    // but for now opening sidebar is enough as the user can tap bell there.
+                                    // Or we can add a prop to AISidebar to force-view notifications.
+                                }}
+                                className="w-12 h-12 rounded-2xl flex items-center justify-center bg-foreground/5 text-muted-foreground hover:bg-foreground/10 transition-all md:hidden"
                             >
-                                <motion.div
-                                    animate={unreadNotifications > 0 ? {
-                                        rotate: [0, -10, 10, -10, 10, 0],
-                                        scale: [1, 1.1, 1]
-                                    } : {}}
-                                    transition={{
-                                        repeat: Infinity,
-                                        duration: 2,
-                                        repeatDelay: 3
-                                    }}
-                                >
-                                    <Icon name="bell" className="w-5 h-5" />
-                                </motion.div>
-
-                                {unreadNotifications > 0 && (
-                                    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-black text-white border-2 border-background shadow-lg group-hover/bell:scale-110 transition-transform">
-                                        {unreadNotifications > 9 ? '9+' : unreadNotifications}
-                                        <span className="absolute inset-0 rounded-full bg-primary animate-ping opacity-40 -z-10" />
-                                    </span>
-                                )}
+                                <Icon name="bell" className="w-5 h-5" />
                             </button>
                             <ThemeToggle />
                         </div>

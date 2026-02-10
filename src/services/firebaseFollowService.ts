@@ -187,37 +187,42 @@ export const unfollowUser = async (otherUserId: string): Promise<void> => {
     const currentUser = auth.currentUser;
     if (!currentUser) throw new Error("Auth required");
 
-    const batch = writeBatch(db);
-    const requestsRef = collection(db, 'follow_requests');
+    try {
+        const batch = writeBatch(db);
+        const requestsRef = collection(db, 'follow_requests');
 
-    // 1. Mark existing accepted request as 'declined' to trigger cooldown
-    const q1 = query(requestsRef, where('fromId', '==', currentUser.uid), where('toId', '==', otherUserId), where('status', '==', 'accepted'));
-    const q2 = query(requestsRef, where('fromId', '==', otherUserId), where('toId', '==', currentUser.uid), where('status', '==', 'accepted'));
+        // 1. Mark existing accepted request as 'declined' to trigger cooldown
+        const q1 = query(requestsRef, where('fromId', '==', currentUser.uid), where('toId', '==', otherUserId), where('status', '==', 'accepted'));
+        const q2 = query(requestsRef, where('fromId', '==', otherUserId), where('toId', '==', currentUser.uid), where('status', '==', 'accepted'));
 
-    const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+        const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
 
-    // Instead of deleting, we update to 'declined' with fresh timestamp for mutual cooldown
-    const now = Date.now();
-    snap1.docs.forEach(d => batch.update(d.ref, { status: 'declined', updatedAt: now, timestamp: now }));
-    snap2.docs.forEach(d => batch.update(d.ref, { status: 'declined', updatedAt: now, timestamp: now }));
+        // Instead of deleting, we update to 'declined' with fresh timestamp for mutual cooldown
+        const now = Date.now();
+        snap1.docs.forEach(d => batch.update(d.ref, { status: 'declined', updatedAt: now, timestamp: now }));
+        snap2.docs.forEach(d => batch.update(d.ref, { status: 'declined', updatedAt: now, timestamp: now }));
 
-    // 2. Delete the personal chat (this will remove it from sidebars for BOTH sides)
-    const chatIds = [currentUser.uid, otherUserId].sort();
-    const chatId = chatIds.join('_');
-    const chatRef = doc(db, 'personal_chats', chatId);
-    batch.delete(chatRef);
+        // 2. Delete the personal chat (this will remove it from sidebars for BOTH sides)
+        const chatIds = [currentUser.uid, otherUserId].sort();
+        const chatId = chatIds.join('_');
+        const chatRef = doc(db, 'personal_chats', chatId);
+        batch.delete(chatRef);
 
-    // 3. Delete related notifications for CURRENT USER ONLY
-    const notificationsRef = collection(db, 'notifications');
-    const n1 = query(notificationsRef, where('userId', '==', currentUser.uid), where('groupId', '==', otherUserId));
-    const n3 = query(notificationsRef, where('userId', '==', currentUser.uid), where('groupId', '==', chatId));
+        // 3. Delete related notifications for CURRENT USER ONLY
+        const notificationsRef = collection(db, 'notifications');
+        const n1 = query(notificationsRef, where('userId', '==', currentUser.uid), where('groupId', '==', otherUserId));
+        const n3 = query(notificationsRef, where('userId', '==', currentUser.uid), where('groupId', '==', chatId));
 
-    const [sn1, sn3] = await Promise.all([getDocs(n1), getDocs(n3)]);
+        const [sn1, sn3] = await Promise.all([getDocs(n1), getDocs(n3)]);
 
-    sn1.docs.forEach(d => batch.delete(d.ref));
-    sn3.docs.forEach(d => batch.delete(d.ref));
+        sn1.docs.forEach(d => batch.delete(d.ref));
+        sn3.docs.forEach(d => batch.delete(d.ref));
 
-    await batch.commit();
+        await batch.commit();
+    } catch (error) {
+        console.error("Error in unfollowUser:", error);
+        throw error;
+    }
 };
 
 /**

@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Icon } from '../common/Icon';
 import { ThemeToggle } from './ThemeToggle';
-import { Group, User, PersonalChat, FollowRequest } from '../../types';
+import { Group, User, PersonalChat, FollowRequest, Notification } from '../../types';
 import { useInbox } from '../../hooks/useChat';
 import { getPendingRequests, acceptFollowRequest, declineFollowRequest } from '../../services/firebaseFollowService';
+import { subscribeToNotifications, markAllAsRead } from '../../services/firebaseNotificationService';
 import { FriendsList } from '../social/FriendsList';
+import { NotificationList } from '../chat/NotificationCenter';
 import { Logo } from '../common/Logo';
 import { useToast } from '../../context/ToastContext';
 
@@ -17,16 +19,12 @@ interface AISidebarProps {
     onSelectPersonal: (chatId: string) => void;
     onBrowseGroups: () => void;
     onFollowRequests: () => void;
-    onOpenNotifications: () => void;
     onCreateGroup: () => void;
     onOpenSettings: () => void;
     onGoHome: () => void;
     user: User | null;
     onLogout: () => void;
     onClose?: () => void;
-    unreadNotifications: number;
-    showNotifications: boolean;
-    onToggleNotifications: () => void;
 }
 
 export const AISidebar: React.FC<AISidebarProps> = ({
@@ -37,21 +35,35 @@ export const AISidebar: React.FC<AISidebarProps> = ({
     onSelectPersonal,
     onBrowseGroups,
     onFollowRequests,
-    onOpenNotifications,
     onCreateGroup,
     onOpenSettings,
     onGoHome,
     user,
     onLogout,
-    onClose,
-    unreadNotifications,
-    showNotifications,
-    onToggleNotifications
+    onClose
 }) => {
     const { personalChats } = useInbox();
     const [followReqs, setFollowReqs] = useState<FollowRequest[]>([]);
-    const [view, setView] = useState<'chats' | 'friends'>('chats');
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [view, setView] = useState<'chats' | 'friends' | 'notifications'>('chats');
     const { toast } = useToast();
+
+    // Subscribe to notifications internally
+    useEffect(() => {
+        const unsubscribe = subscribeToNotifications(setNotifications);
+        return () => unsubscribe();
+    }, []);
+
+    const unreadNotifications = notifications.filter(n => !n.read).length;
+
+    const handleSelectNotification = (chatId: string, isPersonal: boolean, messageId?: string) => {
+        if (isPersonal) {
+            onSelectPersonal(chatId);
+        } else {
+            onSelectGroup(chatId);
+        }
+        if (onClose) onClose();
+    };
 
     const handleAcceptReq = async (id: string, name: string) => {
         // Optimistic update
@@ -131,6 +143,14 @@ export const AISidebar: React.FC<AISidebarProps> = ({
             <div className="flex-1 min-h-0 overflow-y-auto px-6 space-y-8 pb-32 custom-scrollbar">
                 {view === 'friends' ? (
                     <FriendsList onSelectFriend={handleFriendSelect} />
+                ) : view === 'notifications' ? (
+                    <div className="-mx-6 h-full">
+                        <NotificationList
+                            notifications={notifications}
+                            onSelectChat={handleSelectNotification}
+                            onMarkAllRead={markAllAsRead}
+                        />
+                    </div>
                 ) : (
                     <>
                         {followReqs.length > 0 && (
@@ -246,8 +266,11 @@ export const AISidebar: React.FC<AISidebarProps> = ({
 
                     <div className="flex gap-2">
                         <button
-                            onClick={(e) => { e.stopPropagation(); onToggleNotifications(); }}
-                            className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all relative group/bell ${showNotifications ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-foreground/10 text-muted-foreground hover:bg-foreground/20 hover:text-foreground'}`}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setView(view === 'notifications' ? 'chats' : 'notifications');
+                            }}
+                            className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all relative group/bell ${view === 'notifications' ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-foreground/10 text-muted-foreground hover:bg-foreground/20 hover:text-foreground'}`}
                         >
                             <motion.div
                                 animate={unreadNotifications > 0 ? {
