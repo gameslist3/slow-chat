@@ -1,8 +1,7 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef } from 'react';
 import { useChat, useCooldown } from '../../hooks/index';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { Group, Message } from '../../types';
 import { AIChatHeader } from './AIChatHeader';
 import { AIMessageList } from './AIMessageList';
 import { AIComposer } from './AIComposer';
@@ -29,7 +28,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     memberCount,
     memberIds = [],
     createdAt,
-    onType,
     onLeave
 }) => {
     const {
@@ -45,12 +43,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     const { user } = useAuth();
     const { remaining, triggerCooldown } = useCooldown(chatId, memberCount);
     const { toast } = useToast();
-    const scrollRef = useRef<HTMLDivElement>(null);
 
     const handleSendMessage = async (content: any) => {
         if (remaining > 0) return;
         try {
-            // Find recipientId for personal chats
             let recipientId: string | undefined;
             if (isPersonal) {
                 const ids = chatId.split('_');
@@ -65,7 +61,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     };
 
     return (
-        <div className="flex flex-col h-full w-full bg-background relative overflow-hidden">
+        <div className="flex flex-col h-full w-full bg-[#050505] relative overflow-hidden">
             <AIChatHeader
                 groupId={chatId}
                 isPersonal={isPersonal}
@@ -77,16 +73,16 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 onLeave={onLeave}
             />
 
-            {/* Message List Area - Fixed Scrollable Body */}
-            <div className="flex-1 min-h-0 relative overflow-hidden flex flex-col w-full h-full bg-surface/5">
+            {/* Message List Area */}
+            <div className="flex-1 min-h-0 relative overflow-hidden flex flex-col w-full h-full">
                 {loading && messages.length === 0 ? (
                     <div className="max-w-4xl mx-auto py-10 space-y-8 px-4 flex-1 w-full overflow-hidden">
                         {[1, 2, 3, 4, 5].map(i => (
                             <div key={i} className={`flex gap-4 animate-pulse ${i % 2 === 0 ? 'flex-row-reverse' : ''}`}>
-                                <div className="w-12 h-12 bg-muted rounded-2xl shrink-0 opacity-20" />
+                                <div className="w-10 h-10 bg-white/5 rounded-xl shrink-0" />
                                 <div className={`flex-1 space-y-3 ${i % 2 === 0 ? 'items-end flex flex-col' : ''}`}>
-                                    <div className="h-2.5 bg-muted rounded w-24 opacity-20" />
-                                    <div className={`h-14 bg-muted rounded-3xl w-3/4 opacity-20 ${i % 2 === 0 ? 'rounded-tr-none' : 'rounded-tl-none'}`} />
+                                    <div className="h-2 bg-white/5 rounded w-24" />
+                                    <div className={`h-12 bg-white/5 rounded-2xl w-3/4 ${i % 2 === 0 ? 'rounded-tr-none' : 'rounded-tl-none'}`} />
                                 </div>
                             </div>
                         ))}
@@ -94,9 +90,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 ) : (
                     <div className="flex-1 flex flex-col h-full w-full">
                         {messages.length === 0 ? (
-                            <div className="flex-1 flex flex-col items-center justify-center py-20 animate-in fade-in duration-1000">
-                                <div className="text-6xl mb-6 grayscale opacity-20">💬</div>
-                                <p className="font-protocol text-[10px] uppercase tracking-[0.3em] text-muted-foreground/30">Protocol Initialized. No syncs located.</p>
+                            <div className="flex-1 flex flex-col items-center justify-center py-20 opacity-20">
+                                <div className="text-6xl mb-6 grayscale italic">💬</div>
+                                <p className="text-[10px] uppercase tracking-[0.3em] font-black">No activity located</p>
                             </div>
                         ) : (
                             <AIMessageList
@@ -111,25 +107,16 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 )}
             </div>
 
-            {/* Composer - Fixed at Bottom */}
-            <div className="shrink-0">
-                {chatId === 'system-updates' ? (
-                    <div className="p-6 text-center">
-                        <div className="inline-flex items-center gap-2 text-gray-500 text-xs font-bold uppercase tracking-wider">
-                            <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-                            Official Updates
-                        </div>
-                    </div>
-                ) : (
-                    <AIComposer
-                        groupId={chatId}
-                        userId={user?.id || ''}
-                        onSend={handleSendMessage}
-                        replyingTo={replyingTo}
-                        onCancelReply={cancelReply}
-                        cooldown={remaining}
-                    />
-                )}
+            {/* Composer */}
+            <div className="shrink-0 relative z-50">
+                <AIComposer
+                    groupId={chatId}
+                    userId={user?.id || ''}
+                    onSend={handleSendMessage}
+                    replyingTo={replyingTo}
+                    onCancelReply={cancelReply}
+                    cooldown={remaining}
+                />
             </div>
         </div>
     );

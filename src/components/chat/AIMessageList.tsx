@@ -1,10 +1,10 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Icon } from '../common/Icon';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Message, Reaction, User as InternalUser } from '../../types';
 import { getUserById } from '../../services/firebaseAuthService';
 import { sendFollowRequest, getFollowStatus, cancelFollowRequest, unfollowUser } from '../../services/firebaseFollowService';
 import { useToast } from '../../context/ToastContext';
+import { Icon } from '../common/Icon';
 
 interface AIMessageListProps {
     messages: Message[];
@@ -42,21 +42,28 @@ export const AIMessageList: React.FC<AIMessageListProps> = ({
     }, [messages, highlightId]);
 
     return (
-        <div className="flex-1 overflow-y-auto py-8 space-y-12 px-4 md:px-6 custom-scrollbar relative overscroll-contain">
-            {messages.map((msg) => (
-                <MessageItem
-                    key={msg.id}
-                    message={msg}
-                    isOwn={msg.senderId === currentUserId}
-                    onReply={() => onReply?.(msg)}
-                    onReaction={(emoji) => onReaction?.(msg.id, emoji)}
-                    onJumpToReply={scrollToMessage}
-                    onUserClick={(uid) => setSelectedUser(uid)}
-                />
-            ))}
+        <div className="flex-1 overflow-y-auto pt-4 pb-32 px-4 md:px-8 custom-scrollbar relative">
+            <div className="max-w-4xl mx-auto space-y-8">
+                {messages.map((msg, idx) => {
+                    const prevMsg = messages[idx - 1];
+                    const isSequence = prevMsg && prevMsg.senderId === msg.senderId && (msg.timestamp - prevMsg.timestamp < 300000);
+
+                    return (
+                        <MessageItem
+                            key={msg.id}
+                            message={msg}
+                            isOwn={msg.senderId === currentUserId}
+                            isSequence={isSequence}
+                            onReply={() => onReply?.(msg)}
+                            onReaction={(emoji) => onReaction?.(msg.id, emoji)}
+                            onJumpToReply={scrollToMessage}
+                            onUserClick={(uid) => setSelectedUser(uid)}
+                        />
+                    );
+                })}
+            </div>
             <div ref={bottomRef} className="h-4" />
 
-            {/* Profile Overlay - Rendered inside but positioned fixed */}
             <AnimatePresence>
                 {selectedUser && (
                     <UserProfileCard
@@ -73,6 +80,7 @@ export const AIMessageList: React.FC<AIMessageListProps> = ({
 const MessageItem = ({
     message,
     isOwn,
+    isSequence,
     onReply,
     onReaction,
     onJumpToReply,
@@ -80,134 +88,101 @@ const MessageItem = ({
 }: {
     message: Message,
     isOwn: boolean,
+    isSequence: boolean,
     onReply: () => void,
     onReaction: (emoji: string) => void,
     onJumpToReply: (id: string) => void,
     onUserClick: (uid: string) => void
 }) => {
-    const getAvatarColor = (id: string) => {
-        const colors = ['bg-primary', 'bg-secondary', 'bg-indigo-500', 'bg-emerald-500', 'bg-amber-500', 'bg-rose-500', 'bg-violet-500'];
-        let hash = 0;
-        for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
-        return colors[Math.abs(hash) % colors.length];
-    };
-
     return (
         <motion.div
             id={`msg-${message.id}`}
-            layout
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`group flex flex-col gap-3 px-2 md:px-6 transition-all duration-700`}
+            className={`flex flex-col gap-1 ${isOwn ? 'items-end' : 'items-start'} ${isSequence ? 'mt-[-1.5rem]' : 'mt-0'}`}
         >
-            <div className={`max-w-4xl mx-auto w-full flex gap-4 md:gap-6 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
-                {/* Avatar */}
-                <button
-                    onClick={() => onUserClick(message.senderId)}
-                    className={`w-11 h-11 rounded-2xl flex-shrink-0 flex items-center justify-center border shadow-sm transition-all duration-500 group-hover:scale-110 group-hover:rotate-3
-                        ${isOwn ? 'bg-surface border-border text-foreground hover:border-primary/30' : `${getAvatarColor(message.senderId)} border-white/20 text-white shadow-lg`}
-                    `}
-                >
-                    {isOwn ? <Icon name="user" className="w-5 h-5" /> : <span className="font-black text-xs">{message.sender.slice(0, 2).toUpperCase()}</span>}
-                </button>
+            {/* Sender Label */}
+            {!isSequence && (
+                <div className={`flex items-center gap-3 mb-1 px-4 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
+                    <button
+                        onClick={() => onUserClick(message.senderId)}
+                        className="text-[10px] font-black uppercase tracking-widest text-primary/60 hover:text-primary transition-colors"
+                    >
+                        {message.sender}
+                    </button>
+                    <span className="text-[9px] font-bold text-muted-foreground/30">
+                        {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                </div>
+            )}
 
-                <div className={`flex-1 min-w-0 flex flex-col ${isOwn ? 'items-end' : 'items-start'}`}>
-                    {/* Header */}
-                    <div className={`flex items-center gap-3 mb-2 animate-in fade-in duration-1000 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
+            <div className={`group relative flex gap-3 max-w-[85%] md:max-w-[70%] ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
+                {/* Avatar (Only if NOT sequence) */}
+                {!isSequence ? (
+                    <button
+                        onClick={() => onUserClick(message.senderId)}
+                        className={`w-8 h-8 rounded-lg shrink-0 flex items-center justify-center text-[10px] font-black border transition-all
+                            ${isOwn ? 'bg-white/5 border-white/10 text-white' : 'bg-primary/20 border-primary/30 text-primary'}
+                        `}
+                    >
+                        {message.sender[0].toUpperCase()}
+                    </button>
+                ) : (
+                    <div className="w-8 shrink-0" />
+                )}
+
+                <div className={`flex flex-col gap-2 ${isOwn ? 'items-end' : 'items-start'}`}>
+                    {/* Reply Context */}
+                    {message.replyTo && (
                         <button
-                            onClick={() => onUserClick(message.senderId)}
-                            className="font-protocol text-[9px] uppercase tracking-[0.34em] text-primary opacity-40 hover:opacity-100 transition-opacity"
+                            onClick={() => onJumpToReply(message.replyTo!.messageId)}
+                            className="text-[10px] flex items-center gap-2 px-3 py-1 rounded-lg bg-white/5 border border-white/5 text-muted-foreground hover:bg-white/10 transition-all mb-[-4px]"
                         >
-                            {message.sender}
+                            <Icon name="message" className="w-3 h-3" />
+                            <span className="truncate max-w-[120px]">{message.replyTo.text}</span>
                         </button>
-                        <div className="flex items-center gap-2">
-                            <span className="text-[9px] font-bold opacity-20 font-protocol tracking-widest mt-0.5">{new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                            {isOwn && message.status && <StatusIcon status={message.status} />}
-                        </div>
-                    </div>
+                    )}
 
-                    {/* Bubble Container */}
-                    <div className="relative flex flex-col gap-2 max-w-[95%] md:max-w-prose group/bubble">
-                        {/* Reply Preview inside bubble */}
-                        {message.replyTo && (
-                            <div
-                                onClick={() => onJumpToReply(message.replyTo!.messageId)}
-                                className={`cursor-pointer glass-card p-4 rounded-2xl mb-1 text-xs transition-all hover:bg-foreground/5 ${isOwn ? 'text-right' : 'text-left'}`}
-                            >
-                                <p className="font-protocol text-[9px] text-primary tracking-[0.2em] mb-1 italic">{message.replyTo.sender}</p>
-                                <p className="text-muted-foreground truncate opacity-70 font-medium">{message.replyTo.text}</p>
+                    {/* Bubble */}
+                    <div className={`
+                        px-5 py-3 rounded-2xl text-sm font-medium leading-relaxed border transition-all relative
+                        ${isOwn
+                            ? 'bg-primary text-white border-primary/20 rounded-tr-sm shadow-lg shadow-primary/10'
+                            : 'bg-white/[0.03] text-white border-white/5 rounded-tl-sm'}
+                    `}>
+                        {message.type === 'text' && (
+                            <div className="whitespace-pre-wrap break-words">
+                                {message.text}
                             </div>
                         )}
 
-                        <div className={`
-                            text-[15px] leading-relaxed shadow-sm p-5 rounded-[2rem] border transition-all duration-500 relative glass-card
-                            ${isOwn ? 'text-right rounded-tr-sm' : 'text-left rounded-tl-sm'}
-                        `}>
-                            {message.type === 'text' && (
-                                <div className="markdown-content font-medium opacity-90 whitespace-pre-wrap break-words">
-                                    {message.text?.split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
-                                        part.match(/^https?:\/\//) ? <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-primary underline hover:opacity-70">{part}</a> : part
-                                    )}
-                                </div>
-                            )}
+                        {/* Media */}
+                        {message.media && (
+                            <div className="mt-2 rounded-xl overflow-hidden border border-white/10">
+                                {message.type === 'image' && <img src={message.media.url} className="max-h-96 w-auto" alt="" />}
+                                {message.type === 'audio' && <AudioPlayer src={message.media.url} />}
+                            </div>
+                        )}
 
-                            {/* Media Rendering */}
-                            {message.media && (
-                                <div className={`space-y-4 ${isOwn ? 'flex flex-col items-end' : ''}`}>
-                                    {message.type === 'image' && (
-                                        <div className="relative group/img overflow-hidden rounded-2xl border border-border/10">
-                                            <img src={message.media.url} alt={message.media.name} className="max-h-[500px] w-auto transition-transform duration-700 group-hover/img:scale-105" />
-                                        </div>
-                                    )}
-                                    {message.type === 'video' && (
-                                        <video src={message.media.url} controls className="rounded-2xl max-h-[500px] w-full shadow-ui border border-border/10" />
-                                    )}
-                                    {message.type === 'audio' && (
-                                        <AudioPlayer src={message.media.url} isOwn={isOwn} />
-                                    )}
-                                    {['pdf', 'doc'].includes(message.type) && (
-                                        <a href={message.media.url} target="_blank" rel="noreferrer" className="flex items-center gap-4 p-4 glass-card bg-foreground/5 rounded-2xl hover:bg-foreground/10 transition-all border border-border/10 group/file">
-                                            <div className="w-12 h-12 bg-primary/10 rounded-[1rem] flex items-center justify-center text-primary transition-transform group-hover/file:scale-110"><Icon name="file" className="w-6 h-6" /></div>
-                                            <div className="flex-1 text-left">
-                                                <p className="font-protocol text-[10px] tracking-tight truncate max-w-[220px] uppercase">{message.media.name}</p>
-                                                <p className="text-[9px] opacity-40 uppercase font-black tracking-widest mt-0.5">{Math.round(message.media.size / 1024)} KB • {message.type}</p>
-                                            </div>
-                                            <Icon name="clock" className="w-4 h-4 opacity-20 group-hover/file:opacity-100 transition-opacity" />
-                                        </a>
-                                    )}
-                                </div>
-                            )}
+                        {/* Reactions */}
+                        {message.reactions && message.reactions.length > 0 && (
+                            <div className={`absolute -bottom-2 flex gap-1 ${isOwn ? 'right-2' : 'left-2'}`}>
+                                {message.reactions.map(r => (
+                                    <div key={r.emoji} className="bg-[#0A0A0A] border border-white/10 rounded-full px-1.5 py-0.5 text-[11px] flex items-center gap-1 shadow-xl">
+                                        <span>{r.emoji}</span>
+                                        <span className="text-[9px] font-black opacity-40">{r.userIds.length}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
 
-                            {/* WhatsApp Style Reactions Overlay */}
-                            {message.reactions && message.reactions.length > 0 && (
-                                <div className={`absolute -bottom-3 flex flex-wrap gap-1 ${isOwn ? 'right-4' : 'left-4'}`}>
-                                    {message.reactions.map((r: Reaction) => (
-                                        <button
-                                            key={r.emoji}
-                                            onClick={() => onReaction(r.emoji)}
-                                            className="h-7 px-2 flex items-center gap-1.5 glass-card shadow-xl rounded-full text-[13px] hover:border-primary/50 transition-all font-bold"
-                                        >
-                                            <span className="scale-110">{r.emoji}</span>
-                                            <span className="text-[10px] opacity-60 font-protocol">{r.userIds.length}</span>
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Interaction Bar */}
-                        <div className={`flex items-center gap-2 transition-all opacity-0 group-hover/bubble:opacity-100 mt-2 ${isOwn ? 'justify-end' : 'justify-start'}`}>
-                            <ReactionButton onReact={onReaction} isOwn={isOwn} />
-                            <motion.button
-                                whileHover={{ scale: 1.1, backgroundColor: 'rgba(var(--primary-rgb), 0.1)' }}
-                                whileTap={{ scale: 0.9 }}
-                                onClick={onReply}
-                                className="w-9 h-9 rounded-xl glass-card text-muted-foreground flex items-center justify-center transition-all hover:text-primary"
-                                title="Reply"
-                            >
-                                <Icon name="message" className="w-4 h-4" />
-                            </motion.button>
-                        </div>
+                    {/* Hover Actions */}
+                    <div className={`flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity mt-1 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
+                        <button onClick={onReply} className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors">
+                            <Icon name="message" className="w-3.5 h-3.5 text-muted-foreground" />
+                        </button>
+                        <ReactionButton onReact={onReaction} />
                     </div>
                 </div>
             </div>
@@ -215,99 +190,56 @@ const MessageItem = ({
     );
 };
 
-const StatusIcon = ({ status }: { status: 'sent' | 'delivered' | 'seen' }) => {
-    if (status === 'sent') return <Icon name="check" className="w-3 h-3 opacity-20" />;
-    if (status === 'delivered') return <Icon name="checkCheck" className="w-3 h-3 opacity-20" />;
-    if (status === 'seen') return <Icon name="checkCheck" className="w-3 h-3 text-secondary" />;
-    return null;
-};
-
-const ReactionButton = ({ onReact, isOwn }: { onReact: (e: string) => void, isOwn: boolean }) => {
+const ReactionButton = ({ onReact }: { onReact: (e: string) => void }) => {
     const [open, setOpen] = useState(false);
-    const emojis = ['👍', '❤️', '😂', '😮', '😢', '🔥', '👏', '⚡'];
+    const emojis = ['👍', '❤️', '😂', '🔥', '👏'];
 
     return (
         <div className="relative">
-            <button onClick={() => setOpen(!open)} className="w-8 h-8 rounded-lg hover:bg-surface2 text-muted-foreground flex items-center justify-center transition-all hover:text-primary" title="React">
-                <Icon name="thumbsUp" className="w-4 h-4" />
+            <button onClick={() => setOpen(!open)} className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors">
+                <Icon name="thumbsUp" className="w-3.5 h-3.5 text-muted-foreground" />
             </button>
             <AnimatePresence>
                 {open && (
-                    <>
-                        <div className="fixed inset-0 z-[110]" onClick={() => setOpen(false)} />
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.8, y: 10 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.8, y: 10 }}
-                            className={`absolute z-[120] flex gap-1 p-1 bg-surface border border-border shadow-2xl rounded-2xl backdrop-blur-3xl
-                                ${isOwn ? 'right-0 -top-12' : 'left-0 -top-12'}
-                                whitespace-nowrap
-                            `}
-                        >
-                            {emojis.map(e => (
-                                <button
-                                    key={e}
-                                    onClick={() => { onReact(e); setOpen(false); }}
-                                    className="w-8 h-8 flex items-center justify-center hover:bg-primary/10 rounded-xl text-xl transition-all hover:scale-125 active:scale-95"
-                                >
-                                    {e}
-                                </button>
-                            ))}
-                        </motion.div>
-                    </>
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        className="absolute bottom-full mb-2 left-0 flex gap-1 p-1 bg-[#0A0A0A] border border-white/10 rounded-xl shadow-2xl z-50"
+                    >
+                        {emojis.map(e => (
+                            <button key={e} onClick={() => { onReact(e); setOpen(false); }} className="w-8 h-8 hover:bg-white/10 rounded-lg flex items-center justify-center text-lg transition-transform hover:scale-125">
+                                {e}
+                            </button>
+                        ))}
+                    </motion.div>
                 )}
             </AnimatePresence>
         </div>
     );
 };
 
-const AudioPlayer = ({ src, isOwn }: { src: string, isOwn: boolean }) => {
+const AudioPlayer = ({ src }: { src: string }) => {
     const [playing, setPlaying] = useState(false);
     const audioRef = useRef<HTMLAudioElement>(null);
-    const [progress, setProgress] = useState(0);
-
-    const toggle = () => {
-        if (!audioRef.current) return;
-        if (playing) audioRef.current.pause();
-        else audioRef.current.play();
-        setPlaying(!playing);
-    };
 
     return (
-        <div className={`flex items-center gap-4 p-4 bg-muted/40 rounded-[1.5rem] min-w-[240px] border border-border/20 ${isOwn ? 'flex-row-reverse' : ''}`}>
-            <button onClick={toggle} className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center shadow-lg active:scale-95 transition-all group/play">
-                {playing ? <Icon name="pause" className="w-6 h-6" /> : <Icon name="play" className="w-6 h-6 ml-1 group-hover/play:scale-110 transition-transform" />}
+        <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl min-w-[200px]">
+            <button onClick={() => { if (playing) audioRef.current?.pause(); else audioRef.current?.play(); setPlaying(!playing); }} className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white">
+                <Icon name={playing ? "pause" : "play"} className="w-4 h-4" />
             </button>
-            <div className="flex-1 space-y-2">
-                <div className="h-1.5 w-full bg-border/40 rounded-full overflow-hidden">
-                    <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${progress}%` }}
-                        className="h-full bg-primary"
-                    />
-                </div>
-                <div className="flex justify-between text-[8px] font-black uppercase tracking-[0.2em] opacity-40 italic">
-                    <span>{playing ? 'Playing' : 'Voice Message'}</span>
-                    <span>HD Audio</span>
-                </div>
+            <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
+                <div className="h-full bg-primary" style={{ width: '30%' }} />
             </div>
-            <audio
-                ref={audioRef}
-                src={src}
-                onTimeUpdate={(e) => setProgress((e.currentTarget.currentTime / e.currentTarget.duration) * 100)}
-                onEnded={() => setPlaying(false)}
-                className="hidden"
-            />
+            <audio ref={audioRef} src={src} onEnded={() => setPlaying(false)} className="hidden" />
         </div>
     );
 };
 
-// --- Profile Card ---
 const UserProfileCard = ({ userId, currentUserId, onClose }: { userId: string, currentUserId: string, onClose: () => void }) => {
     const [profile, setProfile] = useState<InternalUser | null>(null);
     const [status, setStatus] = useState<'none' | 'pending' | 'accepted' | 'cooldown'>('none');
     const [loading, setLoading] = useState(true);
-    const [actionLoading, setActionLoading] = useState(false);
     const { toast } = useToast();
 
     useEffect(() => {
@@ -321,8 +253,7 @@ const UserProfileCard = ({ userId, currentUserId, onClose }: { userId: string, c
                 setProfile(u);
                 setStatus(s as any);
             } catch (err: any) {
-                console.error('[ProfileCard] Load error:', err);
-                toast('Failed to load user profile.', 'error');
+                toast('Identity failure.', 'error');
             } finally {
                 setLoading(false);
             }
@@ -330,143 +261,29 @@ const UserProfileCard = ({ userId, currentUserId, onClose }: { userId: string, c
         load();
     }, [userId]);
 
-    const handleFollow = async () => {
-        if (!profile || actionLoading) return;
-
-        if (status === 'cooldown') {
-            toast("Connection protocol resetting. Please wait.", "info");
-            return;
-        }
-
-        if (status === 'pending') {
-            // Cancel request (Optimistic)
-            const prevStatus = status;
-            setStatus('none');
-            toast(`Connection protocol withdrawn.`, 'info');
-            try {
-                await cancelFollowRequest(profile.id);
-            } catch (err: any) {
-                setStatus(prevStatus);
-                toast(err.message || "Failed to withdraw request", 'error');
-            }
-            return;
-        }
-
-        if (status !== 'none') return;
-
-        // Follow (Optimistic)
-        setStatus('pending');
-        toast(`Connection request sent to ${profile.username}`, 'success');
-        try {
-            await sendFollowRequest(profile.id, profile.username);
-        } catch (err: any) {
-            // Check if it was a cooldown error
-            if (err.message.includes('Protocol reset')) {
-                setStatus('cooldown');
-            } else {
-                setStatus('none');
-            }
-            toast(err.message || "Failed to send request", 'error');
-        }
-    };
-
     return (
-        <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md" onClick={onClose}>
             <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-background/60 backdrop-blur-3xl"
-                onClick={onClose}
-            />
-            <motion.div
-                initial={{ opacity: 0, scale: 0.8, y: 40 }}
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.8, y: 40 }}
-                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="glass-panel w-full max-w-[90vw] md:max-w-sm relative z-[1000] p-10 md:p-12 text-center space-y-8 shadow-[0_40px_100px_rgba(0,0,0,0.5)] rounded-[3rem] overflow-hidden"
+                className="w-full max-w-sm bg-[#080808] border border-white/10 rounded-[2.5rem] p-10 text-center shadow-2xl relative"
+                onClick={e => e.stopPropagation()}
             >
-                <button
-                    onClick={onClose}
-                    className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-surface2 rounded-full transition-all"
-                >
-                    <Icon name="x" className="w-5 h-5" />
-                </button>
-
-                {loading ? (
-                    <div className="py-20 flex flex-col items-center justify-center gap-4">
-                        <Icon name="rotate" className="w-10 h-10 animate-spin text-primary opacity-50" />
-                        <p className="text-[10px] uppercase font-black tracking-widest opacity-30">Fetching Identity...</p>
-                    </div>
-                ) : profile ? (
+                {loading ? <Icon name="rotate" className="w-10 h-10 animate-spin mx-auto opacity-20" /> : (
                     <>
-                        <div className="w-24 h-24 bg-primary/10 rounded-[2.5rem] flex items-center justify-center text-primary font-black text-4xl shadow-xl mx-auto mb-4 border border-primary/20">
-                            {profile.username.slice(0, 2).toUpperCase()}
+                        <div className="w-20 h-20 bg-primary/20 rounded-2xl flex items-center justify-center text-primary text-3xl font-black mx-auto mb-6 border border-primary/30">
+                            {profile?.username[0].toUpperCase()}
                         </div>
-                        <div className="space-y-1">
-                            <h3 className="text-3xl font-black tracking-tighter uppercase italic">{profile.username}</h3>
-                            <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.2em] opacity-40 italic">SlowChat Member</p>
-                        </div>
+                        <h3 className="text-2xl font-black uppercase italic tracking-tighter">{profile?.username}</h3>
+                        <p className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mt-1 mb-8">Decentralized Node Resident</p>
 
                         {userId !== currentUserId && (
-                            <div className="pt-4">
-                                <button
-                                    onClick={handleFollow}
-                                    disabled={actionLoading || status === 'accepted' || status === 'cooldown'}
-                                    className={`w-full h-14 rounded-2xl flex items-center justify-center gap-3 font-black uppercase tracking-widest text-sm transition-all shadow-lg
-                                        ${status === 'accepted' ? 'bg-secondary/10 text-secondary border border-secondary/20 shadow-none' :
-                                            status === 'pending' ? 'bg-surface2 text-primary border border-primary/20 hover:bg-surface2/80 active:scale-95 shadow-none' :
-                                                status === 'cooldown' ? 'bg-destructive/10 text-destructive border border-destructive/20 shadow-none opacity-50' :
-                                                    'bg-primary text-white hover:scale-105 active:scale-95 shadow-primary/20 hover:shadow-primary/40'}
-                                    `}
-                                >
-                                    {status === 'accepted' ? <Icon name="check" className="w-5 h-5" /> :
-                                        status === 'pending' ? <Icon name="rotate" className="w-5 h-5 animate-spin" /> :
-                                            status === 'cooldown' ? <Icon name="clock" className="w-5 h-5" /> :
-                                                <Icon name="plus" className="w-5 h-5" />}
-
-                                    {status === 'accepted' ? 'Connected' :
-                                        status === 'pending' ? 'Requested' :
-                                            status === 'cooldown' ? 'Wait' :
-                                                'Connect'}
-                                </button>
-                                {status === 'accepted' && (
-                                    <button
-                                        onClick={async () => {
-                                            if (!profile || actionLoading) return;
-
-                                            // Optimistic Update
-                                            const prevStatus = status;
-                                            setStatus('none');
-                                            toast(`Connection with ${profile.username} terminated.`, 'info');
-
-                                            try {
-                                                await unfollowUser(profile.id);
-                                            } catch (err: any) {
-                                                setStatus(prevStatus);
-                                                toast(err.message || "Failed to terminate sync", 'error');
-                                            }
-                                        }}
-                                        className="w-full h-12 mt-3 rounded-2xl bg-destructive/5 text-destructive border border-destructive/10 hover:bg-destructive/10 text-[10px] font-black uppercase tracking-widest transition-all"
-                                    >
-                                        TERMINATE SYNC
-                                    </button>
-                                )}
-                                {status === 'pending' && (
-                                    <p className="text-[9px] font-black uppercase tracking-widest opacity-30 mt-3 italic animate-pulse">Click to withdraw protocol</p>
-                                )}
-                                {status === 'cooldown' && (
-                                    <p className="text-[9px] font-black uppercase tracking-widest text-destructive opacity-40 mt-3 italic">Protocol reset in progress</p>
-                                )}
-                            </div>
+                            <button className="w-full h-14 rounded-2xl bg-primary text-white font-black uppercase tracking-widest text-xs hover:scale-105 transition-transform">
+                                Establish Link
+                            </button>
                         )}
+                        <button onClick={onClose} className="mt-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 hover:text-white transition-colors">Close</button>
                     </>
-                ) : (
-                    <div className="py-20 flex flex-col items-center gap-4">
-                        <Icon name="x" className="w-10 h-10 text-danger opacity-20" />
-                        <p className="text-muted-foreground italic uppercase font-black tracking-widest opacity-40">Identity Not Located</p>
-                        <button onClick={onClose} className="ui-button-ghost text-[10px] font-black uppercase tracking-widest">Close</button>
-                    </div>
                 )}
             </motion.div>
         </div>

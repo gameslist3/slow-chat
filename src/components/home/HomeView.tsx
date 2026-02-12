@@ -12,83 +12,139 @@ interface HomeViewProps {
 
 export const HomeView: React.FC<HomeViewProps> = ({ user, myGroups, onSelectGroup, onBrowseGroups }) => {
     return (
-        <div className="h-full overflow-y-auto p-6 md:p-12 lg:p-16 space-y-12 md:space-y-20 animate-in fade-in duration-1000 custom-scrollbar text-foreground">
-            <div className="max-w-7xl mx-auto space-y-6 md:space-y-8 pt-4 md:pt-8">
-                <h1 className="text-5xl md:text-7xl lg:text-9xl font-black tracking-tighter text-foreground leading-[0.8] uppercase italic">
-                    Welcome, <br />
-                    <span className="text-primary italic underline appearance-none decoration-primary/20 decoration-8 underline-offset-8">{user?.username}</span>
-                </h1>
-                <p className="text-muted-foreground/60 font-medium text-sm md:text-xl max-w-2xl leading-relaxed">
-                    Select a chat to begin.
-                </p>
+        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {/* Legend / Breadcrumb */}
+            <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary/60">
+                <Icon name="zap" className="w-3 h-3" />
+                <span>Operational Dashboard</span>
+                <span className="text-white/10">/</span>
+                <span className="text-white">Overview</span>
             </div>
 
-            <div className="max-w-7xl mx-auto">
-                <div className="flex items-center justify-between mb-8 md:mb-12 border-b border-white/5 pb-4">
-                    <h2 className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground/40">Your Groups</h2>
-                    <span className="text-[10px] md:text-xs font-bold text-primary italic">{myGroups.length} Groups</span>
+            {/* Hero / Overview Header */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+                <div>
+                    <h1 className="text-4xl md:text-6xl font-black tracking-tighter uppercase italic leading-none">
+                        Welcome back, <br />
+                        <span className="text-primary">{user?.username}</span>
+                    </h1>
+                    <p className="mt-4 text-muted-foreground/60 font-medium max-w-lg leading-relaxed">
+                        Your decentralized communication nodes are fully operational. {myGroups.length} clusters are active.
+                    </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
-                    {myGroups.length > 0 ? (
-                        myGroups.map(g => {
-                            const unread = user ? (g.unreadCounts?.[user.id] || 0) : 0;
-                            return (
-                                <motion.button
-                                    key={g.id}
-                                    whileHover={{ y: -8, scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
-                                    onClick={() => onSelectGroup(g.id)}
-                                    className="glass-panel group flex flex-col items-start gap-8 hover:border-primary/40 transition-all text-left p-8 md:p-10 rounded-[2.5rem] md:rounded-[3rem] border border-white/5 relative overflow-hidden h-72 md:h-80 shadow-2xl hover:shadow-primary/5 bg-gradient-to-br from-white/[0.03] to-transparent"
-                                >
-                                    <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-10 transition-opacity transform group-hover:rotate-12 pointer-events-none">
-                                        <Icon name="message" className="w-24 h-24" />
-                                    </div>
+                <div className="flex gap-4">
+                    <button onClick={onBrowseGroups} className="btn-secondary h-12 px-6 rounded-xl">
+                        Explore Clusters
+                    </button>
+                    <button className="btn-primary h-12 px-6 rounded-xl flex items-center gap-2">
+                        <Icon name="plus" className="w-4 h-4" />
+                        New Node
+                    </button>
+                </div>
+            </div>
 
-                                    <div className="flex-1 w-full flex flex-col justify-between z-10">
-                                        <span className="text-6xl md:text-7xl group-hover:scale-110 transition-transform duration-700 block drop-shadow-2xl">{g.image}</span>
+            {/* Bento Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 auto-rows-[240px]">
 
-                                        <div className="space-y-4 w-full">
-                                            <div className="flex items-center justify-between gap-4">
-                                                <h3 className="font-black text-xl md:text-2xl tracking-tight text-foreground line-clamp-1 uppercase italic leading-none">{g.name}</h3>
-                                                {unread > 0 && (
-                                                    <span className="bg-primary text-white text-[9px] md:text-[10px] font-black px-3 py-1 rounded-full shadow-lg shadow-primary/30 animate-pulse uppercase tracking-widest shrink-0">
-                                                        {unread}
-                                                    </span>
-                                                )}
-                                            </div>
-                                            <div className="flex items-center gap-3">
-                                                <span className="text-[8px] md:text-[9px] font-bold uppercase text-primary px-3 py-1 bg-primary/10 rounded-lg border border-primary/20">{g.category}</span>
-                                                <div className="flex items-center gap-1.5 text-[8px] md:text-[9px] font-bold uppercase text-muted-foreground/40">
-                                                    <Icon name="users" className="w-3.5 h-3.5" />
-                                                    <span>{g.members} Members</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary/0 to-transparent group-hover:via-primary/40 transition-all duration-700" />
-                                </motion.button>
-                            );
-                        })
-                    ) : (
-                        <div className="col-span-full glass-panel border-dashed border-white/10 bg-transparent flex flex-col items-center justify-center py-24 md:py-32 text-center gap-8 rounded-[3rem] md:rounded-[4rem]">
-                            <div className="text-8xl md:text-9xl opacity-10 animate-pulse grayscale filter blur-sm">📡</div>
-                            <div className="space-y-3">
-                                <h1 className="text-xl md:text-2xl font-black text-foreground uppercase tracking-wider">No Groups Joined</h1>
-                                <p className="text-sm md:text-base font-medium text-muted-foreground/40 max-w-xs mx-auto">Join a group to start chatting.</p>
-                            </div>
-                            <motion.button
-                                whileHover={{ scale: 1.05, y: -2 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={onBrowseGroups}
-                                className="btn-primary rounded-2xl md:rounded-3xl h-16 md:h-20 px-10 md:px-12 text-[10px] md:text-xs font-black tracking-[0.2em] shadow-2xl shadow-primary/30 uppercase mt-4"
-                            >
-                                Join a Group
-                            </motion.button>
+                {/* Large Featured Card: Recent Clusters */}
+                <div className="md:col-span-2 md:row-span-2 bento-item bg-gradient-to-br from-primary/10 via-transparent to-transparent flex flex-col p-8">
+                    <div className="flex items-center justify-between mb-8">
+                        <div>
+                            <h3 className="text-xl font-black italic uppercase">Active Clusters</h3>
+                            <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60">Real-time Node Status</p>
                         </div>
-                    )}
+                        <Icon name="layers" className="w-6 h-6 text-primary" />
+                    </div>
+
+                    <div className="flex-1 space-y-3 overflow-y-auto custom-scrollbar -mx-2 px-2">
+                        {myGroups.map(g => (
+                            <button
+                                key={g.id}
+                                onClick={() => onSelectGroup(g.id)}
+                                className="w-full p-4 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] hover:border-primary/20 transition-all flex items-center gap-4 group"
+                            >
+                                <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
+                                    {g.image}
+                                </div>
+                                <div className="flex-1 text-left">
+                                    <div className="flex items-center justify-between">
+                                        <p className="text-sm font-bold uppercase tracking-tight">{g.name}</p>
+                                        <span className="text-[10px] text-primary/60 font-black">{g.category}</span>
+                                    </div>
+                                    <p className="text-[10px] text-muted-foreground/40 mt-0.5 truncate">{g.lastMessage || 'Channel standby...'}</p>
+                                </div>
+                                <Icon name="chevron-right" className="w-4 h-4 text-white/5 group-hover:text-primary transition-colors" />
+                            </button>
+                        ))}
+                        {myGroups.length === 0 && (
+                            <div className="h-full flex flex-col items-center justify-center py-12 opacity-40">
+                                <Icon name="activity" className="w-12 h-12 mb-4 animate-pulse" />
+                                <p className="text-xs uppercase font-black tracking-widest">No nodes active</p>
+                            </div>
+                        )}
+                    </div>
                 </div>
+
+                {/* Quick Action: Global Pulse */}
+                <div className="bento-item p-8 border-secondary/20 bg-secondary/5">
+                    <div className="flex items-center justify-between mb-2">
+                        <Icon name="activity" className="w-5 h-5 text-secondary" />
+                        <span className="text-[10px] font-black text-secondary">LIVE</span>
+                    </div>
+                    <div>
+                        <h4 className="text-2xl font-black italic uppercase">Global Pulse</h4>
+                        <p className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mt-1">Cross-cluster activity</p>
+                    </div>
+                    <div className="mt-8 flex -space-x-2">
+                        {[1, 2, 3, 4].map(i => (
+                            <div key={i} className="w-8 h-8 rounded-full border-2 border-[#050505] bg-secondary/20 flex items-center justify-center text-[10px] font-black">
+                                {String.fromCharCode(64 + i)}
+                            </div>
+                        ))}
+                        <div className="w-8 h-8 rounded-full border-2 border-[#050505] bg-white/5 flex items-center justify-center text-[10px] font-black">
+                            +12
+                        </div>
+                    </div>
+                </div>
+
+                {/* Stat: Operations */}
+                <div className="bento-item p-8 border-primary/20">
+                    <div className="flex items-center justify-between mb-2">
+                        <Icon name="shield" className="w-5 h-5 text-primary" />
+                        <span className="w-2 h-2 rounded-full bg-primary animate-ping" />
+                    </div>
+                    <div>
+                        <span className="text-4xl font-black italic">99.9%</span>
+                        <p className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mt-1">Node Integrity</p>
+                    </div>
+                    <div className="mt-auto flex items-end justify-between">
+                        <div className="h-12 w-1.5 rounded-full bg-primary/20 overflow-hidden">
+                            <div className="h-3/4 w-full bg-primary rounded-full bottom-0" />
+                        </div>
+                        <div className="h-8 w-1.5 rounded-full bg-primary/20 overflow-hidden">
+                            <div className="h-1/2 w-full bg-primary rounded-full bottom-0" />
+                        </div>
+                        <div className="h-10 w-1.5 rounded-full bg-primary/20 overflow-hidden">
+                            <div className="h-4/5 w-full bg-primary rounded-full bottom-0" />
+                        </div>
+                        <div className="h-6 w-1.5 rounded-full bg-primary/20 overflow-hidden">
+                            <div className="h-1/3 w-full bg-primary rounded-full bottom-0" />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Final Bento Item: System Config */}
+                <div className="md:col-span-2 bento-item bg-white/[0.02] border-white/5 p-8 flex flex-row items-center justify-between group cursor-pointer hover:border-white/20 transition-all">
+                    <div>
+                        <h4 className="text-xl font-black italic uppercase">Protocol Logs</h4>
+                        <p className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mt-1">Export session history and audit logs</p>
+                    </div>
+                    <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all">
+                        <Icon name="download" className="w-6 h-6" />
+                    </div>
+                </div>
+
             </div>
         </div>
     );

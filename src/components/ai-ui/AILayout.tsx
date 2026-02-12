@@ -1,11 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Icon } from '../common/Icon';
 import { ThemeToggle } from './ThemeToggle';
-import { Group, User, PersonalChat, FollowRequest, Notification } from '../../types';
-import { useInbox } from '../../hooks/useChat';
-import { getPendingRequests } from '../../services/firebaseFollowService';
-import { AbstractBackground } from '../ui/AbstractBackground';
+import { User, Group } from '../../types';
 import { AISidebar } from './AISidebar';
 import { Logo } from '../common/Logo';
 
@@ -24,7 +21,6 @@ interface AILayoutProps {
     onGoHome: () => void;
     user: User | null;
     onLogout: () => void;
-    mobileTitle?: string;
 }
 
 export const AILayout: React.FC<AILayoutProps> = ({
@@ -42,118 +38,74 @@ export const AILayout: React.FC<AILayoutProps> = ({
     onGoHome,
     user,
     onLogout,
-    mobileTitle = "SlowChat"
 }) => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const [showBottomNav, setShowBottomNav] = useState(true);
-    const lastScrollY = React.useRef(0);
-
-    useEffect(() => {
-        if (sidebarOpen) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = '';
-        }
-        return () => { document.body.style.overflow = ''; };
-    }, [sidebarOpen]);
-
-    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-        const currentScrollY = e.currentTarget.scrollTop;
-        if (currentScrollY > lastScrollY.current && currentScrollY > 50) {
-            setShowBottomNav(false);
-        } else {
-            setShowBottomNav(true);
-        }
-        lastScrollY.current = currentScrollY;
-    };
 
     return (
-        <div className="relative h-screen w-full overflow-hidden text-foreground font-sans selection:bg-primary/20 flex flex-col">
-            <AbstractBackground />
-
-            <div className="relative flex-1 flex w-full h-full p-0 md:p-8 gap-0 md:gap-8 overflow-hidden">
-                {/* HUD Sidebar */}
-                <aside className={`
-                    fixed inset-y-0 left-0 z-[100] w-[320px] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] md:relative md:inset-auto md:flex md:w-80 md:rounded-[2.5rem] flex-col shrink-0 overflow-hidden glass-panel
-                    ${sidebarOpen ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 md:translate-x-0 md:opacity-100 md:visible pointer-events-none md:pointer-events-auto'}
-                `}>
-                    <AISidebar
-                        groups={userGroups}
-                        activeId={activeChatId}
-                        isPersonalActive={isPersonal}
-                        onSelectGroup={(id) => { onSelectGroup(id); setSidebarOpen(false); }}
-                        onSelectPersonal={(id) => { onSelectPersonal(id); setSidebarOpen(false); }}
-                        onBrowseGroups={() => { onBrowseGroups(); setSidebarOpen(false); }}
-                        onFollowRequests={() => { onFollowRequests(); setSidebarOpen(false); }}
-                        onCreateGroup={() => { onCreateGroup(); setSidebarOpen(false); }}
-                        onOpenSettings={() => { onOpenSettings(); setSidebarOpen(false); }}
-                        onGoHome={() => { onGoHome(); setSidebarOpen(false); }}
-                        user={user}
-                        onLogout={onLogout}
-                        onClose={() => setSidebarOpen(false)}
-                    />
-                </aside>
-
-                <motion.div
-                    layout
-                    className="flex-1 flex flex-col min-w-0 glass-panel rounded-none md:rounded-[2.5rem] relative h-full overflow-hidden z-0"
-                >
-                    <header className={`
-                        flex items-center justify-between px-6 py-4 md:px-8 md:py-6 border-b border-border/5 bg-background/5 backdrop-blur-xl sticky top-0 z-40 h-[70px] md:h-[90px]
-                        ${activeChatId ? 'hidden md:hidden' : 'flex md:hidden'}
-                    `}>
-                        <div className="flex items-center gap-4">
-                            <button className="md:hidden active:scale-95 transition-transform" onClick={() => setSidebarOpen(true)}>
-                                <Logo className="h-8 w-auto" />
-                            </button>
-                            <button onClick={onGoHome} className="hidden md:block active:scale-95 transition-transform">
-                                <Logo className="h-10 w-auto" />
-                            </button>
-                        </div>
-
-                        <div className="flex items-center gap-4">
-                            {/* Mobile Bell - Now opens sidebar to notifications */}
-                            <button
-                                onClick={() => {
-                                    setSidebarOpen(true);
-                                    // ideally we'd pass a prop to open directly to notifications, 
-                                    // but for now opening sidebar is enough as the user can tap bell there.
-                                    // Or we can add a prop to AISidebar to force-view notifications.
-                                }}
-                                className="w-12 h-12 rounded-2xl flex items-center justify-center bg-foreground/5 text-muted-foreground hover:bg-foreground/10 transition-all md:hidden"
-                            >
-                                <Icon name="bell" className="w-5 h-5" />
-                            </button>
-                            <ThemeToggle />
-                        </div>
-                    </header>
-
-                    <main
-                        className={`flex-1 overflow-hidden flex flex-col relative w-full h-full min-h-0 mobile-scroll-fix ${activeChatId ? 'pt-0' : 'md:p-0'}`}
-                        onScroll={handleScroll}
-                    >
-                        {children}
-                    </main>
-
-                    {/* Desktop Bottom Nav Replacement (Floating HUD for Mobile Home) */}
-                    <AnimatePresence>
-                        {!activeChatId && (
-                            <motion.div
-                                className="md:hidden fixed bottom-10 left-6 right-6 h-16 glass-panel rounded-2xl flex items-center justify-around z-50 shadow-[0_20px_40px_rgba(0,0,0,0.3)] border-white/10"
-                                initial={{ y: 100 }}
-                                animate={{ y: showBottomNav ? 0 : 100 }}
-                                exit={{ y: 100 }}
-                            >
-                                <button onClick={() => setSidebarOpen(true)} className="w-12 h-12 flex items-center justify-center text-muted-foreground active:text-primary transition-colors"><Icon name="menu" /></button>
-                                <button onClick={onBrowseGroups} className="w-12 h-12 flex items-center justify-center text-muted-foreground active:text-primary transition-colors"><Icon name="search" /></button>
-                                <button onClick={onGoHome} className="w-12 h-12 flex items-center justify-center text-primary"><Icon name="zap" /></button>
-                                <button onClick={onFollowRequests} className="w-12 h-12 flex items-center justify-center text-muted-foreground active:text-primary transition-colors"><Icon name="users" /></button>
-                                <button onClick={onOpenSettings} className="w-12 h-12 flex items-center justify-center text-muted-foreground active:text-primary transition-colors"><Icon name="user" /></button>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </motion.div>
+        <div className="h-screen w-full bg-[#050505] text-white flex overflow-hidden font-sans selection:bg-primary/30">
+            {/* Ambient Background Glows */}
+            <div className="fixed inset-0 pointer-events-none overflow-hidden opacity-30">
+                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 blur-[120px] rounded-full" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-secondary/10 blur-[120px] rounded-full" />
             </div>
+
+            {/* Sidebar (Command Center) */}
+            <aside className={`
+                fixed inset-y-0 left-0 z-50 w-72 lg:w-80 b-r border-white/5 bg-[#080808]/80 backdrop-blur-3xl transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]
+                md:relative md:inset-auto md:translate-x-0
+                ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+            `}>
+                <AISidebar
+                    groups={userGroups}
+                    activeId={activeChatId}
+                    isPersonalActive={isPersonal}
+                    onSelectGroup={(id) => { onSelectGroup(id); setSidebarOpen(false); }}
+                    onSelectPersonal={(id) => { onSelectPersonal(id); setSidebarOpen(false); }}
+                    onBrowseGroups={() => { onBrowseGroups(); setSidebarOpen(false); }}
+                    onFollowRequests={() => { onFollowRequests(); setSidebarOpen(false); }}
+                    onCreateGroup={() => { onCreateGroup(); setSidebarOpen(false); }}
+                    onOpenSettings={() => { onOpenSettings(); setSidebarOpen(false); }}
+                    onGoHome={() => { onGoHome(); setSidebarOpen(false); }}
+                    user={user}
+                    onLogout={onLogout}
+                    onClose={() => setSidebarOpen(false)}
+                />
+            </aside>
+
+            {/* Main Canvas */}
+            <main className="flex-1 flex flex-col min-w-0 relative z-10">
+                {/* Mobile Header */}
+                <header className="md:hidden flex items-center justify-between p-6 border-b border-white/5 shrink-0 bg-[#050505]/50 backdrop-blur-md">
+                    <button onClick={() => setSidebarOpen(true)} className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
+                        <Icon name="menu" className="w-5 h-5 text-muted-foreground" />
+                    </button>
+                    <Logo className="h-6 w-auto" />
+                    <button onClick={onOpenSettings} className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
+                        <span className="text-[10px] font-black">{user?.username?.[0].toUpperCase()}</span>
+                    </button>
+                </header>
+
+                <div className="flex-1 overflow-hidden relative">
+                    <div className="absolute inset-0 overflow-y-auto custom-scrollbar scroll-smooth p-6 md:p-12">
+                        <div className="max-w-7xl mx-auto w-full">
+                            {children}
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            {/* Mobile Sidebar Overlay */}
+            <AnimatePresence>
+                {sidebarOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setSidebarOpen(false)}
+                        className="fixed inset-0 bg-black/80 backdrop-blur-md z-40 md:hidden"
+                    />
+                )}
+            </AnimatePresence>
         </div>
     );
 };

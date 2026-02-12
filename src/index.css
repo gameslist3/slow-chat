@@ -25,88 +25,70 @@
       display: none;
     }
 
-    /* --- Phase 10: System Protocol Aesthetic (Light) --- */
-    --ui-background: 220 33% 98%;
-    /* Cleaner white-blue */
-    --ui-text: 222 47% 11%;
+    /* --- Phase 11: Campaign SaaS Management Aesthetic (Ultra Pro) --- */
+    --ui-background: 240 10% 2%;
+    /* Obsidian Black #050505 */
+    --ui-text: 0 0% 100%;
 
     --ui-primary: 250 100% 64%;
-    /* Violet-Blue #6d28d9 -> #5b21b6 range (Modern standard) */
-    --primary-rgb: 109,
-    40,
-    217;
+    /* Electric Indigo */
+    --primary-rgb: 99,
+    102,
+    241;
 
-    --ui-secondary: 15 90% 65%;
-    /* Orange/Coral for contrast */
-    --secondary-rgb: 251,
-    113,
-    133;
+    --ui-secondary: 190 100% 50%;
+    /* Cyber Cyan */
+    --secondary-rgb: 6,
+    182,
+    212;
 
-    --ui-muted: 215 16% 94%;
-    --ui-muted-text: 215 25% 50%;
+    --ui-muted: 240 6% 10%;
+    --ui-muted-text: 240 5% 65%;
 
-    --ui-success: 150 100% 40%;
-    --ui-warning: 35 100% 55%;
+    --ui-success: 142 71% 45%;
+    --ui-warning: 38 92% 50%;
     --ui-danger: 0 84% 60%;
 
-    --ui-border: 214 32% 91%;
+    --ui-border: 240 6% 12%;
     --ui-ring: 250 100% 64%;
 
-    --ui-surface: 0 0% 100%;
-    --ui-surface2: 210 40% 96%;
+    --ui-surface: 240 10% 4%;
+    --ui-surface2: 240 6% 8%;
 
     /* Design System Tokens */
-    --font-protocol: 'Capriola',
+    --font-protocol: 'Satoshi',
+    'Inter',
     sans-serif;
     --font-body: 'Inter',
     sans-serif;
 
-    /* Glass Premium - 2026 Ultra Pro */
-    --glass-surface: rgba(255, 255, 255, 0.6);
-    --glass-border: rgba(255, 255, 255, 0.4);
-    --glass-shadow: rgba(17, 24, 39, 0.05);
+    /* 2026 Ultra Pro Glass & Glow */
+    --glass-surface: rgba(255, 255, 255, 0.02);
+    --glass-border: rgba(255, 255, 255, 0.05);
+    --glass-shadow: rgba(0, 0, 0, 0.8);
     --glass-blur: 32px;
 
-    --radius-sm: 0.75rem;
-    --radius-md: 1.25rem;
-    --radius-lg: 1.75rem;
-    --radius-xl: 3rem;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    --radius-xl: 32px;
     --radius-full: 9999px;
   }
 
   .dark {
-    /* --- Phase 10: System Protocol Aesthetic (Dark - Ultra Pro) --- */
-    --ui-background: 240 10% 4%;
-    /* Deepest Black-Blue #09090b */
-    --ui-text: 0 0% 98%;
+    /* Obsidian Theme Standardized */
+    --ui-background: 240 10% 2%;
+    --ui-text: 0 0% 100%;
+    --ui-primary: 250 100% 64%;
+    --ui-secondary: 190 100% 50%;
+    --ui-muted: 240 6% 10%;
+    --ui-muted-text: 240 5% 65%;
+    --ui-border: 240 6% 12%;
+    --ui-surface: 240 10% 4%;
+    --ui-surface2: 240 6% 8%;
 
-    --ui-primary: 252 100% 68%;
-    /* Electric Violet #8b5cf6 */
-    --primary-rgb: 139,
-      92,
-      246;
-
-    --ui-secondary: 22 100% 60%;
-    /* Vibrant Orange */
-
-    --ui-muted: 240 6% 12%;
-    --ui-muted-text: 240 5% 60%;
-
-    --ui-success: 150 100% 45%;
-    --ui-warning: 35 100% 55%;
-    --ui-danger: 0 84% 60%;
-
-    --ui-border: 240 6% 14%;
-    --ui-ring: 252 100% 68%;
-
-    --ui-surface: 240 10% 8%;
-    --ui-surface2: 240 6% 12%;
-
-    /* Glass Premium Dark - 2026 Ultra Pro */
     --glass-surface: rgba(18, 18, 23, 0.7);
     --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-shadow: rgba(0, 0, 0, 0.5);
-    --glass-blur: 48px;
   }
 }
 
@@ -179,66 +161,68 @@ body {
 @layer components {
 
   /* -------------------------------------------------------------
-     System Protocol Design System V3
+     Campaign SaaS Design System (Bento & Glass)
      ------------------------------------------------------------- */
-
-  .font-protocol {
-    font-family: var(--font-protocol);
-  }
 
   .glass-panel {
     background: var(--glass-surface);
-    backdrop-filter: blur(var(--glass-blur)) saturate(190%);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(190%);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
     border: 1px solid var(--glass-border);
-    box-shadow: 0 8px 32px 0 var(--glass-shadow);
-    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
   }
 
   .glass-card {
     background: var(--glass-surface);
-    backdrop-filter: blur(calc(var(--glass-blur) * 0.5));
-    -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.5));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
-    box-shadow: 0 4px 20px 0 var(--glass-shadow);
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .glass-card:hover {
-    @apply translate-y-[-4px];
-    background: rgba(var(--primary-rgb), 0.05);
-    border-color: rgba(var(--primary-rgb), 0.2);
-    box-shadow: 0 20px 40px -10px var(--glass-shadow);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(var(--primary-rgb), 0.3);
+    transform: translateY(-2px);
   }
 
-  .dark .glass-card:hover {
-    background: rgba(var(--primary-rgb), 0.1);
+  /* Bento Grid Layout */
+  .bento-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    padding: 1.5rem;
   }
 
-  /* Premium Buttons */
+  .bento-item {
+    @apply glass-card p-6 flex flex-col justify-between;
+    min-height: 200px;
+  }
+
+  /* Premium Buttons (SaaS Style) */
   .btn-premium {
-    @apply relative inline-flex items-center justify-center rounded-2xl px-6 py-3 font-bold transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none overflow-hidden;
-    font-family: var(--font-protocol);
-    @apply uppercase tracking-widest text-[10px];
+    @apply relative inline-flex items-center justify-center rounded-xl px-5 py-2.5 font-bold transition-all active:scale-95 disabled:opacity-50 overflow-hidden;
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    letter-spacing: -0.01em;
   }
 
   .btn-primary {
-    @apply btn-premium bg-primary text-white shadow-xl shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5;
+    @apply btn-premium bg-primary text-white shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5;
   }
 
   .btn-secondary {
-    @apply btn-premium bg-secondary text-white shadow-xl shadow-secondary/10 hover:brightness-110;
+    @apply btn-premium bg-secondary text-white shadow-lg shadow-secondary/10 hover:brightness-110;
   }
 
   .btn-ghost {
-    @apply btn-premium bg-transparent text-muted-foreground hover:bg-foreground/5 hover:text-foreground;
+    @apply btn-premium bg-transparent text-muted-foreground hover:bg-white/5 hover:text-white;
   }
 
-  /* Inputs V3 */
+  /* Inputs V4 */
   .glass-input {
-    @apply h-14 w-full rounded-2xl border border-border/10 bg-background/20 px-6 py-4 text-sm placeholder:text-muted-foreground/30 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-background/40 transition-all backdrop-blur-md;
-    font-family: var(--font-body);
+    @apply h-12 w-full rounded-xl border border-white/5 bg-white/[0.02] px-4 text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/40 focus:bg-white/[0.04] transition-all;
   }
 
   /* UI Containers */
