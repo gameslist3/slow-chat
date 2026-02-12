@@ -11,6 +11,8 @@ interface AISidebarProps {
     onGoHome: () => void;
     user: User | null;
     onLogout: () => void;
+    theme?: 'light' | 'dark';
+    onToggleTheme?: () => void;
 }
 
 export const AISidebar: React.FC<AISidebarProps> = ({
@@ -18,7 +20,9 @@ export const AISidebar: React.FC<AISidebarProps> = ({
     onTabChange,
     onOpenSettings,
     onGoHome,
-    user
+    user,
+    theme = 'dark',
+    onToggleTheme
 }) => {
     const navItems = [
         { id: 'home', icon: 'zap' as any, label: 'Home', action: onGoHome },
@@ -64,8 +68,19 @@ export const AISidebar: React.FC<AISidebarProps> = ({
                 ))}
             </nav>
 
-            {/* Profile Section */}
-            <div className="p-4 border-t border-border shrink-0">
+            {/* Bottom Section */}
+            <div className="p-4 border-t border-border shrink-0 space-y-2">
+                <button
+                    onClick={onToggleTheme}
+                    className="w-full h-12 rounded-2xl flex items-center justify-center lg:justify-start lg:px-6 text-muted-foreground hover:bg-surface2 hover:text-foreground transition-all group"
+                    title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+                >
+                    <Icon name={theme === 'dark' ? 'sun' : 'moon'} className="w-5 h-5" />
+                    <span className="hidden lg:block ml-4 text-sm font-bold tracking-tight">
+                        {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                    </span>
+                </button>
+
                 <button
                     onClick={onOpenSettings}
                     className="w-full flex items-center justify-center lg:justify-start gap-4 p-2 rounded-2xl hover:bg-surface2 transition-all group"

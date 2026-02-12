@@ -13,6 +13,8 @@ interface AILayoutProps {
     onGoHome: () => void;
     user: User | null;
     onLogout: () => void;
+    theme: 'light' | 'dark';
+    onToggleTheme: () => void;
 }
 
 export const AILayout: React.FC<AILayoutProps> = ({
@@ -23,6 +25,8 @@ export const AILayout: React.FC<AILayoutProps> = ({
     onGoHome,
     user,
     onLogout,
+    theme,
+    onToggleTheme
 }) => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
 

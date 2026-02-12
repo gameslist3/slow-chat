@@ -19,10 +19,24 @@ import { updateUserStatus } from './services/firebaseAuthService';
 import { FriendsList } from './components/social/FriendsList';
 import { NotificationList } from './components/chat/NotificationCenter';
 import { subscribeToNotifications, markAllAsRead } from './services/firebaseNotificationService';
+import { unfollowUser } from './services/firebaseFollowService';
 
 const AppContent = () => {
     const { isAuthenticated, user } = useAuth();
     const [showPolicy, setShowPolicy] = useState(false);
+    const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+        const saved = localStorage.getItem('slowchat_theme');
+        return (saved as any) || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    });
+
+    useEffect(() => {
+        if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+        localStorage.setItem('slowchat_theme', theme);
+    }, [theme]);
 
     useEffect(() => {
         const accepted = localStorage.getItem('slowchat_storage_accepted');
@@ -50,7 +64,7 @@ const AppContent = () => {
             <CollaborativeBackground />
             <div className="relative z-10 w-full h-full">
                 {showPolicy && <StoragePolicyModal onAccept={handleAcceptPolicy} />}
-                {isAuthenticated ? <AuthenticatedSection /> : <AuthSection />}
+                {isAuthenticated ? <AuthenticatedSection theme={theme} onToggleTheme={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} /> : <AuthSection />}
             </div>
         </div>
     );
@@ -74,7 +88,7 @@ const AuthSection = () => {
     );
 };
 
-const AuthenticatedSection = () => {
+const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark', onToggleTheme: () => void }) => {
     const { user, logout, joinGroup: joinContext } = useAuth();
     const { toast } = useToast();
     const [activeTab, setActiveTab] = useState<'home' | 'direct' | 'groups' | 'friends' | 'inbox' | 'chat' | 'profile'>('home');
@@ -125,6 +139,8 @@ const AuthenticatedSection = () => {
             onGoHome={() => { setActiveTab('home'); setActiveId(null); }}
             user={user}
             onLogout={logout}
+            theme={theme}
+            onToggleTheme={onToggleTheme}
         >
             <div className="p-6 md:p-12 lg:p-16 max-w-7xl mx-auto h-full flex flex-col">
                 <AnimatePresence mode="wait">
@@ -146,12 +162,33 @@ const AuthenticatedSection = () => {
                                 {personalChats.map(chat => {
                                     const otherId = chat.userIds.find(id => id !== user?.id);
                                     const name = chat.usernames?.[otherId || ''] || 'User';
+
+                                    const handleUnfollow = async (e: React.MouseEvent) => {
+                                        e.stopPropagation();
+                                        if (!confirm(`End chat with ${name}?`)) return;
+                                        try {
+                                            if (otherId) await unfollowUser(otherId);
+                                            toast(`Connection with ${name} ended.`, 'info');
+                                        } catch (e) {
+                                            toast("Failed to end chat", "error");
+                                        }
+                                    };
+
                                     return (
-                                        <button key={chat.id} onClick={() => handleSelectPersonal(chat.id)} className="bento-item text-left hover:border-primary transition-all">
-                                            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center font-black text-primary mb-4 transition-transform group-hover:scale-110">{name[0]}</div>
-                                            <h3 className="font-bold text-lg">{name}</h3>
-                                            <p className="text-sm text-muted-foreground truncate">{chat.lastMessage || 'Start a conversation'}</p>
-                                        </button>
+                                        <div key={chat.id} className="relative group">
+                                            <button onClick={() => handleSelectPersonal(chat.id)} className="bento-item w-full text-left hover:border-primary transition-all">
+                                                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center font-black text-primary mb-4 transition-transform group-hover:scale-110">{name[0]}</div>
+                                                <h3 className="font-bold text-lg">{name}</h3>
+                                                <p className="text-sm text-muted-foreground truncate">{chat.lastMessage || 'Start a conversation'}</p>
+                                            </button>
+                                            <button
+                                                onClick={handleUnfollow}
+                                                className="absolute top-4 right-4 w-10 h-10 rounded-xl bg-destructive/10 text-destructive opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center hover:bg-destructive hover:text-white"
+                                                title="End Chat"
+                                            >
+                                                <Icon name="userMinus" className="w-5 h-5" />
+                                            </button>
+                                        </div>
                                     );
                                 })}
                             </div>

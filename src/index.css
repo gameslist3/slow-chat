@@ -20,7 +20,7 @@
       display: none;
     }
 
-    /* --- Theme Core (Light Mode Defaults) --- */
+    /* --- Theme Core (Light Mode Refined) --- */
     --ui-background: 0 0% 100%;
     --ui-text: 240 10% 4%;
     --ui-primary: 250 100% 64%;
@@ -39,9 +39,9 @@
     --ui-surface: 0 0% 98%;
     --ui-surface2: 0 0% 100%;
 
-    --glass-surface: rgba(255, 255, 255, 0.7);
-    --glass-border: rgba(0, 0, 0, 0.05);
-    --glass-blur: 24px;
+    --glass-surface: rgba(255, 255, 255, 0.85);
+    --glass-border: rgba(0, 0, 0, 0.08);
+    --glass-blur: 32px;
 
     --font-protocol: 'Inter',
     sans-serif;
@@ -159,7 +159,7 @@ body {
     backdrop-filter: blur(var(--glass-blur));
     -webkit-backdrop-filter: blur(var(--glass-blur));
     border: 1px solid var(--glass-border);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.12);
   }
 
   .glass-card {
@@ -168,13 +168,14 @@ body {
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .glass-card:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(var(--primary-rgb), 0.3);
-    transform: translateY(-2px);
+    background: var(--ui-surface2);
+    border-color: rgba(var(--primary-rgb), 0.2);
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 20px 40px rgba(var(--primary-rgb), 0.08);
   }
 
   /* Bento Grid Layout */

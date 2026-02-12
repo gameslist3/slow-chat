@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Icon } from '../common/Icon';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { IconCarousel } from './IconCarousel';
@@ -40,31 +40,35 @@ export const CreateGroup: React.FC<CreateGroupProps> = ({ onGroupCreated }) => {
     };
 
     return (
-        <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100 max-w-2xl mx-auto animate-in slide-in-from-bottom-4 duration-300 w-full max-h-[85vh] overflow-y-auto custom-scrollbar flex flex-col">
-            <div className="mb-6 flex-shrink-0">
-                <h2 className="text-2xl font-bold text-gray-900">Create New Group</h2>
-                <p className="text-gray-500">Start a thoughtful conversation.</p>
+        <div className="glass-panel p-8 md:p-12 rounded-[2.5rem] max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-700 w-full flex flex-col relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-[80px] rounded-full -translate-y-1/2 translate-x-1/2" />
+
+            <div className="mb-10 flex-shrink-0 relative z-10">
+                <h2 className="text-4xl font-black text-foreground italic uppercase tracking-tighter">Initiate Group</h2>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/40 mt-2">New Synchronicity Node</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-8">
+            <form onSubmit={handleSubmit} className="space-y-10 relative z-10">
                 <div className="space-y-4">
-                    <label className="block text-sm font-medium text-gray-700">Group Icon</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-2">Visual Identity</label>
                     <IconCarousel selectedIcon={icon} onSelectIcon={setIcon} />
                 </div>
 
                 <div className="space-y-4">
-                    <Input
-                        label="Group Name"
-                        placeholder="e.g. Midnight Philosophers"
-                        value={name}
-                        onChange={e => setName(e.target.value)}
-                        className="text-lg font-medium"
-                    />
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-2">Designation</label>
+                        <input
+                            placeholder="e.g. Midnight Philosophers"
+                            value={name}
+                            onChange={e => setName(e.target.value)}
+                            className="glass-input h-16 text-lg font-bold px-6 bg-surface border-border focus:bg-surface2"
+                        />
+                    </div>
                 </div>
 
-                <div className="space-y-1 relative">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                    <Input
+                <div className="space-y-2 relative">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-2">Classification</label>
+                    <input
                         placeholder="Search or type a category..."
                         value={category}
                         onChange={e => {
@@ -73,56 +77,62 @@ export const CreateGroup: React.FC<CreateGroupProps> = ({ onGroupCreated }) => {
                         }}
                         onFocus={() => setShowSuggestions(true)}
                         onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                        className="glass-input h-16 px-6 bg-surface border-border focus:bg-surface2"
                     />
 
                     {showSuggestions && (category ? filteredCategories.length > 0 : true) && (
-                        <div className="absolute z-50 w-full bg-white mt-1 border border-gray-100 rounded-xl shadow-lg max-h-48 overflow-y-auto">
+                        <div className="absolute z-50 w-full bg-surface mt-2 border border-border rounded-2xl shadow-2xl max-h-48 overflow-y-auto backdrop-blur-xl">
                             {filteredCategories.map(cat => (
                                 <button
                                     key={cat}
                                     type="button"
-                                    className="w-full text-left px-4 py-2 hover:bg-indigo-50 text-gray-700 text-sm"
+                                    className="w-full text-left px-5 py-3 hover:bg-primary/5 text-sm font-bold transition-all flex items-center gap-3"
                                     onClick={() => {
                                         setCategory(cat);
                                         setShowSuggestions(false);
                                     }}
                                 >
+                                    <div className="w-1.5 h-1.5 rounded-full bg-primary/40" />
                                     {cat}
                                 </button>
                             ))}
                             {category && !filteredCategories.includes(category) && (
                                 <button
                                     type="button"
-                                    className="w-full text-left px-4 py-2 hover:bg-indigo-50 text-indigo-600 text-sm font-medium flex items-center"
+                                    className="w-full text-left px-5 py-3 hover:bg-primary/5 text-primary text-sm font-black flex items-center border-t border-border"
                                     onClick={() => {
                                         setShowSuggestions(false);
                                     }}
                                 >
-                                    <Plus className="w-4 h-4 mr-2" /> Use "{category}"
+                                    <Icon name="plus" className="w-4 h-4 mr-2" /> CREATE "{category.toUpperCase()}"
                                 </button>
                             )}
                         </div>
                     )}
                 </div>
 
-                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs text-amber-800 leading-relaxed">
-                    <p className="font-bold mb-1">⚠️ Community Guidelines</p>
-                    <ul className="list-disc pl-4 space-y-1">
-                        <li>Groups with no members for <strong>5 hours</strong> after creation will be automatically deleted.</li>
-                        <li>Groups that become empty will be deleted after <strong>2 hours</strong>.</li>
-                        <li>Group names cannot be changed once created.</li>
+                <div className="bg-primary/5 border border-primary/10 rounded-2xl p-6 space-y-3">
+                    <div className="flex items-center gap-2 text-[10px] font-black text-primary uppercase tracking-widest">
+                        <Icon name="shield" className="w-4 h-4" /> Protocol Guidelines
+                    </div>
+                    <ul className="space-y-1.5">
+                        <li className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-tight flex items-start gap-2">
+                            <span className="text-primary">•</span> Empty nodes auto-purge after 5 hours
+                        </li>
+                        <li className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-tight flex items-start gap-2">
+                            <span className="text-primary">•</span> Abandoned nodes dissolve after 2 hours
+                        </li>
                     </ul>
                 </div>
 
-                <div className="pt-4 flex justify-end gap-3">
-                    <Button
+                <div className="pt-4">
+                    <button
                         type="submit"
-                        isLoading={isSubmitting}
-                        disabled={!name || !category}
-                        className="w-full md:w-auto"
+                        disabled={!name || !category || isSubmitting}
+                        className="w-full h-18 rounded-[1.5rem] bg-foreground text-background font-black uppercase tracking-[0.2em] text-sm shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:hover:scale-100"
                     >
-                        Create Group
-                    </Button>
+                        {isSubmitting ? <Icon name="rotate" className="w-5 h-5 animate-spin mx-auto" /> : 'Establish Group'}
+                    </button>
                 </div>
             </form>
         </div>
