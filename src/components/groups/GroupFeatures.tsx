@@ -22,7 +22,7 @@ const GroupCard = ({ group, isJoined, onAction }: { group: Group, isJoined: bool
 
         <div className="mb-6 md:mb-8 relative z-10">
             <h3 className="text-xl md:text-2xl font-black text-foreground mb-2 group-hover:text-primary transition-colors tracking-tight leading-tight">{group.name}</h3>
-            <p className="text-sm text-muted-foreground/60 line-clamp-2 font-medium leading-relaxed">Active cluster.</p>
+            <p className="text-sm text-muted-foreground/60 line-clamp-2 font-medium leading-relaxed">Join the conversation.</p>
         </div>
 
         <div className="mt-auto flex items-center justify-between pt-6 md:pt-8 border-t border-white/5 relative z-10">
@@ -71,7 +71,7 @@ export const GroupDiscovery = ({ onJoinGroup, onSelectGroup, joinedGroupIds }: a
         <div className="h-full overflow-y-auto w-full p-6 md:p-12 lg:p-16 custom-scrollbar text-foreground">
             <div className="max-w-7xl mx-auto space-y-12 md:space-y-20">
                 <div className="text-center py-6 md:py-12 space-y-4 md:space-y-6">
-                    <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter uppercase italic leading-[0.8] text-balance">Explore <br className="md:hidden" /><span className="text-primary italic">Nexus</span></h1>
+                    <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter uppercase leading-[0.8] text-balance">Explore <br className="md:hidden" /><span className="text-primary">Groups</span></h1>
                     <p className="text-muted-foreground/60 font-medium text-sm md:text-xl max-w-2xl mx-auto text-balance">Join communities and start chatting.</p>
                 </div>
 
@@ -135,7 +135,7 @@ export const CreateGroup = ({ onGroupCreated }: { onGroupCreated: (id: string) =
             <div className="flex items-center gap-4 md:gap-6 mb-8 md:mb-12">
                 <div className="w-1 md:w-1.5 h-10 md:h-14 bg-primary rounded-full shadow-[0_0_25px_rgba(var(--primary-rgb),0.6)]" />
                 <div className="flex flex-col">
-                    <h2 className="text-2xl md:text-4xl font-black tracking-tighter uppercase italic leading-none">Create Cluster</h2>
+                    <h2 className="text-2xl md:text-4xl font-black tracking-tighter uppercase leading-none">Create Group</h2>
                 </div>
             </div>
 

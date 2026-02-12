@@ -25,68 +25,63 @@
       display: none;
     }
 
-    /* --- Phase 11: Campaign SaaS Management Aesthetic (Ultra Pro) --- */
-    --ui-background: 240 10% 2%;
-    /* Obsidian Black #050505 */
-    --ui-text: 0 0% 100%;
-
+    /* --- Theme Core (Light Mode Defaults) --- */
+    --ui-background: 0 0% 100%;
+    --ui-text: 240 10% 4%;
     --ui-primary: 250 100% 64%;
-    /* Electric Indigo */
     --primary-rgb: 99,
     102,
     241;
-
     --ui-secondary: 190 100% 50%;
-    /* Cyber Cyan */
     --secondary-rgb: 6,
     182,
     212;
 
-    --ui-muted: 240 6% 10%;
-    --ui-muted-text: 240 5% 65%;
+    --ui-muted: 240 5% 96%;
+    --ui-muted-text: 240 5% 45%;
 
-    --ui-success: 142 71% 45%;
-    --ui-warning: 38 92% 50%;
-    --ui-danger: 0 84% 60%;
+    --ui-border: 240 5% 90%;
+    --ui-surface: 0 0% 98%;
+    --ui-surface2: 0 0% 100%;
 
-    --ui-border: 240 6% 12%;
-    --ui-ring: 250 100% 64%;
+    --glass-surface: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(0, 0, 0, 0.05);
+    --glass-blur: 24px;
 
-    --ui-surface: 240 10% 4%;
-    --ui-surface2: 240 6% 8%;
-
-    /* Design System Tokens */
-    --font-protocol: 'Satoshi',
-    'Inter',
+    --font-protocol: 'Inter',
     sans-serif;
     --font-body: 'Inter',
     sans-serif;
-
-    /* 2026 Ultra Pro Glass & Glow */
-    --glass-surface: rgba(255, 255, 255, 0.02);
-    --glass-border: rgba(255, 255, 255, 0.05);
-    --glass-shadow: rgba(0, 0, 0, 0.8);
-    --glass-blur: 32px;
 
     --radius-sm: 8px;
     --radius-md: 12px;
     --radius-lg: 20px;
     --radius-xl: 32px;
-    --radius-full: 9999px;
+  }
+
+  /* Dark Mode Support (Manual Class or Media Query) */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ui-background: 240 10% 2%;
+      --ui-text: 0 0% 100%;
+      --ui-muted: 240 6% 10%;
+      --ui-muted-text: 240 5% 65%;
+      --ui-border: 240 6% 12%;
+      --ui-surface: 240 10% 4%;
+      --ui-surface2: 240 6% 8%;
+      --glass-surface: rgba(18, 18, 23, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.08);
+    }
   }
 
   .dark {
-    /* Obsidian Theme Standardized */
     --ui-background: 240 10% 2%;
     --ui-text: 0 0% 100%;
-    --ui-primary: 250 100% 64%;
-    --ui-secondary: 190 100% 50%;
     --ui-muted: 240 6% 10%;
     --ui-muted-text: 240 5% 65%;
     --ui-border: 240 6% 12%;
     --ui-surface: 240 10% 4%;
     --ui-surface2: 240 6% 8%;
-
     --glass-surface: rgba(18, 18, 23, 0.7);
     --glass-border: rgba(255, 255, 255, 0.08);
   }

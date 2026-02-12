@@ -78,7 +78,7 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
         <header className="h-20 border-b border-white/5 bg-[#050505]/50 backdrop-blur-xl flex items-center justify-between px-8 sticky top-0 z-40 transition-all">
             <div className="flex items-center gap-6">
                 <button onClick={onLeave} className="md:hidden w-10 h-10 rounded-xl hover:bg-white/5 flex items-center justify-center transition-colors">
-                    <Icon name="chevron-left" className="w-5 h-5 text-muted-foreground" />
+                    <Icon name="arrowLeft" className="w-5 h-5 text-muted-foreground" />
                 </button>
 
                 <div className="flex items-center gap-4">
@@ -91,7 +91,7 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
                             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                         </div>
                         <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest mt-1">
-                            {isPersonal ? 'Direct Link' : `${memberCount} active nodes`}
+                            {isPersonal ? 'Direct Message' : `${memberCount} Members`}
                         </p>
                     </div>
                 </div>
@@ -122,7 +122,7 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
                                 <div className="h-px bg-white/5 my-1" />
                                 <button onClick={handleLeave} className="w-full h-12 flex items-center gap-3 px-4 text-[10px] font-black uppercase tracking-widest text-rose-500 hover:bg-rose-500/10 transition-all">
                                     <LogOut className="w-4 h-4" />
-                                    {isPersonal ? 'Terminate Sync' : 'Leave Cluster'}
+                                    {isPersonal ? 'End Chat' : 'Leave Group'}
                                 </button>
                             </motion.div>
                         )}
