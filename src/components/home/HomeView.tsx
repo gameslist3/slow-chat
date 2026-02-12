@@ -41,40 +41,46 @@ export const HomeView: React.FC<HomeViewProps> = ({ user, myGroups, onSelectGrou
                         <button onClick={onBrowseGroups} className="btn-primary h-12 px-8 rounded-xl font-bold">Discover Groups</button>
                     </div>
                 ) : (
-                    <div className="bento-grid">
-                        {myGroups.map(group => (
-                            <motion.button
-                                key={group.id}
-                                whileHover={{ y: -4 }}
-                                onClick={() => onSelectGroup(group.id)}
-                                className="bento-item text-left group"
-                            >
-                                <div className="flex items-start justify-between mb-6">
-                                    <div className="text-4xl">{group.image || '💬'}</div>
-                                    <div className="px-3 py-1 bg-primary/10 text-primary rounded-full text-[10px] font-black uppercase tracking-widest">
-                                        {group.category || 'Chat'}
-                                    </div>
+                    <div className="relative group">
+                        {/* Desktop Grid / Mobile Scroll */}
+                        <div className="hidden md:grid bento-grid">
+                            {myGroups.map(group => (
+                                <GroupItem key={group.id} group={group} onClick={() => onSelectGroup(group.id)} />
+                            ))}
+                        </div>
+
+                        <div className="md:hidden flex overflow-x-auto pb-6 gap-4 snap-x snap-mandatory px-2">
+                            {myGroups.map(group => (
+                                <div key={group.id} className="min-w-[280px] snap-center">
+                                    <GroupItem group={group} onClick={() => onSelectGroup(group.id)} />
                                 </div>
-                                <div>
-                                    <h3 className="text-xl font-bold mb-1 group-hover:text-primary transition-colors">{group.name}</h3>
-                                    <p className="text-sm text-muted-foreground flex items-center gap-2">
-                                        <Icon name="users" className="w-4 h-4" />
-                                        {group.members || 0} Members
-                                    </p>
-                                </div>
-                            </motion.button>
-                        ))}
+                            ))}
+                        </div>
                     </div>
                 )}
-            </section>
-
-            {/* Personal Chats Quick Access (Simplified Pulse) */}
-            <section className="space-y-6">
-                <h2 className="text-xl font-bold uppercase tracking-widest text-muted-foreground/50">Recent Messages</h2>
-                <div className="bento-item p-8 bg-surface2/50">
-                    <p className="text-muted-foreground text-center py-4 italic font-medium">Head over to the Messages tab to see your direct conversations.</p>
-                </div>
             </section>
         </div>
     );
 };
+
+const GroupItem = ({ group, onClick }: { group: Group, onClick: () => void }) => (
+    <motion.button
+        whileHover={{ y: -4 }}
+        onClick={onClick}
+        className="bento-item text-left group w-full"
+    >
+        <div className="flex items-start justify-between mb-6">
+            <div className="text-4xl">{group.image || '💬'}</div>
+            <div className="px-3 py-1 bg-primary/10 text-primary rounded-full text-[10px] font-black uppercase tracking-widest">
+                {group.category || 'Chat'}
+            </div>
+        </div>
+        <div>
+            <h3 className="text-xl font-bold mb-1 group-hover:text-primary transition-colors">{group.name}</h3>
+            <p className="text-sm text-muted-foreground flex items-center gap-2">
+                <Icon name="users" className="w-4 h-4" />
+                {group.members || 0} Members
+            </p>
+        </div>
+    </motion.button>
+);

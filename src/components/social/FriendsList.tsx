@@ -20,9 +20,9 @@ interface Friend {
 }
 
 export const FriendsList: React.FC<{ onSelectFriend?: (friendId: string) => void }> = ({ onSelectFriend }) => {
-    const [activeTab, setActiveTab] = useState<'friends' | 'requests'>('friends');
     const [friends, setFriends] = useState<Friend[]>([]);
     const [requests, setRequests] = useState<FollowRequest[]>([]);
+    const [showRequests, setShowRequests] = useState(false);
     const [loading, setLoading] = useState(true);
     const currentUser = auth.currentUser;
     const { toast } = useToast();
@@ -84,137 +84,135 @@ export const FriendsList: React.FC<{ onSelectFriend?: (friendId: string) => void
     if (!currentUser) return null;
 
     return (
-        <div className="flex flex-col h-full rounded-xl overflow-hidden">
-            {/* Header / Tabs */}
-            <div className="flex items-center p-2 gap-2 border-b border-white/5 bg-white/5 backdrop-blur-md sticky top-0 z-10">
-                <button
-                    onClick={() => setActiveTab('friends')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${activeTab === 'friends'
-                        ? 'bg-white/10 text-white shadow-sm border border-white/5'
-                        : 'text-muted-foreground hover:bg-white/5 hover:text-white'
-                        }`}
-                >
-                    <Icon name="users" className="w-4 h-4" />
-                    Friends
-                    <span className="ml-1 text-[9px] opacity-60">({friends.length})</span>
-                </button>
-                <button
-                    onClick={() => setActiveTab('requests')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all relative ${activeTab === 'requests'
-                        ? 'bg-white/10 text-white shadow-sm border border-white/5'
-                        : 'text-muted-foreground hover:bg-white/5 hover:text-white'
-                        }`}
-                >
-                    <Icon name="userPlus" className="w-4 h-4" />
-                    Requests
-                    {requests.length > 0 && (
-                        <span className="absolute top-1 right-2 w-2 h-2 bg-primary rounded-full animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
-                    )}
-                </button>
+        <div className="flex flex-col h-full rounded-xl">
+            {/* Minimal Header */}
+            <div className="flex items-center justify-between p-2 mb-6">
+                <h2 className="text-3xl font-black italic uppercase tracking-tighter">Friends</h2>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => setShowRequests(!showRequests)}
+                        className={`relative w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${showRequests ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-surface2 hover:bg-surface text-muted-foreground hover:text-foreground'}`}
+                    >
+                        <Icon name="userPlus" className="w-5 h-5" />
+                        {requests.length > 0 && (
+                            <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary rounded-full flex items-center justify-center text-[10px] font-black text-white ring-2 ring-background animate-in zoom-in">
+                                {requests.length}
+                            </span>
+                        )}
+                    </button>
+                </div>
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 overflow-y-auto min-h-0 custom-scrollbar p-2 space-y-2">
+            <div className="flex-1 overflow-y-auto min-h-0 custom-scrollbar p-1">
                 {loading ? (
                     <div className="flex items-center justify-center h-full text-muted-foreground">
                         <Icon name="rotate" className="w-5 h-5 animate-spin" />
                     </div>
                 ) : (
                     <AnimatePresence mode="wait">
-                        {activeTab === 'friends' ? (
+                        {showRequests ? (
+                            <motion.div
+                                key="requests-list"
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                className="space-y-4"
+                            >
+                                <div className="p-6 md:p-8 glass-panel rounded-[2.5rem] border-primary/20">
+                                    <div className="flex items-center gap-4 mb-8">
+                                        <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary shadow-lg ring-1 ring-primary/20">
+                                            <Icon name="userPlus" className="w-6 h-6" />
+                                        </div>
+                                        <h3 className="text-xl font-black uppercase tracking-tight">Pending Requests</h3>
+                                    </div>
+                                    <div className="space-y-3">
+                                        {requests.length === 0 ? (
+                                            <div className="text-center py-12 text-muted-foreground text-sm opacity-40 uppercase font-black tracking-widest">
+                                                No pending requests
+                                            </div>
+                                        ) : (
+                                            requests.map((req) => (
+                                                <div
+                                                    key={req.id}
+                                                    className="p-4 rounded-2xl bg-white/5 flex items-center justify-between border border-white/5"
+                                                >
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary font-black text-sm">
+                                                            {req.fromUsername.substring(0, 2).toUpperCase()}
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-sm font-bold text-white/90">{req.fromUsername}</p>
+                                                            <p className="text-[10px] text-muted-foreground uppercase font-black opacity-40">Wants to connect</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <button
+                                                            onClick={() => handleAccept(req.id!)}
+                                                            className="w-10 h-10 bg-primary text-white rounded-xl flex items-center justify-center shadow-lg active:scale-90 transition-transform"
+                                                        >
+                                                            <Icon name="check" className="w-4 h-4" />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDecline(req.id!)}
+                                                            className="w-10 h-10 bg-surface2 text-muted-foreground hover:text-white rounded-xl flex items-center justify-center active:scale-90 transition-transform"
+                                                        >
+                                                            <Icon name="x" className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                    <button
+                                        onClick={() => setShowRequests(false)}
+                                        className="w-full mt-8 py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 hover:text-primary transition-colors"
+                                    >
+                                        Back to friends
+                                    </button>
+                                </div>
+                            </motion.div>
+                        ) : (
                             <motion.div
                                 key="friends-list"
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: 10 }}
-                                className="space-y-1"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                             >
                                 {friends.length === 0 ? (
-                                    <div className="text-center py-8 text-muted-foreground text-sm">
-                                        <div className="w-12 h-12 rounded-full bg-white/5 mx-auto mb-3 flex items-center justify-center border border-white/5">
-                                            <Icon name="users" className="w-6 h-6 opacity-30" />
+                                    <div className="col-span-full text-center py-20 text-muted-foreground">
+                                        <div className="w-16 h-16 rounded-full bg-white/5 mx-auto mb-4 flex items-center justify-center border border-white/5 opacity-20">
+                                            <Icon name="users" className="w-8 h-8" />
                                         </div>
-                                        <p>No friends yet.</p>
-                                        <p className="text-xs opacity-40 mt-1">Start connecting with people!</p>
+                                        <p className="font-bold uppercase tracking-widest text-sm opacity-40">No friends yet.</p>
                                     </div>
                                 ) : (
                                     friends.map((friend) => (
                                         <div
                                             key={friend.uid}
-                                            className="group w-full flex items-center justify-between p-4 rounded-2xl glass-card border border-white/5 hover:bg-white/10 transition-all text-left"
+                                            className="group relative bento-item border border-white/5 hover:border-primary/20 transition-all text-left"
                                         >
-                                            <button
-                                                onClick={() => onSelectFriend?.(friend.uid)}
-                                                className="flex flex-1 items-center gap-4 min-w-0"
-                                            >
-                                                <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary font-black text-sm shadow-lg shadow-primary/10 group-hover:scale-110 transition-transform">
+                                            <div className="flex items-center gap-4 mb-6">
+                                                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-black text-xl shadow-lg ring-1 ring-primary/20 group-hover:scale-110 transition-transform">
                                                     {friend.username.substring(0, 2).toUpperCase()}
                                                 </div>
-                                                <span className="font-bold text-sm text-white/90 truncate">{friend.username}</span>
-                                            </button>
+                                                <span className="font-bold text-lg text-white/90 truncate">{friend.username}</span>
+                                            </div>
 
-                                            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div className="flex items-center gap-2 mt-auto">
                                                 <button
                                                     onClick={() => onSelectFriend?.(friend.uid)}
-                                                    className="p-3 rounded-xl bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all"
-                                                    title="Message"
+                                                    className="flex-1 h-12 rounded-xl bg-primary/10 text-primary font-black uppercase text-[10px] tracking-widest hover:bg-primary hover:text-white transition-all flex items-center justify-center gap-2"
                                                 >
-                                                    <Icon name="message" className="w-5 h-5" />
+                                                    <Icon name="message" className="w-4 h-4" /> Message
                                                 </button>
                                                 <button
                                                     onClick={() => handleUnfollowFriend(friend.uid, friend.username)}
-                                                    className="p-3 rounded-xl bg-destructive/10 text-destructive hover:bg-destructive hover:text-white transition-all"
-                                                    title="Unfollow"
+                                                    className="w-12 h-12 rounded-xl bg-white/5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all flex items-center justify-center"
+                                                    title="Remove friend"
                                                 >
                                                     <Icon name="userMinus" className="w-5 h-5" />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))
-                                )}
-                            </motion.div>
-                        ) : (
-                            <motion.div
-                                key="requests-list"
-                                initial={{ opacity: 0, x: 10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -10 }}
-                                className="space-y-2"
-                            >
-                                {requests.length === 0 ? (
-                                    <div className="text-center py-8 text-muted-foreground text-sm">
-                                        <div className="w-12 h-12 rounded-full bg-white/5 mx-auto mb-3 flex items-center justify-center border border-white/5">
-                                            <Icon name="check" className="w-6 h-6 opacity-30" />
-                                        </div>
-                                        <p>No pending requests.</p>
-                                    </div>
-                                ) : (
-                                    requests.map((req) => (
-                                        <div
-                                            key={req.id}
-                                            className="p-4 rounded-2xl glass-card flex flex-col gap-4 border border-white/5"
-                                        >
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center text-accent font-black text-sm ring-1 ring-accent/30 shadow-lg">
-                                                    {req.fromUsername.substring(0, 2).toUpperCase()}
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-bold truncate text-white/90">{req.fromUsername}</p>
-                                                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold opacity-60">Wants to connect</p>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <button
-                                                    onClick={() => handleAccept(req.id!)}
-                                                    className="flex-1 py-3 bg-primary text-white text-xs font-black rounded-xl transition-all flex items-center justify-center gap-2 uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-105 active:scale-95"
-                                                >
-                                                    <Icon name="check" className="w-4 h-4" /> Accept
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDecline(req.id!)}
-                                                    className="flex-1 py-3 bg-foreground/5 text-muted-foreground hover:bg-destructive hover:text-white text-xs font-black rounded-xl transition-all flex items-center justify-center gap-2 uppercase tracking-widest hover:scale-105 active:scale-95"
-                                                >
-                                                    <Icon name="x" className="w-4 h-4" /> Decline
                                                 </button>
                                             </div>
                                         </div>

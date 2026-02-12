@@ -77,11 +77,13 @@ const AuthSection = () => {
 const AuthenticatedSection = () => {
     const { user, logout, joinGroup: joinContext } = useAuth();
     const { toast } = useToast();
-    const [activeTab, setActiveTab] = useState<'home' | 'direct' | 'groups' | 'friends' | 'inbox' | 'chat'>('home');
+    const [activeTab, setActiveTab] = useState<'home' | 'direct' | 'groups' | 'friends' | 'inbox' | 'chat' | 'profile'>('home');
     const [activeId, setActiveId] = useState<string | null>(null);
     const [isPersonal, setIsPersonal] = useState(false);
     const [myGroups, setMyGroups] = useState<Group[]>([]);
     const [notifications, setNotifications] = useState<any[]>([]);
+    const [showDiscovery, setShowDiscovery] = useState(false);
+    const [showCreateGroup, setShowCreateGroup] = useState(false);
     const { personalChats } = useInbox();
 
     useEffect(() => {
@@ -118,9 +120,8 @@ const AuthenticatedSection = () => {
     return (
         <AILayout
             activeTab={activeTab === 'chat' ? (isPersonal ? 'direct' : 'groups') : activeTab}
-            onTabChange={(tab) => { setActiveTab(tab); setActiveId(null); }}
-            onOpenSettings={() => setActiveTab('chat')} // Reuse chat view or similar transition? 
-            // In a better design, settings would be a separate tab or modal. Let's stick to Home for now.
+            onTabChange={(tab) => { setActiveTab(tab); setActiveId(null); setShowDiscovery(false); setShowCreateGroup(false); }}
+            onOpenSettings={() => { setActiveTab('profile'); setActiveId(null); }}
             onGoHome={() => { setActiveTab('home'); setActiveId(null); }}
             user={user}
             onLogout={logout}
@@ -158,38 +159,56 @@ const AuthenticatedSection = () => {
                     )}
 
                     {activeTab === 'groups' && (
-                        <motion.div key="groups" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-8">
-                            <div className="flex items-center justify-between">
+                        <motion.div key="groups" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-8 pb-32">
+                            <div className="flex items-center justify-between gap-4 flex-wrap">
                                 <h2 className="text-3xl font-black italic uppercase tracking-tighter">Groups</h2>
-                                <button onClick={() => toast('Creation protocol initiated', 'info')} className="btn-primary h-12 px-6 rounded-xl flex items-center gap-2">
-                                    <Icon name="plus" /> New Group
-                                </button>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {myGroups.map(g => (
-                                    <button key={g.id} onClick={() => handleSelectGroup(g.id)} className="bento-item text-left group">
-                                        <div className="text-4xl mb-4">{g.image}</div>
-                                        <h3 className="font-bold text-lg group-hover:text-primary transition-colors">{g.name}</h3>
-                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                            <Icon name="users" className="w-4 h-4" /> {g.members} Members
-                                        </div>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => { setShowDiscovery(!showDiscovery); setShowCreateGroup(false); }}
+                                        className={`h-12 px-6 rounded-xl flex items-center gap-2 font-bold transition-all ${showDiscovery ? 'bg-primary text-white shadow-lg' : 'bg-surface2 hover:bg-surface text-muted-foreground'}`}
+                                    >
+                                        <Icon name="compass" className="w-5 h-5" /> Explore
                                     </button>
-                                ))}
+                                    <button
+                                        onClick={() => { setShowCreateGroup(!showCreateGroup); setShowDiscovery(false); }}
+                                        className={`h-12 px-6 rounded-xl flex items-center gap-2 font-bold transition-all ${showCreateGroup ? 'bg-primary text-white shadow-lg' : 'btn-primary'}`}
+                                    >
+                                        <Icon name="plus" className="w-4 h-4" /> New Group
+                                    </button>
+                                </div>
                             </div>
-                            <div className="pt-8 border-t border-border mt-12">
-                                <GroupDiscovery onJoinGroup={(id: string) => joinContext(id)} onSelectGroup={handleSelectGroup} joinedGroupIds={user?.joinedGroups || []} />
-                            </div>
+
+                            <AnimatePresence mode="wait">
+                                {showCreateGroup ? (
+                                    <motion.div key="create" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
+                                        <CreateGroup onGroupCreated={(id) => { handleSelectGroup(id); setShowCreateGroup(false); }} />
+                                    </motion.div>
+                                ) : showDiscovery ? (
+                                    <motion.div key="discovery" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}>
+                                        <GroupDiscovery onJoinGroup={(id: string) => joinContext(id)} onSelectGroup={handleSelectGroup} joinedGroupIds={user?.joinedGroups || []} />
+                                    </motion.div>
+                                ) : (
+                                    <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                            {myGroups.map(g => (
+                                                <button key={g.id} onClick={() => handleSelectGroup(g.id)} className="bento-item text-left group">
+                                                    <div className="text-4xl mb-4">{g.image}</div>
+                                                    <h3 className="font-bold text-lg group-hover:text-primary transition-colors">{g.name}</h3>
+                                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                        <Icon name="users" className="w-4 h-4" /> {g.members} Members
+                                                    </div>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </motion.div>
                     )}
 
                     {activeTab === 'friends' && (
-                        <motion.div key="friends" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-8">
-                            <h2 className="text-3xl font-black italic uppercase tracking-tighter">Friends</h2>
+                        <motion.div key="friends" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
                             <FriendsList onSelectFriend={(id) => handleSelectPersonal(id)} />
-                            <div className="mt-12">
-                                <h3 className="text-lg font-bold mb-4 uppercase tracking-widest text-muted-foreground/50">Requests</h3>
-                                <FollowRequests onBack={() => setActiveTab('home')} />
-                            </div>
                         </motion.div>
                     )}
 
@@ -213,6 +232,12 @@ const AuthenticatedSection = () => {
                                 memberCount={!isPersonal ? activeGroup?.members || 0 : 2}
                                 onLeave={() => setActiveTab('home')}
                             />
+                        </motion.div>
+                    )}
+
+                    {activeTab === 'profile' && (
+                        <motion.div key="profile" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="h-full">
+                            <AccountSettings onBack={() => setActiveTab('home')} logout={logout} />
                         </motion.div>
                     )}
                 </AnimatePresence>

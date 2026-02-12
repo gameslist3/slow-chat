@@ -1,13 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Capriola&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
-
-/* SlowChat Global Styles
-   Standardized with CSS 2026 specs for maximum compatibility. 
-   Note: @tailwind or @apply warnings can be ignored in IDEs without Tailwind support.
-   ------------------------------------------------------------- */
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* @tailwind/apply lint suppression - rules are processed by PostCSS */
 
 @layer base {
   :root {
@@ -192,7 +187,23 @@ body {
 
   .bento-item {
     @apply glass-card p-6 flex flex-col justify-between;
-    min-height: 200px;
+    min-height: 220px;
+    height: 100%;
+  }
+
+  /* Mobile standard card sizing to prevent "small/big" inconsistencies */
+  @media (max-width: 640px) {
+    .bento-grid {
+      grid-template-columns: 1fr;
+      padding: 1rem;
+      gap: 1rem;
+    }
+
+    .bento-item {
+      min-height: 180px;
+      aspect-ratio: auto;
+      margin-bottom: 0.5rem;
+    }
   }
 
   /* Premium Buttons (SaaS Style) */
