@@ -306,5 +306,10 @@ export function subscribeToPersonalChats(userId: string, callback: (chats: Perso
     return onSnapshot(q, (snap) => {
         const chats = snap.docs.map(d => ({ ...d.data(), id: d.id } as PersonalChat));
         callback(chats);
+    }, (error) => {
+        console.error("Error in subscribeToPersonalChats:", error);
+        // Fallback: If permission error (likely due to deletion of a doc we're listening to?), 
+        // we might want to reload or ignore. 
+        // But for a list query, deletion of one doc shouldn't break the query unless rules are weird.
     });
 }

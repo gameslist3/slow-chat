@@ -26,33 +26,31 @@
     }
 
     /* --- Phase 10: System Protocol Aesthetic (Light) --- */
-    --ui-background: 210 25% 98%;
-    /* Slightly cooler/cleaner white */
+    --ui-background: 220 33% 98%;
+    /* Cleaner white-blue */
     --ui-text: 222 47% 11%;
-    /* Sharper, deep blue-black for readability */
 
-    --ui-primary: 221 83% 53%;
-    /* More vibrant blue #3B82F6 */
-    --primary-rgb: 59,
-    130,
-    246;
+    --ui-primary: 250 100% 64%;
+    /* Violet-Blue #6d28d9 -> #5b21b6 range (Modern standard) */
+    --primary-rgb: 109,
+    40,
+    217;
 
-    --ui-secondary: 171 77% 44%;
-    /* Crisper teal */
+    --ui-secondary: 15 90% 65%;
+    /* Orange/Coral for contrast */
+    --secondary-rgb: 251,
+    113,
+    133;
 
     --ui-muted: 215 16% 94%;
-    --ui-muted-text: 215 25% 40%;
-    /* Darker muted text for better contrast */
+    --ui-muted-text: 215 25% 50%;
 
-    --ui-success: 142 71% 45%;
-    --ui-warning: 38 92% 50%;
+    --ui-success: 150 100% 40%;
+    --ui-warning: 35 100% 55%;
     --ui-danger: 0 84% 60%;
-    --destructive-rgb: 239,
-    68,
-    68;
 
     --ui-border: 214 32% 91%;
-    --ui-ring: 221 83% 53%;
+    --ui-ring: 250 100% 64%;
 
     --ui-surface: 0 0% 100%;
     --ui-surface2: 210 40% 96%;
@@ -63,52 +61,52 @@
     --font-body: 'Inter',
     sans-serif;
 
-    /* Glass V4 - 2026 Premium (Light Mode Refined) */
-    --glass-surface: rgba(255, 255, 255, 0.75);
-    /* More opaque */
-    --glass-border: rgba(255, 255, 255, 0.8);
-    --glass-shadow: rgba(17, 24, 39, 0.08);
-    /* Softer, slightly blue-tinted shadow */
-    --glass-blur: 24px;
+    /* Glass Premium - 2026 Ultra Pro */
+    --glass-surface: rgba(255, 255, 255, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.4);
+    --glass-shadow: rgba(17, 24, 39, 0.05);
+    --glass-blur: 32px;
 
     --radius-sm: 0.75rem;
-    --radius-md: 1rem;
-    --radius-lg: 1.5rem;
-    --radius-xl: 2.5rem;
+    --radius-md: 1.25rem;
+    --radius-lg: 1.75rem;
+    --radius-xl: 3rem;
     --radius-full: 9999px;
   }
 
   .dark {
-    /* --- Phase 10: System Protocol Aesthetic (Dark) --- */
-    --ui-background: 224 20% 5%;
-    /* Richer dark background */
-    --ui-text: 210 40% 98%;
+    /* --- Phase 10: System Protocol Aesthetic (Dark - Ultra Pro) --- */
+    --ui-background: 240 10% 4%;
+    /* Deepest Black-Blue #09090b */
+    --ui-text: 0 0% 98%;
 
-    --ui-primary: 222 51% 58%;
-    /* Kept original soft blue for dark mode */
-    --primary-rgb: 91, 125, 203;
+    --ui-primary: 252 100% 68%;
+    /* Electric Violet #8b5cf6 */
+    --primary-rgb: 139,
+      92,
+      246;
 
-    --ui-secondary: 168 53% 58%;
-    /* ... rest of dark mode vars ... */
-    --ui-muted: 223 15% 14%;
-    --ui-muted-text: 215 20% 65%;
+    --ui-secondary: 22 100% 60%;
+    /* Vibrant Orange */
 
-    --ui-success: 142 71% 45%;
-    --ui-warning: 38 92% 50%;
-    --ui-danger: 0 62% 38%;
+    --ui-muted: 240 6% 12%;
+    --ui-muted-text: 240 5% 60%;
 
-    --ui-border: 217 10% 15%;
-    /* Subtle borders */
-    --ui-ring: 222 51% 58%;
+    --ui-success: 150 100% 45%;
+    --ui-warning: 35 100% 55%;
+    --ui-danger: 0 84% 60%;
 
-    --ui-surface: 224 20% 8%;
-    --ui-surface2: 224 20% 10%;
+    --ui-border: 240 6% 14%;
+    --ui-ring: 252 100% 68%;
 
-    /* Glass V4 Dark - 2026 Premium */
-    --glass-surface: rgba(10, 12, 16, 0.65);
+    --ui-surface: 240 10% 8%;
+    --ui-surface2: 240 6% 12%;
+
+    /* Glass Premium Dark - 2026 Ultra Pro */
+    --glass-surface: rgba(18, 18, 23, 0.7);
     --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-shadow: rgba(0, 0, 0, 0.4);
-    --glass-blur: 40px;
+    --glass-shadow: rgba(0, 0, 0, 0.5);
+    --glass-blur: 48px;
   }
 }
 

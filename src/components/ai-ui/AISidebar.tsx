@@ -49,13 +49,11 @@ export const AISidebar: React.FC<AISidebarProps> = ({
     const [view, setView] = useState<'chats' | 'friends' | 'notifications'>('chats');
     const { toast } = useToast();
 
-    // Subscribe to notifications internally
     useEffect(() => {
         const unsubscribe = subscribeToNotifications(setNotifications);
         return () => unsubscribe();
     }, []);
 
-    // Subscribe to follow requests
     useEffect(() => {
         if (!user?.id) return;
         const unsubscribe = getPendingRequests(setFollowReqs);
@@ -65,53 +63,31 @@ export const AISidebar: React.FC<AISidebarProps> = ({
     const unreadNotifications = notifications.filter(n => !n.read).length;
 
     const handleSelectNotification = (chatId: string, isPersonal: boolean, messageId?: string) => {
-        if (isPersonal) {
-            onSelectPersonal(chatId);
-        } else {
-            onSelectGroup(chatId);
-        }
+        if (isPersonal) onSelectPersonal(chatId);
+        else onSelectGroup(chatId);
         if (onClose) onClose();
     };
 
     const handleAcceptReq = async (id: string, name: string) => {
-        // Optimistic update
-        setFollowReqs(prev => prev.map(req =>
-            req.id === id ? { ...req, status: 'accepted' as const } : req
-        ));
-
+        setFollowReqs(prev => prev.map(req => req.id === id ? { ...req, status: 'accepted' as const } : req));
         try {
             await acceptFollowRequest(id);
-            toast(`You follow ${name}`, 'success');
+            toast(`Connected with ${name}`, 'success');
         } catch (err: any) {
-            toast(err.message || "Failed to accept", 'error');
+            toast(err.message, 'error');
         }
     };
 
     const handleDeclineReq = async (id: string) => {
-        // Optimistic update
-        setFollowReqs(prev => prev.map(req =>
-            req.id === id ? { ...req, status: 'declined' as const } : req
-        ));
-
+        setFollowReqs(prev => prev.map(req => req.id === id ? { ...req, status: 'declined' as const } : req));
         try {
             await declineFollowRequest(id);
-            toast("Request declined", 'info');
         } catch (err: any) {
-            toast(err.message || "Failed to decline", 'error');
+            toast(err.message, 'error');
         }
     };
 
-    const handleFriendSelect = (friendId: string) => {
-        if (!user?.id) return;
-        const chatId = [user.id, friendId].sort().join('_');
-        onSelectPersonal(chatId);
-        if (onClose) onClose();
-    };
-
-    // Filter logic
-    const filteredGroups = groups.filter(g =>
-        g.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredGroups = groups.filter(g => g.name.toLowerCase().includes(searchTerm.toLowerCase()));
     const filteredChats = personalChats.filter(chat => {
         const otherId = chat.userIds.find(id => id !== user?.id);
         const name = chat.usernames?.[otherId || ''] || 'User';
@@ -119,26 +95,77 @@ export const AISidebar: React.FC<AISidebarProps> = ({
     });
 
     return (
-        <aside className="h-full flex flex-col bg-background/20 relative z-30 w-full">
-            {/* Header */}
-            <div className="p-8 pb-4 flex items-center justify-between">
-                <button onClick={onGoHome} className="active:scale-95 transition-transform"><Logo className="h-9 w-auto" /></button>
-                <div className="flex gap-4">
-                    <button onClick={onBrowseGroups} className="w-12 h-12 glass-card rounded-xl flex items-center justify-center text-muted-foreground hover:bg-foreground/10 transition-all shadow-sm">
-                        <Icon name="compass" className="w-6 h-6" />
-                    </button>
-                    <button onClick={onCreateGroup} className="w-12 h-12 glass-card rounded-xl flex items-center justify-center text-muted-foreground hover:bg-foreground/10 transition-all shadow-sm">
-                        <Icon name="plus" className="w-6 h-6" />
+        <aside className="h-full flex flex-col glass-panel border-r border-white/5 relative z-30 w-full md:w-80 lg:w-96 overflow-hidden bg-background/40 backdrop-blur-3xl shadow-2xl">
+            {/* Header / Config */}
+            <div className="p-6 pb-2 flex items-center justify-between shrink-0">
+                <button onClick={onGoHome} className="active:scale-95 transition-transform opacity-80 hover:opacity-100">
+                    <Logo className="h-8 w-auto text-foreground" />
+                </button>
+                <div className="flex gap-2">
+                    <ThemeToggle />
+                    <button onClick={onOpenSettings} className="w-10 h-10 rounded-full hover:bg-foreground/5 flex items-center justify-center transition-all">
+                        <Icon name="settings" className="w-5 h-5 text-muted-foreground" />
                     </button>
                 </div>
             </div>
 
+            {/* Profile / Stats Card */}
+            <div className="mx-6 mt-4 p-5 rounded-[2rem] bg-gradient-to-br from-primary/20 via-primary/5 to-transparent border border-primary/10 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <Icon name="activity" className="w-16 h-16 text-primary rotate-12" />
+                </div>
+                <div className="relative z-10 flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-violet-600 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-primary/25">
+                        {user?.username?.[0].toUpperCase()}
+                    </div>
+                    <div>
+                        <h3 className="font-bold text-base leading-tight text-foreground">{user?.username}</h3>
+                        <p className="text-[10px] uppercase tracking-widest text-primary font-black opacity-80">Online</p>
+                    </div>
+                </div>
+                {/* Visual Stats */}
+                <div className="flex gap-4 mt-4 pt-4 border-t border-primary/10">
+                    <div className="flex flex-col">
+                        <span className="text-xl font-black text-foreground">{personalChats.length}</span>
+                        <span className="text-[9px] uppercase tracking-widest text-muted-foreground">Chats</span>
+                    </div>
+                    <div className="flex flex-col">
+                        <span className="text-xl font-black text-foreground">{groups.length}</span>
+                        <span className="text-[9px] uppercase tracking-widest text-muted-foreground">Groups</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Navigation Tabs */}
+            <div className="flex px-6 mt-6 mb-2 gap-2">
+                {['chats', 'friends', 'notifications'].map((t) => (
+                    <button
+                        key={t}
+                        onClick={() => setView(t as any)}
+                        className={`relative flex-1 h-10 rounded-xl flex items-center justify-center transition-all ${view === t ? 'bg-foreground text-background font-bold shadow-lg' : 'hover:bg-foreground/5 text-muted-foreground'
+                            }`}
+                    >
+                        {t === 'chats' && <Icon name="message" className="w-4 h-4" />}
+                        {t === 'friends' && <Icon name="users" className="w-4 h-4" />}
+                        {t === 'notifications' && <Icon name="bell" className="w-4 h-4" />}
+
+                        {/* Badges */}
+                        {t === 'friends' && followReqs.length > 0 && (
+                            <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full animate-pulse" />
+                        )}
+                        {t === 'notifications' && unreadNotifications > 0 && (
+                            <span className="absolute top-2 right-2 w-2 h-2 bg-secondary rounded-full animate-pulse" />
+                        )}
+                    </button>
+                ))}
+            </div>
+
             {/* Search */}
-            <div className="px-6 py-4">
-                <div className="relative">
-                    <Icon name="search" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/30" />
+            <div className="px-6 mb-4">
+                <div className="relative group">
+                    <Icon name="search" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50 group-focus-within:text-foreground transition-colors" />
                     <input
-                        className="w-full h-12 bg-foreground/5 rounded-2xl pl-12 pr-4 text-sm font-medium outline-none border border-transparent focus:border-primary/20 transition-all placeholder:text-muted-foreground/40"
+                        className="w-full h-10 bg-foreground/5 rounded-xl pl-10 pr-4 text-xs font-bold outline-none border border-transparent focus:bg-foreground/10 focus:border-foreground/5 transition-all placeholder:text-muted-foreground/40"
                         placeholder="Search..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -146,176 +173,146 @@ export const AISidebar: React.FC<AISidebarProps> = ({
                 </div>
             </div>
 
-            {/* Tab Controller */}
-            <div className="px-6 flex gap-3 mb-6">
-                <button onClick={() => setView('chats')} className={`flex-1 h-12 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${view === 'chats' ? 'btn-primary' : 'bg-foreground/5 text-muted-foreground hover:bg-foreground/10'}`}>Chats</button>
-                <button onClick={() => setView('friends')} className={`relative w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${view === 'friends' ? 'btn-primary' : 'bg-foreground/5 text-muted-foreground hover:bg-foreground/10'}`}>
-                    <Icon name="users" className="w-6 h-6" />
-                    {followReqs.length > 0 && <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-[9px] font-black rounded-full flex items-center justify-center border-2 border-background shadow-lg">{followReqs.length}</span>}
-                </button>
-            </div>
+            {/* Content List */}
+            <div className="flex-1 overflow-y-auto px-6 space-y-2 pb-8 custom-scrollbar">
+                <AnimatePresence mode="wait">
+                    {view === 'chats' && (
+                        <motion.div
+                            key="chats"
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 20 }}
+                            className="space-y-6"
+                        >
+                            {/* Create / Discover Actions */}
+                            <div className="grid grid-cols-2 gap-2 mb-4">
+                                <button onClick={onBrowseGroups} className="h-20 rounded-2xl bg-gradient-to-br from-violet-500/10 to-indigo-500/10 border border-violet-500/20 hover:border-violet-500/40 p-3 flex flex-col justify-between transition-all group">
+                                    <Icon name="compass" className="w-5 h-5 text-violet-500 group-hover:scale-110 transition-transform" />
+                                    <span className="text-[10px] font-black uppercase tracking-wider text-violet-500/80">Discover</span>
+                                </button>
+                                <button onClick={onCreateGroup} className="h-20 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 hover:border-emerald-500/40 p-3 flex flex-col justify-between transition-all group">
+                                    <Icon name="plus" className="w-5 h-5 text-emerald-500 group-hover:scale-110 transition-transform" />
+                                    <span className="text-[10px] font-black uppercase tracking-wider text-emerald-500/80">Create</span>
+                                </button>
+                            </div>
 
-            {/* List Area */}
-            <div className="flex-1 min-h-0 overflow-y-auto px-6 space-y-8 pb-32 custom-scrollbar">
-                {view === 'friends' ? (
-                    <FriendsList onSelectFriend={handleFriendSelect} />
-                ) : view === 'notifications' ? (
-                    <div className="-mx-6 h-full">
-                        <NotificationList
-                            notifications={notifications}
-                            onSelectChat={handleSelectNotification}
-                            onMarkAllRead={markAllAsRead}
-                        />
-                    </div>
-                ) : (
-                    <>
-                        {followReqs.length > 0 && (
-                            <div className="space-y-3">
-                                <div className="flex items-center justify-between px-2 mb-2">
-                                    <span className="text-[10px] font-black text-secondary uppercase tracking-[0.2em]">Pending Requests</span>
-                                    <span className="text-[10px] font-black text-secondary/40">{followReqs.length}</span>
-                                </div>
-                                {followReqs.map(req => {
-                                    const chatId = [user?.id, req.fromId].sort().join('_');
+                            {/* Direct Messages */}
+                            <div className="space-y-2">
+                                <h4 className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 pl-2">Private</h4>
+                                {filteredChats.length === 0 && <p className="text-xs text-muted-foreground/40 italic p-4 text-center">No chats found.</p>}
+                                {filteredChats.map(chat => {
+                                    const otherId = chat.userIds.find(id => id !== user?.id);
+                                    const name = chat.usernames?.[otherId || ''] || 'User';
+                                    const active = activeId === chat.id && isPersonalActive;
+                                    const unread = chat.unreadCounts?.[user?.id || ''] || 0;
+
                                     return (
-                                        <div key={req.id} className="w-full p-4 rounded-3xl bg-secondary/5 border border-secondary/10 flex flex-col gap-4">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center font-black bg-secondary text-black text-xs">
-                                                    {req.fromUsername.slice(0, 2).toUpperCase()}
-                                                </div>
-                                                <div className="text-left flex-1 min-w-0">
-                                                    <p className="font-bold text-sm tracking-tight truncate text-white">{req.fromUsername}</p>
-                                                    <p className="text-[9px] font-bold text-secondary tracking-widest uppercase opacity-60">
-                                                        {req.status === 'accepted' ? 'Connected' : req.status === 'declined' ? 'Request Declined' : 'Wants to connect'}
-                                                    </p>
-                                                </div>
-                                                {req.status === 'accepted' && (
-                                                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                                                )}
+                                        <button
+                                            key={chat.id}
+                                            onClick={() => onSelectPersonal(chat.id)}
+                                            className={`w-full p-3 rounded-2xl flex items-center gap-3 transition-all relative overflow-hidden group ${active ? 'bg-primary text-white shadow-lg shadow-primary/25' : 'hover:bg-foreground/5 text-muted-foreground hover:text-foreground'}`}
+                                        >
+                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs shrink-0 ${active ? 'bg-white/20' : 'bg-foreground/5 group-hover:bg-foreground/10'}`}>
+                                                {name.slice(0, 2).toUpperCase()}
                                             </div>
-
-                                            <div className="flex gap-2">
-                                                {req.status === 'pending' ? (
-                                                    <>
-                                                        <button
-                                                            onClick={() => handleAcceptReq(req.id, req.fromUsername)}
-                                                            className="flex-1 h-9 bg-secondary text-black rounded-xl text-[9px] font-black tracking-widest hover:scale-105 active:scale-95 transition-all shadow-lg shadow-secondary/20"
-                                                        >
-                                                            ACCEPT
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleDeclineReq(req.id)}
-                                                            className="flex-1 h-9 bg-foreground/5 text-muted-foreground border border-white/5 rounded-xl text-[9px] font-black tracking-widest hover:bg-destructive/10 hover:text-destructive transition-all"
-                                                        >
-                                                            DECLINE
-                                                        </button>
-                                                    </>
-                                                ) : req.status === 'accepted' ? (
-                                                    <button
-                                                        onClick={() => onSelectPersonal(chatId)}
-                                                        className="w-full h-10 bg-green-500 text-white rounded-xl text-[10px] font-black tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-500/20"
-                                                    >
-                                                        <Icon name="message" className="w-4 h-4" />
-                                                        OPEN CHAT
-                                                    </button>
-                                                ) : (
-                                                    <div className="w-full text-center py-2 text-[9px] font-black text-muted-foreground tracking-widest uppercase opacity-40">
-                                                        Protocol Terminated
-                                                    </div>
-                                                )}
+                                            <div className="flex-1 min-w-0 text-left">
+                                                <div className="flex items-center justify-between">
+                                                    <p className={`font-bold text-sm truncate ${active ? 'text-white' : 'text-foreground'}`}>{name}</p>
+                                                    {unread > 0 && <span className="w-2 h-2 bg-secondary rounded-full animate-pulse" />}
+                                                </div>
+                                                <p className={`text-[10px] truncate opacity-60 ${active ? 'text-white/80' : ''}`}>
+                                                    {chat.lastMessage || 'Start talking...'}
+                                                </p>
                                             </div>
-                                        </div>
+                                        </button>
                                     );
                                 })}
-                                <div className="h-4" />
                             </div>
-                        )}
-                        <div className="space-y-3">
-                            <div className="flex items-center justify-between px-2 mb-2">
-                                <span className="text-[10px] font-black text-primary/40 uppercase tracking-[0.2em]">Direct chat</span>
-                                <span className="text-[10px] font-black text-primary/20">{filteredChats.length}</span>
-                            </div>
-                            {filteredChats.map(chat => {
-                                const otherId = chat.userIds.find(id => id !== user?.id);
-                                const name = chat.usernames?.[otherId || ''] || 'User';
-                                const active = activeId === chat.id && isPersonalActive;
-                                return (
-                                    <button key={chat.id} onClick={() => onSelectPersonal(chat.id)} className={`w-full p-4 rounded-3xl flex items-center gap-4 transition-all ${active ? 'bg-primary text-white shadow-xl shadow-primary/20' : 'hover:bg-foreground/5 text-muted-foreground hover:text-foreground'}`}>
-                                        <div className={`w-12 h-12 rounded-2xl flex-shrink-0 flex items-center justify-center font-black ${active ? 'bg-white/20' : 'bg-primary/10 text-primary'}`}>{name.slice(0, 2).toUpperCase()}</div>
-                                        <div className="text-left flex-1 min-w-0"><p className="font-bold text-sm tracking-tight truncate">{name}</p><p className={`text-[10px] truncate opacity-50 ${active ? 'text-white' : ''}`}>{chat.lastMessage || 'Connected'}</p></div>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                        <div className="space-y-3">
-                            <div className="flex items-center justify-between px-2 mb-2">
-                                <span className="text-[10px] font-black text-primary/40 uppercase tracking-[0.2em]">Joined Groups</span>
-                                <span className="text-[10px] font-black text-primary/20">{filteredGroups.length}</span>
-                            </div>
-                            {filteredGroups.map(group => {
-                                const active = activeId === group.id && !isPersonalActive;
-                                return (
-                                    <button key={group.id} onClick={() => onSelectGroup(group.id)} className={`w-full p-4 rounded-3xl flex items-center gap-4 transition-all ${active ? 'bg-primary text-white shadow-xl shadow-primary/20' : 'hover:bg-foreground/5 text-muted-foreground hover:text-foreground'}`}>
-                                        <div className={`w-12 h-12 rounded-2xl flex-shrink-0 flex items-center justify-center text-xl ${active ? 'bg-white/20' : 'bg-foreground/5'}`}>{group.image}</div>
-                                        <div className="text-left flex-1 min-w-0"><p className="font-bold text-sm tracking-tight truncate">{group.name}</p><p className={`text-[10px] truncate opacity-50 ${active ? 'text-white' : ''}`}>{group.lastMessage || 'Active'}</p></div>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </>
-                )}
-            </div>
 
-            {/* User Footer */}
-            <div className="p-6 border-t border-border/5 bg-foreground/5 mt-auto">
-                <div className="flex items-center gap-3">
-                    <button onClick={onOpenSettings} className="flex-1 flex items-center gap-4 p-2 rounded-2xl hover:bg-foreground/10 transition-all group/profile">
-                        <div className="relative">
-                            <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center text-primary font-black text-xs border border-primary/20">{user?.username?.[0].toUpperCase() || 'U'}</div>
-                            <div className="absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-green-500 border-2 border-background shadow-md" />
-                        </div>
-                        <div className="text-left flex-1 min-w-0">
-                            <p className="text-sm font-bold truncate text-foreground/90">{user?.username || 'User'}</p>
-                        </div>
-                    </button>
+                            {/* Groups */}
+                            <div className="space-y-2">
+                                <h4 className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 pl-2">Clusters</h4>
+                                {filteredGroups.length === 0 && <p className="text-xs text-muted-foreground/40 italic p-4 text-center">No groups joined.</p>}
+                                {filteredGroups.map(group => {
+                                    const active = activeId === group.id && !isPersonalActive;
+                                    const unread = group.unreadCounts?.[user?.id || ''] || 0;
 
-                    <div className="flex gap-2">
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setView(view === 'notifications' ? 'chats' : 'notifications');
-                            }}
-                            className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all relative group/bell ${view === 'notifications' ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-foreground/10 text-muted-foreground hover:bg-foreground/20 hover:text-foreground'}`}
+                                    return (
+                                        <button
+                                            key={group.id}
+                                            onClick={() => onSelectGroup(group.id)}
+                                            className={`w-full p-3 rounded-2xl flex items-center gap-3 transition-all relative overflow-hidden group ${active ? 'bg-gradient-to-r from-secondary to-orange-500 text-white shadow-lg shadow-secondary/25' : 'hover:bg-foreground/5 text-muted-foreground hover:text-foreground'}`}
+                                        >
+                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0 ${active ? 'bg-white/20' : 'bg-foreground/5 group-hover:bg-foreground/10'}`}>
+                                                {group.image}
+                                            </div>
+                                            <div className="flex-1 min-w-0 text-left">
+                                                <div className="flex items-center justify-between">
+                                                    <p className={`font-bold text-sm truncate ${active ? 'text-white' : 'text-foreground'}`}>{group.name}</p>
+                                                    {unread > 0 && <span className="text-[9px] font-black bg-white text-secondary px-1.5 rounded-md">{unread}</span>}
+                                                </div>
+                                                <p className={`text-[10px] truncate opacity-60 ${active ? 'text-white/80' : ''}`}>
+                                                    {group.lastMessage || 'Active'}
+                                                </p>
+                                            </div>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {view === 'friends' && (
+                        <motion.div
+                            key="friends"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
                         >
-                            <motion.div
-                                animate={unreadNotifications > 0 ? {
-                                    rotate: [0, -10, 10, -10, 10, 0],
-                                    scale: [1, 1.1, 1]
-                                } : {}}
-                                transition={{
-                                    repeat: Infinity,
-                                    duration: 2,
-                                    repeatDelay: 3
-                                }}
-                            >
-                                <Icon name="bell" className="w-5 h-5" />
-                            </motion.div>
+                            <FriendsList onSelectFriend={handleFriendSelect} />
 
-                            {unreadNotifications > 0 && (
-                                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-black text-white border-2 border-background shadow-lg">
-                                    {unreadNotifications > 9 ? '9+' : unreadNotifications}
-                                </span>
+                            {/* Embedded Follow Requests */}
+                            {followReqs.length > 0 && (
+                                <div className="mt-6 space-y-4">
+                                    <h4 className="text-[9px] font-black uppercase tracking-[0.2em] text-secondary pl-2">Pending Requests</h4>
+                                    {followReqs.map(req => (
+                                        <div key={req.id} className="p-4 rounded-3xl bg-secondary/10 border border-secondary/20">
+                                            <div className="flex items-center gap-3 mb-3">
+                                                <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-xs font-black text-white">
+                                                    {req.fromUsername[0]}
+                                                </div>
+                                                <div>
+                                                    <p className="font-bold text-xs text-secondary-foreground">{req.fromUsername}</p>
+                                                    <p className="text-[9px] opacity-60">Wants to connect</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <button onClick={() => handleAcceptReq(req.id, req.fromUsername)} className="flex-1 h-8 bg-secondary text-white rounded-lg text-[10px] font-bold">ACCEPT</button>
+                                                <button onClick={() => handleDeclineReq(req.id)} className="flex-1 h-8 bg-background/50 text-muted-foreground hover:text-red-500 rounded-lg text-[10px] font-bold">DECLINE</button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             )}
-                        </button>
+                        </motion.div>
+                    )}
 
-                        <button
-                            onClick={(e) => { e.stopPropagation(); onOpenSettings(); }}
-                            className="w-12 h-12 bg-foreground/10 text-muted-foreground hover:bg-foreground/20 hover:text-foreground rounded-xl flex items-center justify-center transition-all shadow-sm"
+                    {view === 'notifications' && (
+                        <motion.div
+                            key="notifications"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="-mx-4"
                         >
-                            <Icon name="settings" className="w-5 h-5" />
-                        </button>
-                    </div>
-                </div>
+                            <NotificationList
+                                notifications={notifications}
+                                onSelectChat={handleSelectNotification}
+                                onMarkAllRead={markAllAsRead}
+                            />
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
         </aside>
     );
