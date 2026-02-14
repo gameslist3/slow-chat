@@ -283,3 +283,11 @@ export const dangerouslyNukeAllGroups = async (): Promise<void> => {
 };
 
 // --- End of Service ---
+
+/**
+ * Update group last activity (and potentially other metadata)
+ */
+export const updateGroupLastActivity = async (groupId: string): Promise<void> => {
+    const groupRef = doc(db, 'groups', groupId);
+    await updateDoc(groupRef, { lastActivity: Date.now() });
+};

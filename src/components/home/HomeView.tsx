@@ -23,12 +23,6 @@ export const HomeView: React.FC<HomeViewProps> = ({ user, myGroups, onSelectGrou
             <section className="space-y-6">
                 <div className="flex items-center justify-between">
                     <h2 className="text-xl font-bold uppercase tracking-widest text-muted-foreground/50">Your Groups</h2>
-                    <button
-                        onClick={onBrowseGroups}
-                        className="text-sm font-bold text-primary hover:underline flex items-center gap-2"
-                    >
-                        Explore More <Icon name="arrowRight" className="w-4 h-4" />
-                    </button>
                 </div>
 
                 {myGroups.length === 0 ? (
@@ -58,9 +52,14 @@ export const HomeView: React.FC<HomeViewProps> = ({ user, myGroups, onSelectGrou
                         </div>
                     </div>
                 )}
-            </section>
+            </button>
+            <button onClick={onBrowseGroups} className="flex-1 h-14 rounded-2xl bg-primary text-primary-foreground shadow-xl shadow-primary/20 flex items-center justify-center gap-2 font-bold uppercase tracking-wider text-xs">
+                <Icon name="compass" className="w-4 h-4" /> Explore
+            </button>
         </div>
-    );
+                        </div >
+                    </div >
+                );
 };
 
 const GroupItem = ({ group, onClick }: { group: Group, onClick: () => void }) => (

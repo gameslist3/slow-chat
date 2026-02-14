@@ -4,7 +4,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Skeleton } from '../ui/Skeleton';
 import { Group } from '../../types';
-import { getGroups, createGroup, CATEGORIES, ICONS } from '../../services/firebaseGroupService';
+import { getGroups, createGroup, subscribeToGroups, CATEGORIES, ICONS } from '../../services/firebaseGroupService';
 import { useAuth } from '../../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -52,12 +52,12 @@ export const GroupDiscovery = ({ onJoinGroup, onSelectGroup, joinedGroupIds }: a
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        (async () => {
-            setLoading(true);
-            const data = await getGroups();
+        setLoading(true);
+        const unsubscribe = subscribeToGroups((data) => {
             setGroups(data);
             setLoading(false);
-        })();
+        });
+        return () => unsubscribe();
     }, []);
 
     const filtered = groups.filter(g => {
@@ -129,7 +129,7 @@ export const CreateGroup = ({ onGroupCreated }: { onGroupCreated: (id: string) =
     };
 
     return (
-        <div className="w-full max-w-xl mx-auto glass-panel p-6 md:p-10 lg:p-12 rounded-[2.5rem] md:rounded-[3rem] shadow-2xl relative overflow-hidden border-white/10 animate-in zoom-in-95 duration-700">
+        <div className="w-full max-w-xl mx-auto glass-card p-6 md:p-10 lg:p-12 rounded-[2.5rem] md:rounded-[3rem] shadow-2xl relative overflow-hidden border-white/10 animate-in zoom-in-95 duration-700 bg-surface/50 backdrop-blur-3xl">
             <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/20 blur-[100px] rounded-full" />
 
             <div className="flex items-center gap-4 md:gap-6 mb-8 md:mb-12">

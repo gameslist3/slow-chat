@@ -129,7 +129,7 @@ const MessageItem = ({
                 <div className={`
                     relative px-3 py-2 shadow-sm text-[15px] leading-relaxed break-words flex flex-wrap gap-x-4 items-end
                     ${isOwn
-                        ? 'bg-[#005c4b] text-[#e9edef] rounded-l-2xl rounded-tr-2xl rounded-br-sm'
+                        ? 'bg-primary text-primary-foreground rounded-l-2xl rounded-tr-2xl rounded-br-sm'
                         : 'bg-[#202c33] text-[#e9edef] rounded-r-2xl rounded-tl-2xl rounded-bl-sm'}
                 `}>
                     {/* Message Content */}
@@ -152,12 +152,12 @@ const MessageItem = ({
 
                     {/* Metadata (Time + Ticks) */}
                     <div className={`flex items-center gap-1 shrink-0 select-none ml-auto h-[16px] self-end translate-y-[3px]`}>
-                        <span className="text-[10px] text-white/60 font-medium">
+                        <span className={`text-[10px] font-medium ${isOwn ? 'text-primary-foreground/70' : 'text-white/60'}`}>
                             {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                         {isOwn && (
-                            <span className="text-emerald-400">
-                                {message.status === 'seen' || message.readBy?.length ? <CheckCheck className="w-3.5 h-3.5" /> : <Check className="w-3.5 h-3.5 text-white/60" />}
+                            <span className="text-primary-foreground/90">
+                                {message.status === 'seen' || message.readBy?.length ? <CheckCheck className="w-3.5 h-3.5" /> : <Check className="w-3.5 h-3.5 opacity-70" />}
                             </span>
                         )}
                     </div>

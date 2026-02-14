@@ -69,16 +69,26 @@ export const AISidebar: React.FC<AISidebarProps> = ({
 
             {/* Bottom Section */}
             <div className="p-4 border-t border-border shrink-0 space-y-2">
-                <button
-                    onClick={onToggleTheme}
-                    className="w-full h-12 rounded-2xl flex items-center justify-center lg:justify-start lg:px-6 text-muted-foreground hover:bg-surface2 hover:text-foreground transition-all group"
-                    title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
-                >
-                    <Icon name={theme === 'dark' ? 'sun' : 'moon'} className="w-5 h-5" />
-                    <span className="hidden lg:block ml-4 text-sm font-bold tracking-tight">
-                        {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
-                    </span>
-                </button>
+                <div className="px-4 py-2">
+                    <div className="flex items-center justify-between p-3 rounded-2xl bg-surface2/50 border border-border">
+                        <div className="flex items-center gap-3">
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${theme === 'light' ? 'bg-yellow-400 text-black' : 'bg-transparent text-muted-foreground'}`}>
+                                <Icon name="sun" className="w-4 h-4" />
+                            </div>
+                            <span className="text-xs font-bold uppercase tracking-wider hidden lg:block">Theme</span>
+                        </div>
+                        <button
+                            onClick={onToggleTheme}
+                            className={`w-12 h-7 rounded-full p-1 transition-colors relative ${theme === 'dark' ? 'bg-primary' : 'bg-muted-foreground/30'}`}
+                        >
+                            <motion.div
+                                layout
+                                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                className={`w-5 h-5 rounded-full shadow-sm ${theme === 'dark' ? 'bg-white translate-x-5' : 'bg-white translate-x-0'}`}
+                            />
+                        </button>
+                    </div>
+                </div>
 
                 <button
                     onClick={onOpenSettings}
