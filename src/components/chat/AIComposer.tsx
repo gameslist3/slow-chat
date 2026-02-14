@@ -120,109 +120,117 @@ export const AIComposer: React.FC<AIComposerProps> = ({
     };
 
     return (
-        <div className="w-full pb-8 px-4 flex justify-center items-end bg-transparent pointer-events-none">
-            <div className="w-full max-w-2xl pointer-events-auto relative">
+        <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 pt-2 bg-gradient-to-t from-[#050505] via-[#050505] to-transparent bg-opacity-90 backdrop-blur-sm pointer-events-none md:absolute md:bottom-0 md:w-full">
+            <div className="max-w-4xl mx-auto w-full pointer-events-auto relative">
                 <AnimatePresence>
                     {replyingTo && (
                         <motion.div
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: 10 }}
-                            className="bg-surface/90 backdrop-blur-xl border border-border rounded-t-2xl p-4 mb-[-1rem] flex items-center justify-between"
+                            className="bg-[#202c33] border-l-4 border-primary rounded-lg p-2 mb-2 flex items-center justify-between shadow-lg mx-2"
                         >
-                            <div className="flex items-center gap-3 border-l-2 border-primary pl-3">
-                                <div className="flex flex-col">
-                                    <span className="text-[10px] font-black uppercase text-primary">Replying to</span>
-                                    <span className="text-xs text-foreground opacity-60 truncate max-w-[200px]">{replyingTo.text}</span>
-                                </div>
+                            <div className="flex flex-col overflow-hidden">
+                                <span className="text-[10px] font-bold text-primary mb-0.5">Replying to</span>
+                                <span className="text-sm text-white/70 truncate">{replyingTo.text}</span>
                             </div>
-                            <button onClick={onCancelReply} className="w-8 h-8 rounded-lg hover:bg-foreground/5 flex items-center justify-center text-muted-foreground">
-                                <Icon name="x" className="w-4 h-4" />
+                            <button onClick={onCancelReply} className="p-1 hover:bg-white/10 rounded-full">
+                                <Icon name="x" className="w-4 h-4 text-white/50" />
                             </button>
                         </motion.div>
                     )}
                 </AnimatePresence>
 
-                <div className="glass-panel rounded-[2rem] p-1.5 shadow-2xl flex items-end gap-2 border-border">
-                    {recState === 'idle' && (
+                <div className="flex items-end gap-2">
+                    {recState === 'idle' ? (
                         <>
                             <button
                                 onClick={() => fileInputRef.current?.click()}
-                                className="w-12 h-12 rounded-full hover:bg-foreground/5 flex items-center justify-center transition-colors group shrink-0"
+                                className="w-10 h-10 mb-1 rounded-full bg-[#202c33] hover:bg-[#374248] flex items-center justify-center transition-colors text-gray-400"
                             >
-                                <Icon name="plus" className="w-5 h-5 text-muted-foreground group-hover:text-foreground" />
+                                <Icon name="plus" className="w-5 h-5" />
                             </button>
                             <input type="file" ref={fileInputRef} className="hidden" />
 
-                            <div className="flex-1 py-2.5 px-2">
+                            <div className="flex-1 bg-[#202c33] rounded-[1.5rem] px-4 py-2.5 flex items-center border border-white/5 shadow-sm">
                                 <textarea
                                     ref={textareaRef}
                                     value={text}
                                     onChange={e => setText(e.target.value)}
                                     onKeyDown={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendText())}
-                                    placeholder="Type your message..."
-                                    className="w-full bg-transparent border-none focus:ring-0 p-0 text-sm font-medium placeholder:text-muted-foreground/30 outline-none resize-none leading-relaxed text-foreground max-h-[100px] min-h-[20px]"
+                                    placeholder="Message"
+                                    className="w-full bg-transparent border-none focus:ring-0 p-0 text-[15px] placeholder:text-gray-500 outline-none resize-none text-white max-h-[120px] min-h-[24px]"
                                     rows={1}
                                 />
                             </div>
 
-                            <div className="flex items-center gap-2 pr-1 pb-1">
-                                {!text.trim() ? (
-                                    <button
-                                        onClick={startRecording}
-                                        className="w-12 h-12 rounded-full flex items-center justify-center transition-all hover:bg-foreground/5 text-muted-foreground"
-                                    >
-                                        <Icon name="mic" className="w-5 h-5" />
-                                    </button>
-                                ) : (
-                                    <button
-                                        onClick={handleSendText}
-                                        disabled={cooldown > 0}
-                                        className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${cooldown > 0 ? 'bg-muted text-muted-foreground' : 'bg-primary text-white shadow-lg active:scale-95'}`}
-                                    >
-                                        {cooldown > 0 ? <span className="text-[10px] font-black">{cooldown}</span> : <Icon name="send" className="w-5 h-5" />}
-                                    </button>
-                                )}
-                            </div>
-                        </>
-                    )}
-
-                    {recState === 'recording' && (
-                        <div className="flex-1 flex items-center justify-between px-4 py-3">
-                            <div className="flex items-center gap-4">
-                                <div className="w-3 h-3 rounded-full bg-rose-500 animate-pulse" />
-                                <span className="font-mono text-sm font-bold tracking-widest">{Math.floor(recordingTime / 60)}:{(recordingTime % 60).toString().padStart(2, '0')}</span>
-                            </div>
                             <button
-                                onClick={stopRecording}
-                                className="h-10 px-6 rounded-full bg-rose-500 text-white text-xs font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all"
+                                onClick={text.trim() ? handleSendText : startRecording}
+                                disabled={cooldown > 0}
+                                className={`w-12 h-12 mb-0 rounded-full flex items-center justify-center transition-all shadow-lg
+                                    ${text.trim()
+                                        ? 'bg-primary text-white hover:bg-primary/90 active:scale-95'
+                                        : 'bg-primary/20 text-primary hover:bg-primary/30'}
+                                `}
                             >
-                                Stop
+                                {text.trim() ? <Icon name="send" className="w-5 h-5 ml-0.5" /> : <Icon name="mic" className="w-5 h-5" />}
                             </button>
-                        </div>
-                    )}
-
-                    {recState === 'review' && (
-                        <div className="flex-1 flex items-center justify-between px-4 py-2">
+                        </>
+                    ) : (
+                        <div className="flex-1 bg-[#202c33] rounded-[2rem] p-2 pr-4 flex items-center gap-4 animate-in slide-in-from-bottom-2 shadow-2xl border border-white/5">
                             <button
-                                onClick={() => { setRecState('idle'); setAudioBlob(null); setAudioUrl(null); }}
-                                className="w-10 h-10 rounded-full hover:bg-rose-500/10 text-rose-500 flex items-center justify-center"
+                                onClick={() => { stopRecording(); setRecState('idle'); setAudioBlob(null); setAudioUrl(null); }}
+                                className="w-10 h-10 rounded-full hover:bg-white/5 text-rose-500 flex items-center justify-center transition-colors"
                             >
                                 <Icon name="trash" className="w-5 h-5" />
                             </button>
 
-                            <div className="flex-1 px-4 relative flex items-center h-10 bg-white/5 rounded-2xl overflow-hidden border border-white/5">
-                                <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent animate-pulse" />
-                                {audioUrl && <audio src={audioUrl} controls className="w-full h-8 opacity-80" />}
-                            </div>
-
-                            <button
-                                onClick={handleSendVoice}
-                                disabled={uploading}
-                                className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center shadow-lg active:scale-95 disabled:opacity-50"
-                            >
-                                {uploading ? <Icon name="rotate" className="w-5 h-5 animate-spin" /> : <Icon name="send" className="w-5 h-5" />}
-                            </button>
+                            {recState === 'recording' ? (
+                                <div className="flex-1 flex items-center gap-3 overflow-hidden">
+                                    <span className="text-rose-500 animate-pulse text-xs font-black uppercase tracking-widest px-2">Recording</span>
+                                    <div className="flex-1 h-8 flex items-center gap-1 opacity-50">
+                                        {[...Array(20)].map((_, i) => (
+                                            <div
+                                                key={i}
+                                                className="w-1 bg-rose-500 rounded-full animate-bounce"
+                                                style={{
+                                                    height: `${Math.random() * 100}%`,
+                                                    animationDelay: `${i * 0.05}s`,
+                                                    animationDuration: '0.8s'
+                                                }}
+                                            />
+                                        ))}
+                                    </div>
+                                    <span className="font-mono text-sm font-bold text-white min-w-[50px] text-right">
+                                        {Math.floor(recordingTime / 60)}:{(recordingTime % 60).toString().padStart(2, '0')}
+                                    </span>
+                                    <button onClick={stopRecording} className="p-2 rounded-full bg-rose-500/20 text-rose-500">
+                                        <div className="w-3 h-3 bg-current rounded-sm" />
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="flex-1 flex items-center gap-3">
+                                    <div className="flex-1 h-10 bg-black/20 rounded-xl overflow-hidden flex items-center px-4 gap-1">
+                                        <button onClick={() => { const a = document.getElementById('preview-audio') as HTMLAudioElement; if (a.paused) a.play(); else a.pause(); }}>
+                                            <Icon name="play" className="w-4 h-4 text-primary" />
+                                        </button>
+                                        {/* Static Waveform for Review */}
+                                        <div className="flex-1 h-6 flex items-center gap-0.5 opacity-60">
+                                            {[...Array(30)].map((_, i) => (
+                                                <div key={i} className="w-0.5 bg-primary rounded-full" style={{ height: `${30 + Math.random() * 70}%` }} />
+                                            ))}
+                                        </div>
+                                        <audio id="preview-audio" src={audioUrl!} className="hidden" onEnded={() => { }} />
+                                    </div>
+                                    <button
+                                        onClick={handleSendVoice}
+                                        disabled={uploading}
+                                        className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-lg active:scale-95 disabled:opacity-50"
+                                    >
+                                        {uploading ? <Icon name="rotate" className="w-5 h-5 animate-spin" /> : <Icon name="send" className="w-5 h-5 ml-0.5" />}
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>

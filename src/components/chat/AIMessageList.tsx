@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Check, CheckCheck } from 'lucide-react';
 import { Message, Reaction, User as InternalUser } from '../../types';
 import { getUserById } from '../../services/firebaseAuthService';
 import { sendFollowRequest, getFollowStatus, cancelFollowRequest, unfollowUser } from '../../services/firebaseFollowService';
@@ -99,95 +100,88 @@ const MessageItem = ({
             id={`msg-${message.id}`}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`flex flex-col gap-1 ${isOwn ? 'items-end' : 'items-start'} ${isSequence ? 'mt-[-1.5rem]' : 'mt-0'}`}
+            className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'} ${isSequence ? 'mt-1' : 'mt-4'} relative group px-2 md:px-0`}
         >
-            {/* Sender Label */}
-            {!isSequence && (
-                <div className={`flex items-center gap-3 mb-1 px-4 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
-                    <button
-                        onClick={() => onUserClick(message.senderId)}
-                        className="text-[10px] font-black uppercase tracking-widest text-primary/60 hover:text-primary transition-colors"
-                    >
-                        {message.sender}
-                    </button>
-                    <span className="text-[9px] font-bold text-muted-foreground/30">
-                        {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                </div>
+            {/* Sender Name (Group Chat - Others Only) */}
+            {!isOwn && !isSequence && (
+                <button
+                    onClick={() => onUserClick(message.senderId)}
+                    className="ml-2 mb-1 text-[10px] font-black uppercase tracking-widest text-primary/80 hover:text-primary transition-colors"
+                >
+                    {message.sender}
+                </button>
             )}
 
-            <div className={`group relative flex gap-3 max-w-[85%] md:max-w-[70%] ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
-                {/* Avatar (Only if NOT sequence) */}
-                {!isSequence ? (
+            <div className={`relative max-w-[85%] md:max-w-[65%] flex flex-col ${isOwn ? 'items-end' : 'items-start'}`}>
+                {/* Reply Context */}
+                {message.replyTo && (
                     <button
-                        onClick={() => onUserClick(message.senderId)}
-                        className={`w-8 h-8 rounded-lg shrink-0 flex items-center justify-center text-[10px] font-black border transition-all
-                            ${isOwn ? 'bg-white/5 border-white/10 text-white' : 'bg-primary/20 border-primary/30 text-primary'}
+                        onClick={() => onJumpToReply(message.replyTo!.messageId)}
+                        className={`text-[10px] flex items-center gap-2 px-3 py-2 rounded-lg mb-1 transition-all border w-full
+                            ${isOwn ? 'bg-primary/20 border-primary/30 text-white/80' : 'bg-white/5 border-white/10 text-muted-foreground'}
                         `}
                     >
-                        {message.sender[0].toUpperCase()}
+                        <div className="w-0.5 h-4 bg-primary/50 rounded-full" />
+                        <span className="truncate">{message.replyTo.text}</span>
                     </button>
-                ) : (
-                    <div className="w-8 shrink-0" />
                 )}
 
-                <div className={`flex flex-col gap-2 ${isOwn ? 'items-end' : 'items-start'}`}>
-                    {/* Reply Context */}
-                    {message.replyTo && (
-                        <button
-                            onClick={() => onJumpToReply(message.replyTo!.messageId)}
-                            className="text-[10px] flex items-center gap-2 px-3 py-1 rounded-lg bg-white/5 border border-white/5 text-muted-foreground hover:bg-white/10 transition-all mb-[-4px]"
-                        >
-                            <Icon name="message" className="w-3 h-3" />
-                            <span className="truncate max-w-[120px]">{message.replyTo.text}</span>
-                        </button>
-                    )}
-
-                    {/* Bubble */}
-                    <div className={`
-                        px-5 py-3 rounded-2xl text-sm font-medium leading-relaxed border transition-all relative
-                        ${isOwn
-                            ? 'bg-primary text-white border-primary/20 rounded-tr-sm shadow-lg shadow-primary/10'
-                            : 'bg-white/[0.03] text-white border-white/5 rounded-tl-sm'}
-                    `}>
+                {/* Bubble */}
+                <div className={`
+                    relative px-3 py-2 shadow-sm text-[15px] leading-relaxed break-words flex flex-wrap gap-x-4 items-end
+                    ${isOwn
+                        ? 'bg-[#005c4b] text-[#e9edef] rounded-l-2xl rounded-tr-2xl rounded-br-sm'
+                        : 'bg-[#202c33] text-[#e9edef] rounded-r-2xl rounded-tl-2xl rounded-bl-sm'}
+                `}>
+                    {/* Message Content */}
+                    <div className="z-10 relative">
                         {message.type === 'text' && (
-                            <div className="whitespace-pre-wrap break-words">
-                                {message.text}
-                            </div>
+                            <span className="whitespace-pre-wrap">{message.text}</span>
                         )}
 
                         {/* Media */}
                         {message.media && (
-                            <div className="mt-2 rounded-xl overflow-hidden border border-white/10">
-                                {message.type === 'image' && <img src={message.media.url} className="max-h-96 w-auto" alt="" />}
+                            <div className="mt-1 mb-1 rounded-lg overflow-hidden">
+                                {message.type === 'image' && <img src={message.media.url} className="max-h-80 w-auto object-cover" alt="" />}
                                 {(message.type === 'audio' || message.media.type === 'audio') && <AudioPlayer src={message.media.url} />}
                                 {(message.type === 'video' || message.media.type === 'video') && (
-                                    <video src={message.media.url} controls className="max-h-96 w-full rounded-lg" />
+                                    <video src={message.media.url} controls className="max-h-80 w-full rounded-lg" />
                                 )}
                             </div>
                         )}
+                    </div>
 
-                        {/* Reactions */}
-                        {message.reactions && message.reactions.length > 0 && (
-                            <div className={`absolute -bottom-2 flex gap-1 ${isOwn ? 'right-2' : 'left-2'}`}>
-                                {message.reactions.map(r => (
-                                    <div key={r.emoji} className="bg-[#0A0A0A] border border-white/10 rounded-full px-1.5 py-0.5 text-[11px] flex items-center gap-1 shadow-xl">
-                                        <span>{r.emoji}</span>
-                                        <span className="text-[9px] font-black opacity-40">{r.userIds.length}</span>
-                                    </div>
-                                ))}
-                            </div>
+                    {/* Metadata (Time + Ticks) */}
+                    <div className={`flex items-center gap-1 shrink-0 select-none ml-auto h-[16px] self-end translate-y-[3px]`}>
+                        <span className="text-[10px] text-white/60 font-medium">
+                            {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                        {isOwn && (
+                            <span className="text-emerald-400">
+                                {message.status === 'seen' || message.readBy?.length ? <CheckCheck className="w-3.5 h-3.5" /> : <Check className="w-3.5 h-3.5 text-white/60" />}
+                            </span>
                         )}
                     </div>
-
-                    {/* Hover Actions */}
-                    <div className={`flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity mt-1 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
-                        <button onClick={onReply} className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors">
-                            <Icon name="message" className="w-3.5 h-3.5 text-muted-foreground" />
-                        </button>
-                        <ReactionButton onReact={onReaction} />
-                    </div>
                 </div>
+
+                {/* Reactions */}
+                {message.reactions && message.reactions.length > 0 && (
+                    <div className={`absolute -bottom-3 z-20 ${isOwn ? 'right-2' : 'left-2'}`}>
+                        <div className="bg-[#202c33] border border-[#000000]/20 rounded-full px-1.5 py-0.5 text-[10px] flex items-center gap-1 shadow-md">
+                            {message.reactions.map(r => (
+                                <span key={r.emoji} className="leading-none">{r.emoji} <span className="text-[9px] opacity-60 ml-0.5">{r.userIds.length}</span></span>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Quick Actions (Hover) */}
+            <div className={`absolute top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 ${isOwn ? 'left-auto right-full mr-2' : 'left-full ml-2'}`}>
+                <button onClick={onReply} className="p-1.5 rounded-full bg-[#202c33] text-gray-400 hover:text-white hover:bg-white/10 shadow-lg">
+                    <Icon name="message" className="w-4 h-4" />
+                </button>
+                <ReactionButton onReact={onReaction} />
             </div>
         </motion.div>
     );
@@ -227,12 +221,12 @@ const AudioPlayer = ({ src }: { src: string }) => {
     const audioRef = useRef<HTMLAudioElement>(null);
 
     return (
-        <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl min-w-[200px]">
-            <button onClick={() => { if (playing) audioRef.current?.pause(); else audioRef.current?.play(); setPlaying(!playing); }} className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white">
-                <Icon name={playing ? "pause" : "play"} className="w-4 h-4" />
+        <div className="flex items-center gap-3 p-2 min-w-[200px]">
+            <button onClick={() => { if (playing) audioRef.current?.pause(); else audioRef.current?.play(); setPlaying(!playing); }} className="w-9 h-9 rounded-full bg-black/20 hover:bg-black/30 flex items-center justify-center text-white transition-colors">
+                <Icon name={playing ? "pause" : "play"} className="w-4 h-4 fill-current" />
             </button>
-            <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
-                <div className="h-full bg-primary" style={{ width: '30%' }} />
+            <div className="flex-1 h-1 bg-black/20 rounded-full overflow-hidden">
+                <div className="h-full bg-white/80 animate-pulse" style={{ width: playing ? '60%' : '0%' }} />
             </div>
             <audio ref={audioRef} src={src} onEnded={() => setPlaying(false)} className="hidden" />
         </div>
