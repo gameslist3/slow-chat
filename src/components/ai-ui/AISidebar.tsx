@@ -26,8 +26,7 @@ export const AISidebar: React.FC<AISidebarProps> = ({
 }) => {
     const navItems = [
         { id: 'home', icon: 'zap' as any, label: 'Home', action: onGoHome },
-        { id: 'direct', icon: 'message' as any, label: 'Messages', action: () => onTabChange('direct') },
-        { id: 'groups', icon: 'users' as any, label: 'Groups', action: () => onTabChange('groups') },
+        { id: 'explore', icon: 'telescope' as any, label: 'Explore', action: () => onTabChange('groups') }, // Using groups tab for explore
         { id: 'friends', icon: 'sparkles' as any, label: 'Friends', action: () => onTabChange('friends') },
         { id: 'inbox', icon: 'bell' as any, label: 'Notifications', action: () => onTabChange('inbox') },
     ];

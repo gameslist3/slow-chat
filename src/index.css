@@ -173,9 +173,9 @@ body {
 
   .glass-card:hover {
     background: var(--ui-surface2);
-    border-color: rgba(var(--primary-rgb), 0.2);
-    transform: translateY(-4px) scale(1.01);
-    box-shadow: 0 20px 40px rgba(var(--primary-rgb), 0.08);
+    border-color: rgba(var(--primary-rgb), 0.3);
+    transform: translateY(-4px) scale(1.005);
+    box-shadow: 0 20px 40px -10px rgba(var(--primary-rgb), 0.15);
   }
 
   /* Bento Grid Layout */

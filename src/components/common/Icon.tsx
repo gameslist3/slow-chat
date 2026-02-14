@@ -13,7 +13,7 @@ export type IconName =
     | 'thumbsUp' | 'thumbsDown' | 'message' | 'check' | 'checkCheck'
     | 'userPlus' | 'userMinus' | 'x' | 'sparkles' | 'users' | 'clock' | 'arrowLeft'
     | 'menu' | 'plus' | 'search' | 'logout' | 'compass' | 'settings' | 'mail'
-    | 'lock' | 'eye' | 'eyeOff' | 'checkCircle' | 'xCircle' | 'arrowRight' | 'shuffle' | 'key' | 'shield' | 'help' | 'save' | 'phone' | 'bell' | 'bellOff' | 'trash' | 'sun' | 'moon';
+    | 'lock' | 'eye' | 'eyeOff' | 'checkCircle' | 'xCircle' | 'arrowRight' | 'shuffle' | 'key' | 'shield' | 'help' | 'save' | 'phone' | 'bell' | 'bellOff' | 'trash' | 'sun' | 'moon' | 'telescope';
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
     name: IconName;
@@ -79,6 +79,7 @@ const iconRegistry: Record<IconName, React.FC<any>> = {
     trash: SolarIcons.TrashBinTrash,
     sun: SolarIcons.Sun,
     moon: SolarIcons.Moon,
+    telescope: SolarIcons.Telescope,
 };
 
 export const Icon: React.FC<IconProps> = ({ name, className, size = 24, ...props }) => {

@@ -52,9 +52,9 @@ export const sendFollowRequest = async (toUserId: string, toUsername: string): P
     if (latestDeclined) {
         const lastDeclinedTime = latestDeclined.data().timestamp;
         const diff = (Date.now() - lastDeclinedTime) / 1000 / 60; // in minutes
-        if (diff < 5) {
-            const wait = Math.ceil(5 - diff);
-            throw new Error(`Connection protocol reset in progress. Full synchronization available in ${wait} minute${wait > 1 ? 's' : ''}.`);
+        if (diff < 60) {
+            const wait = Math.ceil(60 - diff);
+            throw new Error(`Connection link unstable. Retry available in ${wait} minute${wait > 1 ? 's' : ''}.`);
         }
     }
 
@@ -153,10 +153,12 @@ export const declineFollowRequest = async (requestId: string): Promise<void> => 
     });
 
     // Notify requester
+    // Notify requester
     await createNotification(data.fromId, {
-        type: 'message',
+        type: 'follow_request', // Reusing type or add 'follow_decline' if supported, falling back to generic
         senderName: 'System',
-        text: 'The other user isn’t accepting the follow request.',
+        text: 'The connection request was declined.',
+        groupId: 'system'
     });
 };
 
@@ -248,8 +250,9 @@ export const getFollowStatus = async (toUserId: string): Promise<'none' | 'pendi
         const data = doc.data();
         if (data.status === 'declined') {
             // Check if still in cooldown (Mutual check)
+            // Check if still in cooldown (Mutual check)
             const diff = (Date.now() - (data.timestamp || 0)) / 1000 / 60;
-            if (diff < 5) return 'cooldown';
+            if (diff < 60) return 'cooldown';
             return 'none';
         }
         return data.status as 'pending' | 'accepted';

@@ -29,7 +29,7 @@ export const AIMessageList: React.FC<AIMessageListProps> = ({
         if (el) {
             el.scrollIntoView({ behavior: 'smooth', block: 'center' });
             el.classList.add('pulse-highlight');
-            setTimeout(() => el.classList.remove('pulse-highlight'), 3000);
+            setTimeout(() => el.classList.remove('pulse-highlight'), 2000);
         }
     };
 
@@ -42,7 +42,7 @@ export const AIMessageList: React.FC<AIMessageListProps> = ({
     }, [messages, highlightId]);
 
     return (
-        <div className="flex-1 overflow-y-auto pt-4 pb-32 px-4 md:px-8 custom-scrollbar relative">
+        <div className="flex-1 overflow-y-auto pt-4 pb-24 px-4 md:px-8 custom-scrollbar relative scroll-smooth">
             <div className="max-w-4xl mx-auto space-y-8">
                 {messages.map((msg, idx) => {
                     const prevMsg = messages[idx - 1];

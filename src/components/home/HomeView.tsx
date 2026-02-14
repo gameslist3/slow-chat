@@ -49,7 +49,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ user, myGroups, onSelectGrou
                             ))}
                         </div>
 
-                        <div className="md:hidden flex overflow-x-auto pb-6 gap-4 snap-x snap-mandatory px-2">
+                        <div className="md:hidden flex overflow-x-auto pb-8 gap-4 snap-x snap-mandatory px-2 no-scrollbar">
                             {myGroups.map(group => (
                                 <div key={group.id} className="min-w-[280px] snap-center">
                                     <GroupItem group={group} onClick={() => onSelectGroup(group.id)} />
@@ -67,7 +67,7 @@ const GroupItem = ({ group, onClick }: { group: Group, onClick: () => void }) =>
     <motion.button
         whileHover={{ y: -4 }}
         onClick={onClick}
-        className="bento-item text-left group w-full"
+        className="bento-item text-left group w-full bg-surface/40 hover:bg-surface/60 border-white/5 hover:border-primary/20 transition-all duration-300"
     >
         <div className="flex items-start justify-between mb-6">
             <div className="text-4xl">{group.image || '💬'}</div>

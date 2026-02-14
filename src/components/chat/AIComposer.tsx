@@ -143,7 +143,7 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                     )}
                 </AnimatePresence>
 
-                <div className="glass-panel rounded-[2.5rem] p-2 shadow-2xl flex items-end gap-2 border-border">
+                <div className="glass-panel rounded-[2rem] p-1.5 shadow-2xl flex items-end gap-2 border-border">
                     {recState === 'idle' && (
                         <>
                             <button
@@ -154,14 +154,14 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                             </button>
                             <input type="file" ref={fileInputRef} className="hidden" />
 
-                            <div className="flex-1 py-3 px-2">
+                            <div className="flex-1 py-2.5 px-2">
                                 <textarea
                                     ref={textareaRef}
                                     value={text}
                                     onChange={e => setText(e.target.value)}
                                     onKeyDown={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendText())}
                                     placeholder="Type your message..."
-                                    className="w-full bg-transparent border-none focus:ring-0 p-0 text-sm font-medium placeholder:text-muted-foreground/30 outline-none resize-none leading-relaxed text-foreground max-h-[120px] min-h-[24px]"
+                                    className="w-full bg-transparent border-none focus:ring-0 p-0 text-sm font-medium placeholder:text-muted-foreground/30 outline-none resize-none leading-relaxed text-foreground max-h-[100px] min-h-[20px]"
                                     rows={1}
                                 />
                             </div>

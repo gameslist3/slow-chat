@@ -7,7 +7,7 @@ import { Logo } from '../common/Logo';
 
 // --- Welcome Screen ---
 export const WelcomeScreen = ({ onSignIn, onSignUp }: { onSignIn: () => void, onSignUp: () => void }) => (
-    <div className="w-full h-full flex flex-col justify-center items-center p-6 relative overflow-hidden bg-[#080808]">
+    <div className="w-full min-h-screen flex flex-col justify-center items-center p-6 relative overflow-hidden bg-background">
         {/* Immersive Background Glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/20 blur-[120px] rounded-full opacity-30 animate-pulse" />
         <div className="absolute -top-40 -right-40 w-[400px] h-[400px] bg-secondary/10 blur-[100px] rounded-full opacity-20" />
