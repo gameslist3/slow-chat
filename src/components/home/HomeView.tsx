@@ -65,22 +65,32 @@ export const HomeView: React.FC<HomeViewProps> = ({ user, myGroups, onSelectGrou
 
 const GroupItem = ({ group, onClick }: { group: Group, onClick: () => void }) => (
     <motion.button
-        whileHover={{ y: -4 }}
+        whileHover={{ y: -8, scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
         onClick={onClick}
-        className="bento-item text-left group w-full bg-surface/40 hover:bg-surface/60 border-white/5 hover:border-primary/20 transition-all duration-300"
+        className="bento-item text-left group w-full bg-surface/40 hover:bg-surface/60 border-white/5 hover:border-primary/30 transition-all duration-300 relative overflow-hidden"
     >
-        <div className="flex items-start justify-between mb-6">
-            <div className="text-4xl">{group.image || '💬'}</div>
-            <div className="px-3 py-1 bg-primary/10 text-primary rounded-full text-[10px] font-black uppercase tracking-widest">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div className="flex items-start justify-between mb-6 relative z-10">
+            <div className="text-4xl drop-shadow-md group-hover:scale-110 transition-transform duration-300">{group.image || '💬'}</div>
+            <div className="px-3 py-1 bg-primary/10 text-primary rounded-full text-[10px] font-black uppercase tracking-widest border border-primary/10">
                 {group.category || 'Chat'}
             </div>
         </div>
-        <div>
+        <div className="relative z-10">
             <h3 className="text-xl font-bold mb-1 group-hover:text-primary transition-colors">{group.name}</h3>
             <p className="text-sm text-muted-foreground flex items-center gap-2">
                 <Icon name="users" className="w-4 h-4" />
                 {group.members || 0} Members
             </p>
         </div>
+
+        {/* New Message Bubble (Simulated) */}
+        {Math.random() > 0.7 && (
+            <div className="absolute bottom-4 right-4 flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2">
+                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                <span className="text-[10px] font-bold text-green-500">New Activity</span>
+            </div>
+        )}
     </motion.button>
 );

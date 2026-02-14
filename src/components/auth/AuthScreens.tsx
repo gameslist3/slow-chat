@@ -26,12 +26,12 @@ export const WelcomeScreen = ({ onSignIn, onSignUp }: { onSignIn: () => void, on
                 <motion.div
                     animate={{
                         y: [0, -10, 0],
-                        filter: ["drop-shadow(0 0 30px rgba(var(--primary-rgb), 0.2))", "drop-shadow(0 0 50px rgba(var(--primary-rgb), 0.5))", "drop-shadow(0 0 30px rgba(var(--primary-rgb), 0.2))"]
+                        filter: ["drop-shadow(0 0 30px rgba(var(--primary-rgb), 0.2))", "drop-shadow(0 0 50px rgba(var(--primary-rgb), 0.4))", "drop-shadow(0 0 30px rgba(var(--primary-rgb), 0.2))"]
                     }}
                     transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                    className="relative p-8 rounded-[3rem] bg-white/[0.02] border border-white/10 backdrop-blur-3xl"
+                    className="relative p-2"
                 >
-                    <Logo className="w-44 h-44 text-primary" />
+                    <Logo className="w-56 h-56 text-primary drop-shadow-2xl" />
                 </motion.div>
 
                 <div className="space-y-4">
@@ -39,9 +39,9 @@ export const WelcomeScreen = ({ onSignIn, onSignUp }: { onSignIn: () => void, on
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.5 }}
-                        className="text-6xl md:text-7xl font-black italic uppercase tracking-tighter leading-none"
+                        className="text-7xl md:text-8xl font-black italic uppercase tracking-tighter leading-none"
                     >
-                        Slow<span className="text-primary group-hover:text-white transition-colors">Chat</span>
+                        Gapes<span className="text-primary text-6xl">.</span>
                     </motion.h1>
                     <motion.p
                         initial={{ opacity: 0 }}

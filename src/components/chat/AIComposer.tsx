@@ -146,20 +146,20 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                         <>
                             <button
                                 onClick={() => fileInputRef.current?.click()}
-                                className="w-10 h-10 mb-1 rounded-full bg-[#202c33] hover:bg-[#374248] flex items-center justify-center transition-colors text-gray-400"
+                                className="w-10 h-10 mb-1 rounded-full bg-muted/20 hover:bg-muted/40 flex items-center justify-center transition-colors text-muted-foreground"
                             >
                                 <Icon name="plus" className="w-5 h-5" />
                             </button>
-                            <input type="file" ref={fileInputRef} className="hidden" />
+                            <input type="file" ref={fileInputRef} className="hidden" onChange={handleFile} />
 
-                            <div className="flex-1 bg-[#202c33] rounded-[1.5rem] px-4 py-2.5 flex items-center border border-white/5 shadow-sm">
+                            <div className="flex-1 bg-muted/20 rounded-[1.5rem] px-4 py-2.5 flex items-center border border-border/10 shadow-sm focus-within:ring-1 focus-within:ring-primary/30 transition-all">
                                 <textarea
                                     ref={textareaRef}
                                     value={text}
                                     onChange={e => setText(e.target.value)}
                                     onKeyDown={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendText())}
                                     placeholder="Message"
-                                    className="w-full bg-transparent border-none focus:ring-0 p-0 text-[15px] placeholder:text-gray-500 outline-none resize-none text-white max-h-[120px] min-h-[24px]"
+                                    className="w-full bg-transparent border-none focus:ring-0 p-0 text-[15px] placeholder:text-muted-foreground outline-none resize-none text-foreground max-h-[120px] min-h-[24px]"
                                     rows={1}
                                 />
                             </div>
@@ -169,42 +169,42 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                                 disabled={cooldown > 0}
                                 className={`w-12 h-12 mb-0 rounded-full flex items-center justify-center transition-all shadow-lg
                                     ${text.trim()
-                                        ? 'bg-primary text-white hover:bg-primary/90 active:scale-95'
-                                        : 'bg-primary/20 text-primary hover:bg-primary/30'}
+                                        ? 'bg-primary text-primary-foreground hover:brightness-110 active:scale-95'
+                                        : 'bg-primary/10 text-primary hover:bg-primary/20'}
                                 `}
                             >
                                 {text.trim() ? <Icon name="send" className="w-5 h-5 ml-0.5" /> : <Icon name="mic" className="w-5 h-5" />}
                             </button>
                         </>
                     ) : (
-                        <div className="flex-1 bg-[#202c33] rounded-[2rem] p-2 pr-4 flex items-center gap-4 animate-in slide-in-from-bottom-2 shadow-2xl border border-white/5">
+                        <div className="flex-1 bg-muted/20 rounded-[2rem] p-2 pr-4 flex items-center gap-4 animate-in slide-in-from-bottom-2 shadow-2xl border border-border/10 backdrop-blur-md">
                             <button
                                 onClick={() => { stopRecording(); setRecState('idle'); setAudioBlob(null); setAudioUrl(null); }}
-                                className="w-10 h-10 rounded-full hover:bg-white/5 text-rose-500 flex items-center justify-center transition-colors"
+                                className="w-10 h-10 rounded-full hover:bg-destructive/10 text-destructive flex items-center justify-center transition-colors"
                             >
                                 <Icon name="trash" className="w-5 h-5" />
                             </button>
 
                             {recState === 'recording' ? (
                                 <div className="flex-1 flex items-center gap-3 overflow-hidden">
-                                    <span className="text-rose-500 animate-pulse text-xs font-black uppercase tracking-widest px-2">Recording</span>
-                                    <div className="flex-1 h-8 flex items-center gap-1 opacity-50">
-                                        {[...Array(20)].map((_, i) => (
+                                    <div className="w-3 h-3 rounded-full bg-primary animate-pulse shadow-[0_0_10px_rgba(var(--primary-rgb),0.5)]" />
+                                    <div className="flex-1 h-8 flex items-center gap-1 opacity-80">
+                                        {[...Array(24)].map((_, i) => (
                                             <div
                                                 key={i}
-                                                className="w-1 bg-rose-500 rounded-full animate-bounce"
+                                                className="w-1 bg-primary rounded-full animate-bounce"
                                                 style={{
-                                                    height: `${Math.random() * 100}%`,
+                                                    height: `${Math.random() * 80 + 20}%`,
                                                     animationDelay: `${i * 0.05}s`,
                                                     animationDuration: '0.8s'
                                                 }}
                                             />
                                         ))}
                                     </div>
-                                    <span className="font-mono text-sm font-bold text-white min-w-[50px] text-right">
+                                    <span className="font-mono text-sm font-bold text-foreground min-w-[50px] text-right">
                                         {Math.floor(recordingTime / 60)}:{(recordingTime % 60).toString().padStart(2, '0')}
                                     </span>
-                                    <button onClick={stopRecording} className="p-2 rounded-full bg-rose-500/20 text-rose-500">
+                                    <button onClick={stopRecording} className="p-2 rounded-full bg-primary/20 text-primary hover:bg-primary/30 transition-colors">
                                         <div className="w-3 h-3 bg-current rounded-sm" />
                                     </button>
                                 </div>
@@ -214,7 +214,6 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                                         <button onClick={() => { const a = document.getElementById('preview-audio') as HTMLAudioElement; if (a.paused) a.play(); else a.pause(); }}>
                                             <Icon name="play" className="w-4 h-4 text-primary" />
                                         </button>
-                                        {/* Static Waveform for Review */}
                                         <div className="flex-1 h-6 flex items-center gap-0.5 opacity-60">
                                             {[...Array(30)].map((_, i) => (
                                                 <div key={i} className="w-0.5 bg-primary rounded-full" style={{ height: `${30 + Math.random() * 70}%` }} />
@@ -238,3 +237,4 @@ export const AIComposer: React.FC<AIComposerProps> = ({
         </div>
     );
 };
+

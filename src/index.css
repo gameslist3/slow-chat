@@ -21,9 +21,10 @@
     }
 
     /* --- Theme Core (Light Mode Refined) --- */
-    --ui-background: 0 0% 100%;
-    --ui-text: 240 10% 4%;
+    --ui-background: 0 0% 98%;
+    --ui-text: 240 10% 3.9%;
     --ui-primary: 250 100% 64%;
+    /* Violet Primary */
     --primary-rgb: 99,
     102,
     241;
@@ -32,16 +33,16 @@
     182,
     212;
 
-    --ui-muted: 240 5% 96%;
-    --ui-muted-text: 240 5% 45%;
+    --ui-muted: 240 4.8% 95.9%;
+    --ui-muted-text: 240 3.8% 46.1%;
 
-    --ui-border: 240 5% 90%;
-    --ui-surface: 0 0% 98%;
-    --ui-surface2: 0 0% 100%;
+    --ui-border: 240 5.9% 90%;
+    --ui-surface: 0 0% 100%;
+    --ui-surface2: 240 4.8% 95.9%;
 
-    --glass-surface: rgba(255, 255, 255, 0.85);
-    --glass-border: rgba(0, 0, 0, 0.08);
-    --glass-blur: 32px;
+    --glass-surface: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(0, 0, 0, 0.06);
+    --glass-blur: 20px;
 
     --font-protocol: 'Inter',
     sans-serif;
@@ -57,27 +58,27 @@
   /* Dark Mode Support (Manual Class or Media Query) */
   @media (prefers-color-scheme: dark) {
     :root {
-      --ui-background: 240 10% 2%;
-      --ui-text: 0 0% 100%;
-      --ui-muted: 240 6% 10%;
-      --ui-muted-text: 240 5% 65%;
-      --ui-border: 240 6% 12%;
-      --ui-surface: 240 10% 4%;
-      --ui-surface2: 240 6% 8%;
+      --ui-background: 240 10% 3.9%;
+      --ui-text: 0 0% 98%;
+      --ui-muted: 240 3.7% 15.9%;
+      --ui-muted-text: 240 5% 64.9%;
+      --ui-border: 240 3.7% 15.9%;
+      --ui-surface: 240 10% 3.9%;
+      --ui-surface2: 240 3.7% 15.9%;
       --glass-surface: rgba(18, 18, 23, 0.7);
       --glass-border: rgba(255, 255, 255, 0.08);
     }
   }
 
   .dark {
-    --ui-background: 240 10% 2%;
-    --ui-text: 0 0% 100%;
-    --ui-muted: 240 6% 10%;
-    --ui-muted-text: 240 5% 65%;
-    --ui-border: 240 6% 12%;
+    --ui-background: 240 10% 3.9%;
+    --ui-text: 0 0% 98%;
+    --ui-muted: 240 3.7% 15.9%;
+    --ui-muted-text: 240 5% 64.9%;
+    --ui-border: 240 3.7% 15.9%;
     --ui-surface: 240 10% 4%;
-    --ui-surface2: 240 6% 8%;
-    --glass-surface: rgba(18, 18, 23, 0.7);
+    --ui-surface2: 240 3.7% 15.9%;
+    --glass-surface: rgba(10, 10, 12, 0.7);
     --glass-border: rgba(255, 255, 255, 0.08);
   }
 }
@@ -90,13 +91,11 @@ body,
   padding: 0;
   overflow: hidden;
   background-color: hsl(var(--ui-background));
-  /* Use HSL for smooth transition */
-  color: var(--foreground);
+  color: hsl(var(--ui-text));
   -webkit-tap-highlight-color: transparent;
   width: 100vw;
   max-width: 100%;
   transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1), color 0.5s ease;
-  /* Smooth global transition */
 }
 
 body {
@@ -105,7 +104,6 @@ body {
   position: fixed;
   width: 100%;
   height: 100dvh;
-  /* Prevent background gaps on mobile */
   background-attachment: fixed;
   background-size: cover;
   background-position: center;
@@ -113,12 +111,9 @@ body {
 
 * {
   box-sizing: border-box;
-  /* Ensure animations don't fade back out */
   animation-fill-mode: forwards !important;
   border-color: hsl(var(--ui-border));
-  /* Global border transition support */
   transition: border-color 0.3s ease, background-color 0.3s ease;
-  /* Micro-transitions for components */
 }
 
 @layer base {
@@ -131,7 +126,6 @@ body {
     font-family: var(--font-body);
     font-feature-settings: "rlig" 1, "calt" 1;
     overflow: hidden;
-    /* transition is handled in global body rule above for better consistency */
   }
 
   h1,
@@ -144,22 +138,18 @@ body {
     font-family: var(--font-protocol);
     @apply uppercase tracking-widest font-normal;
     opacity: 1 !important;
-    /* Ensure headers never fade out unexpectedly */
   }
 }
 
 @layer components {
-
-  /* -------------------------------------------------------------
-     Campaign SaaS Design System (Bento & Glass)
-     ------------------------------------------------------------- */
+  /* Campaign SaaS Design System (Bento & Glass) */
 
   .glass-panel {
     background: var(--glass-surface);
     backdrop-filter: blur(var(--glass-blur));
     -webkit-backdrop-filter: blur(var(--glass-blur));
     border: 1px solid var(--glass-border);
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
   }
 
   .glass-card {
@@ -192,7 +182,6 @@ body {
     height: 100%;
   }
 
-  /* Mobile standard card sizing to prevent "small/big" inconsistencies */
   @media (max-width: 640px) {
     .bento-grid {
       grid-template-columns: 1fr;
@@ -209,27 +198,27 @@ body {
 
   /* Premium Buttons (SaaS Style) */
   .btn-premium {
-    @apply relative inline-flex items-center justify-center rounded-xl px-5 py-2.5 font-bold transition-all active:scale-95 disabled:opacity-50 overflow-hidden;
+    @apply relative inline-flex items-center justify-center rounded-xl px-5 py-2.5 font-bold transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:pointer-events-none overflow-hidden select-none;
     font-family: var(--font-body);
     font-size: 0.8rem;
     letter-spacing: -0.01em;
   }
 
   .btn-primary {
-    @apply btn-premium bg-primary text-white shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5;
+    @apply btn-premium bg-primary text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 hover:brightness-110 active:shadow-inner;
   }
 
   .btn-secondary {
-    @apply btn-premium bg-secondary text-white shadow-lg shadow-secondary/10 hover:brightness-110;
+    @apply btn-premium bg-secondary text-secondary-foreground shadow-lg shadow-secondary/15 hover:brightness-110 active:shadow-inner;
   }
 
   .btn-ghost {
-    @apply btn-premium bg-transparent text-muted-foreground hover:bg-white/5 hover:text-white;
+    @apply btn-premium bg-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground;
   }
 
   /* Inputs V4 */
   .glass-input {
-    @apply h-12 w-full rounded-xl border border-white/5 bg-white/[0.02] px-4 text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/40 focus:bg-white/[0.04] transition-all;
+    @apply h-12 w-full rounded-xl border border-input bg-background/50 px-4 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   /* UI Containers */

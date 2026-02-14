@@ -35,10 +35,9 @@ export const AIMessageList: React.FC<AIMessageListProps> = ({
     };
 
     useEffect(() => {
-        if (highlightId) {
-            setTimeout(() => scrollToMessage(highlightId), 100);
-        } else {
-            bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+        // Auto-scroll on new message
+        if (bottomRef.current) {
+            bottomRef.current.scrollIntoView({ behavior: 'smooth' });
         }
     }, [messages, highlightId]);
 
