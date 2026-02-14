@@ -7,48 +7,86 @@ import { Logo } from '../common/Logo';
 
 // --- Welcome Screen ---
 export const WelcomeScreen = ({ onSignIn, onSignUp }: { onSignIn: () => void, onSignUp: () => void }) => (
-    <div className="w-full min-h-screen flex flex-col justify-center items-center p-6 relative overflow-hidden bg-background">
-        {/* Immersive Background Glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/20 blur-[120px] rounded-full opacity-30 animate-pulse" />
-        <div className="absolute -top-40 -right-40 w-[400px] h-[400px] bg-secondary/10 blur-[100px] rounded-full opacity-20" />
+    <div className="w-full min-h-screen flex flex-col justify-center items-center p-6 relative overflow-hidden bg-[#020202] text-white">
+        {/* Cinematic Background Elements */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(var(--primary-rgb),0.15),transparent_70%)]" />
+        <div className="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-primary/10 blur-[150px] rounded-full opacity-40 animate-pulse" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-secondary/10 blur-[120px] rounded-full opacity-30" />
 
-        <div className="relative z-10 text-center space-y-12 max-w-sm w-full">
+        {/* Dynamic Grid Overlay */}
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 contrast-150 brightness-100 pointer-events-none" />
+
+        <div className="relative z-10 text-center space-y-16 max-w-lg w-full">
             <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                className="flex flex-col items-center gap-8"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+                className="flex flex-col items-center gap-10"
             >
                 <motion.div
                     animate={{
-                        scale: [1, 1.05, 1],
-                        filter: ["drop-shadow(0 0 20px rgba(var(--primary-rgb), 0))", "drop-shadow(0 0 30px rgba(var(--primary-rgb), 0.4))", "drop-shadow(0 0 20px rgba(var(--primary-rgb), 0))"]
+                        y: [0, -10, 0],
+                        filter: ["drop-shadow(0 0 30px rgba(var(--primary-rgb), 0.2))", "drop-shadow(0 0 50px rgba(var(--primary-rgb), 0.5))", "drop-shadow(0 0 30px rgba(var(--primary-rgb), 0.2))"]
                     }}
-                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                    className="relative"
+                    transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                    className="relative p-8 rounded-[3rem] bg-white/[0.02] border border-white/10 backdrop-blur-3xl"
                 >
-                    <Logo className="w-40 h-40 text-primary transition-all grayscale-[0.5] hover:grayscale-0" />
+                    <Logo className="w-44 h-44 text-primary" />
                 </motion.div>
 
-                <div className="space-y-2">
-                    <p className="text-[11px] font-black uppercase tracking-[0.5em] text-primary/60">Digital Synchronicity</p>
+                <div className="space-y-4">
+                    <motion.h1
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.5 }}
+                        className="text-6xl md:text-7xl font-black italic uppercase tracking-tighter leading-none"
+                    >
+                        Slow<span className="text-primary group-hover:text-white transition-colors">Chat</span>
+                    </motion.h1>
+                    <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 0.6 }}
+                        transition={{ delay: 0.8 }}
+                        className="text-[10px] font-black uppercase tracking-[0.8em] ml-2 text-white/60"
+                    >
+                        Synchronicity Re-Imagined
+                    </motion.p>
                 </div>
             </motion.div>
 
-            <div className="w-full space-y-4 pt-12">
-                <button
+            <div className="w-full grid grid-cols-1 gap-4 px-4">
+                <motion.button
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 1 }}
                     onClick={onSignUp}
-                    className="w-full h-18 rounded-3xl bg-primary text-white font-black uppercase tracking-[0.2em] text-sm shadow-2xl shadow-primary/30 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+                    className="group relative h-20 rounded-[2.5rem] bg-primary text-white font-black uppercase tracking-[0.3em] text-sm shadow-[0_20px_40px_-10px_rgba(var(--primary-rgb),0.5)] hover:scale-[1.02] active:scale-[0.98] transition-all overflow-hidden"
                 >
-                    Create Account <Icon name="arrowRight" className="w-5 h-5" />
-                </button>
-                <button
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer" />
+                    <span className="relative flex items-center justify-center gap-4">
+                        Initialize Node <Icon name="arrowRight" className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                    </span>
+                </motion.button>
+
+                <motion.button
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 1.2 }}
                     onClick={onSignIn}
-                    className="w-full h-18 rounded-3xl bg-white/5 border border-white/10 text-white font-black uppercase tracking-[0.2em] text-sm hover:bg-white/10 transition-all"
+                    className="h-20 rounded-[2.5rem] bg-white/5 border border-white/10 text-white font-black uppercase tracking-[0.3em] text-sm hover:bg-white/10 hover:border-white/20 transition-all backdrop-blur-md"
                 >
-                    Sign In
-                </button>
+                    Access Identity
+                </motion.button>
             </div>
+
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.3 }}
+                transition={{ delay: 1.5 }}
+                className="pt-8"
+            >
+                <p className="text-[10px] font-bold uppercase tracking-widest text-white/40">Protocol v2.0.26 / Experimental Cluster</p>
+            </motion.div>
         </div>
     </div>
 );

@@ -160,7 +160,10 @@ const MessageItem = ({
                         {message.media && (
                             <div className="mt-2 rounded-xl overflow-hidden border border-white/10">
                                 {message.type === 'image' && <img src={message.media.url} className="max-h-96 w-auto" alt="" />}
-                                {message.type === 'audio' && <AudioPlayer src={message.media.url} />}
+                                {(message.type === 'audio' || message.media.type === 'audio') && <AudioPlayer src={message.media.url} />}
+                                {(message.type === 'video' || message.media.type === 'video') && (
+                                    <video src={message.media.url} controls className="max-h-96 w-full rounded-lg" />
+                                )}
                             </div>
                         )}
 

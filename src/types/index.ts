@@ -87,7 +87,7 @@ export interface FollowRequest {
 export interface Notification {
     id: string;
     userId: string;
-    type: 'message' | 'mention' | 'reply' | 'follow_request' | 'follow_accept';
+    type: 'message' | 'mention' | 'reply' | 'follow_request' | 'follow_accept' | 'system' | 'friends';
     groupId?: string;
     messageId?: string;
     senderName: string;

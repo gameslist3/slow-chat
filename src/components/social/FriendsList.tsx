@@ -189,33 +189,41 @@ export const FriendsList: React.FC<{ onSelectFriend?: (friendId: string) => void
                                     </div>
                                 ) : (
                                     friends.map((friend) => (
-                                        <div
+                                        <motion.div
                                             key={friend.uid}
-                                            className="group relative bento-item border border-white/5 hover:border-primary/20 transition-all text-left"
+                                            layout
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            className="group relative glass-panel p-6 border border-white/5 hover:border-primary/40 transition-all text-left cursor-pointer overflow-hidden"
+                                            onClick={() => onSelectFriend?.(friend.uid)}
                                         >
-                                            <div className="flex items-center gap-4 mb-6">
-                                                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-black text-xl shadow-lg ring-1 ring-primary/20 group-hover:scale-110 transition-transform">
+                                            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                                            <div className="flex items-center gap-4 mb-8 relative z-10">
+                                                <div className="w-16 h-16 rounded-2xl bg-primary text-white flex items-center justify-center font-black text-2xl shadow-xl shadow-primary/20 border border-white/10 group-hover:scale-105 transition-transform">
                                                     {friend.username.substring(0, 2).toUpperCase()}
                                                 </div>
-                                                <span className="font-bold text-lg text-white/90 truncate">{friend.username}</span>
+                                                <div className="flex-1 min-w-0">
+                                                    <h4 className="font-black text-xl text-white truncate">{friend.username}</h4>
+                                                    <p className="text-[10px] uppercase font-black tracking-widest text-primary/60">Active Peer</p>
+                                                </div>
                                             </div>
 
-                                            <div className="flex items-center gap-2 mt-auto">
+                                            <div className="flex items-center gap-3 relative z-10">
                                                 <button
-                                                    onClick={() => onSelectFriend?.(friend.uid)}
-                                                    className="flex-1 h-12 rounded-xl bg-primary/10 text-primary font-black uppercase text-[10px] tracking-widest hover:bg-primary hover:text-white transition-all flex items-center justify-center gap-2"
+                                                    className="flex-1 h-12 rounded-xl bg-primary text-white font-black uppercase text-[10px] tracking-widest hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2"
                                                 >
-                                                    <Icon name="message" className="w-4 h-4" /> Message
+                                                    Open Channel
                                                 </button>
                                                 <button
-                                                    onClick={() => handleUnfollowFriend(friend.uid, friend.username)}
+                                                    onClick={(e) => { e.stopPropagation(); handleUnfollowFriend(friend.uid, friend.username); }}
                                                     className="w-12 h-12 rounded-xl bg-white/5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all flex items-center justify-center"
-                                                    title="Remove friend"
+                                                    title="Terminate connection"
                                                 >
-                                                    <Icon name="userMinus" className="w-5 h-5" />
+                                                    <Icon name="x" className="w-5 h-5" />
                                                 </button>
                                             </div>
-                                        </div>
+                                        </motion.div>
                                     ))
                                 )}
                             </motion.div>

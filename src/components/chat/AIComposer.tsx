@@ -85,7 +85,7 @@ export const AIComposer: React.FC<AIComposerProps> = ({
         setUploading(true);
         try {
             const url = await uploadVoice(audioBlob, groupId, userId, () => { });
-            onSend({ media: { url, type: 'video', name: 'voice_message.webm', size: audioBlob.size }, type: 'video' });
+            onSend({ media: { url, type: 'audio', name: 'voice_note.webm', size: audioBlob.size }, type: 'audio' });
             setRecState('idle');
             setAudioBlob(null);
             setAudioUrl(null);
@@ -211,8 +211,9 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                                 <Icon name="trash" className="w-5 h-5" />
                             </button>
 
-                            <div className="flex-1 px-4">
-                                {audioUrl && <audio src={audioUrl} controls className="w-full h-8 opacity-60" />}
+                            <div className="flex-1 px-4 relative flex items-center h-10 bg-white/5 rounded-2xl overflow-hidden border border-white/5">
+                                <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent animate-pulse" />
+                                {audioUrl && <audio src={audioUrl} controls className="w-full h-8 opacity-80" />}
                             </div>
 
                             <button

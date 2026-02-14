@@ -133,8 +133,13 @@ const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark
 
     return (
         <AILayout
-            activeTab={activeTab === 'chat' ? (isPersonal ? 'direct' : 'groups') : activeTab}
-            onTabChange={(tab) => { setActiveTab(tab); setActiveId(null); setShowDiscovery(false); setShowCreateGroup(false); }}
+            activeTab={activeTab === 'chat' ? (isPersonal ? 'friends' : 'explore') : (showDiscovery ? 'explore' : activeTab)}
+            onTabChange={(tab) => {
+                setActiveTab(tab as any);
+                setActiveId(null);
+                setShowDiscovery(tab === 'explore' || tab === 'groups');
+                setShowCreateGroup(false);
+            }}
             onOpenSettings={() => { setActiveTab('profile'); setActiveId(null); }}
             onGoHome={() => { setActiveTab('home'); setActiveId(null); }}
             user={user}
@@ -150,7 +155,7 @@ const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark
                                 user={user}
                                 myGroups={myGroups}
                                 onSelectGroup={handleSelectGroup}
-                                onBrowseGroups={() => setActiveTab('groups')}
+                                onBrowseGroups={() => { setActiveTab('groups'); setShowDiscovery(true); }}
                             />
                         </motion.div>
                     )}

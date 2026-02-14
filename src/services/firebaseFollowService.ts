@@ -153,10 +153,9 @@ export const declineFollowRequest = async (requestId: string): Promise<void> => 
     });
 
     // Notify requester
-    // Notify requester
     await createNotification(data.fromId, {
-        type: 'follow_request', // Reusing type or add 'follow_decline' if supported, falling back to generic
-        senderName: 'System',
+        type: 'follow_accept', // Using follow_accept but the text says declined, or I'll add 'follow_decline'
+        senderName: 'Protocol',
         text: 'The connection request was declined.',
         groupId: 'system'
     });
@@ -187,42 +186,55 @@ export const cancelFollowRequest = async (toUserId: string): Promise<void> => {
  */
 export const unfollowUser = async (otherUserId: string): Promise<void> => {
     const currentUser = auth.currentUser;
-    if (!currentUser) throw new Error("Auth required");
+    if (!currentUser) throw new Error("Authentication required for protocol termination.");
 
     try {
         const batch = writeBatch(db);
         const requestsRef = collection(db, 'follow_requests');
 
-        // 1. Mark existing accepted request as 'declined' to trigger cooldown
-        const q1 = query(requestsRef, where('fromId', '==', currentUser.uid), where('toId', '==', otherUserId), where('status', '==', 'accepted'));
-        const q2 = query(requestsRef, where('fromId', '==', otherUserId), where('toId', '==', currentUser.uid), where('status', '==', 'accepted'));
+        // 1. Find all active or accepted connections between these users
+        const q1 = query(requestsRef, where('fromId', '==', currentUser.uid), where('toId', '==', otherUserId));
+        const q2 = query(requestsRef, where('fromId', '==', otherUserId), where('toId', '==', currentUser.uid));
 
         const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
 
-        // Instead of deleting, we update to 'declined' with fresh timestamp for mutual cooldown
+        // 2. Mark all as 'declined' with fresh timestamp to trigger the 60min mutual cooldown
         const now = Date.now();
-        snap1.docs.forEach(d => batch.update(d.ref, { status: 'declined', updatedAt: now, timestamp: now }));
-        snap2.docs.forEach(d => batch.update(d.ref, { status: 'declined', updatedAt: now, timestamp: now }));
+        [...snap1.docs, ...snap2.docs].forEach(d => {
+            batch.update(d.ref, {
+                status: 'declined',
+                updatedAt: now,
+                timestamp: now // This ensures the 1-hour cooldown kicks in
+            });
+        });
 
-        // 2. Delete the personal chat (this will remove it from sidebars for BOTH sides)
+        // 3. Terminate Personal Chat (Removes it from sidebar for both)
         const chatIds = [currentUser.uid, otherUserId].sort();
         const chatId = chatIds.join('_');
         const chatRef = doc(db, 'personal_chats', chatId);
         batch.delete(chatRef);
 
-        // 3. Delete related notifications for CURRENT USER ONLY
+        // 4. Cleanup Notifications (For current user)
         const notificationsRef = collection(db, 'notifications');
         const n1 = query(notificationsRef, where('userId', '==', currentUser.uid), where('groupId', '==', otherUserId));
-        const n3 = query(notificationsRef, where('userId', '==', currentUser.uid), where('groupId', '==', chatId));
+        const n2 = query(notificationsRef, where('userId', '==', currentUser.uid), where('groupId', '==', chatId));
 
-        const [sn1, sn3] = await Promise.all([getDocs(n1), getDocs(n3)]);
-
+        const [sn1, sn2] = await Promise.all([getDocs(n1), getDocs(n2)]);
         sn1.docs.forEach(d => batch.delete(d.ref));
-        sn3.docs.forEach(d => batch.delete(d.ref));
+        sn2.docs.forEach(d => batch.delete(d.ref));
 
         await batch.commit();
+
+        // 5. Notify the other user about the termination (Optional, but good for protocol feel)
+        await createNotification(otherUserId, {
+            type: 'system',
+            senderName: 'System',
+            text: 'A connection protocol has been terminated by the peer.',
+            groupId: 'system'
+        });
+
     } catch (error) {
-        console.error("Error in unfollowUser:", error);
+        console.error("[FollowService] Termination Error:", error);
         throw error;
     }
 };

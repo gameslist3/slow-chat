@@ -41,7 +41,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ user, myGroups, onSelectGrou
                         <button onClick={onBrowseGroups} className="btn-primary h-12 px-8 rounded-xl font-bold">Discover Groups</button>
                     </div>
                 ) : (
-                    <div className="relative group">
+                    <div className="relative">
                         {/* Desktop Grid / Mobile Scroll */}
                         <div className="hidden md:grid bento-grid">
                             {myGroups.map(group => (
