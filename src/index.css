@@ -164,8 +164,8 @@ body {
   .glass-card:hover {
     background: var(--ui-surface2);
     border-color: rgba(var(--primary-rgb), 0.3);
-    transform: translateY(-4px) scale(1.005);
-    box-shadow: 0 20px 40px -10px rgba(var(--primary-rgb), 0.15);
+    transform: scale(1.02);
+    box-shadow: 0 0 20px rgba(var(--primary-rgb), 0.3), 0 0 40px rgba(var(--primary-rgb), 0.1);
   }
 
   /* Bento Grid Layout */

@@ -14,7 +14,7 @@ import { AILayout } from './components/ai-ui/AILayout';
 import { Icon } from './components/common/Icon';
 import { useInbox } from './hooks/useChat';
 import { HomeView } from './components/home/HomeView';
-import { CollaborativeBackground } from './components/ui/CollaborativeBackground';
+import { AuroraBackground } from './components/ui/AuroraBackground';
 import { updateUserStatus } from './services/firebaseAuthService';
 import { FriendsList } from './components/social/FriendsList';
 import { NotificationList } from './components/chat/NotificationCenter';
@@ -61,7 +61,7 @@ const AppContent = () => {
 
     return (
         <div className="min-h-screen bg-background font-sans selection:bg-primary/20 relative">
-            <CollaborativeBackground />
+            <AuroraBackground />
             <div className="relative z-10 w-full h-full">
                 {showPolicy && <StoragePolicyModal onAccept={handleAcceptPolicy} />}
                 {isAuthenticated ? <AuthenticatedSection theme={theme} onToggleTheme={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} /> : <AuthSection />}
