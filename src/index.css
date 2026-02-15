@@ -20,30 +20,39 @@
       display: none;
     }
 
-    /* --- Theme Core (Light Mode Refined) --- */
+    /* --- Antigravity Theme Tokens --- */
     --ui-background: transparent;
-    --ui-text: 240 10% 90%;
-    --ui-primary: 222 73% 66%;
-    /* #6A90E8 converted approx to HSL */
-    /* Blue Primary */
-    --primary-rgb: 106,
-    144,
-    232;
-    --ui-secondary: 190 100% 50%;
-    --secondary-rgb: 6,
-    182,
-    212;
+    --ui-text: 228 50% 95%;
+    /* #E6ECFF */
 
-    --ui-muted: 240 4.8% 15%;
-    --ui-muted-text: 240 5% 64.9%;
+    /* Primary (Button Primary: #4964A2) */
+    --ui-primary: 222 38% 46%;
+    --primary-rgb: 73,
+    100,
+    162;
 
-    --ui-border: 240 5.9% 10%;
-    --ui-surface: 240 10% 3.9%;
-    --ui-surface2: 240 5% 10%;
+    /* Secondary (Button Hover: #5A75B3 or Accent Blue #5B7DCB) 
+       User said: "Accent blue: #5B7DCB" -> HSL approx 218 53% 58%
+       Let's use Accent Blue for secondary/highlight */
+    --ui-secondary: 218 53% 58%;
+    --secondary-rgb: 91,
+    125,
+    203;
 
-    --glass-surface: rgba(10, 10, 12, 0.4);
-    --glass-border: rgba(255, 255, 255, 0.1);
+    --ui-muted: 223 30% 15%;
+    /* Darker muted */
+    --ui-muted-text: 222 50% 75%;
+    /* #9DB1E0 - Secondary text */
+
+    --ui-border: 222 49% 66%;
+    /* rgba(124,151,213,0.18) approx but simpler to use variable */
+    --ui-surface: 222 30% 10%;
+
+    /* Specific Glass Tokens */
+    --glass-surface: rgba(255, 255, 255, 0.04);
+    --glass-border: rgba(124, 151, 213, 0.18);
     --glass-blur: 16px;
+    --glass-hover-bg: rgba(124, 151, 213, 0.08);
 
     --font-protocol: 'Inter',
     sans-serif;
@@ -56,31 +65,22 @@
     --radius-xl: 32px;
   }
 
-  /* Dark Mode Support (Manual Class or Media Query) */
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --ui-background: transparent;
-      --ui-text: 0 0% 98%;
-      --ui-muted: 240 3.7% 15.9%;
-      --ui-muted-text: 240 5% 64.9%;
-      --ui-border: 240 3.7% 15.9%;
-      --ui-surface: 240 10% 3.9%;
-      --ui-surface2: 240 3.7% 15.9%;
-      --glass-surface: rgba(18, 18, 23, 0.4);
-      --glass-border: rgba(255, 255, 255, 0.1);
-    }
-  }
-
+  /* Dark Mode Defaults (Enforced) */
   .dark {
     --ui-background: transparent;
-    --ui-text: 0 0% 98%;
-    --ui-muted: 240 3.7% 15.9%;
-    --ui-muted-text: 240 5% 64.9%;
-    --ui-border: 240 3.7% 15.9%;
-    --ui-surface: 240 10% 4%;
-    --ui-surface2: 240 3.7% 15.9%;
-    --glass-surface: rgba(10, 10, 12, 0.4);
-    --glass-border: rgba(255, 255, 255, 0.1);
+    --ui-text: 228 50% 95%;
+    /* #E6ECFF */
+    --ui-primary: 222 38% 46%;
+    /* #4964A2 */
+    --ui-secondary: 218 53% 58%;
+    /* #5B7DCB */
+    --ui-muted: 223 30% 15%;
+    --ui-muted-text: 222 50% 75%;
+    /* #9DB1E0 */
+    --ui-border: 222 49% 66%;
+
+    --glass-surface: rgba(255, 255, 255, 0.04);
+    --glass-border: rgba(124, 151, 213, 0.18);
   }
 }
 
@@ -96,7 +96,6 @@ body,
   -webkit-tap-highlight-color: transparent;
   width: 100vw;
   max-width: 100%;
-  transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1), color 0.5s ease;
 }
 
 body {
@@ -105,16 +104,16 @@ body {
   position: fixed;
   width: 100%;
   height: 100dvh;
+  background: linear-gradient(180deg, #112040 0%, #0D1320 100%);
+  /* Main dark gradient */
   background-attachment: fixed;
   background-size: cover;
-  background-position: center;
 }
 
 * {
   box-sizing: border-box;
   animation-fill-mode: forwards !important;
-  border-color: hsl(var(--ui-border));
-  transition: border-color 0.3s ease, background-color 0.3s ease;
+  border-color: var(--glass-border);
 }
 
 @layer base {
@@ -123,7 +122,7 @@ body {
   }
 
   body {
-    @apply bg-transparent text-foreground antialiased selection:bg-primary/30;
+    @apply bg-transparent text-foreground antialiased selection:bg-[#4964A2]/30;
     font-family: var(--font-body);
     font-feature-settings: "rlig" 1, "calt" 1;
     overflow: hidden;
@@ -137,20 +136,29 @@ body {
   h6,
   .protocol-header {
     font-family: var(--font-protocol);
+    color: #E6ECFF;
+    /* Main heading */
     @apply uppercase tracking-widest font-normal;
     opacity: 1 !important;
+  }
+
+  p,
+  span,
+  div {
+    /* General text color fallback */
   }
 }
 
 @layer components {
-  /* Campaign SaaS Design System (Bento & Glass) */
 
+  /* Glassmorphism Refined */
   .glass-panel {
     background: var(--glass-surface);
     backdrop-filter: blur(var(--glass-blur));
     -webkit-backdrop-filter: blur(var(--glass-blur));
     border: 1px solid var(--glass-border);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+    /* Card glow shadow */
   }
 
   .glass-card {
@@ -160,16 +168,20 @@ body {
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+    /* Card shadow */
   }
 
   .glass-card:hover {
-    background: var(--ui-surface2);
-    border-color: rgba(var(--primary-rgb), 0.3);
+    background: var(--glass-hover-bg);
+    /* rgba(124,151,213,0.08) */
+    border-color: rgba(124, 151, 213, 0.3);
     transform: scale(1.02);
-    box-shadow: 0 0 20px rgba(var(--primary-rgb), 0.3), 0 0 40px rgba(var(--primary-rgb), 0.1);
+    box-shadow: 0 0 30px rgba(91, 125, 203, 0.25);
+    /* Soft glow */
   }
 
-  /* Bento Grid Layout */
+  /* Bento Grid */
   .bento-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -197,7 +209,7 @@ body {
     }
   }
 
-  /* Premium Buttons (SaaS Style) */
+  /* Buttons */
   .btn-premium {
     @apply relative inline-flex items-center justify-center rounded-xl px-5 py-2.5 font-bold transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:pointer-events-none overflow-hidden select-none;
     font-family: var(--font-body);
@@ -206,30 +218,49 @@ body {
   }
 
   .btn-primary {
-    @apply btn-premium bg-primary text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 hover:brightness-110 active:shadow-inner;
+    /* Background: #4964A2, Text: #DFDFE0, Glow: #5B7DCB opacity 40% */
+    background-color: #4964A2;
+    color: #DFDFE0;
+    box-shadow: 0 2px 20px rgba(91, 125, 203, 0.45);
+    /* Button glow */
+    @apply btn-premium hover:bg-[#5A75B3] hover:-translate-y-0.5 hover:brightness-110;
   }
 
   .btn-secondary {
-    @apply btn-premium bg-secondary text-secondary-foreground shadow-lg shadow-secondary/15 hover:brightness-110 active:shadow-inner;
+    /* Secondary text: #7C97D5, Hover bg: rgba(124,151,213,0.15) */
+    background-color: transparent;
+    color: #7C97D5;
+    border: 1px solid #374B7A;
+    /* Border subtle/Strong border */
+    @apply btn-premium hover:bg-[#7C97D5]/15 hover:brightness-110;
   }
 
   .btn-ghost {
-    @apply btn-premium bg-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground;
+    @apply btn-premium bg-transparent text-[#9DB1E0] hover:bg-white/5 hover:text-white;
   }
 
-  /* Inputs V4 */
+  /* Inputs */
   .glass-input {
-    @apply h-12 w-full rounded-xl border border-input bg-background/50 px-4 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50;
+    background: transparent;
+    border: 1px solid rgba(91, 125, 203, 0.2);
+    /* Border gradient/color */
+    color: #CFE1FF;
+    /* Input text */
+    @apply h-12 w-full rounded-xl px-4 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-[#7C97D5] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#5B7DCB] disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .glass-input-icon {
+    color: #7C97D5;
   }
 
   /* UI Containers */
   .ui-composer-island {
-    @apply relative flex items-end gap-3 p-3 rounded-[2.5rem] glass-panel transition-all duration-700 focus-within:ring-2 focus-within:ring-primary/10;
+    @apply relative flex items-end gap-3 p-3 rounded-[2.5rem] glass-panel transition-all duration-700 focus-within:ring-2 focus-within:ring-[#5B7DCB]/20;
     -webkit-line-clamp: none;
     line-clamp: none;
   }
 
-  /* Standardization Layer for Lint Resolution */
+  /* Standard Resets */
   img,
   svg,
   video,
@@ -239,7 +270,6 @@ body {
   embed,
   object {
     display: inline-block;
-    /* Resolve display: block conflict */
     vertical-align: middle;
   }
 
@@ -290,50 +320,52 @@ body {
 }
 
 /* -------------------------------------------------------------
-   Atmospheric Motion Background V3
+   Atmospheric Motion Background V4 (Antigravity)
    ------------------------------------------------------------- */
 
 .motion-bg-container {
-  @apply fixed inset-0 z-[-1] overflow-hidden bg-[#050608];
-  transition: background-color 1s ease-in-out;
-}
-
-.dark .motion-bg-container {
-  @apply bg-[#020305];
+  @apply fixed inset-0 z-[-1] overflow-hidden;
+  background: linear-gradient(180deg, #112040 0%, #0D1320 100%);
 }
 
 .abstract-glow {
-  @apply absolute rounded-full blur-[90px] opacity-20 pointer-events-none;
+  @apply absolute rounded-full blur-[90px] opacity-40 pointer-events-none;
   mix-blend-mode: screen;
+  /* Or normal depending on desired vibrance */
   z-index: 0;
 }
 
 .glow-1 {
-  background: radial-gradient(circle, var(--ui-primary) 0%, transparent 70%);
+  /* Glow 1 (blue) #5B7DCB opacity 30-60% */
+  background: radial-gradient(circle, #5B7DCB 0%, transparent 70%);
   width: 90vw;
   height: 90vw;
   top: -20vw;
   left: -20vw;
+  opacity: 0.4;
 }
 
 .glow-2 {
-  background: radial-gradient(circle, var(--ui-secondary) 0%, transparent 70%);
+  /* Glow 2 (purple blue) #374B7A opacity 40% */
+  background: radial-gradient(circle, #374B7A 0%, transparent 70%);
   width: 80vw;
   height: 80vw;
   bottom: -20vw;
   right: -20vw;
+  opacity: 0.4;
 }
 
 .glow-3 {
-  background: radial-gradient(circle, #8B5CF6 0%, transparent 70%);
+  /* Glow 3 (deep navy glow) #1B2A52 */
+  background: radial-gradient(circle, #1B2A52 0%, transparent 70%);
   width: 60vw;
   height: 60vw;
   top: 30vh;
   left: 20vw;
-  opacity: 0.1;
+  opacity: 0.6;
 }
 
-/* Custom Scrollbar - Hidden by default, visible on hover */
+/* Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -350,11 +382,11 @@ body {
 }
 
 *:hover::-webkit-scrollbar-thumb {
-  background: rgba(var(--primary-rgb), 0.2);
+  background: rgba(91, 125, 203, 0.25);
 }
 
 *:hover::-webkit-scrollbar-thumb:hover {
-  background: rgba(var(--primary-rgb), 0.4);
+  background: rgba(91, 125, 203, 0.45);
 }
 
 /* Mobile Polish */

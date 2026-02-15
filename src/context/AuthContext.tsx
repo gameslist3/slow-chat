@@ -142,8 +142,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     const logout = async () => {
-        await firebaseAuth.logoutUser();
-        setUser(null);
+        try {
+            // Optimistically clear user state immediately to prevent UI flicker
+            setUser(null);
+            await firebaseAuth.logoutUser();
+        } catch (error) {
+            console.error("Logout error:", error);
+            // Force clear if firebase fails
+            setUser(null);
+        }
     };
 
     const updateUsername = async (newUsername: string): Promise<boolean> => {

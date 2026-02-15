@@ -179,9 +179,11 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <motion.button
                                 whileHover={{ y: -4 }}
-                                onClick={() => {
+                                onClick={async (e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
                                     try {
-                                        logout();
+                                        await logout();
                                     } catch (e) {
                                         toast("Logout failed. Try force refresh.", "error");
                                     }
