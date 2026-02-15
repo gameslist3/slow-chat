@@ -7,86 +7,60 @@ import { Logo } from '../common/Logo';
 
 // --- Welcome Screen ---
 export const WelcomeScreen = ({ onSignIn, onSignUp }: { onSignIn: () => void, onSignUp: () => void }) => (
-    <div className="w-full min-h-screen flex flex-col justify-center items-center p-6 relative overflow-hidden bg-[#020202] text-white">
-        {/* Cinematic Background Elements */}
+    <div className="w-full min-h-screen relative overflow-hidden bg-[#020202] text-white selection:bg-primary/30 font-sans">
+        {/* Background Elements */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(var(--primary-rgb),0.15),transparent_70%)]" />
         <div className="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-primary/10 blur-[150px] rounded-full opacity-40 animate-pulse" />
         <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-secondary/10 blur-[120px] rounded-full opacity-30" />
-
-        {/* Dynamic Grid Overlay */}
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 contrast-150 brightness-100 pointer-events-none" />
 
-        <div className="relative z-10 text-center space-y-16 max-w-lg w-full">
+        {/* Logo: Top 220px, Center, Width 400px (Using smaller visual width but centered in container) */}
+        <div className="absolute top-[220px] left-1/2 -translate-x-1/2 w-[400px] flex justify-center z-20">
             <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-                className="flex flex-col items-center gap-10"
+                transition={{ duration: 1 }}
             >
-                <motion.div
-                    animate={{
-                        y: [0, -10, 0],
-                        filter: ["drop-shadow(0 0 30px rgba(var(--primary-rgb), 0.2))", "drop-shadow(0 0 50px rgba(var(--primary-rgb), 0.4))", "drop-shadow(0 0 30px rgba(var(--primary-rgb), 0.2))"]
-                    }}
-                    transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                    className="relative p-2"
-                >
-                    <Logo className="w-56 h-56 text-primary drop-shadow-2xl" />
-                </motion.div>
-
-                <div className="space-y-4">
-                    <motion.h1
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.5 }}
-                        className="text-7xl md:text-8xl font-black italic uppercase tracking-tighter leading-none"
-                    >
-                        Gapes<span className="text-primary text-6xl">.</span>
-                    </motion.h1>
-                    <motion.p
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 0.6 }}
-                        transition={{ delay: 0.8 }}
-                        className="text-[10px] font-black uppercase tracking-[0.8em] ml-2 text-white/60"
-                    >
-                        Private. Secure. Global.
-                    </motion.p>
-                </div>
+                <Logo className="w-64 h-auto text-primary drop-shadow-2xl" />
             </motion.div>
+        </div>
 
-            <div className="w-full grid grid-cols-1 gap-4 px-4">
-                <motion.button
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 1 }}
-                    onClick={onSignIn}
-                    className="group relative h-20 rounded-[2.5rem] bg-primary text-white font-black uppercase tracking-[0.3em] text-sm shadow-[0_20px_40px_-10px_rgba(var(--primary-rgb),0.5)] hover:scale-[1.02] active:scale-[0.98] transition-all overflow-hidden"
-                >
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer" />
-                    <span className="relative flex items-center justify-center gap-4">
-                        Sign In <Icon name="arrowRight" className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-                    </span>
-                </motion.button>
-
-                <motion.button
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 1.2 }}
-                    onClick={onSignUp}
-                    className="h-20 rounded-[2.5rem] bg-white/5 border border-white/10 text-white font-black uppercase tracking-[0.3em] text-sm hover:bg-white/10 hover:border-white/20 transition-all backdrop-blur-md"
-                >
-                    Create account
-                </motion.button>
-            </div>
-
-            <motion.div
+        {/* Tagline: Top 460px */}
+        <div className="absolute top-[460px] left-1/2 -translate-x-1/2 z-20 whitespace-nowrap opacity-70">
+            <motion.p
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 0.3 }}
-                transition={{ delay: 1.5 }}
-                className="pt-8"
+                animate={{ opacity: 0.7 }}
+                transition={{ delay: 0.5 }}
+                className="text-[14px] font-bold uppercase tracking-[0.8em] text-white"
             >
-                <p className="text-[10px] font-bold uppercase tracking-widest text-white/40">Protocol v2.0.26 / Experimental Cluster</p>
-            </motion.div>
+                Private. Secure. Global.
+            </motion.p>
+        </div>
+
+        {/* Buttons: Top 640px, Gap 40px */}
+        <div className="absolute top-[640px] left-1/2 -translate-x-1/2 flex items-center gap-[40px] z-20">
+            <motion.button
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8 }}
+                onClick={onSignIn}
+                className="w-[220px] h-[46px] rounded-full bg-primary text-white font-bold uppercase tracking-widest text-xs hover:brightness-110 hover:shadow-[0_0_20px_rgba(var(--primary-rgb),0.4)] transition-all shadow-lg shadow-primary/25 flex items-center justify-center"
+            >
+                Sign In
+            </motion.button>
+            <motion.button
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.9 }}
+                onClick={onSignUp}
+                className="w-[220px] h-[46px] rounded-full bg-transparent border border-white/20 text-white font-bold uppercase tracking-widest text-xs hover:bg-white/5 hover:border-white/40 transition-all flex items-center justify-center"
+            >
+                Create account
+            </motion.button>
+        </div>
+
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 opacity-30 text-[10px] uppercase tracking-widest">
+            Protocol v2.0.26
         </div>
     </div>
 );
@@ -115,57 +89,60 @@ export const SignInScreen = ({ onBack, onSuccess, onForgotPassword }: any) => {
     };
 
     return (
-        <div className="w-full h-full flex items-center justify-center p-6 bg-[#080808] relative">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg aspect-square bg-primary/10 blur-[100px] rounded-full" />
+        <div className="w-full min-h-screen relative bg-[#020202] text-white font-sans overflow-hidden">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
 
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="w-full max-w-sm glass-panel p-10 rounded-[3rem] border border-white/10 relative z-10 shadow-2xl"
-            >
-                <button onClick={onBack} className="w-12 h-12 rounded-2xl hover:bg-white/5 flex items-center justify-center mb-8 transition-colors border border-white/5">
+            {/* Logo Top 90px (Matching Register Style) */}
+            <div className="absolute top-[90px] left-1/2 -translate-x-1/2 w-[200px] flex justify-center z-20">
+                <Logo className="w-24 h-auto text-primary" />
+            </div>
+
+            {/* Header Top 200px */}
+            <div className="absolute top-[200px] left-1/2 -translate-x-1/2 flex items-center gap-[16px] z-20">
+                <button onClick={onBack} className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors">
                     <Icon name="arrowLeft" className="w-5 h-5 text-white" />
                 </button>
+                <h2 className="text-2xl font-bold uppercase tracking-tight">Sign In</h2>
+            </div>
 
-                <h2 className="text-4xl font-black uppercase italic tracking-tighter mb-2 text-white">Sign In</h2>
-                <p className="text-[10px] uppercase tracking-widest text-primary font-black mb-10">Private. Secure. Global.</p>
-
-                <form onSubmit={handleSignIn} className="space-y-6">
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-white ml-2">Email Address</label>
+            {/* Form Top 330px */}
+            <div className="absolute top-[330px] left-1/2 -translate-x-1/2 w-[360px] z-20">
+                <form onSubmit={handleSignIn} className="flex flex-col gap-[20px]">
+                    <div className="relative group">
+                        <Icon name="mail" className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40 group-focus-within:text-primary transition-colors" />
                         <input
                             type="email"
                             required
                             value={email}
                             onChange={e => setEmail(e.target.value)}
-                            className="glass-input w-full h-16 rounded-[1.5rem] px-6 bg-white/[0.05] border-white/10 text-white focus:bg-white/[0.08]"
-                            placeholder="your@email.com"
+                            className="w-full h-[48px] rounded-full bg-white/5 border border-white/10 text-white pl-[50px] pr-6 text-sm focus:outline-none focus:border-primary/50 focus:bg-white/10 transition-all placeholder:text-white/20"
+                            placeholder="Email Address"
                         />
                     </div>
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-white ml-2">Password</label>
+                    <div className="relative group">
+                        <Icon name="key" className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40 group-focus-within:text-primary transition-colors" />
                         <input
                             type="password"
                             required
                             value={password}
                             onChange={e => setPassword(e.target.value)}
-                            className="glass-input w-full h-16 rounded-[1.5rem] px-6 bg-white/[0.05] border-white/10 text-white focus:bg-white/[0.08]"
-                            placeholder="••••••••"
+                            className="w-full h-[48px] rounded-full bg-white/5 border border-white/10 text-white pl-[50px] pr-6 text-sm focus:outline-none focus:border-primary/50 focus:bg-white/10 transition-all placeholder:text-white/20"
+                            placeholder="Password"
                         />
                     </div>
 
-                    <div className="flex justify-end pt-2">
-                        <button type="button" onClick={onForgotPassword} className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/80 hover:text-primary transition-colors">Forgot Key?</button>
+                    <div className="flex justify-end">
+                        <button type="button" onClick={onForgotPassword} className="text-[10px] font-bold uppercase tracking-widest text-white/60 hover:text-white transition-colors">Forgot?</button>
                     </div>
 
                     <button
                         disabled={loading}
-                        className="w-full h-18 rounded-[1.5rem] bg-primary text-white font-black uppercase tracking-widest text-sm mt-6 shadow-xl shadow-primary/20 disabled:opacity-50 hover:shadow-primary/40 transition-all active:scale-95"
+                        className="w-full h-[48px] rounded-full bg-primary text-white font-bold uppercase tracking-widest text-xs mt-[10px] shadow-lg shadow-primary/25 hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                     >
-                        {loading ? <Icon name="rotate" className="w-5 h-5 animate-spin mx-auto" /> : 'Sign In'}
+                        {loading ? <Icon name="rotate" className="w-4 h-4 animate-spin" /> : 'Enter'}
                     </button>
                 </form>
-            </motion.div>
+            </div>
         </div>
     );
 };
@@ -196,64 +173,67 @@ export const SignUpScreen = ({ onBack, onSuccess }: any) => {
     };
 
     return (
-        <div className="w-full h-full flex items-center justify-center p-6 bg-[#080808] relative">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg aspect-square bg-secondary/10 blur-[100px] rounded-full" />
+        <div className="w-full min-h-screen relative bg-[#020202] text-white font-sans overflow-hidden">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-secondary/5 blur-[120px] rounded-full pointer-events-none" />
 
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="w-full max-w-sm glass-panel p-10 rounded-[3rem] border border-white/10 relative z-10 shadow-2xl"
-            >
-                <button onClick={onBack} className="w-12 h-12 rounded-2xl hover:bg-white/5 flex items-center justify-center mb-8 transition-colors border border-white/5">
+            {/* Logo: Top 90px */}
+            <div className="absolute top-[90px] left-1/2 -translate-x-1/2 w-[200px] flex justify-center z-20">
+                <Logo className="w-24 h-auto text-primary" />
+            </div>
+
+            {/* Back + Join: Top 200px, Gap 16px */}
+            <div className="absolute top-[200px] left-1/2 -translate-x-1/2 flex items-center gap-[16px] z-20">
+                <button onClick={onBack} className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors">
                     <Icon name="arrowLeft" className="w-5 h-5 text-white" />
                 </button>
+                <h2 className="text-2xl font-bold uppercase tracking-tight">Join</h2>
+            </div>
 
-                <h2 className="text-4xl font-black uppercase italic tracking-tighter mb-2 text-white">Join</h2>
-                <p className="text-[10px] uppercase tracking-widest text-secondary font-black mb-6">Start your journey today</p>
-
-                <form onSubmit={handleSignUp} className="space-y-4">
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-white ml-2">Email Address</label>
+            {/* Form: Top 330px, Width 360px */}
+            <div className="absolute top-[330px] left-1/2 -translate-x-1/2 w-[360px] z-20">
+                <form onSubmit={handleSignUp} className="flex flex-col gap-[20px]">
+                    <div className="relative group">
+                        <Icon name="mail" className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40 group-focus-within:text-secondary transition-colors" />
                         <input
                             type="email"
                             required
                             value={email}
                             onChange={e => setEmail(e.target.value)}
-                            className="glass-input w-full h-14 rounded-2xl px-6 bg-white/[0.05] border-white/10 text-white focus:bg-white/[0.08]"
-                            placeholder="you@universe.com"
+                            className="w-full h-[48px] rounded-full bg-white/5 border border-white/10 text-white pl-[50px] pr-6 text-sm focus:outline-none focus:border-secondary/50 focus:bg-white/10 transition-all placeholder:text-white/20"
+                            placeholder="Email Address"
                         />
                     </div>
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-white ml-2">Create Password</label>
+                    <div className="relative group">
+                        <Icon name="lock" className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40 group-focus-within:text-secondary transition-colors" />
                         <input
                             type="password"
                             required
                             value={password}
                             onChange={e => setPassword(e.target.value)}
-                            className="glass-input w-full h-14 rounded-2xl px-6 bg-white/[0.05] border-white/10 text-white focus:bg-white/[0.08]"
-                            placeholder="Min. 8 characters"
+                            className="w-full h-[48px] rounded-full bg-white/5 border border-white/10 text-white pl-[50px] pr-6 text-sm focus:outline-none focus:border-secondary/50 focus:bg-white/10 transition-all placeholder:text-white/20"
+                            placeholder="Password (Min 8)"
                         />
                     </div>
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-white ml-2">Confirm Password</label>
+                    <div className="relative group">
+                        <Icon name="checkCircle" className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40 group-focus-within:text-secondary transition-colors" />
                         <input
                             type="password"
                             required
                             value={confirmPassword}
                             onChange={e => setConfirmPassword(e.target.value)}
-                            className="glass-input w-full h-14 rounded-2xl px-6 bg-white/[0.05] border-white/10 text-white focus:bg-white/[0.08]"
-                            placeholder="Match password"
+                            className="w-full h-[48px] rounded-full bg-white/5 border border-white/10 text-white pl-[50px] pr-6 text-sm focus:outline-none focus:border-secondary/50 focus:bg-white/10 transition-all placeholder:text-white/20"
+                            placeholder="Confirm Password"
                         />
                     </div>
 
                     <button
                         disabled={loading}
-                        className="w-full h-18 rounded-[1.5rem] bg-secondary text-white font-black uppercase tracking-widest text-sm mt-8 shadow-xl shadow-secondary/20 disabled:opacity-50 hover:shadow-secondary/40 transition-all active:scale-95"
+                        className="w-full h-[48px] rounded-full bg-secondary text-white font-bold uppercase tracking-widest text-xs mt-[20px] shadow-lg shadow-secondary/20 hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                     >
-                        {loading ? <Icon name="rotate" className="w-5 h-5 animate-spin mx-auto" /> : 'Create Account'}
+                        {loading ? <Icon name="rotate" className="w-4 h-4 animate-spin" /> : 'Create Account'}
                     </button>
                 </form>
-            </motion.div>
+            </div>
         </div>
     );
 };

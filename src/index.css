@@ -303,8 +303,9 @@ body {
 }
 
 .abstract-glow {
-  @apply absolute rounded-full blur-[140px] opacity-20 pointer-events-none;
+  @apply absolute rounded-full blur-[90px] opacity-20 pointer-events-none;
   mix-blend-mode: screen;
+  z-index: 0;
 }
 
 .glow-1 {

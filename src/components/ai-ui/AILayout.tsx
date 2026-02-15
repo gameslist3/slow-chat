@@ -33,10 +33,9 @@ export const AILayout: React.FC<AILayoutProps> = ({
     return (
         <div className="h-screen w-full text-foreground flex overflow-hidden font-sans selection:bg-primary/30">
 
-            {/* Sidebar (Navigation Rail) */}
+            {/* Sidebar (Navigation Rail) - Fixed 240px */}
             <aside className={`
-                fixed inset-y-0 left-0 z-50 w-20 lg:w-72 border-r border-white/10 bg-surface/30 backdrop-blur-xl transition-transform duration-500
-                md:relative md:inset-auto md:translate-x-0
+                fixed inset-y-0 left-0 z-50 w-[240px] border-r border-white/10 bg-glass-surface backdrop-blur-xl transition-transform duration-500
                 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
             `}>
                 <AISidebar
@@ -49,8 +48,8 @@ export const AILayout: React.FC<AILayoutProps> = ({
                 />
             </aside>
 
-            {/* Main Canvas */}
-            <main className="flex-1 flex flex-col min-w-0 relative z-10">
+            {/* Main Canvas - Margin 260px, Padding 60px */}
+            <main className="flex-1 flex flex-col min-w-0 relative z-10 md:ml-[260px] p-0 md:p-[60px] h-screen overflow-hidden">
                 {/* Mobile Header */}
                 <header className="md:hidden flex items-center justify-between p-4 border-b border-border shrink-0 bg-surface/50 backdrop-blur-md">
                     <button onClick={() => setSidebarOpen(true)} className="w-10 h-10 rounded-xl bg-surface2 flex items-center justify-center border border-border">
@@ -62,11 +61,10 @@ export const AILayout: React.FC<AILayoutProps> = ({
                     </button>
                 </header>
 
-                <div className="flex-1 overflow-hidden relative">
-                    <div className="absolute inset-0 overflow-y-auto custom-scrollbar scroll-smooth">
-                        <div className="w-full h-full">
-                            {children}
-                        </div>
+                <div className="flex-1 overflow-visible relative h-full">
+                    {/* Removed internal scroll container to let individual screens handle scrolling if needed, or use main's overflow */}
+                    <div className="w-full h-full">
+                        {children}
                     </div>
                 </div>
             </main>

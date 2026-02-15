@@ -61,20 +61,28 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     };
 
     return (
-        <div className="flex flex-col h-full w-full bg-[#050505] relative overflow-hidden">
-            <AIChatHeader
-                groupId={chatId}
-                isPersonal={isPersonal}
-                title={title}
-                image={image}
-                createdAt={createdAt}
-                memberCount={memberCount}
-                memberIds={memberIds}
-                onLeave={onLeave}
-            />
+        <div className="w-full h-full relative">
+            {/* Header: Global Top 40px -> Local Top -20px (since Content starts at 60px) */}
+            <div className="absolute top-[-20px] left-0 right-0 h-[60px] z-50">
+                <AIChatHeader
+                    groupId={chatId}
+                    isPersonal={isPersonal}
+                    title={title}
+                    image={image}
+                    createdAt={createdAt}
+                    memberCount={memberCount}
+                    memberIds={memberIds}
+                    onLeave={onLeave}
+                />
+            </div>
 
-            {/* Message List Area */}
-            <div className="flex-1 min-h-0 relative overflow-hidden flex flex-col w-full h-full">
+            {/* Message List Area: Global Top 120px -> Local Top 60px. Bottom 100px (to leave space for input at 30px) */}
+            {/* Global Height: calc(100vh - 220px). 
+                Top 120px + Height (100vh - 220px) = Bottom 100px.
+                Input is at Bottom 30px with height 60px (Top of input at 90px).
+                Gap between Messages (Bottom 100px) and Input (Top 90px) is 10px? Matches well.
+            */}
+            <div className="absolute top-[60px] left-0 right-0 bottom-[100px] overflow-hidden">
                 {loading && messages.length === 0 ? (
                     <div className="max-w-4xl mx-auto py-10 space-y-8 px-4 flex-1 w-full overflow-hidden">
                         {[1, 2, 3, 4, 5].map(i => (
@@ -107,8 +115,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 )}
             </div>
 
-            {/* Composer */}
-            <div className="shrink-0 relative z-50">
+            {/* Composer: Global Bottom 30px -> Local Bottom -30px. Height 60px. */}
+            <div className="absolute bottom-[-30px] left-0 right-0 h-[60px] z-50">
                 <AIComposer
                     groupId={chatId}
                     userId={user?.id || ''}
