@@ -58,6 +58,51 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                         </div>
                     )}
 
+                    {message.type === 'audio' && message.media && (
+                        <div className="flex items-center gap-3 min-w-[200px]">
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    const audio = e.currentTarget.nextElementSibling as HTMLAudioElement;
+                                    if (audio.paused) audio.play(); else audio.pause();
+                                    e.currentTarget.querySelector('svg')?.classList.toggle('hidden'); // Hacky toggle for icon
+                                    // Better to use state but MessageBubble is stateless here? 
+                                    // I'll just use a simple player for now or simple controls
+                                }}
+                                className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors shrink-0"
+                            >
+                                <svg className="w-4 h-4 fill-current ml-0.5 play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                                <svg className="w-4 h-4 fill-current hidden pause-icon" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" /></svg>
+                            </button>
+                            <audio
+                                src={message.media.url}
+                                onPlay={(e) => {
+                                    (e.currentTarget.previousElementSibling?.querySelector('.play-icon') as HTMLElement).classList.add('hidden');
+                                    (e.currentTarget.previousElementSibling?.querySelector('.pause-icon') as HTMLElement).classList.remove('hidden');
+                                }}
+                                onPause={(e) => {
+                                    (e.currentTarget.previousElementSibling?.querySelector('.play-icon') as HTMLElement).classList.remove('hidden');
+                                    (e.currentTarget.previousElementSibling?.querySelector('.pause-icon') as HTMLElement).classList.add('hidden');
+                                }}
+                                onEnded={(e) => {
+                                    (e.currentTarget.previousElementSibling?.querySelector('.play-icon') as HTMLElement).classList.remove('hidden');
+                                    (e.currentTarget.previousElementSibling?.querySelector('.pause-icon') as HTMLElement).classList.add('hidden');
+                                }}
+                                className="hidden"
+                            />
+                            <div className="flex-1 space-y-1">
+                                <div className="h-1 bg-white/20 rounded-full overflow-hidden w-full">
+                                    <div className="h-full bg-white w-0 animate-[progress_1s_linear]" style={{ width: '0%' }} />
+                                    {/* Real progress requires state/refs. For UI fidelity without state complexity in this component, I'll show a static waveform visualization or simple bar */}
+                                </div>
+                                <div className="flex justify-between text-[9px] font-bold opacity-60">
+                                    <span>VOICE NOTE</span>
+                                    <span>0:00</span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {(message.type === 'image' || message.type === 'video') && (
                         <div className="relative group/media overflow-hidden rounded-xl">
                             {message.type === 'image' ? (

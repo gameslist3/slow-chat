@@ -49,7 +49,7 @@ export const WelcomeScreen = ({ onSignIn, onSignUp }: { onSignIn: () => void, on
                         transition={{ delay: 0.8 }}
                         className="text-[10px] font-black uppercase tracking-[0.8em] ml-2 text-white/60"
                     >
-                        Synchronicity Re-Imagined
+                        Private. Secure. Global.
                     </motion.p>
                 </div>
             </motion.div>
@@ -59,12 +59,12 @@ export const WelcomeScreen = ({ onSignIn, onSignUp }: { onSignIn: () => void, on
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 1 }}
-                    onClick={onSignUp}
+                    onClick={onSignIn}
                     className="group relative h-20 rounded-[2.5rem] bg-primary text-white font-black uppercase tracking-[0.3em] text-sm shadow-[0_20px_40px_-10px_rgba(var(--primary-rgb),0.5)] hover:scale-[1.02] active:scale-[0.98] transition-all overflow-hidden"
                 >
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer" />
                     <span className="relative flex items-center justify-center gap-4">
-                        Initialize Node <Icon name="arrowRight" className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                        Sign In <Icon name="arrowRight" className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                     </span>
                 </motion.button>
 
@@ -72,10 +72,10 @@ export const WelcomeScreen = ({ onSignIn, onSignUp }: { onSignIn: () => void, on
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 1.2 }}
-                    onClick={onSignIn}
+                    onClick={onSignUp}
                     className="h-20 rounded-[2.5rem] bg-white/5 border border-white/10 text-white font-black uppercase tracking-[0.3em] text-sm hover:bg-white/10 hover:border-white/20 transition-all backdrop-blur-md"
                 >
-                    Access Identity
+                    Create account
                 </motion.button>
             </div>
 
@@ -128,7 +128,7 @@ export const SignInScreen = ({ onBack, onSuccess, onForgotPassword }: any) => {
                 </button>
 
                 <h2 className="text-4xl font-black uppercase italic tracking-tighter mb-2 text-white">Sign In</h2>
-                <p className="text-[10px] uppercase tracking-widest text-primary font-black mb-10">Welcome back, voyager</p>
+                <p className="text-[10px] uppercase tracking-widest text-primary font-black mb-10">Private. Secure. Global.</p>
 
                 <form onSubmit={handleSignIn} className="space-y-6">
                     <div className="space-y-2">
@@ -162,7 +162,7 @@ export const SignInScreen = ({ onBack, onSuccess, onForgotPassword }: any) => {
                         disabled={loading}
                         className="w-full h-18 rounded-[1.5rem] bg-primary text-white font-black uppercase tracking-widest text-sm mt-6 shadow-xl shadow-primary/20 disabled:opacity-50 hover:shadow-primary/40 transition-all active:scale-95"
                     >
-                        {loading ? <Icon name="rotate" className="w-5 h-5 animate-spin mx-auto" /> : 'Log In'}
+                        {loading ? <Icon name="rotate" className="w-5 h-5 animate-spin mx-auto" /> : 'Sign In'}
                     </button>
                 </form>
             </motion.div>
@@ -174,12 +174,16 @@ export const SignInScreen = ({ onBack, onSuccess, onForgotPassword }: any) => {
 export const SignUpScreen = ({ onBack, onSuccess }: any) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const { toast } = useToast();
 
     const handleSignUp = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!validateEmail(email)) return toast("Format failure", "error");
+        if (password.length < 8) return toast("Password too short (min 8 chars)", "error");
+        if (password !== confirmPassword) return toast("Passwords do not match", "error");
+
         setLoading(true);
         try {
             await registerUserStep1({ email, password });
@@ -205,9 +209,9 @@ export const SignUpScreen = ({ onBack, onSuccess }: any) => {
                 </button>
 
                 <h2 className="text-4xl font-black uppercase italic tracking-tighter mb-2 text-white">Join</h2>
-                <p className="text-[10px] uppercase tracking-widest text-secondary font-black mb-10">Start your journey today</p>
+                <p className="text-[10px] uppercase tracking-widest text-secondary font-black mb-6">Start your journey today</p>
 
-                <form onSubmit={handleSignUp} className="space-y-6">
+                <form onSubmit={handleSignUp} className="space-y-4">
                     <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase tracking-widest text-white ml-2">Email Address</label>
                         <input
@@ -215,7 +219,7 @@ export const SignUpScreen = ({ onBack, onSuccess }: any) => {
                             required
                             value={email}
                             onChange={e => setEmail(e.target.value)}
-                            className="glass-input w-full h-16 rounded-[1.5rem] px-6 bg-white/[0.05] border-white/10 text-white focus:bg-white/[0.08]"
+                            className="glass-input w-full h-14 rounded-2xl px-6 bg-white/[0.05] border-white/10 text-white focus:bg-white/[0.08]"
                             placeholder="you@universe.com"
                         />
                     </div>
@@ -226,8 +230,19 @@ export const SignUpScreen = ({ onBack, onSuccess }: any) => {
                             required
                             value={password}
                             onChange={e => setPassword(e.target.value)}
-                            className="glass-input w-full h-16 rounded-[1.5rem] px-6 bg-white/[0.05] border-white/10 text-white focus:bg-white/[0.08]"
+                            className="glass-input w-full h-14 rounded-2xl px-6 bg-white/[0.05] border-white/10 text-white focus:bg-white/[0.08]"
                             placeholder="Min. 8 characters"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-white ml-2">Confirm Password</label>
+                        <input
+                            type="password"
+                            required
+                            value={confirmPassword}
+                            onChange={e => setConfirmPassword(e.target.value)}
+                            className="glass-input w-full h-14 rounded-2xl px-6 bg-white/[0.05] border-white/10 text-white focus:bg-white/[0.08]"
+                            placeholder="Match password"
                         />
                     </div>
 

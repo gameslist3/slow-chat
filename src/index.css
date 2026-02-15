@@ -23,11 +23,12 @@
     /* --- Theme Core (Light Mode Refined) --- */
     --ui-background: transparent;
     --ui-text: 240 10% 90%;
-    --ui-primary: 250 100% 70%;
-    /* Violet Primary */
-    --primary-rgb: 139,
-    92,
-    246;
+    --ui-primary: 222 73% 66%;
+    /* #6A90E8 converted approx to HSL */
+    /* Blue Primary */
+    --primary-rgb: 106,
+    144,
+    232;
     --ui-secondary: 190 100% 50%;
     --secondary-rgb: 6,
     182,

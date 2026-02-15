@@ -84,152 +84,86 @@ export const FriendsList: React.FC<{ onSelectFriend?: (friendId: string) => void
     if (!currentUser) return null;
 
     return (
-        <div className="flex flex-col h-full rounded-xl">
-            {/* Minimal Header */}
-            <div className="flex items-center justify-between p-2 mb-6">
-                <h2 className="text-3xl font-black italic uppercase tracking-tighter">Friends</h2>
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => setShowRequests(!showRequests)}
-                        className={`relative w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${showRequests ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-surface2 hover:bg-surface text-muted-foreground hover:text-foreground'}`}
-                    >
-                        <Icon name="userPlus" className="w-5 h-5" />
-                        {requests.length > 0 && (
-                            <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary rounded-full flex items-center justify-center text-[10px] font-black text-white ring-2 ring-background animate-in zoom-in">
-                                {requests.length}
-                            </span>
-                        )}
-                    </button>
-                </div>
+        <div className="flex flex-col h-full w-full max-w-7xl mx-auto px-6 md:px-12 py-8">
+            {/* Header */}
+            <div className="text-center mb-16 space-y-4">
+                <h2 className="text-4xl md:text-5xl font-normal text-white tracking-tight">My <span className="font-bold">Friends</span></h2>
+                <p className="text-slate-400 text-lg">Pick up where you left off or find something new.</p>
             </div>
 
-            {/* Content Area */}
-            <div className="flex-1 overflow-y-auto min-h-0 custom-scrollbar p-1">
-                {loading ? (
-                    <div className="flex items-center justify-center h-full text-muted-foreground">
-                        <Icon name="rotate" className="w-5 h-5 animate-spin" />
+            {/* Friends Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+                {friends.length === 0 && !loading ? (
+                    <div className="col-span-full text-center py-10 opacity-50">
+                        <p>No friends yet.</p>
                     </div>
                 ) : (
-                    <AnimatePresence mode="wait">
-                        {showRequests ? (
-                            <motion.div
-                                key="requests-list"
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                                className="space-y-4"
-                            >
-                                <div className="p-6 md:p-8 glass-panel rounded-[2.5rem] border-primary/20">
-                                    <div className="flex items-center gap-4 mb-8">
-                                        <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary shadow-lg ring-1 ring-primary/20">
-                                            <Icon name="userPlus" className="w-6 h-6" />
-                                        </div>
-                                        <h3 className="text-xl font-black uppercase tracking-tight">Pending Requests</h3>
-                                    </div>
-                                    <div className="space-y-3">
-                                        {requests.length === 0 ? (
-                                            <div className="text-center py-12 text-muted-foreground text-sm opacity-40 uppercase font-black tracking-widest">
-                                                No pending requests
-                                            </div>
-                                        ) : (
-                                            requests.map((req) => (
-                                                <div
-                                                    key={req.id}
-                                                    className="p-4 rounded-2xl bg-white/5 flex items-center justify-between border border-white/5"
-                                                >
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary font-black text-sm">
-                                                            {req.fromUsername.substring(0, 2).toUpperCase()}
-                                                        </div>
-                                                        <div>
-                                                            <p className="text-sm font-bold text-white/90">{req.fromUsername}</p>
-                                                            <p className="text-[10px] text-muted-foreground uppercase font-black opacity-40">Wants to connect</p>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <button
-                                                            onClick={() => handleAccept(req.id!)}
-                                                            className="w-10 h-10 bg-primary text-white rounded-xl flex items-center justify-center shadow-lg active:scale-90 transition-transform"
-                                                        >
-                                                            <Icon name="check" className="w-4 h-4" />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleDecline(req.id!)}
-                                                            className="w-10 h-10 bg-surface2 text-muted-foreground hover:text-white rounded-xl flex items-center justify-center active:scale-90 transition-transform"
-                                                        >
-                                                            <Icon name="x" className="w-4 h-4" />
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            ))
-                                        )}
-                                    </div>
-                                    <button
-                                        onClick={() => setShowRequests(false)}
-                                        className="w-full mt-8 py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 hover:text-primary transition-colors"
-                                    >
-                                        Back to friends
-                                    </button>
+                    friends.map((friend) => (
+                        <div
+                            key={friend.uid}
+                            onClick={() => onSelectFriend?.(friend.uid)}
+                            className="bg-[#1A2333]/40 border border-white/5 rounded-2xl p-4 flex items-center justify-between hover:bg-[#1A2333]/60 transition-all cursor-pointer group"
+                        >
+                            <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-full bg-transparent border border-white/10 flex items-center justify-center text-slate-300">
+                                    <Icon name="zap" className="w-5 h-5" />
                                 </div>
-                            </motion.div>
-                        ) : (
-                            <motion.div
-                                key="friends-list"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                            >
-                                {friends.length === 0 ? (
-                                    <div className="col-span-full text-center py-20 text-muted-foreground">
-                                        <div className="w-16 h-16 rounded-full bg-white/5 mx-auto mb-4 flex items-center justify-center border border-white/5 opacity-20">
-                                            <Icon name="users" className="w-8 h-8" />
-                                        </div>
-                                        <p className="font-bold uppercase tracking-widest text-sm opacity-40">No friends yet.</p>
-                                    </div>
-                                ) : (
-                                    friends.map((friend) => (
-                                        <motion.div
-                                            key={friend.uid}
-                                            layout
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            className="group relative glass-panel p-6 border border-white/5 hover:border-primary/40 transition-all text-left cursor-pointer overflow-hidden"
-                                            onClick={() => onSelectFriend?.(friend.uid)}
-                                        >
-                                            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                                            <div className="flex items-center gap-4 mb-8 relative z-10">
-                                                <div className="w-16 h-16 rounded-2xl bg-primary text-white flex items-center justify-center font-black text-2xl shadow-xl shadow-primary/20 border border-white/10 group-hover:scale-105 transition-transform">
-                                                    {friend.username.substring(0, 2).toUpperCase()}
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <h4 className="font-black text-xl text-white truncate">{friend.username}</h4>
-                                                    <p className="text-[10px] uppercase font-black tracking-widest text-primary/60">Active Peer</p>
-                                                </div>
-                                            </div>
-
-                                            <div className="flex items-center gap-3 relative z-10">
-                                                <button
-                                                    className="flex-1 h-12 rounded-xl bg-primary text-white font-black uppercase text-[10px] tracking-widest hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2"
-                                                >
-                                                    Open Channel
-                                                </button>
-                                                <button
-                                                    onClick={(e) => { e.stopPropagation(); handleUnfollowFriend(friend.uid, friend.username); }}
-                                                    className="w-12 h-12 rounded-xl bg-white/5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all flex items-center justify-center"
-                                                    title="Terminate connection"
-                                                >
-                                                    <Icon name="x" className="w-5 h-5" />
-                                                </button>
-                                            </div>
-                                        </motion.div>
-                                    ))
-                                )}
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+                                <span className="font-bold text-white text-lg">{friend.username}</span>
+                            </div>
+                            <div className="bg-[#151a23] border border-white/5 rounded-full px-3 py-1 text-xs font-medium text-slate-400">
+                                2 New
+                            </div>
+                        </div>
+                    ))
                 )}
+            </div>
+
+            {/* Pending Requests */}
+            <div className="mt-auto">
+                <div className="flex items-center gap-4 mb-6">
+                    <h3 className="text-xl font-bold text-slate-200">Pending Friend Follow Requests</h3>
+                    <div className="px-2.5 py-0.5 rounded-full bg-[#151a23] border border-white/5 text-xs text-slate-400 font-bold">
+                        {requests.length}
+                    </div>
+                    <Icon name="arrowRight" className="w-4 h-4 text-slate-500" />
+                </div>
+
+                <div className="flex gap-6 overflow-x-auto pb-4">
+                    {requests.map((req) => (
+                        <div key={req.id} className="min-w-[300px] bg-[#1A2333]/40 border border-white/5 rounded-2xl p-5">
+                            <div className="flex items-start justify-between mb-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400">
+                                        <Icon name="sparkles" className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-bold text-white">{req.fromUsername}</h4>
+                                        <p className="text-xs text-slate-500">Wants to connect</p>
+                                    </div>
+                                </div>
+                                <span className="text-xs text-slate-500 bg-[#151a23] px-2 py-1 rounded-md border border-white/5">2 D</span>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                                <button
+                                    onClick={() => handleAccept(req.id!)}
+                                    className="flex-1 bg-[#4C6B2F]/80 hover:bg-[#4C6B2F] text-[#B8E986] py-2 rounded-lg text-sm font-bold transition-colors"
+                                >
+                                    Accept
+                                </button>
+                                <button
+                                    onClick={() => handleDecline(req.id!)}
+                                    className="flex-1 bg-[#1A2333] border border-white/5 hover:bg-white/5 text-slate-400 py-2 rounded-lg text-sm font-bold transition-colors"
+                                >
+                                    Decline
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                    {requests.length === 0 && (
+                        <p className="text-slate-500 text-sm italic">No pending requests.</p>
+                    )}
+                </div>
             </div>
         </div>
     );

@@ -76,23 +76,23 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
 
     return (
         <header className="h-20 border-b border-white/5 bg-[#050505]/50 backdrop-blur-xl flex items-center justify-between px-8 sticky top-0 z-40 transition-all">
-            <div className="flex items-center gap-6">
-                <button onClick={onLeave} className="md:hidden w-10 h-10 rounded-xl hover:bg-white/5 flex items-center justify-center transition-colors">
-                    <Icon name="arrowLeft" className="w-5 h-5 text-muted-foreground" />
+            <div className="flex items-center gap-4">
+                <button onClick={onLeave} className="w-10 h-10 flex items-center justify-center transition-colors group">
+                    <Icon name="arrowLeft" className="w-6 h-6 text-slate-300 group-hover:text-white transition-colors" />
                 </button>
 
                 <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center text-xl shadow-lg border border-white/5">
+                    <div className="w-10 h-10 rounded-xl bg-[#1A2333] flex items-center justify-center text-xl border border-white/10 shadow-sm">
                         {image}
                     </div>
                     <div>
-                        <div className="flex items-center gap-2">
-                            <h2 className="text-sm font-black uppercase tracking-tight leading-none">{title}</h2>
-                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        <h2 className="text-lg font-bold text-white tracking-tight leading-none">{title}</h2>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                            <Icon name="users" className="w-3 h-3 text-slate-400" />
+                            <p className="text-xs font-medium text-slate-400">
+                                {isPersonal ? 'Private Chat' : `${memberCount} Users`}
+                            </p>
                         </div>
-                        <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest mt-1">
-                            {isPersonal ? 'Direct Message' : `${memberCount} Members`}
-                        </p>
                     </div>
                 </div>
             </div>
