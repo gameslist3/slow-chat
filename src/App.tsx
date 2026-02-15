@@ -60,7 +60,7 @@ const AppContent = () => {
     };
 
     return (
-        <div className="min-h-screen bg-background font-sans selection:bg-primary/20 relative">
+        <div className="min-h-screen font-sans selection:bg-primary/20 relative">
             <AuroraBackground />
             <div className="relative z-10 w-full h-full">
                 {showPolicy && <StoragePolicyModal onAccept={handleAcceptPolicy} />}

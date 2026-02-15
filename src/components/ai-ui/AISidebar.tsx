@@ -32,7 +32,7 @@ export const AISidebar: React.FC<AISidebarProps> = ({
     ];
 
     return (
-        <div className="h-full flex flex-col bg-surface border-r border-border relative z-30">
+        <div className="h-full flex flex-col bg-transparent border-r border-border relative z-30">
             {/* Branding */}
             <div className="p-6 flex items-center justify-center lg:justify-start shrink-0">
                 <button onClick={onGoHome} className="flex items-center gap-3 active:scale-95 transition-transform group">

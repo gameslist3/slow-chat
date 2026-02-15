@@ -31,16 +31,11 @@ export const AILayout: React.FC<AILayoutProps> = ({
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     return (
-        <div className="h-screen w-full bg-background text-foreground flex overflow-hidden font-sans selection:bg-primary/30">
-            {/* Ambient Background Glows - Subtle and adaptive */}
-            <div className="fixed inset-0 pointer-events-none overflow-hidden opacity-20 dark:opacity-30">
-                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 blur-[120px] rounded-full" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-secondary/10 blur-[120px] rounded-full" />
-            </div>
+        <div className="h-screen w-full text-foreground flex overflow-hidden font-sans selection:bg-primary/30">
 
             {/* Sidebar (Navigation Rail) */}
             <aside className={`
-                fixed inset-y-0 left-0 z-50 w-20 lg:w-72 border-r border-border bg-surface/80 backdrop-blur-3xl transition-transform duration-500
+                fixed inset-y-0 left-0 z-50 w-20 lg:w-72 border-r border-white/10 bg-surface/30 backdrop-blur-xl transition-transform duration-500
                 md:relative md:inset-auto md:translate-x-0
                 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
             `}>

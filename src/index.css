@@ -21,28 +21,28 @@
     }
 
     /* --- Theme Core (Light Mode Refined) --- */
-    --ui-background: 0 0% 98%;
-    --ui-text: 240 10% 3.9%;
-    --ui-primary: 250 100% 64%;
+    --ui-background: transparent;
+    --ui-text: 240 10% 90%;
+    --ui-primary: 250 100% 70%;
     /* Violet Primary */
-    --primary-rgb: 99,
-    102,
-    241;
+    --primary-rgb: 139,
+    92,
+    246;
     --ui-secondary: 190 100% 50%;
     --secondary-rgb: 6,
     182,
     212;
 
-    --ui-muted: 240 4.8% 95.9%;
-    --ui-muted-text: 240 3.8% 46.1%;
+    --ui-muted: 240 4.8% 15%;
+    --ui-muted-text: 240 5% 64.9%;
 
-    --ui-border: 240 5.9% 90%;
-    --ui-surface: 0 0% 100%;
-    --ui-surface2: 240 4.8% 95.9%;
+    --ui-border: 240 5.9% 10%;
+    --ui-surface: 240 10% 3.9%;
+    --ui-surface2: 240 5% 10%;
 
-    --glass-surface: rgba(255, 255, 255, 0.7);
-    --glass-border: rgba(0, 0, 0, 0.06);
-    --glass-blur: 20px;
+    --glass-surface: rgba(10, 10, 12, 0.4);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-blur: 16px;
 
     --font-protocol: 'Inter',
     sans-serif;
@@ -58,28 +58,28 @@
   /* Dark Mode Support (Manual Class or Media Query) */
   @media (prefers-color-scheme: dark) {
     :root {
-      --ui-background: 240 10% 3.9%;
+      --ui-background: transparent;
       --ui-text: 0 0% 98%;
       --ui-muted: 240 3.7% 15.9%;
       --ui-muted-text: 240 5% 64.9%;
       --ui-border: 240 3.7% 15.9%;
       --ui-surface: 240 10% 3.9%;
       --ui-surface2: 240 3.7% 15.9%;
-      --glass-surface: rgba(18, 18, 23, 0.7);
-      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-surface: rgba(18, 18, 23, 0.4);
+      --glass-border: rgba(255, 255, 255, 0.1);
     }
   }
 
   .dark {
-    --ui-background: 240 10% 3.9%;
+    --ui-background: transparent;
     --ui-text: 0 0% 98%;
     --ui-muted: 240 3.7% 15.9%;
     --ui-muted-text: 240 5% 64.9%;
     --ui-border: 240 3.7% 15.9%;
     --ui-surface: 240 10% 4%;
     --ui-surface2: 240 3.7% 15.9%;
-    --glass-surface: rgba(10, 10, 12, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-surface: rgba(10, 10, 12, 0.4);
+    --glass-border: rgba(255, 255, 255, 0.1);
   }
 }
 
@@ -90,7 +90,7 @@ body,
   margin: 0;
   padding: 0;
   overflow: hidden;
-  background-color: hsl(var(--ui-background));
+  background-color: transparent;
   color: hsl(var(--ui-text));
   -webkit-tap-highlight-color: transparent;
   width: 100vw;
@@ -122,7 +122,7 @@ body {
   }
 
   body {
-    @apply bg-background text-foreground antialiased selection:bg-primary/30;
+    @apply bg-transparent text-foreground antialiased selection:bg-primary/30;
     font-family: var(--font-body);
     font-feature-settings: "rlig" 1, "calt" 1;
     overflow: hidden;
@@ -149,7 +149,7 @@ body {
     backdrop-filter: blur(var(--glass-blur));
     -webkit-backdrop-filter: blur(var(--glass-blur));
     border: 1px solid var(--glass-border);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
   }
 
   .glass-card {
