@@ -120,7 +120,8 @@
 
   /* Sidebar Active Pill */
   .nav-item-active {
-    @apply bg-[#243A6B40] text-[#E6ECFF] border border-[#5B79B740] shadow-[0_0_15px_rgba(91, 121, 183, 0.2)];
+    @apply bg-[#243A6B40] text-[#E6ECFF] border border-[#5B79B740];
+    box-shadow: 0 0 15px rgba(91, 121, 183, 0.2);
   }
 
 
