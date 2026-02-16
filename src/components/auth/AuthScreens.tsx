@@ -4,6 +4,7 @@ import { Icon } from '../common/Icon';
 import { validateEmail, registerUserStep1, loginUserWithPassword, generateAnonymousName } from '../../services/firebaseAuthService';
 import { useToast } from '../../context/ToastContext';
 import { Logo } from '../common/Logo';
+import { TermsModal } from './TermsModal';
 
 // --- Welcome Screen ---
 export const WelcomeScreen = ({ onSignIn, onSignUp }: { onSignIn: () => void, onSignUp: () => void }) => (
@@ -53,7 +54,7 @@ export const WelcomeScreen = ({ onSignIn, onSignUp }: { onSignIn: () => void, on
             </motion.div>
         </div>
     </div>
-); import { TermsModal } from './TermsModal';
+);
 
 // --- Sign In Screen ---
 export const SignInScreen = ({ onBack, onSuccess, onForgotPassword }: any) => {

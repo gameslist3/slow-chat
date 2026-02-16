@@ -60,9 +60,9 @@ const AppContent = () => {
     };
 
     return (
-        <div className="min-h-screen font-sans selection:bg-primary/20 relative">
+        <div className="h-screen w-screen font-sans selection:bg-primary/20 relative overflow-hidden">
             <AuroraBackground />
-            <div className="relative z-10 w-full h-full">
+            <div className="relative z-10 w-full h-full flex flex-col overflow-hidden">
                 {showPolicy && <StoragePolicyModal onAccept={handleAcceptPolicy} />}
                 {isAuthenticated ? <AuthenticatedSection theme={theme} onToggleTheme={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} /> : <AuthSection />}
             </div>
