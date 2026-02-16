@@ -131,6 +131,8 @@ const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark
     const otherUserId = activePersonalChat?.userIds.find((id: string) => id !== user?.id);
     const personalChatTitle = isPersonal ? (activePersonalChat?.usernames?.[otherUserId || ''] || 'User') : '';
 
+    console.log('[App] Rendering AuthenticatedSection', { activeTab, activeId, isAuthenticated: !!user });
+
     return (
         <AILayout
             activeTab={activeTab === 'chat' ? (isPersonal ? 'friends' : 'explore') : (showDiscovery ? 'explore' : activeTab)}
@@ -147,7 +149,7 @@ const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark
             theme={theme}
             onToggleTheme={onToggleTheme}
         >
-            <div className="w-full h-full flex flex-col">
+            <div className="w-full h-full flex flex-col px-4 md:px-8 lg:px-12 max-w-[1600px] mx-auto">
                 <AnimatePresence mode="wait">
                     {activeTab === 'home' && (
                         <motion.div key="home" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>

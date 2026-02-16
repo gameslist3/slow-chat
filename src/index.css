@@ -1,5 +1,10 @@
+@charset "UTF-8";
+
+/* @tailwind base */
 @tailwind base;
+/* @tailwind components */
 @tailwind components;
+/* @tailwind utilities */
 @tailwind utilities;
 
 @layer base {
@@ -40,6 +45,19 @@
     --radius-pill: 9999px;
 
     --font-main: 'Inter', sans-serif;
+
+    /* --- UI Design Tokens (for Tailwind) --- */
+    --ui-background: 222 47% 11%;
+    --ui-text: 226 100% 95%;
+    --ui-surface: 220 54% 13%;
+    --ui-surface2: 222 55% 21%;
+    --ui-border: 226 100% 95% / 0.08;
+    --ui-ring: 221 100% 75%;
+    --ui-success: 102 65% 60%;
+    --ui-warning: 38 92% 50%;
+    --ui-danger: 0 100% 65%;
+    --ui-muted: 222 30% 60% / 0.1;
+    --ui-muted-text: 222 25% 65%;
   }
 
   /* Force Dark Mode Appearance */
@@ -50,7 +68,11 @@
   }
 
   body {
-    @apply bg-[#0B1220] text-[#E6ECFF] antialiased overflow-hidden;
+    background-color: #0B1220;
+    color: #E6ECFF;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow: hidden;
     /* Main Gradient Background */
     background: radial-gradient(circle at 50% 0%, #182B52 0%, #0F1C34 40%, #0B1220 100%);
     background-attachment: fixed;
@@ -62,7 +84,9 @@
 
   /* Base Glass Panel */
   .glass-panel {
-    @apply backdrop-blur-xl transition-all duration-300;
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     background: var(--glass-fill);
     border: 1px solid var(--glass-border);
     box-shadow: var(--glass-shadow);
@@ -70,7 +94,14 @@
 
   /* Interactive Glass Card */
   .glass-card {
-    @apply glass-panel rounded-[20px] relative overflow-hidden;
+    background: var(--glass-fill);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
   }
 
   .glass-card:hover {
@@ -82,11 +113,27 @@
 
   /* Primary Button (Glowing Pill) */
   .btn-primary {
-    @apply relative inline-flex items-center justify-center rounded-full px-6 py-3 font-semibold transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
     background: linear-gradient(135deg, var(--highlight) 0%, var(--glow-soft) 100%);
     color: #fff;
     box-shadow: 0 4px 15px rgba(91, 121, 183, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .btn-primary:active {
+    transform: scale(0.95);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 
   .btn-primary:hover:not(:disabled) {
@@ -96,10 +143,21 @@
 
   /* Secondary/Ghost Button */
   .btn-ghost {
-    @apply relative inline-flex items-center justify-center rounded-full px-6 py-3 font-medium transition-all duration-300 active:scale-95;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
     background: transparent;
     color: var(--text-secondary);
     border: 1px solid transparent;
+  }
+
+  .btn-ghost:active {
+    transform: scale(0.95);
   }
 
   .btn-ghost:hover {
@@ -110,17 +168,31 @@
 
   /* Input Fields */
   .glass-input {
-    @apply w-full bg-[#FFFFFF08] border border-[#FFFFFF10] rounded-xl px-4 py-3 text-[#E6ECFF] placeholder-[#7C89A6] transition-all duration-300 outline-none;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    color: #E6ECFF;
+    transition: all 0.3s ease;
+    outline: none;
+  }
+
+  .glass-input::placeholder {
+    color: #7C89A6;
   }
 
   .glass-input:focus {
-    @apply bg-[#FFFFFF12] border-[#7FA6FF40];
+    background-color: rgba(255, 255, 255, 0.07);
+    border-color: rgba(127, 166, 255, 0.25);
     box-shadow: 0 0 0 1px rgba(127, 166, 255, 0.1);
   }
 
   /* Sidebar Active Pill */
   .nav-item-active {
-    @apply bg-[#243A6B40] text-[#E6ECFF] border border-[#5B79B740];
+    background-color: rgba(36, 58, 107, 0.25);
+    color: #E6ECFF;
+    border: 1px solid rgba(91, 121, 183, 0.25);
     box-shadow: 0 0 15px rgba(91, 121, 183, 0.2);
   }
 
@@ -135,7 +207,13 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-white/10 rounded-full hover:bg-white/20 transition-colors;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 9999px;
+    transition: background-color 0.2s;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.2);
   }
 }
 
