@@ -31,54 +31,72 @@ export const AILayout: React.FC<AILayoutProps> = ({
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     return (
-        <div className="h-screen w-full text-foreground flex overflow-hidden font-sans selection:bg-primary/30">
+        <div className="flex h-screen w-full overflow-hidden font-sans text-foreground">
 
-            {/* Sidebar (Navigation Rail) - Fixed 240px */}
-            <aside className={`
-                fixed inset-y-0 left-0 z-50 w-[240px] border-r border-white/10 bg-glass-surface backdrop-blur-xl transition-transform duration-500
-                ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-            `}>
+            {/* Desktop Sidebar (Flex Item) */}
+            <aside className="hidden md:flex w-72 flex-col flex-shrink-0 z-50 border-r border-[#FFFFFF08] bg-[#0F1C34]/40 backdrop-blur-xl">
                 <AISidebar
                     activeTab={activeTab}
-                    onTabChange={(tab) => { onTabChange(tab); setSidebarOpen(false); }}
-                    onOpenSettings={() => { onOpenSettings(); setSidebarOpen(false); }}
-                    onGoHome={() => { onGoHome(); setSidebarOpen(false); }}
+                    onTabChange={onTabChange}
+                    onOpenSettings={onOpenSettings}
+                    onGoHome={onGoHome}
                     user={user}
                     onLogout={onLogout}
+                    onToggleTheme={onToggleTheme}
                 />
             </aside>
 
-            {/* Main Canvas - Margin 260px, Padding 60px */}
-            <main className="flex-1 flex flex-col min-w-0 relative z-10 md:ml-[260px] p-0 md:p-[60px] h-screen overflow-hidden">
+            {/* Main Canvas */}
+            <main className="flex-1 flex flex-col min-w-0 relative z-10 h-full overflow-hidden">
                 {/* Mobile Header */}
-                <header className="md:hidden flex items-center justify-between p-4 border-b border-border shrink-0 bg-surface/50 backdrop-blur-md">
-                    <button onClick={() => setSidebarOpen(true)} className="w-10 h-10 rounded-xl bg-surface2 flex items-center justify-center border border-border">
+                <header className="md:hidden flex items-center justify-between p-4 border-b border-[#FFFFFF08] bg-[#0F1C34]/60 backdrop-blur-xl shrink-0">
+                    <button onClick={() => setSidebarOpen(true)} className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
                         <Icon name="menu" className="w-5 h-5 text-muted-foreground" />
                     </button>
-                    <Logo className="h-6 w-auto" />
-                    <button onClick={onOpenSettings} className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
-                        <span className="text-[10px] font-black">{user?.username?.[0].toUpperCase()}</span>
+                    <div className="flex items-center gap-2">
+                        <Logo className="h-6 w-6" />
+                        <span className="font-bold text-lg tracking-tight">Gapes</span>
+                    </div>
+                    <button onClick={onOpenSettings} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
+                        <span className="text-xs font-bold">{user?.username?.[0].toUpperCase()}</span>
                     </button>
                 </header>
 
-                <div className="flex-1 overflow-visible relative h-full">
-                    {/* Removed internal scroll container to let individual screens handle scrolling if needed, or use main's overflow */}
-                    <div className="w-full h-full">
-                        {children}
-                    </div>
+                {/* Content Scroll Area */}
+                <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar relative">
+                    {children}
                 </div>
             </main>
 
             {/* Mobile Sidebar Overlay */}
             <AnimatePresence>
                 {sidebarOpen && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={() => setSidebarOpen(false)}
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
-                    />
+                    <>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setSidebarOpen(false)}
+                            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
+                        />
+                        <motion.aside
+                            initial={{ x: '-100%' }}
+                            animate={{ x: 0 }}
+                            exit={{ x: '-100%' }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                            className="fixed inset-y-0 left-0 z-50 w-72 bg-[#0F1C34]/90 backdrop-blur-xl border-r border-white/10 md:hidden"
+                        >
+                            <AISidebar
+                                activeTab={activeTab}
+                                onTabChange={(tab) => { onTabChange(tab); setSidebarOpen(false); }}
+                                onOpenSettings={() => { onOpenSettings(); setSidebarOpen(false); }}
+                                onGoHome={() => { onGoHome(); setSidebarOpen(false); }}
+                                user={user}
+                                onLogout={onLogout}
+                                onToggleTheme={onToggleTheme}
+                            />
+                        </motion.aside>
+                    </>
                 )}
             </AnimatePresence>
         </div>

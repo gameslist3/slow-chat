@@ -61,9 +61,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     };
 
     return (
-        <div className="w-full h-full relative">
-            {/* Header: Global Top 40px -> Local Top -20px (since Content starts at 60px) */}
-            <div className="absolute top-[-20px] left-0 right-0 h-[60px] z-50">
+        <div className="w-full h-full flex flex-col relative overflow-hidden bg-[#0B1220]/50 backdrop-blur-3xl">
+            {/* Header */}
+            <div className="shrink-0 z-40 bg-black/20 backdrop-blur-md border-b border-white/5">
                 <AIChatHeader
                     groupId={chatId}
                     isPersonal={isPersonal}
@@ -76,31 +76,29 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 />
             </div>
 
-            {/* Message List Area: Global Top 120px -> Local Top 60px. Bottom 100px (to leave space for input at 30px) */}
-            {/* Global Height: calc(100vh - 220px). 
-                Top 120px + Height (100vh - 220px) = Bottom 100px.
-                Input is at Bottom 30px with height 60px (Top of input at 90px).
-                Gap between Messages (Bottom 100px) and Input (Top 90px) is 10px? Matches well.
-            */}
-            <div className="absolute top-[60px] left-0 right-0 bottom-[100px] overflow-hidden">
+            {/* Messages */}
+            <div className="flex-1 overflow-hidden relative">
                 {loading && messages.length === 0 ? (
-                    <div className="max-w-4xl mx-auto py-10 space-y-8 px-4 flex-1 w-full overflow-hidden">
-                        {[1, 2, 3, 4, 5].map(i => (
+                    <div className="max-w-4xl mx-auto py-10 space-y-8 px-8 w-full">
+                        {[1, 2, 3].map(i => (
                             <div key={i} className={`flex gap-4 animate-pulse ${i % 2 === 0 ? 'flex-row-reverse' : ''}`}>
-                                <div className="w-10 h-10 bg-white/5 rounded-xl shrink-0" />
+                                <div className="w-10 h-10 bg-white/5 rounded-2xl shrink-0" />
                                 <div className={`flex-1 space-y-3 ${i % 2 === 0 ? 'items-end flex flex-col' : ''}`}>
                                     <div className="h-2 bg-white/5 rounded w-24" />
-                                    <div className={`h-12 bg-white/5 rounded-2xl w-3/4 ${i % 2 === 0 ? 'rounded-tr-none' : 'rounded-tl-none'}`} />
+                                    <div className={`h-16 bg-white/5 rounded-3xl w-2/3 ${i % 2 === 0 ? 'rounded-tr-none' : 'rounded-tl-none'}`} />
                                 </div>
                             </div>
                         ))}
                     </div>
                 ) : (
-                    <div className="flex-1 flex flex-col h-full w-full">
+                    <div className="h-full w-full">
                         {messages.length === 0 ? (
-                            <div className="flex-1 flex flex-col items-center justify-center py-20 opacity-20">
-                                <div className="text-6xl mb-6 grayscale italic">💬</div>
-                                <p className="text-[10px] uppercase tracking-[0.3em] font-black">No activity located</p>
+                            <div className="h-full flex flex-col items-center justify-center opacity-30 text-center p-8">
+                                <div className="w-24 h-24 bg-blue-500/20 rounded-full flex items-center justify-center mb-6">
+                                    <div className="text-4xl">💬</div>
+                                </div>
+                                <p className="text-xs uppercase tracking-[0.3em] font-black text-blue-200">No signals detected</p>
+                                <p className="text-sm text-blue-200/50 mt-2">Begin transmission</p>
                             </div>
                         ) : (
                             <AIMessageList
@@ -115,17 +113,15 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 )}
             </div>
 
-            {/* Composer: Global Bottom 30px -> Local Bottom -30px. Height 60px. */}
-            <div className="absolute bottom-[-30px] left-0 right-0 h-[60px] z-50">
-                <AIComposer
-                    groupId={chatId}
-                    userId={user?.id || ''}
-                    onSend={handleSendMessage}
-                    replyingTo={replyingTo}
-                    onCancelReply={cancelReply}
-                    cooldown={remaining}
-                />
-            </div>
+            {/* Composer */}
+            <AIComposer
+                groupId={chatId}
+                userId={user?.id || ''}
+                onSend={handleSendMessage}
+                replyingTo={replyingTo}
+                onCancelReply={cancelReply}
+                cooldown={remaining}
+            />
         </div>
     );
 };

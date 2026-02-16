@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Icon } from '../common/Icon';
-import { Button } from '../ui/Button';
-import { Input } from '../ui/Input';
-import { Skeleton } from '../ui/Skeleton';
 import { Group } from '../../types';
-import { getGroups, createGroup, subscribeToGroups, CATEGORIES, ICONS } from '../../services/firebaseGroupService';
+import { createGroup, subscribeToGroups, ICONS } from '../../services/firebaseGroupService';
 import { useAuth } from '../../context/AuthContext';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 // --- Group Card ---
 const GroupCard = ({ group, isJoined, onAction }: { group: Group, isJoined: boolean, onAction: () => void }) => (
-    <div className="group relative glass-panel p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] flex flex-col h-full overflow-hidden hover:border-primary/40 transition-all duration-500 shadow-xl hover:shadow-primary/5">
+    <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="group relative glass-panel p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] flex flex-col h-full overflow-hidden hover:border-primary/40 transition-all duration-500 shadow-xl hover:shadow-primary/5"
+    >
         <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:opacity-10 transition-opacity pointer-events-none">
             <Icon name="message" className="w-24 h-24 -rotate-12" />
         </div>
@@ -21,7 +23,7 @@ const GroupCard = ({ group, isJoined, onAction }: { group: Group, isJoined: bool
         </div>
 
         <div className="mb-6 md:mb-8 relative z-10">
-            <h3 className="text-xl md:text-2xl font-black text-foreground mb-2 group-hover:text-primary transition-colors tracking-tight leading-tight">{group.name}</h3>
+            <h3 className="text-xl md:text-2xl font-black text-foreground mb-2 group-hover:text-primary transition-colors tracking-tight leading-tight line-clamp-1">{group.name}</h3>
             <p className="text-sm text-muted-foreground/60 line-clamp-2 font-medium leading-relaxed">Join the conversation.</p>
         </div>
 
@@ -42,7 +44,7 @@ const GroupCard = ({ group, isJoined, onAction }: { group: Group, isJoined: bool
                 {isJoined ? "open" : "join"}
             </motion.button>
         </div>
-    </div>
+    </motion.div>
 );
 
 // --- Discovery ---
@@ -68,47 +70,47 @@ export const GroupDiscovery = ({ onJoinGroup, onSelectGroup, joinedGroupIds, onC
     });
 
     return (
-        <div className="w-full h-full relative font-sans text-foreground">
-            {/* Title: Global 80px -> Local 20px */}
-            <div className="absolute top-[20px] left-0">
-                <h1 className="text-5xl font-black tracking-tighter uppercase leading-[0.8]">Explore <span className="text-primary">Groups</span></h1>
-            </div>
+        <div className="w-full h-full flex flex-col px-6 md:px-12 py-8 max-w-7xl mx-auto space-y-8">
+            {/* Header Area */}
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6 shrink-0">
+                <h1 className="text-4xl md:text-5xl font-black tracking-tighter uppercase leading-[0.8] text-center md:text-left">
+                    Explore <span className="text-primary">Groups</span>
+                </h1>
 
-            {/* Search: Global 140px -> Local 80px. Center width 420px */}
-            {/* Prompt says "Search bar: top 140px center width 420px". 
-                "Center" relative to Content Area? Content Area is width ~1180px (1440-260). 
-                Center of text area is ~590px. 
-                I will center it relative to the container. */}
-            <div className="absolute top-[80px] left-1/2 -translate-x-1/2 w-[420px]">
-                <div className="relative group w-full">
-                    <Icon name="search" className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-primary opacity-20 transition-opacity group-focus-within:opacity-100" />
-                    <input
-                        placeholder="Search..."
-                        value={filter}
-                        onChange={e => setFilter(e.target.value)}
-                        className="glass-input pl-16 h-12 bg-white/5 text-sm font-bold rounded-full border border-white/5 focus:bg-white/10 transition-all w-full shadow-lg"
-                    />
+                <div className="flex items-center gap-4 w-full md:w-auto">
+                    {/* Search */}
+                    <div className="relative group flex-1 md:w-[320px]">
+                        <Icon name="search" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 group-focus-within:text-primary transition-colors" />
+                        <input
+                            placeholder="Search..."
+                            value={filter}
+                            onChange={e => setFilter(e.target.value)}
+                            className="glass-input pl-10 h-12 w-full rounded-2xl bg-white/5 border-white/5 focus:bg-white/10 text-sm font-bold transition-all placeholder:text-muted-foreground/40"
+                        />
+                    </div>
+
+                    {/* Create Action */}
+                    {onCreateGroup && (
+                        <button
+                            onClick={onCreateGroup}
+                            className="h-12 w-12 md:w-auto md:px-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-3 transition-all shrink-0"
+                            title="Create Group"
+                        >
+                            <span className="hidden md:inline">Create</span>
+                            <Icon name="plus" className="w-4 h-4" />
+                        </button>
+                    )}
                 </div>
             </div>
 
-            {/* Create New: Global 140px, Right 80px -> Local 80px, Right 20px */}
-            {onCreateGroup && (
-                <button
-                    onClick={onCreateGroup}
-                    className="absolute top-[80px] right-[20px] h-12 px-6 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold uppercase tracking-widest text-xs flex items-center gap-3 transition-all"
-                >
-                    Create New <Icon name="plus" className="w-4 h-4" />
-                </button>
-            )}
-
-            {/* Grid: Global 220px -> Local 160px */}
-            <div className="absolute top-[160px] left-0 right-0 bottom-0 overflow-y-auto pr-2 pb-10">
+            {/* Grid */}
+            <div className="flex-1 overflow-y-auto min-h-0 pr-2 pb-8 custom-scrollbar">
                 {loading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[20px]">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="h-64 w-full rounded-[2.5rem] glass-panel animate-pulse bg-white/5 opacity-20" />)}
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[20px] animate-in fade-in slide-in-from-bottom-8 duration-700">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
                         {filtered.map(g => (
                             <GroupCard
                                 key={g.id}
@@ -117,6 +119,11 @@ export const GroupDiscovery = ({ onJoinGroup, onSelectGroup, joinedGroupIds, onC
                                 onAction={() => joinedGroupIds.includes(g.id) ? onSelectGroup(g.id) : onJoinGroup(g.id)}
                             />
                         ))}
+                        {filtered.length === 0 && (
+                            <div className="col-span-full py-20 text-center text-muted-foreground/40 font-bold uppercase tracking-widest">
+                                No discovery results
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
@@ -142,69 +149,75 @@ export const CreateGroup = ({ onGroupCreated, onBack }: { onGroupCreated: (id: s
     };
 
     return (
-        <div className="w-full h-full relative">
-            {/* Title: Global 140px -> Local 80px. Center */}
-            <div className="absolute top-[80px] left-1/2 -translate-x-1/2 text-center">
-                {onBack && (
-                    <button onClick={onBack} className="absolute -left-16 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors">
-                        <Icon name="arrowLeft" className="w-5 h-5 text-white" />
-                    </button>
-                )}
-                <h2 className="text-3xl font-black tracking-tighter uppercase leading-none text-white">Create Group</h2>
-            </div>
-
-            {/* Icon Selector: Global 240px -> Local 180px. Center */}
-            <div className="absolute top-[180px] left-1/2 -translate-x-1/2 w-[380px] flex flex-col items-center gap-2">
-                <label className="text-[10px] font-bold tracking-widest text-muted-foreground/40 uppercase">Choose Icon</label>
-                <div className="flex gap-3 overflow-x-auto w-full justify-center pb-2 no-scrollbar">
-                    {ICONS.map(i => (
-                        <motion.button
-                            key={i}
-                            type="button"
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={() => setIcon(i)}
-                            className={`
-                                shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-xl transition-all border
-                                ${icon === i ? 'bg-primary border-primary text-white shadow-lg' : 'bg-white/5 border-transparent hover:bg-white/10 opacity-50 hover:opacity-100'}
-                            `}
-                        >
-                            {i}
-                        </motion.button>
-                    ))}
+        <div className="w-full h-full flex items-center justify-center p-6 relative overflow-y-auto">
+            <div className="w-full max-w-lg space-y-8 text-center relative z-10">
+                {/* Header */}
+                <div className="relative">
+                    {onBack && (
+                        <button onClick={onBack} className="absolute -left-4 md:-left-12 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors">
+                            <Icon name="arrowLeft" className="w-5 h-5 text-white" />
+                        </button>
+                    )}
+                    <h2 className="text-3xl md:text-4xl font-black tracking-tighter uppercase leading-none text-white">Create Group</h2>
+                    <p className="text-blue-200/40 font-bold uppercase tracking-widest text-xs mt-2">Initialize new communications node</p>
                 </div>
-            </div>
 
-            {/* Inputs: Global 320px -> Local 260px. Center Width 380px */}
-            <div className="absolute top-[260px] left-1/2 -translate-x-1/2 w-[380px]">
-                <form onSubmit={handleSubmit} className="flex flex-col gap-[20px]">
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-bold tracking-widest text-muted-foreground/40 uppercase ml-2">Name</label>
-                        <input
-                            value={name}
-                            onChange={e => setName(e.target.value)}
-                            className="glass-input w-full h-[48px] px-6 rounded-full bg-white/[0.03] border-white/5 text-white font-bold focus:bg-white/[0.05] focus:border-primary/30 transition-all placeholder:text-muted-foreground/20"
-                            placeholder="Group Name"
-                        />
-                    </div>
+                <div className="glass-panel p-8 md:p-10 rounded-[3rem] border border-white/10 shadow-2xl relative bg-[#0B1220]/50 backdrop-blur-xl">
+                    <form onSubmit={handleSubmit} className="flex flex-col gap-8">
 
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-bold tracking-widest text-muted-foreground/40 uppercase ml-2">Category</label>
-                        <input
-                            value={cat}
-                            onChange={e => setCat(e.target.value)}
-                            className="glass-input w-full h-[48px] px-6 rounded-full bg-white/[0.03] border-white/5 text-white font-bold focus:bg-white/[0.05] focus:border-primary/30 transition-all placeholder:text-muted-foreground/20"
-                            placeholder="Design, Tech, gaming..."
-                        />
-                    </div>
+                        {/* Icon Selector */}
+                        <div className="space-y-4">
+                            <label className="text-[10px] font-bold tracking-widest text-blue-200/40 uppercase">Cluster Icon</label>
+                            <div className="flex gap-3 overflow-x-auto w-full justify-center pb-2 no-scrollbar px-2">
+                                {ICONS.map(i => (
+                                    <motion.button
+                                        key={i}
+                                        type="button"
+                                        whileHover={{ scale: 1.1 }}
+                                        whileTap={{ scale: 0.9 }}
+                                        onClick={() => setIcon(i)}
+                                        className={`
+                                            shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-xl transition-all border
+                                            ${icon === i ? 'bg-primary border-primary text-white shadow-lg' : 'bg-white/5 border-transparent hover:bg-white/10 opacity-50 hover:opacity-100'}
+                                        `}
+                                    >
+                                        {i}
+                                    </motion.button>
+                                ))}
+                            </div>
+                        </div>
 
-                    <button
-                        disabled={!name || !cat || loading}
-                        className="w-full h-[48px] rounded-full bg-secondary text-white font-black uppercase tracking-[0.2em] text-xs shadow-xl shadow-secondary/20 hover:shadow-secondary/40 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 mt-[20px] flex items-center justify-center gap-2"
-                    >
-                        {loading ? <Icon name="rotate" className="w-4 h-4 animate-spin" /> : "Create Group"}
-                    </button>
-                </form>
+                        {/* Inputs */}
+                        <div className="space-y-4">
+                            <div className="space-y-2 text-left">
+                                <label className="text-[10px] font-bold tracking-widest text-blue-200/40 uppercase ml-4">Node Name</label>
+                                <input
+                                    value={name}
+                                    onChange={e => setName(e.target.value)}
+                                    className="glass-input w-full h-14 px-6 rounded-2xl bg-black/20 border-white/5 text-white font-bold focus:bg-black/40 focus:border-primary/50 transition-all placeholder:text-muted-foreground/20 text-center"
+                                    placeholder="e.g. Neon Nights"
+                                />
+                            </div>
+
+                            <div className="space-y-2 text-left">
+                                <label className="text-[10px] font-bold tracking-widest text-blue-200/40 uppercase ml-4">Category Protocol</label>
+                                <input
+                                    value={cat}
+                                    onChange={e => setCat(e.target.value)}
+                                    className="glass-input w-full h-14 px-6 rounded-2xl bg-black/20 border-white/5 text-white font-bold focus:bg-black/40 focus:border-primary/50 transition-all placeholder:text-muted-foreground/20 text-center"
+                                    placeholder="e.g. Gaming, Tech, Music"
+                                />
+                            </div>
+                        </div>
+
+                        <button
+                            disabled={!name || !cat || loading}
+                            className="w-full h-14 rounded-2xl btn-primary text-white font-black uppercase tracking-[0.2em] text-xs shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 mt-4 flex items-center justify-center gap-2"
+                        >
+                            {loading ? <Icon name="rotate" className="w-5 h-5 animate-spin" /> : "Deploy Group"}
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     );

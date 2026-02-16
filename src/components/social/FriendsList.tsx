@@ -84,87 +84,121 @@ export const FriendsList: React.FC<{ onSelectFriend?: (friendId: string) => void
     if (!currentUser) return null;
 
     return (
-        <div className="w-full h-full relative">
-            {/* Title: Global 80px -> Local 20px */}
-            <div className="absolute top-[20px] left-0">
-                <h2 className="text-4xl md:text-5xl font-normal text-white tracking-tight">My <span className="font-bold">Friends</span></h2>
-            </div>
-            {/* Subtitle not explicitly positioned in prompt but keeping it close to title */}
-
-            {/* Friends Grid: Global 160px -> Local 100px */}
-            <div className="absolute top-[100px] left-0 right-0 h-[200px]"> {/* Fixed height or just top? Prompt says "Friends grid top 160px... Pending section top 360px". So grid height limited or specific? 3 per row. I'll let it flow but pending is absolute. */}
-                {/* Wait, if Pending is Top 360px, Grid must fit between 160px and 360px (200px height). That's small. 
-                   "Friends grid top 160px ... Pending section top 360px".
-                   Maybe the Grid pushes pending down? No, "Positioning ... Pending section top 360px" implies fixed.
-                   I will treat Pending as Fixed Top 360px.
-                   The Grid will start at Top 100px (Local).
-                   If Grid content overlaps Pending, it will overlap. 
-                   I will assume standard desktop view.
-                */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {friends.map((friend) => (
-                        <div
-                            key={friend.uid}
-                            onClick={() => onSelectFriend?.(friend.uid)}
-                            className="bg-[#1A2333]/40 border border-white/5 rounded-2xl p-4 flex items-center justify-between hover:bg-[#1A2333]/60 transition-all cursor-pointer group h-[80px]" // Height approx
-                        >
-                            <div className="flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-full bg-transparent border border-white/10 flex items-center justify-center text-slate-300">
-                                    <Icon name="user" className="w-5 h-5" />
-                                </div>
-                                <span className="font-bold text-white text-lg">{friend.username}</span>
-                            </div>
-                            <div className="bg-[#151a23] border border-white/5 rounded-full px-3 py-1 text-xs font-medium text-slate-400">
-                                2 New
-                            </div>
-                        </div>
-                    ))}
+        <div className="w-full h-full flex flex-col px-6 md:px-12 py-8 max-w-7xl mx-auto space-y-8">
+            {/* Header */}
+            <div className="shrink-0 flex items-center justify-between">
+                <div>
+                    <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter uppercase leading-none">
+                        My <span className="text-primary">Network</span>
+                    </h2>
+                    <p className="text-blue-200/40 font-bold uppercase tracking-widest text-xs mt-2">
+                        Active Connections & Sync Requests
+                    </p>
                 </div>
             </div>
 
-            {/* Pending Section: Global 360px -> Local 300px */}
-            <div className="absolute top-[300px] left-0 right-0 bottom-0">
-                <div className="flex items-center gap-4 mb-6">
-                    <h3 className="text-xl font-bold text-slate-200">Pending Requests</h3>
-                    <div className="px-2.5 py-0.5 rounded-full bg-[#151a23] border border-white/5 text-xs text-slate-400 font-bold">
-                        {requests.length}
+            {/* Main Content - Scrollable */}
+            <div className="flex-1 overflow-y-auto min-h-0 pr-2 pb-8 custom-scrollbar space-y-12">
+
+                {/* Pending Requests */}
+                {requests.length > 0 && (
+                    <section className="space-y-6">
+                        <div className="flex items-center gap-4">
+                            <h3 className="text-lg font-bold text-white uppercase tracking-widest flex items-center gap-3">
+                                <Icon name="sparkles" className="w-4 h-4 text-secondary" />
+                                Pending Uplinks
+                            </h3>
+                            <div className="px-2 py-0.5 rounded-full bg-secondary/10 border border-secondary/20 text-[10px] text-secondary font-black">
+                                {requests.length}
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                            {requests.map((req) => (
+                                <div key={req.id} className="glass-panel p-5 rounded-2xl flex items-center justify-between gap-4 border-l-2 border-l-secondary/50">
+                                    <div className="flex items-center gap-3 overflow-hidden">
+                                        <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary border border-secondary/20 shrink-0">
+                                            <Icon name="user" className="w-5 h-5" />
+                                        </div>
+                                        <div className="overflow-hidden">
+                                            <h4 className="font-bold text-white truncate">{req.fromUsername}</h4>
+                                            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Incoming Request</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-2 shrink-0">
+                                        <button
+                                            onClick={() => handleAccept(req.id!)}
+                                            className="w-8 h-8 rounded-lg bg-secondary/20 text-secondary hover:bg-secondary hover:text-black flex items-center justify-center transition-colors"
+                                            title="Accept"
+                                        >
+                                            <Icon name="check" className="w-4 h-4" />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDecline(req.id!)}
+                                            className="w-8 h-8 rounded-lg bg-white/5 text-muted-foreground hover:bg-red-500/20 hover:text-red-500 flex items-center justify-center transition-colors"
+                                            title="Decline"
+                                        >
+                                            <Icon name="x" className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                )}
+
+                {/* Friends Grid */}
+                <section className="space-y-6">
+                    <div className="flex items-center gap-4">
+                        <h3 className="text-lg font-bold text-white uppercase tracking-widest flex items-center gap-3">
+                            <Icon name="users" className="w-4 h-4 text-primary" />
+                            Active Nodes
+                        </h3>
+                        <div className="px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-[10px] text-primary font-black">
+                            {friends.length}
+                        </div>
                     </div>
-                </div>
 
-                <div className="flex gap-6 overflow-x-auto pb-4">
-                    {requests.map((req) => (
-                        <div key={req.id} className="min-w-[300px] bg-[#1A2333]/40 border border-white/5 rounded-2xl p-5">
-                            {/* Card content matches design */}
-                            <div className="flex items-start justify-between mb-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400">
-                                        <Icon name="sparkles" className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                        <h4 className="font-bold text-white">{req.fromUsername}</h4>
-                                        <p className="text-xs text-slate-500">Wants to connect</p>
-                                    </div>
-                                </div>
-                                <span className="text-xs text-slate-500 bg-[#151a23] px-2 py-1 rounded-md border border-white/5">2 D</span>
+                    {friends.length === 0 ? (
+                        <div className="py-20 text-center opacity-30">
+                            <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Icon name="users" className="w-8 h-8" />
                             </div>
-
-                            <div className="flex items-center gap-3">
-                                <button
-                                    onClick={() => handleAccept(req.id!)}
-                                    className="flex-1 bg-[#4C6B2F]/80 hover:bg-[#4C6B2F] text-[#B8E986] py-2 rounded-lg text-sm font-bold transition-colors"
-                                >
-                                    Accept
-                                </button>
-                                <button
-                                    onClick={() => handleDecline(req.id!)}
-                                    className="flex-1 bg-[#1A2333] border border-white/5 hover:bg-white/5 text-slate-400 py-2 rounded-lg text-sm font-bold transition-colors"
-                                >
-                                    Decline
-                                </button>
-                            </div>
+                            <p className="text-xs uppercase tracking-widest font-bold">Network Empty</p>
                         </div>
-                    ))}
-                </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                            {friends.map((friend) => (
+                                <motion.div
+                                    key={friend.uid}
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    whileHover={{ scale: 1.02 }}
+                                    onClick={() => onSelectFriend?.(friend.uid)}
+                                    className="glass-card p-4 rounded-2xl flex items-center gap-4 cursor-pointer group hover:border-primary/30 hover:bg-primary/5 transition-all"
+                                >
+                                    <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/50 group-hover:text-primary group-hover:border-primary/30 transition-colors">
+                                        <Icon name="user" className="w-6 h-6" />
+                                    </div>
+                                    <div className="flex-1 overflow-hidden">
+                                        <h4 className="font-bold text-white truncate group-hover:text-primary transition-colors">{friend.username}</h4>
+                                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                            Online
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); handleUnfollowFriend(friend.uid, friend.username); }}
+                                        className="w-8 h-8 rounded-lg hover:bg-red-500/10 text-transparent group-hover:text-red-500/50 hover:!text-red-500 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100"
+                                        title="Disconnect"
+                                    >
+                                        <Icon name="trash" className="w-4 h-4" />
+                                    </button>
+                                </motion.div>
+                            ))}
+                        </div>
+                    )}
+                </section>
             </div>
         </div>
     );

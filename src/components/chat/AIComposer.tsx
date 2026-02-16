@@ -142,7 +142,7 @@ export const AIComposer: React.FC<AIComposerProps> = ({
     };
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 pt-2 bg-gradient-to-t from-[#050505] via-[#050505] to-transparent bg-opacity-90 backdrop-blur-sm pointer-events-none md:absolute md:bottom-0 md:w-full">
+        <div className="w-full z-50 px-4 pb-6 pt-2 bg-gradient-to-t from-[#0B1220] via-[#0B1220] to-transparent pointer-events-none shrink-0">
             <div className="max-w-4xl mx-auto w-full pointer-events-auto relative">
                 <AnimatePresence>
                     {replyingTo && (
