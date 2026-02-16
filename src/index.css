@@ -1,9 +1,6 @@
-@charset "UTF-8";
-
-/* Standard Tailwind Imports to avoid IDE warnings */
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @layer base {
   :root {

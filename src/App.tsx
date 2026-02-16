@@ -21,13 +21,39 @@ import { NotificationList } from './components/chat/NotificationCenter';
 import { subscribeToNotifications, markAllAsRead } from './services/firebaseNotificationService';
 import { unfollowUser } from './services/firebaseFollowService';
 
+const AuthSection = () => {
+    const { user, completeLogin, loginWithData } = useAuth();
+    const [step, setStep] = useState('welcome');
+
+    if (user && !user.username) {
+        return <NameScreen onNameSelected={completeLogin} />;
+    }
+
+    return (
+        <div className="flex-1 w-full flex flex-col">
+            <AnimatePresence mode="wait">
+                {step === 'welcome' && <WelcomeScreen key="w" onSignIn={() => setStep('signin')} onSignUp={() => setStep('signup')} />}
+                {step === 'signin' && <SignInScreen key="si" onBack={() => setStep('welcome')} onSuccess={loginWithData} onForgotPassword={() => setStep('forgot-password')} />}
+                {step === 'signup' && <SignUpScreen key="su" onBack={() => setStep('welcome')} onSuccess={loginWithData} />}
+                {step === 'forgot-password' && <ForgotPasswordScreen key="fp" onBack={() => setStep('signin')} />}
+            </AnimatePresence>
+        </div>
+    );
+};
+
 const AppContent = () => {
-    const { isAuthenticated, user } = useAuth();
+    const { isAuthenticated, user, loading } = useAuth();
+    const [isClient, setIsClient] = useState(false);
     const [showPolicy, setShowPolicy] = useState(false);
     const [theme, setTheme] = useState<'light' | 'dark'>(() => {
         const saved = localStorage.getItem('slowchat_theme');
         return (saved as any) || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     });
+
+    useEffect(() => {
+        setIsClient(true);
+        console.log('[App] Mount Start');
+    }, []);
 
     useEffect(() => {
         if (theme === 'dark') {
@@ -59,32 +85,52 @@ const AppContent = () => {
         setShowPolicy(false);
     };
 
-    return (
-        <div className="h-screen w-screen font-sans selection:bg-primary/20 relative overflow-hidden">
-            <AuroraBackground />
-            <div className="relative z-10 w-full h-full flex flex-col overflow-hidden">
-                {showPolicy && <StoragePolicyModal onAccept={handleAcceptPolicy} />}
-                {isAuthenticated ? <AuthenticatedSection theme={theme} onToggleTheme={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} /> : <AuthSection />}
+    if (!isClient || loading) {
+        return (
+            <div className="h-screen w-screen bg-[#0B1220] flex items-center justify-center p-12">
+                <div className="flex flex-col items-center gap-6 text-center">
+                    <div className="relative">
+                        <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="w-2 h-2 bg-primary rounded-full animate-ping" />
+                        </div>
+                    </div>
+                    <div className="space-y-1">
+                        <p className="text-white text-lg font-black uppercase italic tracking-tighter">System Booting</p>
+                        <p className="text-primary/40 text-[10px] font-bold uppercase tracking-[0.2em]">Synchronizing Neural Net</p>
+                    </div>
+                    {/* Fallback diagnostic */}
+                    <div className="mt-8 text-[8px] text-white/5 uppercase tracking-widest">
+                        Node: {window.location.hostname} | Build: Stable
+                    </div>
+                </div>
             </div>
-        </div>
-    );
-};
-
-const AuthSection = () => {
-    const { user, completeLogin, loginWithData } = useAuth();
-    const [step, setStep] = useState('welcome');
-
-    if (user && !user.username) {
-        return <NameScreen onNameSelected={completeLogin} />;
+        );
     }
 
+    console.log('[App] Rendering Root', { isAuthenticated, hasUser: !!user });
+
     return (
-        <AnimatePresence mode="wait">
-            {step === 'welcome' && <WelcomeScreen key="w" onSignIn={() => setStep('signin')} onSignUp={() => setStep('signup')} />}
-            {step === 'signin' && <SignInScreen key="si" onBack={() => setStep('welcome')} onSuccess={loginWithData} onForgotPassword={() => setStep('forgot-password')} />}
-            {step === 'signup' && <SignUpScreen key="su" onBack={() => setStep('welcome')} onSuccess={loginWithData} />}
-            {step === 'forgot-password' && <ForgotPasswordScreen key="fp" onBack={() => setStep('signin')} />}
-        </AnimatePresence>
+        <div className="h-screen w-screen font-sans bg-[#0B1220] selection:bg-primary/20 relative overflow-hidden text-white">
+            {/* Debug Label (Visible during dev) */}
+            <div className="fixed top-2 right-2 z-[9999] px-2 py-1 bg-primary rounded text-[8px] font-bold uppercase tracking-widest opacity-20 pointer-events-none">
+                Gapes Core v1.1.2 {isAuthenticated ? 'Auth' : 'Public'}
+            </div>
+
+            <div className="relative z-10 w-full h-full flex flex-col overflow-hidden">
+                {showPolicy && <StoragePolicyModal onAccept={handleAcceptPolicy} />}
+                <div className="flex-1 w-full flex flex-col overflow-hidden min-h-full">
+                    {isAuthenticated ? (
+                        <AuthenticatedSection
+                            theme={theme}
+                            onToggleTheme={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
+                        />
+                    ) : (
+                        <AuthSection />
+                    )}
+                </div>
+            </div>
+        </div>
     );
 };
 
