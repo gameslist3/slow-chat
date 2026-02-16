@@ -99,49 +99,59 @@ const MessageItem = ({
             id={`msg-${message.id}`}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'} ${isSequence ? 'mt-1' : 'mt-4'} relative group px-2 md:px-0`}
+            className={`flex ${isOwn ? 'flex-row-reverse' : 'flex-row'} gap-3 ${isSequence ? 'mt-2' : 'mt-6'} relative group px-2 md:px-0`}
         >
-            {/* Sender Name (Group Chat - Others Only) */}
+            {/* Avatar (Incoming Only) */}
             {!isOwn && !isSequence && (
                 <button
                     onClick={() => onUserClick(message.senderId)}
-                    className="ml-2 mb-1 text-[10px] font-black uppercase tracking-widest text-primary/80 hover:text-primary transition-colors"
+                    className="shrink-0 w-8 h-8 rounded-full bg-[#FFFFFF0D] border border-[#FFFFFF1F] flex items-center justify-center text-xs font-bold text-[#E6ECFF] hover:border-[#7FA6FF]/50 transition-colors self-end"
                 >
-                    {message.sender}
+                    {message.sender?.[0]?.toUpperCase() || 'U'}
                 </button>
             )}
 
-            <div className={`relative max-w-[85%] md:max-w-[65%] flex flex-col ${isOwn ? 'items-end' : 'items-start'}`}>
+            {/* Spacer for sequence messages without avatar */}
+            {!isOwn && isSequence && <div className="w-8 shrink-0" />}
+
+            <div className={`relative max-w-[75%] md:max-w-[60%] flex flex-col ${isOwn ? 'items-end' : 'items-start'}`}>
+                {/* Sender Name (Incoming, non-sequence) */}
+                {!isOwn && !isSequence && (
+                    <span className="ml-3 mb-1 text-[10px] font-bold uppercase tracking-wider text-[#7FA6FF]/80">
+                        {message.sender}
+                    </span>
+                )}
+
                 {/* Reply Context */}
                 {message.replyTo && (
                     <button
                         onClick={() => onJumpToReply(message.replyTo!.messageId)}
-                        className={`text-[10px] flex items-center gap-2 px-3 py-2 rounded-lg mb-1 transition-all border w-full
-                            ${isOwn ? 'bg-primary/20 border-primary/30 text-white/80' : 'bg-white/5 border-white/10 text-muted-foreground'}
+                        className={`text-[10px] flex items-center gap-2 px-3 py-2 rounded-xl mb-1.5 transition-all border backdrop-blur-sm w-full
+                            ${isOwn ? 'bg-[#5B79B7]/20 border-[#5B79B7]/30 text-[#E6ECFF]/80' : 'bg-white/5 border-white/10 text-[#A9B4D0]'}
                         `}
                     >
-                        <div className="w-0.5 h-4 bg-primary/50 rounded-full" />
+                        <div className="w-0.5 h-4 bg-[#7FA6FF]/50 rounded-full" />
                         <span className="truncate">{message.replyTo.text}</span>
                     </button>
                 )}
 
-                {/* Bubble */}
+                {/* Message Bubble */}
                 <div className={`
-                    relative px-3 py-2 shadow-sm text-[15px] leading-relaxed break-words flex flex-wrap gap-x-4 items-end
+                    relative px-4 py-2.5 shadow-lg text-[15px] leading-relaxed break-words flex flex-wrap gap-x-4 items-end backdrop-blur-md
                     ${isOwn
-                        ? 'bg-primary text-primary-foreground rounded-l-2xl rounded-tr-2xl rounded-br-sm'
-                        : 'bg-[#202c33] text-[#e9edef] rounded-r-2xl rounded-tl-2xl rounded-bl-sm'}
+                        ? 'bg-[#7FA6FF]/18 border border-[#7FA6FF]/20 text-[#E6ECFF] rounded-l-2xl rounded-tr-2xl rounded-br-md shadow-[#7FA6FF]/10'
+                        : 'bg-[#FFFFFF0F] border border-[#FFFFFF1F] text-[#E6ECFF] rounded-r-2xl rounded-tl-2xl rounded-bl-md'}
                 `}>
                     {/* Message Content */}
-                    <div className="z-10 relative">
+                    <div className="z-10 relative flex-1">
                         {message.type === 'text' && (
                             <span className="whitespace-pre-wrap">{message.text}</span>
                         )}
 
                         {/* Media */}
                         {message.media && (
-                            <div className="mt-1 mb-1 rounded-lg overflow-hidden">
-                                {message.type === 'image' && <img src={message.media.url} className="max-h-80 w-auto object-cover" alt="" />}
+                            <div className="mt-2 mb-1 rounded-lg overflow-hidden">
+                                {message.type === 'image' && <img src={message.media.url} className="max-h-80 w-auto object-cover rounded-lg" alt="" />}
                                 {(message.type === 'audio' || message.media.type === 'audio') && <AudioPlayer src={message.media.url} />}
                                 {(message.type === 'video' || message.media.type === 'video') && (
                                     <video src={message.media.url} controls className="max-h-80 w-full rounded-lg" />
@@ -151,13 +161,13 @@ const MessageItem = ({
                     </div>
 
                     {/* Metadata (Time + Ticks) */}
-                    <div className={`flex items-center gap-1 shrink-0 select-none ml-auto h-[16px] self-end translate-y-[3px]`}>
-                        <span className={`text-[10px] font-medium ${isOwn ? 'text-primary-foreground/70' : 'text-white/60'}`}>
+                    <div className={`flex items-center gap-1.5 shrink-0 select-none ml-auto h-[18px] self-end`}>
+                        <span className={`text-[10px] font-medium ${isOwn ? 'text-[#E6ECFF]/60' : 'text-[#A9B4D0]/70'}`}>
                             {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                         {isOwn && (
-                            <span className="text-primary-foreground/90">
-                                {message.status === 'seen' || message.readBy?.length ? <CheckCheck className="w-3.5 h-3.5" /> : <Check className="w-3.5 h-3.5 opacity-70" />}
+                            <span className="text-[#E6ECFF]/80">
+                                {message.status === 'seen' || message.readBy?.length ? <CheckCheck className="w-3.5 h-3.5" /> : <Check className="w-3.5 h-3.5 opacity-60" />}
                             </span>
                         )}
                     </div>
@@ -165,10 +175,12 @@ const MessageItem = ({
 
                 {/* Reactions */}
                 {message.reactions && message.reactions.length > 0 && (
-                    <div className={`absolute -bottom-3 z-20 ${isOwn ? 'right-2' : 'left-2'}`}>
-                        <div className="bg-[#202c33] border border-[#000000]/20 rounded-full px-1.5 py-0.5 text-[10px] flex items-center gap-1 shadow-md">
+                    <div className={`absolute -bottom-2.5 z-20 ${isOwn ? 'right-2' : 'left-2'}`}>
+                        <div className="bg-[#0F1C34] border border-[#FFFFFF1F] rounded-full px-2 py-1 text-[10px] flex items-center gap-1.5 shadow-lg backdrop-blur-md">
                             {message.reactions.map(r => (
-                                <span key={r.emoji} className="leading-none">{r.emoji} <span className="text-[9px] opacity-60 ml-0.5">{r.userIds.length}</span></span>
+                                <span key={r.emoji} className="leading-none flex items-center gap-0.5">
+                                    {r.emoji} <span className="text-[9px] text-[#A9B4D0] font-bold">{r.userIds.length}</span>
+                                </span>
                             ))}
                         </div>
                     </div>
@@ -176,8 +188,8 @@ const MessageItem = ({
             </div>
 
             {/* Quick Actions (Hover) */}
-            <div className={`absolute top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 ${isOwn ? 'left-auto right-full mr-2' : 'left-full ml-2'}`}>
-                <button onClick={onReply} className="p-1.5 rounded-full bg-[#202c33] text-gray-400 hover:text-white hover:bg-white/10 shadow-lg">
+            <div className={`absolute top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 ${isOwn ? 'left-auto right-full mr-3' : 'left-full ml-3'}`}>
+                <button onClick={onReply} className="p-1.5 rounded-full bg-[#0F1C34] border border-[#FFFFFF1F] text-[#A9B4D0] hover:text-white hover:bg-[#5B79B7]/30 shadow-lg backdrop-blur-md transition-all">
                     <Icon name="message" className="w-4 h-4" />
                 </button>
                 <ReactionButton onReact={onReaction} />

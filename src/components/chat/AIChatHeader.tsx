@@ -75,35 +75,44 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
     };
 
     return (
-        <header className="h-20 border-b border-white/5 bg-[#050505]/50 backdrop-blur-xl flex items-center justify-between px-8 sticky top-0 z-40 transition-all">
+        <header className="h-20 border-b border-white/5 bg-[#0B1220]/80 backdrop-blur-xl flex items-center justify-between px-6 md:px-8 sticky top-0 z-40 transition-all">
             <div className="flex items-center gap-4">
-                <button onClick={onLeave} className="w-10 h-10 flex items-center justify-center transition-colors group">
-                    <Icon name="arrowLeft" className="w-6 h-6 text-slate-300 group-hover:text-white transition-colors" />
+                <button
+                    onClick={onLeave}
+                    className="w-10 h-10 rounded-full flex items-center justify-center transition-all hover:bg-white/5 group"
+                >
+                    <Icon name="arrowLeft" className="w-5 h-5 text-[#A9B4D0] group-hover:text-white transition-colors" />
                 </button>
 
-                <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-[#1A2333] flex items-center justify-center text-xl border border-white/10 shadow-sm">
+                <div className="flex items-center gap-4 py-1 px-2 rounded-xl hover:bg-white/5 transition-colors cursor-pointer">
+                    <div className="w-10 h-10 rounded-full bg-[#FFFFFF0D] flex items-center justify-center text-lg border border-[#FFFFFF1F] shadow-sm text-white">
                         {image}
                     </div>
                     <div>
-                        <h2 className="text-lg font-bold text-white tracking-tight leading-none">{title}</h2>
+                        <h2 className="text-base font-bold text-[#E6ECFF] tracking-wide leading-tight">{title}</h2>
                         <div className="flex items-center gap-1.5 mt-0.5">
-                            <Icon name="users" className="w-3 h-3 text-slate-400" />
-                            <p className="text-xs font-medium text-slate-400">
-                                {isPersonal ? 'Private Chat' : `${memberCount} Users`}
+                            <Icon name="users" className="w-3 h-3 text-[#7C89A6]" />
+                            <p className="text-[10px] font-bold text-[#7C89A6] uppercase tracking-wider">
+                                {isPersonal ? 'Private' : `${memberCount} Members`}
                             </p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="flex items-center gap-2">
-                <button onClick={handleShare} className="w-10 h-10 rounded-xl hover:bg-white/5 flex items-center justify-center transition-colors group">
-                    {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Share2 className="w-4 h-4 text-muted-foreground group-hover:text-white" />}
+            <div className="flex items-center gap-3">
+                <button
+                    onClick={handleShare}
+                    className="w-10 h-10 rounded-xl bg-[#FFFFFF06] border border-[#FFFFFF12] hover:bg-[#FFFFFF0D] hover:border-[#FFFFFF26] hover:shadow-[0_0_15px_rgba(127,166,255,0.2)] flex items-center justify-center transition-all group"
+                >
+                    {copied ? <Check className="w-4 h-4 text-[#7ED957]" /> : <Share2 className="w-4 h-4 text-[#A9B4D0] group-hover:text-white" />}
                 </button>
 
                 <div className="relative">
-                    <button onClick={() => setShowMore(!showMore)} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${showMore ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'hover:bg-white/5 text-muted-foreground'}`}>
+                    <button
+                        onClick={() => setShowMore(!showMore)}
+                        className={`w-10 h-10 rounded-xl bg-[#FFFFFF06] border border-[#FFFFFF12] flex items-center justify-center transition-all ${showMore ? 'bg-[#5B79B7] text-white shadow-[0_0_15px_rgba(91,121,183,0.4)] border-transparent' : 'hover:bg-[#FFFFFF0D] hover:border-[#FFFFFF26] text-[#A9B4D0] hover:text-white'}`}
+                    >
                         <MoreVertical className="w-5 h-5" />
                     </button>
 
@@ -113,16 +122,16 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
                                 initial={{ opacity: 0, scale: 0.95, y: 10 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                                className="absolute right-0 mt-2 w-56 bg-[#080808] border border-white/10 rounded-2xl shadow-2xl py-2 overflow-hidden z-50 ring-1 ring-white/5"
+                                className="absolute right-0 mt-3 w-60 bg-[#0F1C34] border border-[#FFFFFF1F] rounded-2xl shadow-2xl py-2 overflow-hidden z-50 ring-1 ring-black/50"
                             >
-                                <button onClick={handleToggleMute} className="w-full h-12 flex items-center gap-3 px-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:bg-white/5 hover:text-white transition-all">
+                                <button onClick={handleToggleMute} className="w-full h-12 flex items-center gap-3 px-5 text-[10px] font-bold uppercase tracking-widest text-[#A9B4D0] hover:bg-white/5 hover:text-white transition-all">
                                     {muted ? <Bell className="w-4 h-4" /> : <BellOff className="w-4 h-4" />}
-                                    {muted ? 'Restore Alerts' : 'Suppress Alerts'}
+                                    {muted ? 'Restore Alerts' : 'Mute Notifications'}
                                 </button>
                                 <div className="h-px bg-white/5 my-1" />
-                                <button onClick={handleLeave} className="w-full h-12 flex items-center gap-3 px-4 text-[10px] font-black uppercase tracking-widest text-rose-500 hover:bg-rose-500/10 transition-all">
+                                <button onClick={handleLeave} className="w-full h-12 flex items-center gap-3 px-5 text-[10px] font-bold uppercase tracking-widest text-rose-400 hover:bg-rose-500/10 transition-all">
                                     <LogOut className="w-4 h-4" />
-                                    {isPersonal ? 'End Chat' : 'Leave Group'}
+                                    {isPersonal ? 'End Connection' : 'Leave Channel'}
                                 </button>
                             </motion.div>
                         )}
