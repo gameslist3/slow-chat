@@ -61,6 +61,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                         });
                     }
                     setLoading(false);
+                }, (err) => {
+                    console.error('[AuthContext] Snapshot error:', err);
+                    setLoading(false);
                 });
 
                 // 2. Subscribe to notifications for accurate unreadCount (Client-side derivation)

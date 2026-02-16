@@ -44,6 +44,7 @@ const AuthSection = () => {
 const AppContent = () => {
     const { isAuthenticated, user, loading } = useAuth();
     const [isClient, setIsClient] = useState(false);
+    const [forceShow, setForceShow] = useState(false);
     const [showPolicy, setShowPolicy] = useState(false);
     const [theme, setTheme] = useState<'light' | 'dark'>(() => {
         const saved = localStorage.getItem('slowchat_theme');
@@ -53,6 +54,14 @@ const AppContent = () => {
     useEffect(() => {
         setIsClient(true);
         console.log('[App] Mount Start');
+
+        // Safety timeout for loading state
+        const timer = setTimeout(() => {
+            console.warn('[App] Loading timeout reached - forcing start');
+            setForceShow(true);
+        }, 4000);
+
+        return () => clearTimeout(timer);
     }, []);
 
     useEffect(() => {
@@ -85,7 +94,7 @@ const AppContent = () => {
         setShowPolicy(false);
     };
 
-    if (!isClient || loading) {
+    if (!isClient || (loading && !forceShow)) {
         return (
             <div className="h-screen w-screen bg-[#0B1220] flex items-center justify-center p-12">
                 <div className="flex flex-col items-center gap-6 text-center">
@@ -100,8 +109,16 @@ const AppContent = () => {
                         <p className="text-primary/40 text-[10px] font-bold uppercase tracking-[0.2em]">Synchronizing Neural Net</p>
                     </div>
                     {/* Fallback diagnostic */}
-                    <div className="mt-8 text-[8px] text-white/5 uppercase tracking-widest">
-                        Node: {window.location.hostname} | Build: Stable
+                    <div className="mt-8 flex flex-col items-center gap-2">
+                        <div className="text-[8px] text-white/5 uppercase tracking-widest">
+                            Node: {window.location.hostname} | Build: Stable
+                        </div>
+                        <button
+                            onClick={() => { console.log('Bypass triggered'); setForceShow(true); }}
+                            className="text-[10px] text-primary/20 hover:text-primary/50 font-bold uppercase tracking-widest transition-colors"
+                        >
+                            Emergency Bypass
+                        </button>
                     </div>
                 </div>
             </div>
