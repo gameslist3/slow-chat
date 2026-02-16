@@ -19,7 +19,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
     onCreateGroup
 }) => {
     return (
-        <div className="w-full flex flex-col min-h-full">
+        <div className="w-full h-full flex flex-col">
             {/* Welcome Header */}
             <header className="flex flex-col items-center justify-center pt-24 pb-32 text-center px-6">
                 <motion.h1

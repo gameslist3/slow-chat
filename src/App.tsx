@@ -147,7 +147,7 @@ const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark
             theme={theme}
             onToggleTheme={onToggleTheme}
         >
-            <div className="p-6 md:p-12 lg:p-16 max-w-7xl mx-auto h-full flex flex-col">
+            <div className="w-full h-full flex flex-col">
                 <AnimatePresence mode="wait">
                     {activeTab === 'home' && (
                         <motion.div key="home" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>

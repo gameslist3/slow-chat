@@ -84,7 +84,7 @@ export const FriendsList: React.FC<{ onSelectFriend?: (friendId: string) => void
     if (!currentUser) return null;
 
     return (
-        <div className="w-full h-full flex flex-col min-h-full">
+        <div className="w-full h-full flex flex-col">
             {/* Header */}
             <header className="flex flex-col items-center justify-center pt-24 pb-20 text-center px-6">
                 <motion.h1

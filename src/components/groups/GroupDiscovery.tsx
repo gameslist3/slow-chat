@@ -38,7 +38,7 @@ export const GroupDiscovery: React.FC<GroupDiscoveryProps> = ({
     );
 
     return (
-        <div className="w-full flex flex-col min-h-full">
+        <div className="w-full h-full flex flex-col">
             {/* Header */}
             <header className="flex flex-col items-center justify-center pt-24 pb-16 text-center px-6">
                 <motion.h1
