@@ -21,6 +21,7 @@ export const AISidebar: React.FC<AISidebarProps> = ({
     onOpenSettings,
     onGoHome,
     user,
+    onLogout,
     theme = 'dark',
     onToggleTheme
 }) => {
