@@ -84,120 +84,98 @@ export const FriendsList: React.FC<{ onSelectFriend?: (friendId: string) => void
     if (!currentUser) return null;
 
     return (
-        <div className="w-full h-full flex flex-col px-6 md:px-12 py-8 max-w-7xl mx-auto space-y-8">
+        <div className="w-full h-full flex flex-col min-h-full">
             {/* Header */}
-            <div className="shrink-0 flex items-center justify-between">
-                <div>
-                    <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter uppercase leading-none">
-                        My <span className="text-primary">Network</span>
-                    </h2>
-                    <p className="text-blue-200/40 font-bold uppercase tracking-widest text-xs mt-2">
-                        Active Connections & Sync Requests
-                    </p>
-                </div>
-            </div>
+            <header className="flex flex-col items-center justify-center pt-24 pb-20 text-center px-6">
+                <motion.h1
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-5xl md:text-6xl font-semibold tracking-tight text-[#E6ECFF]"
+                >
+                    My <span className="font-bold">Friends</span>
+                </motion.h1>
+                <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-[#A9B4D0] font-medium text-lg opacity-60 mt-4"
+                >
+                    Pick up where you left off or find something new.
+                </motion.p>
+            </header>
 
-            {/* Main Content - Scrollable */}
-            <div className="flex-1 overflow-y-auto min-h-0 pr-2 pb-8 custom-scrollbar space-y-12">
-
-                {/* Pending Requests */}
-                {requests.length > 0 && (
-                    <section className="space-y-6">
-                        <div className="flex items-center gap-4">
-                            <h3 className="text-lg font-bold text-white uppercase tracking-widest flex items-center gap-3">
-                                <Icon name="sparkles" className="w-4 h-4 text-secondary" />
-                                Pending Uplinks
-                            </h3>
-                            <div className="px-2 py-0.5 rounded-full bg-secondary/10 border border-secondary/20 text-[10px] text-secondary font-black">
-                                {requests.length}
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                            {requests.map((req) => (
-                                <div key={req.id} className="glass-panel p-5 rounded-2xl flex items-center justify-between gap-4 border-l-2 border-l-secondary/50">
-                                    <div className="flex items-center gap-3 overflow-hidden">
-                                        <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary border border-secondary/20 shrink-0">
-                                            <Icon name="user" className="w-5 h-5" />
-                                        </div>
-                                        <div className="overflow-hidden">
-                                            <h4 className="font-bold text-white truncate">{req.fromUsername}</h4>
-                                            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Incoming Request</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex gap-2 shrink-0">
-                                        <button
-                                            onClick={() => handleAccept(req.id!)}
-                                            className="w-8 h-8 rounded-lg bg-secondary/20 text-secondary hover:bg-secondary hover:text-black flex items-center justify-center transition-colors"
-                                            title="Accept"
-                                        >
-                                            <Icon name="check" className="w-4 h-4" />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDecline(req.id!)}
-                                            className="w-8 h-8 rounded-lg bg-white/5 text-muted-foreground hover:bg-red-500/20 hover:text-red-500 flex items-center justify-center transition-colors"
-                                            title="Decline"
-                                        >
-                                            <Icon name="x" className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
-                )}
-
+            {/* Content Section */}
+            <div className="flex-1 px-8 md:px-16 lg:px-24 pb-20">
                 {/* Friends Grid */}
-                <section className="space-y-6">
-                    <div className="flex items-center gap-4">
-                        <h3 className="text-lg font-bold text-white uppercase tracking-widest flex items-center gap-3">
-                            <Icon name="users" className="w-4 h-4 text-primary" />
-                            Active Nodes
-                        </h3>
-                        <div className="px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-[10px] text-primary font-black">
-                            {friends.length}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6 max-w-[1400px] mx-auto mb-24">
+                    {friends.map((friend) => (
+                        <motion.div
+                            key={friend.uid}
+                            whileHover={{ scale: 1.02, backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
+                            onClick={() => onSelectFriend?.(friend.uid)}
+                            className="group flex items-center justify-between p-5 rounded-3xl bg-[#FFFFFF08] border border-white/5 hover:border-white/10 transition-all cursor-pointer"
+                        >
+                            <div className="flex items-center gap-4 flex-1 min-w-0">
+                                <div className="w-12 h-12 rounded-full bg-[#FFFFFF05] border border-white/5 flex items-center justify-center text-3xl">
+                                    🍦
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <h4 className="text-[#E6ECFF] font-bold text-lg truncate mb-1">
+                                        {friend.username}
+                                    </h4>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/5 text-[#A9B4D0] text-[9px] font-black uppercase tracking-widest">
+                                <Icon name="mail" className="w-3 h-3" />
+                                <span>2 New</span>
+                            </div>
+                        </motion.div>
+                    ))}
+                </div>
+
+                {/* Pending Requests Section */}
+                <section className="max-w-[1400px] mx-auto">
+                    <div className="flex items-center gap-4 mb-8">
+                        <h3 className="text-xl font-bold text-[#E6ECFF]">Pending Friend Follow Requests</h3>
+                        <div className="px-3 py-1 rounded-full bg-[#5B79B7]/20 border border-[#5B79B7]/40 text-[#7FA6FF] text-[10px] font-black leading-none">
+                            <Icon name="users" className="w-3.5 h-3.5 inline mr-1" /> {requests.length}
                         </div>
+                        <Icon name="arrowRight" className="w-5 h-5 text-[#A9B4D0] opacity-50" />
                     </div>
 
-                    {friends.length === 0 ? (
-                        <div className="py-20 text-center opacity-30">
-                            <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <Icon name="users" className="w-8 h-8" />
-                            </div>
-                            <p className="text-xs uppercase tracking-widest font-bold">Network Empty</p>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                            {friends.map((friend) => (
-                                <motion.div
-                                    key={friend.uid}
-                                    initial={{ opacity: 0, scale: 0.95 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    whileHover={{ scale: 1.02 }}
-                                    onClick={() => onSelectFriend?.(friend.uid)}
-                                    className="glass-card p-4 rounded-2xl flex items-center gap-4 cursor-pointer group hover:border-primary/30 hover:bg-primary/5 transition-all"
-                                >
-                                    <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/50 group-hover:text-primary group-hover:border-primary/30 transition-colors">
-                                        <Icon name="user" className="w-6 h-6" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
+                        {requests.map((req) => (
+                            <div key={req.id} className="p-5 rounded-3xl bg-[#FFFFFF08] border border-white/5 flex flex-col gap-4">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-full bg-[#FFFFFF05] border border-white/5 flex items-center justify-center text-3xl">
+                                            🍦
+                                        </div>
+                                        <div>
+                                            <h4 className="text-[#E6ECFF] font-bold text-lg">{req.fromUsername}</h4>
+                                        </div>
                                     </div>
-                                    <div className="flex-1 overflow-hidden">
-                                        <h4 className="font-bold text-white truncate group-hover:text-primary transition-colors">{friend.username}</h4>
-                                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                            Online
-                                        </p>
+                                    <div className="flex items-center gap-1 text-[#A9B4D0] text-[10px] font-black opacity-50">
+                                        <Icon name="clock" className="w-3 h-3" />
+                                        <span>2 D</span>
                                     </div>
+                                </div>
+                                <div className="flex gap-3">
                                     <button
-                                        onClick={(e) => { e.stopPropagation(); handleUnfollowFriend(friend.uid, friend.username); }}
-                                        className="w-8 h-8 rounded-lg hover:bg-red-500/10 text-transparent group-hover:text-red-500/50 hover:!text-red-500 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100"
-                                        title="Disconnect"
+                                        onClick={() => handleAccept(req.id!)}
+                                        className="flex-1 h-10 rounded-full bg-[#7ED957]/20 border border-[#7ED957]/40 text-[#7ED957] text-[10px] font-black uppercase tracking-widest hover:bg-[#7ED957] hover:text-[#0B1220] transition-all"
                                     >
-                                        <Icon name="trash" className="w-4 h-4" />
+                                        Accept
                                     </button>
-                                </motion.div>
-                            ))}
-                        </div>
-                    )}
+                                    <button
+                                        onClick={() => handleDecline(req.id!)}
+                                        className="flex-1 h-10 rounded-full bg-white/5 border border-white/10 text-[#A9B4D0] text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all"
+                                    >
+                                        Decline
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </section>
             </div>
         </div>

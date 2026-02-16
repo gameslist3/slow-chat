@@ -69,7 +69,7 @@ export const AISidebar: React.FC<AISidebarProps> = ({
                 })}
             </nav>
 
-            {/* Bottom Section: User Status & Theme */}
+            {/* Bottom Section: User Status & Theme & Logout */}
             <div className="mt-auto pt-6 border-t border-white/5 flex flex-col gap-6">
                 {/* User Status */}
                 <div className="flex items-center gap-3 px-2">
@@ -79,21 +79,38 @@ export const AISidebar: React.FC<AISidebarProps> = ({
                         </div>
                         <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#7ED957] rounded-full border-2 border-[#0B1220] shadow-[0_0_8px_#7ED957]" />
                     </div>
-                    <div className="hidden md:block overflow-hidden">
-                        <div className="text-sm font-bold text-[#A9B4D0] truncate">
+                    <div className="hidden md:block overflow-hidden flex-1">
+                        <div className="text-sm font-bold text-[#E6ECFF] truncate">
                             {user?.username || 'Happy'}
                         </div>
-                        <div className="text-[10px] font-bold uppercase tracking-wider text-[#7ED957]">Online</div>
                     </div>
+                    {/* Theme Toggle inside user row for desktop */}
+                    <button
+                        onClick={onToggleTheme}
+                        className="hidden md:flex w-8 h-8 rounded-full items-center justify-center text-[#A9B4D0] hover:text-white transition-all"
+                    >
+                        <Icon name={theme === 'dark' ? 'moon' : 'sun'} className="w-4 h-4" />
+                    </button>
                 </div>
 
-                {/* Theme Toggle */}
-                <button
-                    onClick={onToggleTheme}
-                    className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[#A9B4D0] hover:text-white hover:bg-white/10 hover:border-white/20 transition-all shadow-lg mx-auto md:mx-0"
-                >
-                    <Icon name={theme === 'dark' ? 'moon' : 'sun'} className="w-5 h-5" />
-                </button>
+                {/* Mobile/Tablet Theme & Logout */}
+                <div className="flex items-center justify-between px-2 md:px-0">
+                    <button
+                        onClick={onLogout}
+                        className="flex items-center gap-3 px-4 py-3 rounded-xl text-[#A9B4D0] hover:text-red-400 hover:bg-red-400/5 transition-all w-full md:w-auto"
+                        title="Logout"
+                    >
+                        <Icon name="logout" className="w-5 h-5 shrink-0" />
+                        <span className="hidden md:block text-sm font-bold">Logout</span>
+                    </button>
+
+                    <button
+                        onClick={onToggleTheme}
+                        className="md:hidden w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[#A9B4D0]"
+                    >
+                        <Icon name={theme === 'dark' ? 'moon' : 'sun'} className="w-5 h-5" />
+                    </button>
+                </div>
             </div>
         </div>
     );

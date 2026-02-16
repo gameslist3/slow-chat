@@ -137,10 +137,10 @@ const MessageItem = ({
 
                 {/* Message Bubble */}
                 <div className={`
-                    relative px-4 py-2.5 shadow-lg text-[15px] leading-relaxed break-words flex flex-wrap gap-x-4 items-end backdrop-blur-md
+                    relative px-4 py-3 shadow-lg text-[15px] leading-relaxed break-words flex flex-wrap gap-x-4 items-end backdrop-blur-xl
                     ${isOwn
-                        ? 'bg-[#7FA6FF]/18 border border-[#7FA6FF]/20 text-[#E6ECFF] rounded-l-2xl rounded-tr-2xl rounded-br-md shadow-[#7FA6FF]/10'
-                        : 'bg-[#FFFFFF0F] border border-[#FFFFFF1F] text-[#E6ECFF] rounded-r-2xl rounded-tl-2xl rounded-bl-md'}
+                        ? 'bg-[#7FA6FF]/15 border border-[#7FA6FF]/10 text-white rounded-l-[1.5rem] rounded-tr-[1.5rem] rounded-br-[0.5rem] shadow-blue-500/5'
+                        : 'bg-white/5 border border-white/5 text-[#E6ECFF] rounded-r-[1.5rem] rounded-tl-[1.5rem] rounded-bl-[0.5rem]'}
                 `}>
                     {/* Message Content */}
                     <div className="z-10 relative flex-1">
