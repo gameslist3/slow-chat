@@ -103,6 +103,8 @@ const AppContent = () => {
                 Gapes Core v1.1.2 {isAuthenticated ? 'Auth' : 'Public'} {loading && '⏳'}
             </div>
 
+            <AuroraBackground />
+
             <div className="relative z-10 w-full h-full flex flex-col overflow-hidden">
                 {showPolicy && <StoragePolicyModal onAccept={handleAcceptPolicy} />}
                 <div className="flex-1 w-full flex flex-col overflow-hidden min-h-full">
@@ -131,6 +133,8 @@ const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark
     const [showDiscovery, setShowDiscovery] = useState(false);
     const [showCreateGroup, setShowCreateGroup] = useState(false);
     const { personalChats } = useInbox();
+
+    console.log('[AuthenticatedSection] Rendering', { user: user?.username, activeTab, myGroupsCount: myGroups.length });
 
     useEffect(() => {
         if (!user) return;
