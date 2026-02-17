@@ -37,7 +37,7 @@ export const IconCarousel: React.FC<IconCarouselProps> = ({ selectedIcon, onSele
 
             <div
                 ref={scrollRef}
-                className="flex overflow-x-auto gap-4 px-[50%] no-scrollbar snap-x snap-mandatory py-4 relative z-10"
+                className="flex overflow-x-auto gap-4 pb-4 px-2 snap-x scrollbar-none mask-fade-sides snap-mandatory py-4 relative z-10"
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
                 {ICONS.map((icon, idx) => (

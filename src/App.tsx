@@ -7,6 +7,7 @@ import { StoragePolicyModal } from './components/auth/StoragePolicyModal';
 import { GroupDiscovery, CreateGroup } from './components/groups/GroupFeatures';
 import { ChatInterface } from './components/chat/ChatFeatures';
 import { AccountSettings } from './components/auth/AccountSettings';
+import { UserProfileModal } from './components/user/UserProfileModal';
 import { FollowRequests } from './components/auth/FollowRequests';
 import { subscribeToGroups, joinGroup } from './services/firebaseGroupService';
 import { Group, User, PersonalChat } from './types';
@@ -127,6 +128,7 @@ const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark
     const [notifications, setNotifications] = useState<any[]>([]);
     const [showDiscovery, setShowDiscovery] = useState(false);
     const [showCreateGroup, setShowCreateGroup] = useState(false);
+    const [viewingUserId, setViewingUserId] = useState<string | null>(null);
     const { personalChats } = useInbox();
 
     console.log('[AuthenticatedSection] Rendering', { user: user?.username, activeTab, myGroupsCount: myGroups.length });
@@ -244,7 +246,10 @@ const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark
                                 ) : showDiscovery ? (
                                     <motion.div key="discovery" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}>
                                         <GroupDiscovery
-                                            onJoinGroup={(id: string) => joinContext(id)}
+                                            onJoinGroup={async (id: string) => {
+                                                await joinContext(id);
+                                                handleSelectGroup(id);
+                                            }}
                                             onSelectGroup={handleSelectGroup}
                                             joinedGroupIds={user?.joinedGroups || []}
                                             onCreateGroup={() => setShowCreateGroup(true)}
@@ -312,6 +317,7 @@ const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark
                                 image={!isPersonal ? activeGroup?.image || '👥' : '👤'}
                                 memberCount={!isPersonal ? activeGroup?.members || 0 : 2}
                                 onLeave={() => setActiveTab('home')}
+                                onProfileClick={(userId) => setViewingUserId(userId)}
                             />
                         </motion.div>
                     )}
@@ -323,6 +329,23 @@ const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark
                     )}
                 </AnimatePresence>
             </div>
+
+            {/* Global User Profile Modal */}
+            <AnimatePresence>
+                {viewingUserId && (
+                    <UserProfileModal
+                        userId={viewingUserId}
+                        currentUserId={user?.id || ''}
+                        onClose={() => setViewingUserId(null)}
+                        onMessage={(targetId: string) => {
+                            // Logic to start chat 
+                            // For now just close, as integrating "Start Chat" logic might needs more service calls if chat doesn't exist
+                            setViewingUserId(null);
+                            // TODO: Implement direct jump to chat if we want that polish
+                        }}
+                    />
+                )}
+            </AnimatePresence>
         </AILayout>
     );
 };

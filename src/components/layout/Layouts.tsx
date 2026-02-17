@@ -92,7 +92,7 @@ export const Sidebar = ({ groups, activeGroupId, onSelectGroup, onCreateGroup, o
 };
 
 // --- MainLayout ---
-export const MainLayout = ({ children, userGroups, activeGroupId, onSelectGroup, onCreateGroup, onBrowseGroups, onOpenSettings, mobileTitle, showMobileBack, onMobileBack }: any) => {
+export const MainLayout = ({ children, userGroups, activeGroupId, onSelectGroup, onCreateGroup, onBrowseGroups, onOpenSettings, mobileTitle, showMobileBack, onMobileBack, showMobileHeader = true }: any) => {
     const [isSidebarOpen, setSidebarOpen] = useState(false);
     return (
         <div className="flex h-screen bg-white overflow-hidden">
@@ -107,7 +107,7 @@ export const MainLayout = ({ children, userGroups, activeGroupId, onSelectGroup,
                 onClose={() => setSidebarOpen(false)}
             />
             <main className="flex-1 flex flex-col h-full relative overflow-hidden bg-white w-full">
-                <MobileHeader title={mobileTitle} showBack={showMobileBack} onBack={onMobileBack} onMenuToggle={() => setSidebarOpen(true)} />
+                {showMobileHeader && <MobileHeader title={mobileTitle} showBack={showMobileBack} onBack={onMobileBack} onMenuToggle={() => setSidebarOpen(true)} />}
                 <div className="flex-1 overflow-hidden relative">{children}</div>
             </main>
         </div>

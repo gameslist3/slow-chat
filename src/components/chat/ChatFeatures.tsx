@@ -17,6 +17,7 @@ interface ChatInterfaceProps {
     createdAt?: number;
     onType?: (isDirty: boolean) => void;
     onLeave?: () => void;
+    onProfileClick?: (userId: string) => void;
 }
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({
@@ -28,7 +29,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     memberCount,
     memberIds = [],
     createdAt,
-    onLeave
+    onLeave,
+    onProfileClick
 }) => {
     const {
         messages,
@@ -108,6 +110,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                                 highlightId={highlightMessageId}
                                 onReply={handleReply}
                                 onReaction={toggleReaction}
+                                onProfileClick={onProfileClick}
                             />
                         )}
                     </div>

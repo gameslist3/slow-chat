@@ -55,8 +55,7 @@ export const AILayout: React.FC<AILayoutProps> = ({
                         <Icon name="menu" className="w-5 h-5 text-muted-foreground" />
                     </button>
                     <div className="flex items-center gap-2">
-                        <Logo className="h-6 w-6" />
-                        <span className="font-bold text-lg tracking-tight">Gapes</span>
+                        <Logo className="h-8 w-8 text-blue-500 drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
                     </div>
                     <button onClick={onOpenSettings} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
                         <span className="text-xs font-bold">{user?.username?.[0].toUpperCase()}</span>
@@ -85,7 +84,7 @@ export const AILayout: React.FC<AILayoutProps> = ({
                             animate={{ x: 0 }}
                             exit={{ x: '-100%' }}
                             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                            className="fixed inset-y-0 left-0 z-50 w-72 bg-[#0F1C34]/90 backdrop-blur-xl border-r border-white/10 md:hidden"
+                            className="fixed inset-y-0 left-0 z-50 w-[88px] bg-[#0F1C34]/90 backdrop-blur-xl border-r border-white/10 md:hidden flex flex-col items-center"
                         >
                             <AISidebar
                                 activeTab={activeTab}

@@ -48,7 +48,7 @@ export interface Message {
     sender: string;
     senderId: string;
     text: string;
-    timestamp: number;
+    timestamp: any; // number | Timestamp
     type: 'text' | 'image' | 'video' | 'pdf' | 'doc' | 'audio' | 'system';
     media?: FileMetadata;
     reactions: Reaction[];

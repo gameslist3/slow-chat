@@ -43,10 +43,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
             <section className="w-full px-6 md:px-12 lg:px-20 max-w-[1600px] flex-1">
                 {/* Section Header Row */}
                 <div className="flex items-center justify-between mb-8 w-full">
-                    <button onClick={onBrowseGroups} className="flex items-center gap-3 group">
-                        <h2 className="text-xl md:text-2xl font-bold text-[#A9B4D0] group-hover:text-white transition-colors">My Groups</h2>
-                        <Icon name="arrowRight" className="w-5 h-5 text-[#5B79B7] group-hover:translate-x-1 transition-transform" />
-                    </button>
+                    <div className="flex items-center gap-3 group">
+                        <button onClick={onBrowseGroups}>
+                            <h2 className="text-xl md:text-2xl font-bold text-[#A9B4D0] group-hover:text-white transition-colors text-left">My Groups</h2>
+                        </button>
+                        <div className="pointer-events-none">
+                            <Icon name="arrowRight" className="w-5 h-5 text-[#5B79B7] group-hover:translate-x-1 transition-transform" />
+                        </div>
+                    </div>
 
                     {onCreateGroup && (
                         <button

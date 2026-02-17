@@ -9,11 +9,20 @@ interface MessageBubbleProps {
     isContinual?: boolean; // If previous message was same sender
     onReact: (emoji: string) => void;
     onReply: () => void;
+    onProfileClick?: (userId: string) => void;
 }
 
-export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinual, onReact, onReply }) => {
+export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinual, onReact, onReply, onProfileClick }) => {
     const { user } = useAuth();
     const isMe = message.sender === user?.username;
+
+    // Helper to format time safely
+    const formatTime = (ts: any) => {
+        if (!ts) return '...';
+        if (typeof ts === 'number') return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        if (ts?.toDate) return ts.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        return '...';
+    };
 
     return (
         <div className={`flex w-full ${isMe ? 'justify-end' : 'justify-start'} mb-${isContinual ? '1' : '4'} group relative animate-in fade-in slide-in-from-bottom-2 duration-300`}>
@@ -22,14 +31,17 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
             {!isMe && (
                 <div className={`w-10 h-10 mr-4 flex-shrink-0 ${isContinual ? 'opacity-0' : ''}`}>
                     {!isContinual && (
-                        <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-[10px] font-black text-primary border border-primary/20 shadow-sm uppercase tracking-tighter">
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onProfileClick?.(message.senderId); }}
+                            className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-[10px] font-black text-primary border border-primary/20 shadow-sm uppercase tracking-tighter hover:scale-105 transition-transform"
+                        >
                             {message.sender.slice(0, 2)}
-                        </div>
+                        </button>
                     )}
                 </div>
             )}
 
-            <div className={`max-w-[75%] md:max-w-[60%] flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+            <div className={`max-w-[75%] md:max-w-[60%] flex flex-col ${isMe ? 'items-end' : 'items-start'} relative group/bubble`}>
                 {!isMe && !isContinual && (
                     <span className="text-[9px] uppercase font-black text-primary/60 ml-1 mb-1.5 tracking-[0.2em]">{message.sender}</span>
                 )}
@@ -130,7 +142,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
 
                     {message.type === 'text' && (
                         <span className={`text-[9px] font-bold ml-3 opacity-60 inline-block align-bottom ${isMe ? 'text-[#E6ECFF]' : 'text-[#7C89A6]'}`}>
-                            {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            {formatTime(message.timestamp)}
                         </span>
                     )}
                 </div>
@@ -145,28 +157,27 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                         ))}
                     </div>
                 )}
-            </div>
 
-            {/* Action Bar (Closer & Cleaner) */}
-            <div className={`
-                absolute top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 flex gap-1 z-10
-                ${isMe
-                    ? 'right-full mr-2 flex-row-reverse'
-                    : 'left-full ml-2'
-                }
-            `}>
-                <Button
-                    variant="secondary" size="icon" className="w-8 h-8 rounded-full bg-white shadow-sm border border-gray-100 text-gray-500 hover:text-indigo-600"
-                    onClick={() => onReact('❤️')}
-                >
-                    ❤️
-                </Button>
-                <Button
-                    variant="secondary" size="icon" className="w-8 h-8 rounded-full bg-white shadow-sm border border-gray-100 text-gray-500 hover:text-indigo-600"
-                    onClick={onReply}
-                >
-                    <Reply className="w-4 h-4" />
-                </Button>
+                {/* Action Bar (Anchored to Bubble) */}
+                <div className={`
+                    absolute -top-8 opacity-0 group-hover/bubble:opacity-100 transition-all duration-200 flex gap-1 z-20
+                    ${isMe ? 'right-0' : 'left-0'}
+                `}>
+                    <div className="flex items-center gap-1 bg-[#0F1C34]/80 backdrop-blur-md p-1 rounded-full border border-white/10 shadow-lg">
+                        <Button
+                            variant="ghost" size="icon" className="w-7 h-7 rounded-full text-zinc-400 hover:text-white hover:bg-white/10"
+                            onClick={() => onReact('❤️')}
+                        >
+                            ❤️
+                        </Button>
+                        <Button
+                            variant="ghost" size="icon" className="w-7 h-7 rounded-full text-zinc-400 hover:text-white hover:bg-white/10"
+                            onClick={onReply}
+                        >
+                            <Reply className="w-4 h-4" />
+                        </Button>
+                    </div>
+                </div>
             </div>
         </div>
     );

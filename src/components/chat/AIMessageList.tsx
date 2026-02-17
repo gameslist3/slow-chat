@@ -14,6 +14,7 @@ interface AIMessageListProps {
     highlightId?: string;
     onReply?: (msg: Message) => void;
     onReaction?: (messageId: string, emoji: string) => void;
+    onProfileClick?: (userId: string) => void;
 }
 
 export const AIMessageList: React.FC<AIMessageListProps> = ({
@@ -21,7 +22,8 @@ export const AIMessageList: React.FC<AIMessageListProps> = ({
     currentUserId,
     highlightId,
     onReply,
-    onReaction
+    onReaction,
+    onProfileClick
 }) => {
     const bottomRef = useRef<HTMLDivElement>(null);
     const [selectedUser, setSelectedUser] = useState<string | null>(null);
@@ -56,12 +58,14 @@ export const AIMessageList: React.FC<AIMessageListProps> = ({
                             isSequence={isSequence}
                             onReply={() => onReply?.(msg)}
                             onReaction={(emoji) => onReaction?.(msg.id, emoji)}
+                            onProfileClick={onProfileClick}
                         />
                     );
                 })}
             </div>
             <div ref={bottomRef} className="h-4" />
 
+            {/* We might remove this if we move it to App level, but keeping for now if used internally */}
             <AnimatePresence>
                 {selectedUser && (
                     <UserProfileCard
@@ -80,11 +84,13 @@ const MessageItem = ({
     isSequence,
     onReply,
     onReaction,
+    onProfileClick
 }: {
     message: Message,
     isSequence: boolean,
     onReply: () => void,
     onReaction: (emoji: string) => void,
+    onProfileClick?: (userId: string) => void
 }) => {
     return (
         <div id={`msg-${message.id}`}>
@@ -93,6 +99,7 @@ const MessageItem = ({
                 isContinual={isSequence}
                 onReact={onReaction}
                 onReply={onReply}
+                onProfileClick={onProfileClick}
             />
         </div>
     );

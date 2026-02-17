@@ -15,7 +15,8 @@ import {
     Timestamp,
     arrayUnion,
     increment,
-    limit
+    limit,
+    serverTimestamp
 } from 'firebase/firestore';
 import { db, auth } from '../config/firebase';
 import { Message, ReplyMetadata, Reaction, FileMetadata, PersonalChat } from '../types';
@@ -60,7 +61,7 @@ export async function sendMessage(
             sender: senderUsername,
             senderId,
             text: content.text || '',
-            timestamp: Date.now(),
+            timestamp: serverTimestamp(),
             type: content.type,
             reactions: []
         };
