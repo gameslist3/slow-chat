@@ -86,16 +86,17 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                                 <div className={`flex-1 space-y-3 ${i % 2 === 0 ? 'items-end flex flex-col' : ''}`}>
                                     <div className="h-2 bg-white/5 rounded w-24" />
                                     <div className={`h-16 bg-white/5 rounded-3xl w-2/3 ${i % 2 === 0 ? 'rounded-tr-none' : 'rounded-tl-none'}`} />
+                                    <div className="h-2 bg-white/5 rounded w-16 opacity-50" />
                                 </div>
                             </div>
                         ))}
                     </div>
                 ) : (
-                    <div className="h-full w-full">
+                    <div className="h-full w-full overflow-y-auto custom-scrollbar pb-32 px-4 md:px-0">
                         {messages.length === 0 ? (
                             <div className="h-full flex flex-col items-center justify-center opacity-30 text-center p-8">
-                                <div className="w-24 h-24 bg-blue-500/20 rounded-full flex items-center justify-center mb-6">
-                                    <div className="text-4xl">💬</div>
+                                <div className="w-24 h-24 bg-blue-500/20 rounded-full flex items-center justify-center mb-6 animate-pulse">
+                                    <div className="text-4xl text-blue-400">💬</div>
                                 </div>
                                 <p className="text-xs uppercase tracking-[0.3em] font-black text-blue-200">No signals detected</p>
                                 <p className="text-sm text-blue-200/50 mt-2">Begin transmission</p>
@@ -113,15 +114,17 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 )}
             </div>
 
-            {/* Composer */}
-            <AIComposer
-                groupId={chatId}
-                userId={user?.id || ''}
-                onSend={handleSendMessage}
-                replyingTo={replyingTo}
-                onCancelReply={cancelReply}
-                cooldown={remaining}
-            />
+            {/* Composer - Floating Absolute */}
+            <div className="absolute bottom-0 left-0 right-0 z-50">
+                <AIComposer
+                    groupId={chatId}
+                    userId={user?.id || ''}
+                    onSend={handleSendMessage}
+                    replyingTo={replyingTo}
+                    onCancelReply={cancelReply}
+                    cooldown={remaining}
+                />
+            </div>
         </div>
     );
 };

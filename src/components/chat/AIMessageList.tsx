@@ -6,6 +6,7 @@ import { getUserById } from '../../services/firebaseAuthService';
 import { sendFollowRequest, getFollowStatus, cancelFollowRequest, unfollowUser } from '../../services/firebaseFollowService';
 import { useToast } from '../../context/ToastContext';
 import { Icon } from '../common/Icon';
+import { MessageBubble } from './MessageBubble';
 
 interface AIMessageListProps {
     messages: Message[];
@@ -52,12 +53,9 @@ export const AIMessageList: React.FC<AIMessageListProps> = ({
                         <MessageItem
                             key={msg.id}
                             message={msg}
-                            isOwn={msg.senderId === currentUserId}
                             isSequence={isSequence}
                             onReply={() => onReply?.(msg)}
                             onReaction={(emoji) => onReaction?.(msg.id, emoji)}
-                            onJumpToReply={scrollToMessage}
-                            onUserClick={(uid) => setSelectedUser(uid)}
                         />
                     );
                 })}
@@ -79,122 +77,24 @@ export const AIMessageList: React.FC<AIMessageListProps> = ({
 
 const MessageItem = ({
     message,
-    isOwn,
     isSequence,
     onReply,
     onReaction,
-    onJumpToReply,
-    onUserClick
 }: {
     message: Message,
-    isOwn: boolean,
     isSequence: boolean,
     onReply: () => void,
     onReaction: (emoji: string) => void,
-    onJumpToReply: (id: string) => void,
-    onUserClick: (uid: string) => void
 }) => {
     return (
-        <motion.div
-            id={`msg-${message.id}`}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`flex ${isOwn ? 'flex-row-reverse' : 'flex-row'} gap-3 ${isSequence ? 'mt-2' : 'mt-6'} relative group px-2 md:px-0`}
-        >
-            {/* Avatar (Incoming Only) */}
-            {!isOwn && !isSequence && (
-                <button
-                    onClick={() => onUserClick(message.senderId)}
-                    className="shrink-0 w-8 h-8 rounded-full bg-[#FFFFFF0D] border border-[#FFFFFF1F] flex items-center justify-center text-xs font-bold text-[#E6ECFF] hover:border-[#7FA6FF]/50 transition-colors self-end"
-                >
-                    {message.sender?.[0]?.toUpperCase() || 'U'}
-                </button>
-            )}
-
-            {/* Spacer for sequence messages without avatar */}
-            {!isOwn && isSequence && <div className="w-8 shrink-0" />}
-
-            <div className={`relative max-w-[75%] md:max-w-[60%] flex flex-col ${isOwn ? 'items-end' : 'items-start'}`}>
-                {/* Sender Name (Incoming, non-sequence) */}
-                {!isOwn && !isSequence && (
-                    <span className="ml-3 mb-1 text-[10px] font-bold uppercase tracking-wider text-[#7FA6FF]/80">
-                        {message.sender}
-                    </span>
-                )}
-
-                {/* Reply Context */}
-                {message.replyTo && (
-                    <button
-                        onClick={() => onJumpToReply(message.replyTo!.messageId)}
-                        className={`text-[10px] flex items-center gap-2 px-3 py-2 rounded-xl mb-1.5 transition-all border backdrop-blur-sm w-full
-                            ${isOwn ? 'bg-[#5B79B7]/20 border-[#5B79B7]/30 text-[#E6ECFF]/80' : 'bg-white/5 border-white/10 text-[#A9B4D0]'}
-                        `}
-                    >
-                        <div className="w-0.5 h-4 bg-[#7FA6FF]/50 rounded-full" />
-                        <span className="truncate">{message.replyTo.text}</span>
-                    </button>
-                )}
-
-                {/* Message Bubble */}
-                <div className={`
-                    relative px-4 py-3 shadow-lg text-[15px] leading-relaxed break-words flex flex-wrap gap-x-4 items-end backdrop-blur-xl
-                    ${isOwn
-                        ? 'bg-[#7FA6FF]/15 border border-[#7FA6FF]/10 text-white rounded-l-[1.5rem] rounded-tr-[1.5rem] rounded-br-[0.5rem] shadow-blue-500/5'
-                        : 'bg-white/5 border border-white/5 text-[#E6ECFF] rounded-r-[1.5rem] rounded-tl-[1.5rem] rounded-bl-[0.5rem]'}
-                `}>
-                    {/* Message Content */}
-                    <div className="z-10 relative flex-1">
-                        {message.type === 'text' && (
-                            <span className="whitespace-pre-wrap">{message.text}</span>
-                        )}
-
-                        {/* Media */}
-                        {message.media && (
-                            <div className="mt-2 mb-1 rounded-lg overflow-hidden">
-                                {message.type === 'image' && <img src={message.media.url} className="max-h-80 w-auto object-cover rounded-lg" alt="" />}
-                                {(message.type === 'audio' || message.media.type === 'audio') && <AudioPlayer src={message.media.url} />}
-                                {(message.type === 'video' || message.media.type === 'video') && (
-                                    <video src={message.media.url} controls className="max-h-80 w-full rounded-lg" />
-                                )}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Metadata (Time + Ticks) */}
-                    <div className={`flex items-center gap-1.5 shrink-0 select-none ml-auto h-[18px] self-end`}>
-                        <span className={`text-[10px] font-medium ${isOwn ? 'text-[#E6ECFF]/60' : 'text-[#A9B4D0]/70'}`}>
-                            {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                        {isOwn && (
-                            <span className="text-[#E6ECFF]/80">
-                                {message.status === 'seen' || message.readBy?.length ? <CheckCheck className="w-3.5 h-3.5" /> : <Check className="w-3.5 h-3.5 opacity-60" />}
-                            </span>
-                        )}
-                    </div>
-                </div>
-
-                {/* Reactions */}
-                {message.reactions && message.reactions.length > 0 && (
-                    <div className={`absolute -bottom-2.5 z-20 ${isOwn ? 'right-2' : 'left-2'}`}>
-                        <div className="bg-[#0F1C34] border border-[#FFFFFF1F] rounded-full px-2 py-1 text-[10px] flex items-center gap-1.5 shadow-lg backdrop-blur-md">
-                            {message.reactions.map(r => (
-                                <span key={r.emoji} className="leading-none flex items-center gap-0.5">
-                                    {r.emoji} <span className="text-[9px] text-[#A9B4D0] font-bold">{r.userIds.length}</span>
-                                </span>
-                            ))}
-                        </div>
-                    </div>
-                )}
-            </div>
-
-            {/* Quick Actions (Hover) */}
-            <div className={`absolute top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 ${isOwn ? 'left-auto right-full mr-3' : 'left-full ml-3'}`}>
-                <button onClick={onReply} className="p-1.5 rounded-full bg-[#0F1C34] border border-[#FFFFFF1F] text-[#A9B4D0] hover:text-white hover:bg-[#5B79B7]/30 shadow-lg backdrop-blur-md transition-all">
-                    <Icon name="message" className="w-4 h-4" />
-                </button>
-                <ReactionButton onReact={onReaction} />
-            </div>
-        </motion.div>
+        <div id={`msg-${message.id}`}>
+            <MessageBubble
+                message={message}
+                isContinual={isSequence}
+                onReact={onReaction}
+                onReply={onReply}
+            />
+        </div>
     );
 };
 

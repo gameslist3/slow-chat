@@ -47,8 +47,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                 <div className={`
                     relative px-5 py-3 text-[15px] font-medium leading-relaxed tracking-wide break-words overflow-hidden shadow-lg
                     ${isMe
-                        ? 'bg-[#3B82F6] text-white rounded-[1.25rem] rounded-tr-sm'
-                        : 'bg-[#152238]/90 backdrop-blur-md text-[#E6ECFF] rounded-[1.25rem] rounded-tl-sm border border-white/5'
+                        ? 'bg-[rgba(127,166,255,0.18)] text-[#E6ECFF] rounded-[1.25rem] rounded-tr-sm border border-white/5'
+                        : 'bg-[rgba(255,255,255,0.05)] text-[#E6ECFF] rounded-[1.25rem] rounded-tl-sm border border-[rgba(255,255,255,0.12)]'
                     }
                     ${message.type === 'image' || message.type === 'video' ? 'p-1 bg-transparent border-0 shadow-none' : ''}
                 `}>
@@ -59,20 +59,18 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                     )}
 
                     {message.type === 'audio' && message.media && (
-                        <div className="flex items-center gap-3 min-w-[200px]">
+                        <div className="flex items-center gap-3 min-w-[200px] h-10">
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     const audio = e.currentTarget.nextElementSibling as HTMLAudioElement;
                                     if (audio.paused) audio.play(); else audio.pause();
-                                    e.currentTarget.querySelector('svg')?.classList.toggle('hidden'); // Hacky toggle for icon
-                                    // Better to use state but MessageBubble is stateless here? 
-                                    // I'll just use a simple player for now or simple controls
+                                    e.currentTarget.querySelector('svg')?.classList.toggle('hidden');
                                 }}
-                                className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors shrink-0"
+                                className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors shrink-0"
                             >
-                                <svg className="w-4 h-4 fill-current ml-0.5 play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-                                <svg className="w-4 h-4 fill-current hidden pause-icon" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" /></svg>
+                                <svg className="w-3 h-3 fill-current ml-0.5 play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                                <svg className="w-3 h-3 fill-current hidden pause-icon" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" /></svg>
                             </button>
                             <audio
                                 src={message.media.url}
@@ -91,13 +89,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                                 className="hidden"
                             />
                             <div className="flex-1 space-y-1">
-                                <div className="h-1 bg-white/20 rounded-full overflow-hidden w-full">
+                                <div className="h-0.5 bg-white/20 rounded-full overflow-hidden w-full">
                                     <div className="h-full bg-white w-0 animate-[progress_1s_linear]" style={{ width: '0%' }} />
-                                    {/* Real progress requires state/refs. For UI fidelity without state complexity in this component, I'll show a static waveform visualization or simple bar */}
-                                </div>
-                                <div className="flex justify-between text-[9px] font-bold opacity-60">
-                                    <span>VOICE NOTE</span>
-                                    <span>0:00</span>
                                 </div>
                             </div>
                         </div>
@@ -136,7 +129,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                     )}
 
                     {message.type === 'text' && (
-                        <span className={`text-[9px] font-bold ml-3 opacity-50 inline-block align-bottom ${isMe ? 'text-blue-100' : 'text-[#7C89A6]'}`}>
+                        <span className={`text-[9px] font-bold ml-3 opacity-60 inline-block align-bottom ${isMe ? 'text-[#E6ECFF]' : 'text-[#7C89A6]'}`}>
                             {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                     )}

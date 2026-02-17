@@ -34,15 +34,12 @@ export const AISidebar: React.FC<AISidebarProps> = ({
 
     return (
         <div className="h-full flex flex-col relative w-full px-4 py-6">
-            {/* Branding - Top Left */}
-            <div className="px-4 mb-10 flex items-center gap-3">
-                <div className="relative group cursor-pointer">
+            {/* Branding - Top Left (Icon Only) */}
+            <div className="px-4 mb-10 flex items-center justify-center md:justify-start">
+                <div className="relative group cursor-pointer hover:scale-110 transition-transform duration-300">
                     <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <Logo className="w-8 h-8 md:w-10 md:h-10 text-white relative z-10" />
+                    <Logo className="w-10 h-10 md:w-12 md:h-12 text-white relative z-10 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
                 </div>
-                <span className="text-2xl font-bold tracking-tight text-white hidden md:block">
-                    Gapes
-                </span>
             </div>
 
             {/* Main Navigation */}
@@ -76,7 +73,10 @@ export const AISidebar: React.FC<AISidebarProps> = ({
             {/* Bottom Section: User & Config */}
             <div className="mt-auto flex flex-col gap-4">
                 {/* User Profile Pill */}
-                <div className="flex items-center gap-3 p-2 rounded-full hover:bg-[#FFFFFF05] transition-colors cursor-pointer group">
+                <div
+                    onClick={onOpenSettings}
+                    className="flex items-center gap-3 p-2 rounded-full hover:bg-[#FFFFFF05] transition-colors cursor-pointer group"
+                >
                     <div className="relative shrink-0">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#182B52] to-[#0F1C34] flex items-center justify-center text-white font-bold border border-[#FFFFFF10] shadow-lg group-hover:border-[#5B79B7] transition-colors">
                             {user?.username?.[0].toUpperCase() || <Icon name="user" className="w-4 h-4" />}
@@ -92,8 +92,11 @@ export const AISidebar: React.FC<AISidebarProps> = ({
 
                     {/* Theme Toggle Mini */}
                     <button
-                        onClick={onToggleTheme}
-                        className="ml-auto w-8 h-8 rounded-full flex items-center justify-center text-[#7C89A6] hover:text-white hover:bg-white/10"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onToggleTheme?.();
+                        }}
+                        className="ml-auto w-8 h-8 rounded-full flex items-center justify-center text-[#7C89A6] hover:text-white hover:bg-white/10 transition-colors"
                     >
                         <Icon name={theme === 'dark' ? 'moon' : 'sun'} className="w-4 h-4" />
                     </button>

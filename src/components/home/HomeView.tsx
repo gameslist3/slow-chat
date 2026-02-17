@@ -114,14 +114,14 @@ const GroupItem = ({
         {/* Hover Glow Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-[#5B79B7]/0 to-[#5B79B7]/5 opacity-0 group-hover:opacity-100 transition-opacity" />
 
-        <div className="flex items-start gap-4 z-10">
-            {/* Icon */}
-            <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-2xl shrink-0 text-white">
+        <div className="flex items-center gap-4 z-10 w-full mb-4">
+            {/* Icon - No Background */}
+            <div className="w-12 h-12 flex items-center justify-center text-4xl shrink-0">
                 {group.image || '💬'}
             </div>
 
             {/* Name */}
-            <div className="flex-1 min-w-0 pt-1">
+            <div className="flex-1 min-w-0">
                 <h3 className="text-[#E6ECFF] font-bold text-lg leading-tight truncate">
                     {group.name}
                 </h3>

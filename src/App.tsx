@@ -174,7 +174,7 @@ const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark
                 setShowCreateGroup(false);
             }}
             onOpenSettings={() => { setActiveTab('profile'); setActiveId(null); }}
-            onGoHome={() => { setActiveTab('home'); setActiveId(null); }}
+            onGoHome={() => { setActiveTab('home'); setActiveId(null); setShowDiscovery(false); }}
             user={user}
             onLogout={logout}
             theme={theme}
@@ -189,6 +189,7 @@ const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark
                                 myGroups={myGroups}
                                 onSelectGroup={handleSelectGroup}
                                 onBrowseGroups={() => { setActiveTab('groups'); setShowDiscovery(true); }}
+                                onCreateGroup={() => { setActiveTab('groups'); setShowCreateGroup(true); }}
                             />
                         </motion.div>
                     )}
@@ -235,24 +236,6 @@ const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark
 
                     {activeTab === 'groups' && (
                         <motion.div key="groups" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-8 pb-32">
-                            <div className="flex items-center justify-between gap-4 flex-wrap">
-                                <h2 className="text-3xl font-black italic uppercase tracking-tighter">Groups</h2>
-                                <div className="flex items-center gap-2">
-                                    <button
-                                        onClick={() => { setShowDiscovery(!showDiscovery); setShowCreateGroup(false); }}
-                                        className={`h-12 px-6 rounded-xl flex items-center gap-2 font-bold transition-all ${showDiscovery ? 'bg-primary text-white shadow-lg' : 'bg-surface2 hover:bg-surface text-muted-foreground'}`}
-                                    >
-                                        <Icon name="compass" className="w-5 h-5" /> Explore
-                                    </button>
-                                    <button
-                                        onClick={() => { setShowCreateGroup(!showCreateGroup); setShowDiscovery(false); }}
-                                        className={`h-12 px-6 rounded-xl flex items-center gap-2 font-bold transition-all ${showCreateGroup ? 'bg-primary text-white shadow-lg' : 'btn-primary'}`}
-                                    >
-                                        <Icon name="plus" className="w-4 h-4" /> New Group
-                                    </button>
-                                </div>
-                            </div>
-
                             <AnimatePresence mode="wait">
                                 {showCreateGroup ? (
                                     <motion.div key="create" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
@@ -260,10 +243,33 @@ const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark
                                     </motion.div>
                                 ) : showDiscovery ? (
                                     <motion.div key="discovery" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}>
-                                        <GroupDiscovery onJoinGroup={(id: string) => joinContext(id)} onSelectGroup={handleSelectGroup} joinedGroupIds={user?.joinedGroups || []} />
+                                        <GroupDiscovery
+                                            onJoinGroup={(id: string) => joinContext(id)}
+                                            onSelectGroup={handleSelectGroup}
+                                            joinedGroupIds={user?.joinedGroups || []}
+                                            onCreateGroup={() => setShowCreateGroup(true)}
+                                            onBack={() => setShowDiscovery(false)}
+                                        />
                                     </motion.div>
                                 ) : (
                                     <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                                        <div className="flex items-center justify-between gap-4 flex-wrap mb-8">
+                                            <h2 className="text-3xl font-black italic uppercase tracking-tighter">Groups</h2>
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    onClick={() => { setShowDiscovery(!showDiscovery); setShowCreateGroup(false); }}
+                                                    className={`h-12 px-6 rounded-xl flex items-center gap-2 font-bold transition-all ${showDiscovery ? 'bg-primary text-white shadow-lg' : 'bg-surface2 hover:bg-surface text-muted-foreground'}`}
+                                                >
+                                                    <Icon name="compass" className="w-5 h-5" /> Explore
+                                                </button>
+                                                <button
+                                                    onClick={() => { setShowCreateGroup(!showCreateGroup); setShowDiscovery(false); }}
+                                                    className={`h-12 px-6 rounded-xl flex items-center gap-2 font-bold transition-all ${showCreateGroup ? 'bg-primary text-white shadow-lg' : 'btn-primary'}`}
+                                                >
+                                                    <Icon name="plus" className="w-4 h-4" /> New Group
+                                                </button>
+                                            </div>
+                                        </div>
                                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                             {myGroups.map(g => (
                                                 <button key={g.id} onClick={() => handleSelectGroup(g.id)} className="bento-item text-left group">
