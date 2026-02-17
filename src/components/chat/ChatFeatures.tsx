@@ -61,7 +61,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     };
 
     return (
-        <div className="w-full h-full flex flex-col relative overflow-hidden bg-[#0B1220]/50 backdrop-blur-3xl">
+        <div className="w-full h-full flex flex-col relative overflow-hidden bg-transparent">
             {/* Header */}
             <div className="shrink-0 z-40 bg-black/20 backdrop-blur-md border-b border-white/5">
                 <AIChatHeader

@@ -49,7 +49,7 @@ export interface Message {
     senderId: string;
     text: string;
     timestamp: number;
-    type: 'text' | 'image' | 'video' | 'pdf' | 'doc' | 'audio';
+    type: 'text' | 'image' | 'video' | 'pdf' | 'doc' | 'audio' | 'system';
     media?: FileMetadata;
     reactions: Reaction[];
     replyTo?: ReplyMetadata;

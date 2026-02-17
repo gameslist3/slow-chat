@@ -40,7 +40,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
             </header>
 
             {/* Groups Section */}
-            <section className="flex-1 px-8 md:px-16 lg:px-24">
+            <section className="flex-1 px-4 md:px-8 lg:px-12">
                 {/* Section Header Row */}
                 <div className="flex items-center justify-between mb-8 max-w-[1400px] mx-auto">
                     <div className="flex items-center gap-3">
@@ -75,7 +75,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                         </button>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6 max-w-[1400px] mx-auto pb-20">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-[1400px] mx-auto pb-20">
                         {myGroups.map((group, i) => (
                             <GroupItem
                                 key={group.id}
@@ -104,9 +104,9 @@ const GroupItem = ({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.05 }}
-        whileHover={{ x: 5, backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
+        whileHover={{ x: 5, backgroundColor: 'rgba(255, 255, 255, 0.04)' }}
         onClick={onClick}
-        className="group flex items-center gap-4 p-5 rounded-3xl bg-[#FFFFFF08] border border-white/5 hover:border-white/10 transition-all text-left"
+        className="group flex items-center gap-4 p-5 rounded-[2rem] bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all text-left shadow-lg"
     >
         {/* Left: Icon/Emoji Circle */}
         <div className="w-14 h-14 rounded-full bg-[#FFFFFF05] border border-white/5 flex items-center justify-center text-3xl shrink-0 group-hover:scale-110 transition-transform">

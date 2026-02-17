@@ -154,14 +154,14 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                 )}
             </div>
 
-            {/* Action Bar (Simple, shows on hover) */}
+            {/* Action Bar (Closer to bubble, WhatsApp style) */}
             <div className={`
-        absolute top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 flex gap-1 z-10
-        ${isMe
-                    ? 'right-full mr-3 flex-row-reverse'
-                    : 'left-full ml-3'
+                absolute top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 flex gap-0.5 z-10
+                ${isMe
+                    ? 'right-full mr-1.5 flex-row-reverse'
+                    : 'left-full ml-1.5'
                 }
-      `}>
+            `}>
                 <Button
                     variant="secondary" size="icon" className="w-8 h-8 rounded-full bg-white shadow-sm border border-gray-100 text-gray-500 hover:text-indigo-600"
                     onClick={() => onReact('❤️')}

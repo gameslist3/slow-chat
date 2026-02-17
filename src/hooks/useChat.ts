@@ -20,7 +20,9 @@ export const useChat = (chatId: string, isPersonal: boolean = false) => {
         if (!chatId) return;
         setLoading(true);
         const unsubscribe = subscribeToMessages(chatId, isPersonal, (newMessages) => {
-            setMessages(newMessages);
+            // Filter out system messages to focus on direct communication (WhatsApp/Instagram style)
+            const filtered = newMessages.filter(m => m.type !== 'system');
+            setMessages(filtered);
             setLoading(false);
 
             // Mark as seen when new messages arrive and we are active

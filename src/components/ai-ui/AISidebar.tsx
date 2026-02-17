@@ -34,11 +34,11 @@ export const AISidebar: React.FC<AISidebarProps> = ({
 
     return (
         <div className="h-full flex flex-col relative w-full p-4">
-            {/* Branding - Icon Only, Increased Size */}
-            <div className="px-4 py-8 flex items-center justify-center">
+            {/* Branding - Left-aligned and larger */}
+            <div className="px-6 py-10 flex items-center justify-start">
                 <div className="relative group cursor-pointer hover:scale-110 transition-transform duration-500">
                     <div className="absolute inset-0 bg-blue-500/30 blur-2xl rounded-full opacity-50 group-hover:opacity-100 transition-opacity" />
-                    <Logo className="w-12 h-12 relative z-10 text-white drop-shadow-[0_0_15px_rgba(127,166,255,0.5)]" />
+                    <Logo className="w-16 h-16 relative z-10 text-white drop-shadow-[0_0_15px_rgba(127,166,255,0.5)]" />
                 </div>
             </div>
 

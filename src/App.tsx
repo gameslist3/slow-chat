@@ -98,11 +98,6 @@ const AppContent = () => {
 
     return (
         <div className="h-screen w-screen font-sans bg-[#0B1220] selection:bg-primary/20 relative overflow-hidden text-white">
-            {/* Debug Label (Visible during dev) */}
-            <div className="fixed top-2 right-2 z-[9999] px-2 py-1 bg-primary rounded text-[8px] font-bold uppercase tracking-widest opacity-20 pointer-events-none">
-                Gapes Core v1.1.2 {isAuthenticated ? 'Auth' : 'Public'} {loading && '⏳'}
-            </div>
-
             <AuroraBackground />
 
             <div className="relative z-10 w-full h-full flex flex-col overflow-hidden">
