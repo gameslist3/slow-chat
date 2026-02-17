@@ -46,13 +46,21 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                     <span className="text-[9px] uppercase font-black text-primary/60 ml-1 mb-1.5 tracking-[0.2em]">{message.sender}</span>
                 )}
 
-                {/* Reply Context */}
+                {/* Reply Context - WhatsApp Style */}
                 {message.replyTo && (
                     <div className={`
-             mb-1 text-xs px-3 py-1 rounded-lg bg-gray-100/50 border-l-2 border-gray-300 text-gray-500 truncate max-w-full
-             ${isMe ? 'mr-1' : 'ml-1'}
-           `}>
-                        Replying to message...
+                        mb-1 text-xs mx-1 rounded-lg overflow-hidden flex cursor-pointer hover:bg-black/5 transition-colors relative
+                        ${isMe ? 'bg-black/10' : 'bg-black/5'}
+                    `}>
+                        <div className="w-1 bg-[#7FA6FF] shrink-0" />
+                        <div className="px-2 py-1.5 flex-1 min-w-0">
+                            <div className="text-[10px] font-bold text-[#7FA6FF] mb-0.5">
+                                {message.replyTo.sender || 'Unknown'}
+                            </div>
+                            <div className="text-gray-400 truncate">
+                                {message.replyTo.text || 'Photo'}
+                            </div>
+                        </div>
                     </div>
                 )}
 
@@ -148,10 +156,10 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                 </div>
 
                 {/* Reactions */}
-                {message.reactions.length > 0 && (
-                    <div className={`flex gap-1 mt-1 ${isMe ? 'mr-1' : 'ml-1'}`}>
+                {message.reactions && message.reactions.length > 0 && (
+                    <div className={`flex flex-wrap gap-1 mt-1 z-10 ${isMe ? 'justify-end mr-1' : 'justify-start ml-1'}`}>
                         {message.reactions.map((r, i) => (
-                            <span key={i} className="bg-white border border-gray-100 shadow-sm rounded-full px-1.5 py-0.5 text-xs animate-in zoom-in">
+                            <span key={i} className="bg-[#0F1C34] border border-white/10 shadow-sm rounded-full px-1.5 py-0.5 text-[10px] animate-in zoom-in text-white/90">
                                 {r.emoji}
                             </span>
                         ))}
@@ -160,22 +168,27 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
 
                 {/* Action Bar (Anchored to Bubble) */}
                 <div className={`
-                    absolute -top-8 opacity-0 group-hover/bubble:opacity-100 transition-all duration-200 flex gap-1 z-20
+                    absolute -top-7 opacity-0 group-hover/bubble:opacity-100 transition-all duration-200 flex gap-1 z-20 
+                    scale-90 group-hover/bubble:scale-100 origin-bottom
                     ${isMe ? 'right-0' : 'left-0'}
                 `}>
-                    <div className="flex items-center gap-1 bg-[#0F1C34]/80 backdrop-blur-md p-1 rounded-full border border-white/10 shadow-lg">
-                        <Button
-                            variant="ghost" size="icon" className="w-7 h-7 rounded-full text-zinc-400 hover:text-white hover:bg-white/10"
-                            onClick={() => onReact('❤️')}
-                        >
-                            ❤️
-                        </Button>
-                        <Button
-                            variant="ghost" size="icon" className="w-7 h-7 rounded-full text-zinc-400 hover:text-white hover:bg-white/10"
+                    <div className="flex items-center gap-1 bg-[#0F1C34]/90 backdrop-blur-md p-1 rounded-full border border-white/10 shadow-xl">
+                        {['❤️', '😂', '😮', '😢'].map(emoji => (
+                            <button
+                                key={emoji}
+                                className="w-6 h-6 rounded-full hover:bg-white/10 flex items-center justify-center text-sm transition-transform hover:scale-110 active:scale-90"
+                                onClick={() => onReact(emoji)}
+                            >
+                                {emoji}
+                            </button>
+                        ))}
+                        <div className="w-px h-3 bg-white/10 mx-0.5" />
+                        <button
+                            className="w-6 h-6 rounded-full hover:bg-white/10 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
                             onClick={onReply}
                         >
-                            <Reply className="w-4 h-4" />
-                        </Button>
+                            <Reply className="w-3 h-3" />
+                        </button>
                     </div>
                 </div>
             </div>

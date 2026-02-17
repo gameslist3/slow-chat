@@ -164,11 +164,14 @@ const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark
     const otherUserId = activePersonalChat?.userIds.find((id: string) => id !== user?.id);
     const personalChatTitle = isPersonal ? (activePersonalChat?.usernames?.[otherUserId || ''] || 'User') : '';
 
+    // Calculate unread notifications
+    const unreadCount = notifications.filter(n => !n.read).length;
+
     console.log('[App] Rendering AuthenticatedSection', { activeTab, activeId, isAuthenticated: !!user });
 
     return (
         <AILayout
-            activeTab={activeTab === 'chat' ? (isPersonal ? 'friends' : 'explore') : (showDiscovery ? 'explore' : activeTab)}
+            activeTab={activeTab === 'chat' ? (isPersonal ? 'friends' : 'home') : (showDiscovery ? 'explore' : activeTab)}
             onTabChange={(tab) => {
                 setActiveTab(tab as any);
                 setActiveId(null);
@@ -181,6 +184,7 @@ const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark
             onLogout={logout}
             theme={theme}
             onToggleTheme={onToggleTheme}
+            unreadCount={unreadCount}
         >
             <div className="w-full h-full flex flex-col px-4 md:px-8 lg:px-12 max-w-[1600px] mx-auto">
                 <AnimatePresence mode="wait">

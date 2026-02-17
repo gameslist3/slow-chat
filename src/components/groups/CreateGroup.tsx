@@ -65,7 +65,7 @@ export const CreateGroup: React.FC<CreateGroupProps> = ({ onGroupCreated }) => {
                                 placeholder="e.g. Design Talks"
                                 value={name}
                                 onChange={e => setName(e.target.value)}
-                                className="w-full h-14 px-5 rounded-2xl bg-[#152238]/60 border border-white/10 text-[#E6ECFF] placeholder-[#475569] focus:border-[#3B82F6] focus:bg-[#152238] transition-all outline-none font-medium"
+                                className="w-full h-14 px-5 rounded-2xl bg-[#152238]/60 border border-white/10 text-[#E6ECFF] placeholder-white/20 focus:border-[#3B82F6] focus:bg-[#152238] transition-all outline-none font-medium"
                             />
                         </div>
 
@@ -80,7 +80,7 @@ export const CreateGroup: React.FC<CreateGroupProps> = ({ onGroupCreated }) => {
                                         setShowSuggestions(true);
                                     }}
                                     onFocus={() => setShowSuggestions(true)}
-                                    className="w-full h-14 px-5 rounded-2xl bg-[#152238]/60 border border-white/10 text-[#E6ECFF] placeholder-[#475569] focus:border-[#3B82F6] focus:bg-[#152238] transition-all outline-none font-medium"
+                                    className="w-full h-14 px-5 rounded-2xl bg-[#152238]/60 border border-white/10 text-[#E6ECFF] placeholder-white/20 focus:border-[#3B82F6] focus:bg-[#152238] transition-all outline-none font-medium"
                                 />
                                 <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
                                     <Icon name="search" className="w-4 h-4 text-[#64748B]" />

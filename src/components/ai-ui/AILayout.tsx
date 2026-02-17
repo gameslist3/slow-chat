@@ -15,6 +15,7 @@ interface AILayoutProps {
     onLogout: () => void;
     theme: 'light' | 'dark';
     onToggleTheme: () => void;
+    unreadCount?: number;
 }
 
 export const AILayout: React.FC<AILayoutProps> = ({
@@ -26,7 +27,8 @@ export const AILayout: React.FC<AILayoutProps> = ({
     user,
     onLogout,
     theme,
-    onToggleTheme
+    onToggleTheme,
+    unreadCount = 0
 }) => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -44,6 +46,7 @@ export const AILayout: React.FC<AILayoutProps> = ({
                     user={user}
                     onLogout={onLogout}
                     onToggleTheme={onToggleTheme}
+                    unreadCount={unreadCount}
                 />
             </aside>
 
@@ -94,6 +97,7 @@ export const AILayout: React.FC<AILayoutProps> = ({
                                 user={user}
                                 onLogout={onLogout}
                                 onToggleTheme={onToggleTheme}
+                                unreadCount={unreadCount}
                             />
                         </motion.aside>
                     </>

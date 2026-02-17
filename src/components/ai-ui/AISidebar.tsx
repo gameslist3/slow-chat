@@ -13,6 +13,7 @@ interface AISidebarProps {
     onLogout: () => void;
     theme?: 'light' | 'dark';
     onToggleTheme?: () => void;
+    unreadCount?: number;
 }
 
 export const AISidebar: React.FC<AISidebarProps> = ({
@@ -23,7 +24,8 @@ export const AISidebar: React.FC<AISidebarProps> = ({
     user,
     onLogout,
     theme = 'dark',
-    onToggleTheme
+    onToggleTheme,
+    unreadCount = 0
 }) => {
     const navItems = [
         { id: 'home', icon: 'zap' as any, label: 'Home', action: onGoHome },
@@ -46,22 +48,31 @@ export const AISidebar: React.FC<AISidebarProps> = ({
             <nav className="space-y-3 flex-1">
                 {navItems.map((item) => {
                     const isActive = activeTab === item.id;
+                    const isNotifications = item.id === 'inbox';
+
                     return (
                         <button
                             key={item.id}
                             onClick={item.action}
                             className={`
-                                w-full flex items-center gap-4 px-4 py-3.5 rounded-full transition-all duration-300 group
+                                w-full flex items-center gap-4 px-4 py-3.5 rounded-full transition-all duration-300 group relative
                                 ${isActive
                                     ? 'bg-gradient-to-r from-[#5B79B7] to-[#243A6B] text-white shadow-lg shadow-blue-900/20'
                                     : 'text-[#7C89A6] hover:text-[#E6ECFF] hover:bg-[#FFFFFF05]'
                                 }
                             `}
                         >
-                            <Icon
-                                name={item.icon}
-                                className={`w-5 h-5 transition-transform group-hover:scale-110 ${isActive ? 'text-white' : 'text-[#7C89A6] group-hover:text-white'}`}
-                            />
+                            <div className="relative">
+                                <Icon
+                                    name={item.icon}
+                                    className={`w-5 h-5 transition-transform group-hover:scale-110 ${isActive ? 'text-white' : 'text-[#7C89A6] group-hover:text-white'}`}
+                                />
+                                {isNotifications && unreadCount > 0 && (
+                                    <div className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-0.5 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-[#0B1220]">
+                                        {unreadCount > 9 ? '9+' : unreadCount}
+                                    </div>
+                                )}
+                            </div>
                             <span className="hidden md:block text-sm font-medium tracking-wide">
                                 {item.label}
                             </span>
