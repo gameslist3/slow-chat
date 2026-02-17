@@ -34,7 +34,8 @@ export const AILayout: React.FC<AILayoutProps> = ({
         <div className="flex h-screen w-full overflow-hidden font-sans text-foreground">
 
             {/* Desktop Sidebar (Flex Item) - Optimized Transparency */}
-            <aside className="hidden md:flex w-72 flex-col flex-shrink-0 z-50 border-r border-[#FFFFFF08] bg-black/10 backdrop-blur-2xl">
+            {/* Desktop Sidebar (Flex Item) - Optimized Transparency */}
+            <aside className="hidden md:flex w-72 flex-col flex-shrink-0 z-50 border-r border-white/5 bg-[#0B1221]/60 backdrop-blur-3xl">
                 <AISidebar
                     activeTab={activeTab}
                     onTabChange={onTabChange}
@@ -49,7 +50,7 @@ export const AILayout: React.FC<AILayoutProps> = ({
             {/* Main Canvas */}
             <main className="flex-1 flex flex-col min-w-0 relative z-10 h-full overflow-hidden bg-transparent">
                 {/* Mobile Header - Optimized Transparency */}
-                <header className="md:hidden flex items-center justify-between p-4 border-b border-[#FFFFFF08] bg-black/20 backdrop-blur-xl shrink-0">
+                <header className="md:hidden flex items-center justify-between p-4 border-b border-white/5 bg-[#0B1221]/80 backdrop-blur-xl shrink-0">
                     <button onClick={() => setSidebarOpen(true)} className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
                         <Icon name="menu" className="w-5 h-5 text-muted-foreground" />
                     </button>

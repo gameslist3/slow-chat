@@ -19,13 +19,13 @@ export const HomeView: React.FC<HomeViewProps> = ({
     onCreateGroup
 }) => {
     return (
-        <div className="w-full h-full flex flex-col">
-            {/* Welcome Header */}
-            <header className="flex flex-col items-center justify-center pt-24 pb-32 text-center px-6">
+        <div className="w-full h-full flex flex-col items-center">
+            {/* Welcome Header - Centered & Spaced */}
+            <header className="flex flex-col items-center justify-center pt-20 pb-24 text-center px-6 max-w-4xl mx-auto">
                 <motion.h1
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-wide text-[#E6ECFF] uppercase mb-4"
+                    className="text-4xl md:text-5xl lg:text-6xl font-medium tracking-tight text-[#E6ECFF] mb-6"
                 >
                     WELCOME BACK, <span className="font-bold">{user?.username?.toUpperCase()}</span>
                 </motion.h1>
@@ -33,25 +33,25 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.1 }}
-                    className="text-[#A9B4D0] font-medium text-lg tracking-wide opacity-60"
+                    className="text-[#7C89A6] font-medium text-lg tracking-wide max-w-lg"
                 >
                     Pick up where you left off or find something new.
                 </motion.p>
             </header>
 
             {/* Groups Section */}
-            <section className="flex-1 px-4 md:px-8 lg:px-12">
+            <section className="w-full px-6 md:px-12 lg:px-20 max-w-[1600px] flex-1">
                 {/* Section Header Row */}
-                <div className="flex items-center justify-between mb-8 max-w-[1400px] mx-auto">
-                    <div className="flex items-center gap-3">
-                        <h2 className="text-xl md:text-2xl font-bold text-[#E6ECFF]">My Groups</h2>
-                        <Icon name="arrowRight" className="w-5 h-5 text-[#A9B4D0] opacity-50" />
-                    </div>
+                <div className="flex items-center justify-between mb-8 w-full">
+                    <button onClick={onBrowseGroups} className="flex items-center gap-3 group">
+                        <h2 className="text-xl md:text-2xl font-bold text-[#A9B4D0] group-hover:text-white transition-colors">My Groups</h2>
+                        <Icon name="arrowRight" className="w-5 h-5 text-[#5B79B7] group-hover:translate-x-1 transition-transform" />
+                    </button>
 
                     {onCreateGroup && (
                         <button
                             onClick={onCreateGroup}
-                            className="text-[#A9B4D0] hover:text-[#7FA6FF] flex items-center gap-2 font-bold text-sm transition-all"
+                            className="text-[#7C89A6] hover:text-[#E6ECFF] flex items-center gap-2 font-medium text-sm transition-all"
                         >
                             Create New <Icon name="plus" className="w-4 h-4" />
                         </button>
@@ -59,23 +59,23 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 </div>
 
                 {myGroups.length === 0 ? (
-                    <div className="glass-panel p-20 text-center rounded-[2.5rem] flex flex-col items-center justify-center">
-                        <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-8 border border-white/10 text-[#A9B4D0]">
+                    <div className="glass-panel p-20 text-center rounded-[2rem] flex flex-col items-center justify-center bg-[#0F1C34]/50 border border-white/5">
+                        <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6 border border-white/5 text-[#5B79B7]">
                             <Icon name="search" className="w-8 h-8" />
                         </div>
-                        <h3 className="text-2xl font-bold mb-3 text-[#E6ECFF]">No groups yet</h3>
-                        <p className="text-[#A9B4D0] mb-8 text-sm">
+                        <h3 className="text-xl font-bold mb-2 text-[#E6ECFF]">No groups yet</h3>
+                        <p className="text-[#7C89A6] mb-8 text-sm">
                             The expanse is empty. Join a group to start communicating.
                         </p>
                         <button
                             onClick={onBrowseGroups}
-                            className="px-10 py-4 rounded-full bg-[#5B79B7] text-white font-bold text-sm uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:scale-105 transition-all"
+                            className="px-8 py-3 rounded-full bg-[#1F2937] hover:bg-[#374151] text-white font-bold text-sm transition-all"
                         >
                             Explore Groups
                         </button>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-[1400px] mx-auto pb-20">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 pb-20">
                         {myGroups.map((group, i) => (
                             <GroupItem
                                 key={group.id}
@@ -91,6 +91,9 @@ export const HomeView: React.FC<HomeViewProps> = ({
     );
 };
 
+// Helper for "Go Browse" since it wasn't in props but is needed for the header link
+const onGoBrowse = () => { }; // Placeholder if not passed, but effectively just a visual link in the design
+
 const GroupItem = ({
     group,
     index,
@@ -104,29 +107,39 @@ const GroupItem = ({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.05 }}
-        whileHover={{ x: 5, backgroundColor: 'rgba(255, 255, 255, 0.04)' }}
+        whileHover={{ y: -5, boxShadow: '0 10px 30px -10px rgba(0,0,0,0.3)' }}
         onClick={onClick}
-        className="group flex items-center gap-4 p-5 rounded-[2rem] bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all text-left shadow-lg"
+        className="group relative flex flex-col p-6 rounded-[1.5rem] bg-[#152238]/60 border border-white/5 hover:border-[#5B79B7]/30 transition-all text-left overflow-hidden w-full h-40"
     >
-        {/* Left: Icon/Emoji Circle */}
-        <div className="w-14 h-14 rounded-full bg-[#FFFFFF05] border border-white/5 flex items-center justify-center text-3xl shrink-0 group-hover:scale-110 transition-transform">
-            {group.image || '💬'}
-        </div>
+        {/* Hover Glow Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#5B79B7]/0 to-[#5B79B7]/5 opacity-0 group-hover:opacity-100 transition-opacity" />
 
-        {/* Center: Name & Member Count */}
-        <div className="flex-1 min-w-0">
-            <h3 className="text-[#E6ECFF] font-bold text-lg truncate mb-1">
-                {group.name}
-            </h3>
-            <div className="flex items-center gap-2 text-[#A9B4D0]/60 text-xs font-bold">
-                <Icon name="users" className="w-4 h-4" />
-                <span>{group.members || 1} User</span>
+        <div className="flex items-start gap-4 z-10">
+            {/* Icon */}
+            <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-2xl shrink-0 text-white">
+                {group.image || '💬'}
+            </div>
+
+            {/* Name */}
+            <div className="flex-1 min-w-0 pt-1">
+                <h3 className="text-[#E6ECFF] font-bold text-lg leading-tight truncate">
+                    {group.name}
+                </h3>
             </div>
         </div>
 
-        {/* Right: Category Tag */}
-        <div className="px-3 py-1.5 rounded-full bg-white/5 border border-white/5 text-[#A9B4D0] text-[9px] font-black uppercase tracking-widest shrink-0">
-            {group.category || 'General'}
+        {/* Bottom Metadata Row */}
+        <div className="mt-auto flex items-center justify-between z-10 w-full">
+            {/* Members (Left) */}
+            <div className="flex items-center gap-2 text-[#7C89A6] text-xs font-bold">
+                <Icon name="users" className="w-4 h-4" />
+                <span>{group.members || 1} User</span>
+            </div>
+
+            {/* Category Pill (Right) */}
+            <div className="px-3 py-1 rounded-full border border-white/10 text-[#A9B4D0] text-[10px] font-bold uppercase tracking-wider bg-black/20">
+                {group.category || 'General'}
+            </div>
         </div>
     </motion.button>
 );

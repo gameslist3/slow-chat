@@ -33,36 +33,39 @@ export const AISidebar: React.FC<AISidebarProps> = ({
     ];
 
     return (
-        <div className="h-full flex flex-col relative w-full p-4">
-            {/* Branding - Left-aligned and larger */}
-            <div className="px-6 py-10 flex items-center justify-start">
-                <div className="relative group cursor-pointer hover:scale-110 transition-transform duration-500">
-                    <div className="absolute inset-0 bg-blue-500/30 blur-2xl rounded-full opacity-50 group-hover:opacity-100 transition-opacity" />
-                    <Logo className="w-16 h-16 relative z-10 text-white drop-shadow-[0_0_15px_rgba(127,166,255,0.5)]" />
+        <div className="h-full flex flex-col relative w-full px-4 py-6">
+            {/* Branding - Top Left */}
+            <div className="px-4 mb-10 flex items-center gap-3">
+                <div className="relative group cursor-pointer">
+                    <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <Logo className="w-8 h-8 md:w-10 md:h-10 text-white relative z-10" />
                 </div>
+                <span className="text-2xl font-bold tracking-tight text-white hidden md:block">
+                    Gapes
+                </span>
             </div>
 
             {/* Main Navigation */}
-            <nav className="space-y-4 mt-8 flex-1 flex flex-col items-center">
+            <nav className="space-y-3 flex-1">
                 {navItems.map((item) => {
                     const isActive = activeTab === item.id;
                     return (
                         <button
                             key={item.id}
                             onClick={item.action}
-                            title={item.label}
-                            className={`w-12 h-12 md:w-full md:h-14 rounded-2xl md:rounded-xl flex items-center justify-center md:justify-start md:px-5 transition-all duration-300 relative group overflow-hidden
+                            className={`
+                                w-full flex items-center gap-4 px-4 py-3.5 rounded-full transition-all duration-300 group
                                 ${isActive
-                                    ? 'bg-[#5B79B7] shadow-[0_0_20px_rgba(127,166,255,0.4)] text-[#E6ECFF]'
-                                    : 'text-[#A9B4D0] hover:text-[#E6ECFF] hover:bg-white/5'
+                                    ? 'bg-gradient-to-r from-[#5B79B7] to-[#243A6B] text-white shadow-lg shadow-blue-900/20'
+                                    : 'text-[#7C89A6] hover:text-[#E6ECFF] hover:bg-[#FFFFFF05]'
                                 }
                             `}
                         >
                             <Icon
                                 name={item.icon}
-                                className={`w-6 h-6 md:mr-4 relative z-10 transition-transform group-hover:scale-110 ${isActive ? 'text-white' : ''}`}
+                                className={`w-5 h-5 transition-transform group-hover:scale-110 ${isActive ? 'text-white' : 'text-[#7C89A6] group-hover:text-white'}`}
                             />
-                            <span className={`hidden md:block text-sm font-bold tracking-wide relative z-10 ${isActive ? 'text-white' : ''} transition-opacity`}>
+                            <span className="hidden md:block text-sm font-medium tracking-wide">
                                 {item.label}
                             </span>
                         </button>
@@ -70,46 +73,29 @@ export const AISidebar: React.FC<AISidebarProps> = ({
                 })}
             </nav>
 
-            {/* Bottom Section: User Status & Theme & Logout */}
-            <div className="mt-auto pt-6 border-t border-white/5 flex flex-col gap-6">
-                {/* User Status */}
-                <div className="flex items-center gap-3 px-2">
+            {/* Bottom Section: User & Config */}
+            <div className="mt-auto flex flex-col gap-4">
+                {/* User Profile Pill */}
+                <div className="flex items-center gap-3 p-2 rounded-full hover:bg-[#FFFFFF05] transition-colors cursor-pointer group">
                     <div className="relative shrink-0">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#182B52] to-[#243A6B] flex items-center justify-center text-white font-bold text-sm border border-white/10 shadow-lg">
-                            {user?.username?.[0].toUpperCase() || 'H'}
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#182B52] to-[#0F1C34] flex items-center justify-center text-white font-bold border border-[#FFFFFF10] shadow-lg group-hover:border-[#5B79B7] transition-colors">
+                            {user?.username?.[0].toUpperCase() || <Icon name="user" className="w-4 h-4" />}
                         </div>
-                        <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#7ED957] rounded-full border-2 border-[#0B1220] shadow-[0_0_8px_#7ED957]" />
+                        <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#7ED957] rounded-full border-2 border-[#0B1220]" />
                     </div>
-                    <div className="hidden md:block overflow-hidden flex-1">
-                        <div className="text-sm font-bold text-[#E6ECFF] truncate">
-                            {user?.username || 'Happy'}
-                        </div>
+
+                    <div className="hidden md:flex flex-col overflow-hidden">
+                        <span className="text-sm font-bold text-[#E6ECFF] truncate">
+                            {user?.username || 'Guest'}
+                        </span>
                     </div>
-                    {/* Theme Toggle inside user row for desktop */}
+
+                    {/* Theme Toggle Mini */}
                     <button
                         onClick={onToggleTheme}
-                        className="hidden md:flex w-8 h-8 rounded-full items-center justify-center text-[#A9B4D0] hover:text-white transition-all"
+                        className="ml-auto w-8 h-8 rounded-full flex items-center justify-center text-[#7C89A6] hover:text-white hover:bg-white/10"
                     >
                         <Icon name={theme === 'dark' ? 'moon' : 'sun'} className="w-4 h-4" />
-                    </button>
-                </div>
-
-                {/* Mobile/Tablet Theme & Logout */}
-                <div className="flex items-center justify-between px-2 md:px-0">
-                    <button
-                        onClick={onLogout}
-                        className="flex items-center gap-3 px-4 py-3 rounded-xl text-[#A9B4D0] hover:text-red-400 hover:bg-red-400/5 transition-all w-full md:w-auto"
-                        title="Logout"
-                    >
-                        <Icon name="logout" className="w-5 h-5 shrink-0" />
-                        <span className="hidden md:block text-sm font-bold">Logout</span>
-                    </button>
-
-                    <button
-                        onClick={onToggleTheme}
-                        className="md:hidden w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[#A9B4D0]"
-                    >
-                        <Icon name={theme === 'dark' ? 'moon' : 'sun'} className="w-5 h-5" />
                     </button>
                 </div>
             </div>

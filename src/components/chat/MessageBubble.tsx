@@ -45,12 +45,12 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                 )}
 
                 <div className={`
-                    relative px-5 py-3.5 text-[15px] font-medium leading-relaxed tracking-tight break-words overflow-hidden
+                    relative px-5 py-3 text-[15px] font-medium leading-relaxed tracking-wide break-words overflow-hidden shadow-lg
                     ${isMe
-                        ? 'bg-primary text-white rounded-[1.5rem] rounded-tr-none shadow-lg shadow-primary/20'
-                        : 'glass-panel rounded-[1.5rem] rounded-tl-none border border-white/10'
+                        ? 'bg-[#3B82F6] text-white rounded-[1.25rem] rounded-tr-sm'
+                        : 'bg-[#152238]/90 backdrop-blur-md text-[#E6ECFF] rounded-[1.25rem] rounded-tl-sm border border-white/5'
                     }
-                    ${message.type === 'image' || message.type === 'video' ? 'p-1.5 bg-transparent border-0 shadow-none' : ''}
+                    ${message.type === 'image' || message.type === 'video' ? 'p-1 bg-transparent border-0 shadow-none' : ''}
                 `}>
                     {message.type === 'text' && (
                         <div className="max-w-full">
@@ -136,7 +136,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                     )}
 
                     {message.type === 'text' && (
-                        <span className={`text-[9px] font-black ml-3 opacity-40 inline-block align-bottom uppercase tracking-widest ${isMe ? 'text-white' : 'text-muted-foreground'}`}>
+                        <span className={`text-[9px] font-bold ml-3 opacity-50 inline-block align-bottom ${isMe ? 'text-blue-100' : 'text-[#7C89A6]'}`}>
                             {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                     )}
@@ -154,12 +154,12 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                 )}
             </div>
 
-            {/* Action Bar (Closer to bubble, WhatsApp style) */}
+            {/* Action Bar (Closer & Cleaner) */}
             <div className={`
-                absolute top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 flex gap-0.5 z-10
+                absolute top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 flex gap-1 z-10
                 ${isMe
-                    ? 'right-full mr-1.5 flex-row-reverse'
-                    : 'left-full ml-1.5'
+                    ? 'right-full mr-2 flex-row-reverse'
+                    : 'left-full ml-2'
                 }
             `}>
                 <Button

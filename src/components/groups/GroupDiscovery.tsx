@@ -39,33 +39,34 @@ export const GroupDiscovery: React.FC<GroupDiscoveryProps> = ({
     );
 
     return (
-        <div className="w-full h-full flex flex-col overflow-y-auto no-scrollbar pb-20">
+        <div className="w-full h-full flex flex-col items-center overflow-y-auto custom-scrollbar">
             {/* PAGE HEADER */}
-            <header className="flex flex-col items-center justify-center pt-20 pb-12 text-center px-6">
+            <header className="flex flex-col items-center justify-center pt-20 pb-12 text-center px-6 w-full max-w-4xl">
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8 }}
+                    className="w-full flex flex-col items-center"
                 >
-                    <h1 className="text-4xl md:text-5xl font-semibold tracking-tight text-[#E6ECFF] mb-3">
+                    <h1 className="text-4xl md:text-5xl font-semibold tracking-tight text-[#E6ECFF] mb-2">
                         Explore Group
                     </h1>
-                    <p className="text-[#A9B4D0] text-sm md:text-base font-light mb-10">
+                    <p className="text-[#A9B4D0] text-sm md:text-base font-light mb-8">
                         Join communities and start chatting.
                     </p>
 
                     {/* SEARCH BAR (Centered Glass Style) */}
-                    <div className="w-full max-w-lg relative group mx-auto">
-                        <div className="absolute inset-0 bg-[#7FA6FF]/5 blur-xl rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity pointer-events-none" />
+                    <div className="w-full max-w-lg relative group">
+                        <div className="absolute inset-0 bg-[#3B82F6]/10 blur-xl rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity pointer-events-none" />
                         <div className="relative">
                             <input
                                 placeholder="Search Groups.."
                                 value={filter}
                                 onChange={e => setFilter(e.target.value)}
-                                className="w-full h-14 pl-6 pr-14 rounded-full bg-white/[0.05] border border-white/[0.12] focus:border-[#7FA6FF] focus:bg-white/[0.08] text-[#E6ECFF] placeholder-[#7C89A6] transition-all outline-none shadow-lg"
+                                className="w-full h-12 pl-6 pr-12 rounded-full bg-[#152238] border border-white/10 focus:border-[#3B82F6]/50 focus:bg-[#1E3A8A]/30 text-[#E6ECFF] placeholder-[#64748B] transition-all outline-none shadow-lg"
                             />
-                            <div className="absolute right-5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center">
-                                <Icon name="search" className="w-5 h-5 text-[#7C89A6] group-focus-within:text-[#7FA6FF] shadow-[#7FA6FF]/20 transition-colors" />
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none">
+                                <Icon name="search" className="w-5 h-5 text-[#64748B] group-focus-within:text-[#3B82F6] transition-colors" />
                             </div>
                         </div>
                     </div>
@@ -73,28 +74,28 @@ export const GroupDiscovery: React.FC<GroupDiscoveryProps> = ({
             </header>
 
             {/* SECTION HEADER ROW */}
-            <div className="w-full max-w-[1400px] mx-auto px-6 md:px-12 mb-8">
+            <div className="w-full max-w-[1400px] mx-auto px-6 md:px-12 mb-6 mt-4">
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm font-bold text-[#A9B4D0]">Explore Groups</span>
-                        <Icon name="arrowRight" className="w-4 h-4 text-[#A9B4D0] opacity-70" />
+                    <div className="flex items-center gap-2 group cursor-pointer">
+                        <span className="text-xl font-bold text-[#A9B4D0] group-hover:text-white transition-colors">Explore Groups</span>
+                        <Icon name="arrowRight" className="w-5 h-5 text-[#5B79B7] group-hover:translate-x-1 transition-transform" />
                     </div>
-                    <button className="flex items-center gap-1.5 text-[#7FA6FF] font-bold text-sm hover:brightness-125 hover:drop-shadow-[0_0_8px_rgba(127,166,255,0.4)] transition-all">
+                    <button className="flex items-center gap-1.5 text-[#E6ECFF] font-medium text-sm hover:text-white hover:bg-white/5 px-3 py-1.5 rounded-full transition-all">
                         Create New +
                     </button>
                 </div>
             </div>
 
             {/* GROUP CARD GRID */}
-            <section className="w-full max-w-[1400px] mx-auto px-6 md:px-12">
+            <section className="w-full max-w-[1400px] mx-auto px-6 md:px-12 flex-1 pb-20">
                 {loading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-20">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {[1, 2, 3, 4, 5, 6].map(i => (
-                            <div key={i} className="h-28 bg-white/5 rounded-[2rem] animate-pulse border border-white/5" />
+                            <div key={i} className="h-32 bg-[#152238] rounded-[1.5rem] animate-pulse border border-white/5" />
                         ))}
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 pb-20">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
                         {filteredGroups.map((group, idx) => {
                             const isJoined = joinedGroupIds.includes(group.id);
                             return (
@@ -102,52 +103,58 @@ export const GroupDiscovery: React.FC<GroupDiscoveryProps> = ({
                                     key={group.id}
                                     initial={{ opacity: 0, scale: 0.95 }}
                                     animate={{ opacity: 1, scale: 1 }}
-                                    whileHover={{ y: -5, scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
+                                    whileHover={{ y: -5 }}
                                     transition={{ delay: idx * 0.03 }}
                                     onClick={() => isJoined ? onSelectGroup(group.id) : null}
-                                    className="group relative glass-morphism-card cursor-pointer"
+                                    className="group relative flex flex-col p-5 rounded-[1.5rem] bg-[#152238]/60 border border-white/5 hover:border-[#5B79B7]/30 transition-all text-left overflow-hidden h-40 shadow-lg"
                                 >
-                                    {/* Glass styles moved to CSS or applied via container */}
-                                    <div className="absolute inset-0 bg-white/[0.06] border border-white/[0.12] rounded-[2rem] transition-all group-hover:bg-white/[0.08] group-hover:border-white/[0.2] shadow-xl" />
+                                    {/* Hover Glow */}
+                                    <div className="absolute inset-0 bg-gradient-to-br from-[#3B82F6]/0 to-[#3B82F6]/5 opacity-0 group-hover:opacity-100 transition-opacity" />
 
-                                    <div className="relative z-10 p-5 flex items-center gap-4">
-                                        {/* Left area: Emoji in Circular Glass */}
-                                        <div className="w-14 h-14 rounded-full bg-white/[0.05] border border-white/[0.12] flex items-center justify-center text-2xl shadow-inner inline-glow shrink-0">
+                                    <div className="flex items-start gap-4 relative z-10 mb-auto">
+                                        {/* Icon */}
+                                        <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-2xl shrink-0 text-white">
                                             {group.image || '💬'}
                                         </div>
 
-                                        {/* Center area: Name + member count */}
-                                        <div className="flex-1 min-w-0">
-                                            <h3 className="text-[#E6ECFF] font-semi-bold text-lg truncate leading-tight mb-1">{group.name}</h3>
-                                            <div className="flex items-center gap-1.5 text-[#7C89A6] text-xs font-medium">
-                                                <Icon name="user" className="w-3.5 h-3.5 opacity-60" />
-                                                <span>{group.members || 1} members</span>
+                                        {/* Name */}
+                                        <div className="flex-1 min-w-0 pt-1">
+                                            <h3 className="text-[#E6ECFF] font-bold text-lg leading-tight truncate">
+                                                {group.name}
+                                            </h3>
+                                        </div>
+                                    </div>
+
+                                    {/* Bottom Row */}
+                                    <div className="relative z-10 flex items-center justify-between w-full mt-4">
+
+                                        <div className="flex items-center gap-3">
+                                            {/* Members */}
+                                            <div className="flex items-center gap-1.5 text-[#7C89A6] text-xs font-bold">
+                                                <Icon name="users" className="w-3.5 h-3.5" />
+                                                <span>{group.members || 1} User</span>
+                                            </div>
+
+                                            {/* Category Pill */}
+                                            <div className="px-2.5 py-1 rounded-full border border-white/10 text-[#A9B4D0] text-[10px] font-bold uppercase tracking-wider bg-black/20">
+                                                {group.category || 'General'}
                                             </div>
                                         </div>
 
-                                        {/* Right area: Category + Join button */}
-                                        <div className="flex flex-col items-end gap-3 shrink-0">
-                                            {group.category && (
-                                                <div className="px-2.5 py-1 rounded-full bg-white/[0.05] border border-white/[0.1] text-[10px] text-[#A9B4D0] font-medium tracking-wide">
-                                                    {group.category}
-                                                </div>
-                                            )}
-
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    isJoined ? onSelectGroup(group.id) : onJoinGroup(group.id);
-                                                }}
-                                                className={`px-4 py-1.5 rounded-full text-[11px] font-bold transition-all shadow-sm
-                                                    ${isJoined
-                                                        ? 'bg-transparent border border-white/10 text-[#A9B4D0] hover:text-[#E6ECFF]'
-                                                        : 'bg-[#7FA6FF]/18 text-[#E6ECFF] hover:bg-[#7FA6FF]/30 hover:shadow-[0_0_12px_rgba(127,166,255,0.4)]'}
-                                                `}
-                                            >
-                                                {isJoined ? 'Open' : 'Join'}
-                                            </button>
-                                        </div>
+                                        {/* Join Button */}
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                isJoined ? onSelectGroup(group.id) : onJoinGroup(group.id);
+                                            }}
+                                            className={`px-4 py-1.5 rounded-full text-[11px] font-bold transition-all shadow-sm
+                                                ${isJoined
+                                                    ? 'bg-transparent border border-white/10 text-[#A9B4D0] hover:text-[#E6ECFF]'
+                                                    : 'bg-[#1E3A8A] text-white hover:bg-[#2563EB] hover:shadow-[0_0_12px_rgba(37,99,235,0.4)]'}
+                                            `}
+                                        >
+                                            {isJoined ? 'Open' : 'Join'}
+                                        </button>
                                     </div>
                                 </motion.div>
                             );

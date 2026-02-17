@@ -4,55 +4,42 @@
 
 @layer base {
   :root {
-    /* --- Gapes Premium Palette --- */
-    --bg-core: #0B1220;
+    /* --- Gapes Premium Palette (Redesign) --- */
+    --bg-core: #0B1221;
     --bg-navy: #0F1C34;
-    --bg-indigo: #182B52;
+    --bg-indigo: #152238;
 
-    --glow-soft: #243A6B;
-    --glow-accent: #7FA6FF;
+    --glow-soft: #1E3A8A;
+    /* Darker blue glow */
+    --glow-accent: #3B82F6;
+    /* Bright blue accent */
     --highlight: #5B79B7;
 
     --text-primary: #E6ECFF;
     --text-secondary: #A9B4D0;
-    --text-muted: #7C89A6;
+    --text-muted: #64748B;
 
-    --status-success: #7ED957;
-    --status-danger: #7A86A8;
-    /* Muted for decline */
-    --status-error: #FF4D4D;
+    --status-success: #10B981;
+    --status-danger: #EF4444;
+    --status-warning: #F59E0B;
 
     /* --- Glass Tokens --- */
-    --glass-fill: rgba(255, 255, 255, 0.04);
-    --glass-fill-hover: rgba(255, 255, 255, 0.08);
-    --glass-fill-active: rgba(255, 255, 255, 0.12);
+    --glass-fill: rgba(255, 255, 255, 0.03);
+    --glass-fill-hover: rgba(255, 255, 255, 0.06);
+    --glass-fill-active: rgba(255, 255, 255, 0.09);
 
-    --glass-border: rgba(255, 255, 255, 0.08);
-    /* More subtle */
-    --glass-border-hover: rgba(255, 255, 255, 0.15);
+    --glass-border: rgba(255, 255, 255, 0.06);
+    --glass-border-hover: rgba(255, 255, 255, 0.12);
 
-    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    --glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 
     /* --- Structural --- */
     --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 20px;
+    --radius-md: 14px;
+    --radius-lg: 24px;
     --radius-pill: 9999px;
 
     --font-main: 'Inter', sans-serif;
-
-    /* --- UI Design Tokens (for Tailwind) --- */
-    --ui-background: 222 47% 11%;
-    --ui-text: 226 100% 95%;
-    --ui-surface: 220 54% 13%;
-    --ui-surface2: 222 55% 21%;
-    --ui-border: 226 100% 95% / 0.08;
-    --ui-ring: 221 100% 75%;
-    --ui-success: 102 65% 60%;
-    --ui-warning: 38 92% 50%;
-    --ui-danger: 0 100% 65%;
-    --ui-muted: 222 30% 60% / 0.1;
-    --ui-muted-text: 222 25% 65%;
   }
 
   /* Force Dark Mode Appearance */
@@ -63,13 +50,13 @@
   }
 
   body {
-    background-color: #0B1220;
-    color: #E6ECFF;
+    background-color: var(--bg-core);
+    color: var(--text-primary);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow: hidden;
-    /* Main Gradient Background */
-    background: radial-gradient(circle at 50% 0%, #182B52 0%, #0F1C34 40%, #0B1220 100%);
+    /* Deep Navy Gradient Background */
+    background: radial-gradient(circle at 50% -20%, #152238 0%, #0B1221 60%);
     background-attachment: fixed;
   }
 }

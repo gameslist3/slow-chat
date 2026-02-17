@@ -75,7 +75,7 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
     };
 
     return (
-        <header className="h-20 border-b border-white/5 bg-[#0B1220]/80 backdrop-blur-xl flex items-center justify-between px-6 md:px-8 sticky top-0 z-40 transition-all">
+        <header className="h-20 bg-[#0B1220]/60 backdrop-blur-md flex items-center justify-between px-6 md:px-8 sticky top-0 z-40 transition-all border-b border-white/5">
             <div className="flex items-center gap-4">
                 <button
                     onClick={onLeave}

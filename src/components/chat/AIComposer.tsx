@@ -142,119 +142,120 @@ export const AIComposer: React.FC<AIComposerProps> = ({
     };
 
     return (
-        <div className="w-full z-50 px-4 pb-6 pt-2 bg-gradient-to-t from-[#0B1220] via-[#0B1220] to-transparent pointer-events-none shrink-0">
-            <div className="max-w-4xl mx-auto w-full pointer-events-auto relative">
+        <div className="w-full z-50 px-4 pb-6 pt-2 pointer-events-none shrink-0 flex justify-center">
+            <div className="w-full max-w-3xl pointer-events-auto relative">
                 <AnimatePresence>
                     {replyingTo && (
                         <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 10 }}
-                            className="bg-[#202c33] border-l-4 border-primary rounded-lg p-2 mb-2 flex items-center justify-between shadow-lg mx-2"
+                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                            className="absolute bottom-full mb-2 left-0 right-0 bg-[#0F1C34]/90 border border-white/10 rounded-2xl p-3 flex items-center justify-between shadow-2xl backdrop-blur-xl mx-4"
                         >
                             <div className="flex flex-col overflow-hidden">
-                                <span className="text-[10px] font-bold text-primary mb-0.5">Replying to</span>
-                                <span className="text-sm text-white/70 truncate">{replyingTo.text}</span>
+                                <span className="text-[10px] font-bold text-[#5B79B7] mb-0.5 uppercase tracking-wider">Replying to</span>
+                                <span className="text-sm text-[#E6ECFF] truncate max-w-xs">{replyingTo.text}</span>
                             </div>
-                            <button onClick={onCancelReply} className="p-1 hover:bg-white/10 rounded-full">
-                                <Icon name="x" className="w-4 h-4 text-white/50" />
+                            <button onClick={onCancelReply} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                                <Icon name="x" className="w-4 h-4 text-[#A9B4D0]" />
                             </button>
                         </motion.div>
                     )}
                 </AnimatePresence>
 
-                <div className="flex items-end gap-2">
-                    {recState === 'idle' ? (
-                        <>
-                            <button
-                                onClick={() => fileInputRef.current?.click()}
-                                className="w-10 h-10 mb-1 rounded-full bg-muted/20 hover:bg-muted/40 flex items-center justify-center transition-colors text-muted-foreground"
-                            >
-                                <Icon name="plus" className="w-5 h-5" />
-                            </button>
-                            <input type="file" ref={fileInputRef} className="hidden" onChange={handleFile} />
+                {recState === 'idle' ? (
+                    <div className="flex items-end gap-3 bg-[#152238]/80 backdrop-blur-xl border border-white/10 p-2 rounded-[2rem] shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all hover:border-white/20">
+                        {/* Attachment Button */}
+                        <button
+                            onClick={() => fileInputRef.current?.click()}
+                            className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-all text-[#A9B4D0] hover:text-white shrink-0"
+                        >
+                            <Icon name="plus" className="w-5 h-5" />
+                        </button>
+                        <input type="file" ref={fileInputRef} className="hidden" onChange={handleFile} />
 
-                            <div className="flex-1 bg-muted/20 rounded-[1.5rem] px-4 py-2.5 flex items-center border border-border/10 shadow-sm focus-within:ring-1 focus-within:ring-primary/30 transition-all">
-                                <textarea
-                                    ref={textareaRef}
-                                    value={text}
-                                    onChange={e => setText(e.target.value)}
-                                    onKeyDown={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendText())}
-                                    placeholder="Message"
-                                    className="w-full bg-transparent border-none focus:ring-0 p-0 text-[15px] placeholder:text-muted-foreground outline-none resize-none text-foreground max-h-[120px] min-h-[24px]"
-                                    rows={1}
-                                />
+                        {/* Text Input */}
+                        <div className="flex-1 py-2.5 px-2">
+                            <textarea
+                                ref={textareaRef}
+                                value={text}
+                                onChange={e => setText(e.target.value)}
+                                onKeyDown={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendText())}
+                                placeholder="Message"
+                                className="w-full bg-transparent border-none focus:ring-0 p-0 text-[15px] placeholder:text-[#64748B] text-[#E6ECFF] resize-none max-h-[120px] min-h-[24px] custom-scrollbar leading-relaxed"
+                                rows={1}
+                            />
+                        </div>
+
+                        {/* Mic / Send Button */}
+                        <button
+                            onClick={text.trim() ? handleSendText : startRecording}
+                            disabled={cooldown > 0}
+                            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-lg shrink-0
+                                ${text.trim()
+                                    ? 'bg-[#3B82F6] text-white hover:bg-[#2563EB] hover:scale-105'
+                                    : 'bg-[#1E3A8A]/50 text-[#7FA6FF] hover:bg-[#1E3A8A] hover:text-white'}
+                            `}
+                        >
+                            {text.trim() ? <Icon name="send" className="w-4 h-4 ml-0.5" /> : <Icon name="mic" className="w-4 h-4" />}
+                        </button>
+                    </div>
+                ) : (
+                    /* Recording State Pill */
+                    <div className="flex items-center gap-4 bg-[#EF4444]/10 backdrop-blur-xl border border-[#EF4444]/20 p-2 rounded-[2rem] shadow-2xl animate-in slide-in-from-bottom-2">
+                        <button
+                            onClick={() => { stopRecording(); setRecState('idle'); setAudioBlob(null); setAudioUrl(null); }}
+                            className="w-10 h-10 rounded-full bg-[#EF4444]/20 hover:bg-[#EF4444]/30 text-[#EF4444] flex items-center justify-center transition-colors"
+                        >
+                            <Icon name="trash" className="w-5 h-5" />
+                        </button>
+
+                        {recState === 'recording' ? (
+                            <div className="flex-1 flex items-center gap-4 min-w-[200px]">
+                                <div className="w-3 h-3 rounded-full bg-[#EF4444] animate-pulse shadow-[0_0_10px_#EF4444]" />
+                                <div className="flex-1 h-8 flex items-center gap-1 opacity-80">
+                                    {[...Array(12)].map((_, i) => (
+                                        <div
+                                            key={i}
+                                            className="w-1 bg-[#EF4444] rounded-full animate-bounce"
+                                            style={{
+                                                height: `${Math.random() * 60 + 20}%`,
+                                                animationDelay: `${i * 0.05}s`
+                                            }}
+                                        />
+                                    ))}
+                                </div>
+                                <span className="font-mono text-sm font-bold text-[#E6ECFF] w-[50px] text-right">
+                                    {Math.floor(recordingTime / 60)}:{(recordingTime % 60).toString().padStart(2, '0')}
+                                </span>
+                                <button onClick={stopRecording} className="p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors">
+                                    <div className="w-3 h-3 bg-current rounded-sm" />
+                                </button>
                             </div>
-
-                            <button
-                                onClick={text.trim() ? handleSendText : startRecording}
-                                disabled={cooldown > 0}
-                                className={`w-12 h-12 mb-0 rounded-full flex items-center justify-center transition-all shadow-lg
-                                    ${text.trim()
-                                        ? 'bg-primary text-primary-foreground hover:brightness-110 active:scale-95'
-                                        : 'bg-primary/10 text-primary hover:bg-primary/20'}
-                                `}
-                            >
-                                {text.trim() ? <Icon name="send" className="w-5 h-5 ml-0.5" /> : <Icon name="mic" className="w-5 h-5" />}
-                            </button>
-                        </>
-                    ) : (
-                        <div className="flex-1 bg-muted/20 rounded-[2rem] p-2 pr-4 flex items-center gap-4 animate-in slide-in-from-bottom-2 shadow-2xl border border-border/10 backdrop-blur-md">
-                            <button
-                                onClick={() => { stopRecording(); setRecState('idle'); setAudioBlob(null); setAudioUrl(null); }}
-                                className="w-10 h-10 rounded-full hover:bg-destructive/10 text-destructive flex items-center justify-center transition-colors"
-                            >
-                                <Icon name="trash" className="w-5 h-5" />
-                            </button>
-
-                            {recState === 'recording' ? (
-                                <div className="flex-1 flex items-center gap-3 overflow-hidden">
-                                    <div className="w-3 h-3 rounded-full bg-primary animate-pulse shadow-[0_0_10px_rgba(var(--primary-rgb),0.5)]" />
-                                    <div className="flex-1 h-8 flex items-center gap-1 opacity-80">
-                                        {[...Array(24)].map((_, i) => (
-                                            <div
-                                                key={i}
-                                                className="w-1 bg-primary rounded-full animate-bounce"
-                                                style={{
-                                                    height: `${Math.random() * 80 + 20}%`,
-                                                    animationDelay: `${i * 0.05}s`,
-                                                    animationDuration: '0.8s'
-                                                }}
-                                            />
+                        ) : (
+                            <div className="flex-1 flex items-center gap-3 min-w-[200px]">
+                                <div className="flex-1 h-10 bg-black/20 rounded-full overflow-hidden flex items-center px-4 gap-3 border border-white/5">
+                                    <button onClick={() => { const a = document.getElementById('preview-audio') as HTMLAudioElement; if (a.paused) a.play(); else a.pause(); }}>
+                                        <Icon name="play" className="w-3 h-3 text-[#E6ECFF]" />
+                                    </button>
+                                    <div className="flex-1 h-6 flex items-center gap-0.5 opacity-60">
+                                        {[...Array(20)].map((_, i) => (
+                                            <div key={i} className="w-0.5 bg-[#E6ECFF] rounded-full" style={{ height: `${20 + Math.random() * 60}%` }} />
                                         ))}
                                     </div>
-                                    <span className="font-mono text-sm font-bold text-foreground min-w-[50px] text-right">
-                                        {Math.floor(recordingTime / 60)}:{(recordingTime % 60).toString().padStart(2, '0')}
-                                    </span>
-                                    <button onClick={stopRecording} className="p-2 rounded-full bg-primary/20 text-primary hover:bg-primary/30 transition-colors">
-                                        <div className="w-3 h-3 bg-current rounded-sm" />
-                                    </button>
+                                    <audio id="preview-audio" src={audioUrl!} className="hidden" onEnded={() => { }} />
                                 </div>
-                            ) : (
-                                <div className="flex-1 flex items-center gap-3">
-                                    <div className="flex-1 h-10 bg-black/20 rounded-xl overflow-hidden flex items-center px-4 gap-1">
-                                        <button onClick={() => { const a = document.getElementById('preview-audio') as HTMLAudioElement; if (a.paused) a.play(); else a.pause(); }}>
-                                            <Icon name="play" className="w-4 h-4 text-primary" />
-                                        </button>
-                                        <div className="flex-1 h-6 flex items-center gap-0.5 opacity-60">
-                                            {[...Array(30)].map((_, i) => (
-                                                <div key={i} className="w-0.5 bg-primary rounded-full" style={{ height: `${30 + Math.random() * 70}%` }} />
-                                            ))}
-                                        </div>
-                                        <audio id="preview-audio" src={audioUrl!} className="hidden" onEnded={() => { }} />
-                                    </div>
-                                    <button
-                                        onClick={handleSendVoice}
-                                        disabled={uploading}
-                                        className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-lg active:scale-95 disabled:opacity-50"
-                                    >
-                                        {uploading ? <Icon name="rotate" className="w-5 h-5 animate-spin" /> : <Icon name="send" className="w-5 h-5 ml-0.5" />}
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    )}
-                </div>
+                                <button
+                                    onClick={handleSendVoice}
+                                    disabled={uploading}
+                                    className="w-10 h-10 rounded-full bg-[#3B82F6] text-white flex items-center justify-center shadow-lg active:scale-95 disabled:opacity-50"
+                                >
+                                    {uploading ? <Icon name="rotate" className="w-4 h-4 animate-spin" /> : <Icon name="send" className="w-4 h-4 ml-0.5" />}
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
         </div>
     );

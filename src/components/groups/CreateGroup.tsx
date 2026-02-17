@@ -40,101 +40,101 @@ export const CreateGroup: React.FC<CreateGroupProps> = ({ onGroupCreated }) => {
     };
 
     return (
-        <div className="glass-panel p-8 md:p-12 rounded-[2.5rem] max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-700 w-full flex flex-col relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-[80px] rounded-full -translate-y-1/2 translate-x-1/2" />
+        <div className="w-full h-full flex items-center justify-center p-6">
+            <div className="glass-panel p-8 md:p-10 rounded-[2rem] max-w-lg w-full relative overflow-hidden animate-in fade-in zoom-in-95 duration-500 shadow-2xl border border-white/10">
+                {/* Background Glow */}
+                <div className="absolute top-0 right-0 w-64 h-64 bg-[#3B82F6]/10 blur-[80px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
 
-            <div className="mb-10 flex-shrink-0 relative z-10">
-                <h2 className="text-4xl font-black text-foreground italic uppercase tracking-tighter">Initiate Group</h2>
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/40 mt-2">New Synchronicity Node</p>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-10 relative z-10">
-                <div className="space-y-4">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-2">Visual Identity</label>
-                    <IconCarousel selectedIcon={icon} onSelectIcon={setIcon} />
+                <div className="mb-8 text-center relative z-10">
+                    <h2 className="text-3xl font-bold text-[#E6ECFF] tracking-tight mb-2">Create New Group</h2>
+                    <p className="text-[#A9B4D0] text-sm font-medium opacity-60">Start a community for like-minded people.</p>
                 </div>
 
-                <div className="space-y-4">
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-2">Designation</label>
-                        <input
-                            placeholder="e.g. Midnight Philosophers"
-                            value={name}
-                            onChange={e => setName(e.target.value)}
-                            className="glass-input h-16 text-lg font-bold px-6 bg-surface border-border focus:bg-surface2"
-                        />
+                <form onSubmit={handleSubmit} className="space-y-8 relative z-10">
+                    {/* Icon Picker (Centered) */}
+                    <div className="flex flex-col items-center space-y-3">
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-[#7C89A6]">Group Icon</label>
+                        <IconCarousel selectedIcon={icon} onSelectIcon={setIcon} />
                     </div>
-                </div>
 
-                <div className="space-y-2 relative">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-2">Classification</label>
-                    <input
-                        placeholder="Search or type a category..."
-                        value={category}
-                        onChange={e => {
-                            setCategory(e.target.value);
-                            setShowSuggestions(true);
-                        }}
-                        onFocus={() => setShowSuggestions(true)}
-                        onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                        className="glass-input h-16 px-6 bg-surface border-border focus:bg-surface2"
-                    />
+                    {/* Inputs */}
+                    <div className="space-y-5">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-[#7C89A6] ml-1">Group Name</label>
+                            <input
+                                placeholder="e.g. Design Talks"
+                                value={name}
+                                onChange={e => setName(e.target.value)}
+                                className="w-full h-14 px-5 rounded-2xl bg-[#152238]/60 border border-white/10 text-[#E6ECFF] placeholder-[#64748B] focus:border-[#3B82F6] focus:bg-[#152238] transition-all outline-none font-medium"
+                            />
+                        </div>
 
-                    {showSuggestions && (category ? filteredCategories.length > 0 : true) && (
-                        <div className="absolute z-50 w-full bg-surface mt-2 border border-border rounded-2xl shadow-2xl max-h-48 overflow-y-auto backdrop-blur-xl">
-                            {filteredCategories.map(cat => (
-                                <button
-                                    key={cat}
-                                    type="button"
-                                    className="w-full text-left px-5 py-3 hover:bg-primary/5 text-sm font-bold transition-all flex items-center gap-3"
-                                    onClick={() => {
-                                        setCategory(cat);
-                                        setShowSuggestions(false);
+                        <div className="space-y-2 relative">
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-[#7C89A6] ml-1">Category</label>
+                            <div className="relative">
+                                <input
+                                    placeholder="Select or Type Category..."
+                                    value={category}
+                                    onChange={e => {
+                                        setCategory(e.target.value);
+                                        setShowSuggestions(true);
                                     }}
-                                >
-                                    <div className="w-1.5 h-1.5 rounded-full bg-primary/40" />
-                                    {cat}
-                                </button>
-                            ))}
-                            {category && !filteredCategories.includes(category) && (
-                                <button
-                                    type="button"
-                                    className="w-full text-left px-5 py-3 hover:bg-primary/5 text-primary text-sm font-black flex items-center border-t border-border"
-                                    onClick={() => {
-                                        setShowSuggestions(false);
-                                    }}
-                                >
-                                    <Icon name="plus" className="w-4 h-4 mr-2" /> CREATE "{category.toUpperCase()}"
-                                </button>
+                                    onFocus={() => setShowSuggestions(true)}
+                                    className="w-full h-14 px-5 rounded-2xl bg-[#152238]/60 border border-white/10 text-[#E6ECFF] placeholder-[#64748B] focus:border-[#3B82F6] focus:bg-[#152238] transition-all outline-none font-medium"
+                                />
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                                    <Icon name="search" className="w-4 h-4 text-[#64748B]" />
+                                </div>
+                            </div>
+
+                            {/* Suggestions Dropdown */}
+                            {showSuggestions && (category ? filteredCategories.length > 0 : true) && (
+                                <div className="absolute z-50 w-full bg-[#152238] border border-white/10 rounded-2xl shadow-xl max-h-48 overflow-y-auto mt-2 p-1 custom-scrollbar">
+                                    {filteredCategories.map(cat => (
+                                        <button
+                                            key={cat}
+                                            type="button"
+                                            className="w-full text-left px-4 py-3 rounded-xl hover:bg-white/5 text-[#E6ECFF] text-sm font-medium transition-colors flex items-center gap-2"
+                                            onClick={() => {
+                                                setCategory(cat);
+                                                setShowSuggestions(false);
+                                            }}
+                                        >
+                                            <span className="w-1.5 h-1.5 rounded-full bg-[#5B79B7]" />
+                                            {cat}
+                                        </button>
+                                    ))}
+                                    {category && !filteredCategories.includes(category) && (
+                                        <button
+                                            type="button"
+                                            className="w-full text-left px-4 py-3 rounded-xl hover:bg-[#3B82F6]/10 text-[#3B82F6] text-sm font-bold transition-colors flex items-center gap-2 mt-1 border-t border-white/5"
+                                            onClick={() => {
+                                                setShowSuggestions(false);
+                                            }}
+                                        >
+                                            <Icon name="plus" className="w-4 h-4" /> Create "{category}"
+                                        </button>
+                                    )}
+                                </div>
                             )}
                         </div>
-                    )}
-                </div>
-
-                <div className="bg-primary/5 border border-primary/10 rounded-2xl p-6 space-y-3">
-                    <div className="flex items-center gap-2 text-[10px] font-black text-primary uppercase tracking-widest">
-                        <Icon name="shield" className="w-4 h-4" /> Protocol Guidelines
                     </div>
-                    <ul className="space-y-1.5">
-                        <li className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-tight flex items-start gap-2">
-                            <span className="text-primary">•</span> Empty nodes auto-purge after 5 hours
-                        </li>
-                        <li className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-tight flex items-start gap-2">
-                            <span className="text-primary">•</span> Abandoned nodes dissolve after 2 hours
-                        </li>
-                    </ul>
-                </div>
 
-                <div className="pt-4">
-                    <button
-                        type="submit"
-                        disabled={!name || !category || isSubmitting}
-                        className="w-full h-18 rounded-[1.5rem] bg-foreground text-background font-black uppercase tracking-[0.2em] text-sm shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:hover:scale-100"
-                    >
-                        {isSubmitting ? <Icon name="rotate" className="w-5 h-5 animate-spin mx-auto" /> : 'Establish Group'}
-                    </button>
-                </div>
-            </form>
+                    <div className="pt-2">
+                        <button
+                            type="submit"
+                            disabled={!name || !category || isSubmitting}
+                            className="w-full h-14 rounded-full bg-[#3B82F6] text-white font-bold text-sm shadow-lg shadow-blue-900/20 hover:bg-[#2563EB] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2"
+                        >
+                            {isSubmitting ? <Icon name="rotate" className="w-5 h-5 animate-spin" /> : (
+                                <>
+                                    Create Group <Icon name="arrowRight" className="w-4 h-4" />
+                                </>
+                            )}
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     );
 };
