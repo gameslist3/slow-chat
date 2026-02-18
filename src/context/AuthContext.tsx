@@ -146,13 +146,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     const logout = async () => {
+        // Optimistically clear user state immediately to prevent UI flicker and force immediate unmount
+        setUser(null);
         try {
-            // Optimistically clear user state immediately to prevent UI flicker
-            setUser(null);
             await firebaseAuth.logoutUser();
         } catch (error) {
             console.error("Logout error:", error);
-            // Force clear if firebase fails
+            // State is already cleared, but just to be safe
             setUser(null);
         }
     };

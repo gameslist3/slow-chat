@@ -50,12 +50,11 @@ export const createNotification = async (
 /**
  * Subscribe to notifications for the current user
  */
-export const subscribeToNotifications = (callback: (notifications: Notification[]) => void) => {
-    const user = auth.currentUser;
-    if (!user) return () => { };
+export const subscribeToNotifications = (uid: string, callback: (notifications: Notification[]) => void) => {
+    if (!uid) return () => { };
 
     const q = query(collection(db, 'notifications'),
-        where('userId', '==', user.uid),
+        where('userId', '==', uid),
         orderBy('timestamp', 'desc'),
         limit(50)
     );
@@ -81,12 +80,11 @@ export const markAsRead = async (notificationId: string, extra?: { followStatus?
 /**
  * Mark all notifications as read for current user
  */
-export const markAllAsRead = async (): Promise<void> => {
-    const user = auth.currentUser;
-    if (!user) return;
+export const markAllAsRead = async (uid: string): Promise<void> => {
+    if (!uid) return;
 
     const q = query(collection(db, 'notifications'),
-        where('userId', '==', user.uid),
+        where('userId', '==', uid),
         where('read', '==', false),
         where('type', '!=', 'follow_request')
     );

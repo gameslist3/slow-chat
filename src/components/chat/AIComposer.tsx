@@ -143,7 +143,7 @@ export const AIComposer: React.FC<AIComposerProps> = ({
     };
 
     return (
-        <div className="w-full z-50 px-4 pb-6 pt-2 pointer-events-none shrink-0 flex justify-center">
+        <div className="w-full z-50 px-4 pb-10 md:pb-6 pt-2 pointer-events-none shrink-0 flex justify-center">
             <div className="w-full max-w-3xl pointer-events-auto relative">
                 <AnimatePresence>
                     {replyingTo && (

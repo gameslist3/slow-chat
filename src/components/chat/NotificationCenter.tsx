@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Bell, X, MessageSquare, AtSign, Reply, UserPlus, Check, Trash2, Zap, RotateCw } from 'lucide-react';
 import { collection, query, where, limit, getDocs } from 'firebase/firestore';
 import { db, auth } from '../../config/firebase';
+import { useAuth } from '../../context/AuthContext';
 import { subscribeToNotifications, markAsRead, markAllAsRead } from '../../services/firebaseNotificationService';
 import { acceptFollowRequest, declineFollowRequest } from '../../services/firebaseFollowService';
 import { useToast } from '../../context/ToastContext';
@@ -27,6 +28,7 @@ const IconForType = ({ type }: { type: Notification['type'] }) => {
 const FollowRequestItem = ({ note, onSelectPersonal }: { note: Notification; onSelectPersonal: (chatId: string) => void }) => {
     const [loading, setLoading] = useState(false);
     const [actionStatus, setActionStatus] = useState<'pending' | 'accepted' | 'declined'>(note.followStatus || (note.read ? 'accepted' : 'pending'));
+    const [hidden, setHidden] = useState(false);
     const { toast } = useToast();
 
     const handleAction = async (action: 'accept' | 'decline') => {
@@ -34,7 +36,7 @@ const FollowRequestItem = ({ note, onSelectPersonal }: { note: Notification; onS
 
         // Optimistic UI
         setActionStatus(newStatus);
-        setLoading(false); // Hide spinner immediately
+        setLoading(false);
 
         try {
             const requestsRef = collection(db, 'follow_requests');
@@ -49,53 +51,55 @@ const FollowRequestItem = ({ note, onSelectPersonal }: { note: Notification; onS
             );
             const snap = await getDocs(q);
             if (snap.empty) {
-                // If it was already processed elsewhere, just mark notification
                 await markAsRead(note.id, { followStatus: newStatus });
-                return;
-            }
-
-            const requestId = snap.docs[0].id;
-
-            if (action === 'accept') {
-                await acceptFollowRequest(requestId);
-                await markAsRead(note.id, { followStatus: 'accepted' });
-                toast(`You follow ${note.senderName}`, 'success');
             } else {
-                await declineFollowRequest(requestId);
-                await markAsRead(note.id, { followStatus: 'declined' });
-                toast(`Request declined`, 'info');
+                const requestId = snap.docs[0].id;
+                if (action === 'accept') {
+                    await acceptFollowRequest(requestId);
+                    await markAsRead(note.id, { followStatus: 'accepted' });
+                    toast(`You follow ${note.senderName}`, 'success');
+                } else {
+                    await declineFollowRequest(requestId);
+                    await markAsRead(note.id, { followStatus: 'declined' });
+                    toast(`Request declined`, 'info');
+                }
             }
+
+            // Hide after 2 seconds
+            setTimeout(() => setHidden(true), 2000);
+
         } catch (err: any) {
             console.error(err);
-            // On hard error, we could revert, but usually with subscription it's better to just log
-            // toast(err.message || "Action failed", 'error'); 
         }
     };
 
     const handleOpenChat = () => {
+        if (actionStatus !== 'accepted') return;
         const user = auth.currentUser;
         if (!user || !note.groupId) return;
         const chatId = [user.uid, note.groupId].sort().join('_');
         onSelectPersonal(chatId);
     };
 
+    if (hidden) return null;
+
     return (
         <motion.div
             layout
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
+            exit={{ opacity: 0, scale: 0.9, height: 0 }}
             className="p-5 md:p-6 rounded-[2rem] bg-secondary/5 border border-secondary/20 relative overflow-hidden group shadow-xl"
         >
             <div className="absolute inset-0 bg-gradient-to-br from-secondary/10 to-transparent opacity-30 transition-opacity group-hover:opacity-50" />
 
-            <div className="flex gap-4 md:gap-5 items-center relative z-10">
+            <div className="flex gap-4 md:gap-5 items-center relative z-10 text-left">
                 <div className="w-12 h-12 md:w-14 md:h-14 bg-secondary text-black rounded-2xl flex items-center justify-center font-black text-xl shadow-lg border border-white/10 group-hover:scale-105 transition-transform">
                     {note.senderName.slice(0, 2).toUpperCase()}
                 </div>
                 <div className="flex-1">
                     <p className="font-bold text-base tracking-tight text-white">{note.senderName}</p>
-                    <p className="text-[9px] font-bold text-secondary tracking-widest uppercase opacity-70 mt-1">
+                    <p className="text-[9px] font-bold text-secondary tracking-widest uppercase opacity-70 mt-1 text-left">
                         {actionStatus === 'accepted' ? 'Connection Established' : actionStatus === 'declined' ? 'Request Declined' : 'Follow Request'}
                     </p>
                 </div>
@@ -143,6 +147,15 @@ export const NotificationList: React.FC<{
     onMarkAllRead?: () => void;
 }> = ({ notifications, onSelectChat, onMarkAllRead }) => {
 
+    const user = auth.currentUser;
+
+    // Process notifications only on mount
+    useEffect(() => {
+        if (onMarkAllRead) {
+            onMarkAllRead();
+        }
+    }, []);
+
     // Logic for processing notifications
     const isPersonalNote = (note: Notification): boolean => {
         const type = note.type;
@@ -177,7 +190,7 @@ export const NotificationList: React.FC<{
     };
 
     return (
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full bg-background/50">
             <header className="px-6 py-4 flex items-center justify-between sticky top-0 bg-background/95 backdrop-blur-md z-10 border-b border-border/5">
                 <div className="flex flex-col">
                     <span className="text-[9px] font-bold tracking-widest text-primary opacity-60 mb-1 uppercase">Notifications</span>
@@ -248,7 +261,7 @@ export const NotificationList: React.FC<{
                                                     : 'bg-foreground/5 border-white/5 hover:border-primary/40 hover:bg-primary/5'}
                                             `}
                                         >
-                                            <div className="flex gap-4 items-start">
+                                            <div className="flex gap-4 items-start text-left">
                                                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-transform group-hover:scale-110
                                                     ${note.type === 'mention' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' :
                                                         note.type === 'reply' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
@@ -261,7 +274,7 @@ export const NotificationList: React.FC<{
                                                         <span className="font-bold text-xs tracking-tight text-foreground/90">{note.senderName}</span>
                                                         <span className="text-[8px] font-bold opacity-30 tracking-widest uppercase">{new Date(note.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                                     </div>
-                                                    <p className="text-xs font-medium line-clamp-2 text-muted-foreground leading-relaxed group-hover:text-foreground transition-colors">
+                                                    <p className="text-xs font-medium line-clamp-2 text-muted-foreground leading-relaxed group-hover:text-foreground transition-colors text-left">
                                                         {note.text}
                                                     </p>
                                                 </div>
@@ -283,6 +296,7 @@ export const NotificationList: React.FC<{
 export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose, onSelectChat }) => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const containerRef = React.useRef<HTMLDivElement>(null);
+    const { user } = useAuth(); // Import useAuth hook
 
     // Close on click outside
     useEffect(() => {
@@ -296,19 +310,20 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose,
     }, [onClose]);
 
     useEffect(() => {
-        const unsubscribe = subscribeToNotifications(setNotifications);
+        if (!user?.id) return;
+        const unsubscribe = subscribeToNotifications(user.id, setNotifications);
         return () => unsubscribe();
-    }, []);
+    }, [user?.id]);
 
     return (
-        <div ref={containerRef} className="flex flex-col h-full glass-panel rounded-none md:rounded-[2.5rem] overflow-hidden shadow-2xl border-white/5">
+        <div ref={containerRef} className="flex flex-col h-full glass-panel rounded-none md:rounded-[2.5rem] overflow-hidden shadow-2xl border-white/5 bg-[#0B1221]/95">
             <div className="flex items-center justify-end p-2 md:hidden">
                 <button onClick={onClose} className="p-2"><X className="w-6 h-6" /></button>
             </div>
             <NotificationList
                 notifications={notifications}
                 onSelectChat={onSelectChat}
-                onMarkAllRead={() => markAllAsRead()}
+                onMarkAllRead={() => user?.id && markAllAsRead(user.id)}
             />
         </div>
     );

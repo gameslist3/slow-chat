@@ -144,9 +144,10 @@ const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark
     }, [user?.joinedGroups]);
 
     useEffect(() => {
-        const unsubscribe = subscribeToNotifications(setNotifications);
+        if (!user?.id) return;
+        const unsubscribe = subscribeToNotifications(user.id, setNotifications);
         return () => unsubscribe();
-    }, []);
+    }, [user?.id]);
 
     const handleSelectGroup = (id: string) => {
         setActiveId(id);
@@ -316,7 +317,7 @@ const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark
                         <motion.div key="inbox" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-8">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-3xl font-black italic uppercase tracking-tighter">Notifications</h2>
-                                <button onClick={markAllAsRead} className="text-sm font-bold text-primary hover:underline">Mark all read</button>
+                                <button onClick={() => user?.id && markAllAsRead(user.id)} className="text-sm font-bold text-primary hover:underline">Mark all read</button>
                             </div>
                             <NotificationList
                                 notifications={notifications}
@@ -325,7 +326,7 @@ const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark
                                     else handleSelectGroup(id);
                                     setHighlightMessageId(msgId);
                                 }}
-                                onMarkAllRead={markAllAsRead}
+                                onMarkAllRead={() => user?.id && markAllAsRead(user.id)}
                             />
                         </motion.div>
                     )}
