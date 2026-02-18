@@ -129,6 +129,7 @@ const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark
     const [showDiscovery, setShowDiscovery] = useState(false);
     const [showCreateGroup, setShowCreateGroup] = useState(false);
     const [viewingUserId, setViewingUserId] = useState<string | null>(null);
+    const [highlightMessageId, setHighlightMessageId] = useState<string | undefined>(undefined);
     const { personalChats } = useInbox();
 
     console.log('[AuthenticatedSection] Rendering', { user: user?.username, activeTab, myGroupsCount: myGroups.length });
@@ -175,11 +176,12 @@ const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark
             onTabChange={(tab) => {
                 setActiveTab(tab as any);
                 setActiveId(null);
+                setHighlightMessageId(undefined);
                 setShowDiscovery(tab === 'explore' || tab === 'groups');
                 setShowCreateGroup(false);
             }}
-            onOpenSettings={() => { setActiveTab('profile'); setActiveId(null); }}
-            onGoHome={() => { setActiveTab('home'); setActiveId(null); setShowDiscovery(false); }}
+            onOpenSettings={() => { setActiveTab('profile'); setActiveId(null); setHighlightMessageId(undefined); }}
+            onGoHome={() => { setActiveTab('home'); setActiveId(null); setShowDiscovery(false); setHighlightMessageId(undefined); }}
             user={user}
             onLogout={() => {
                 logout();
@@ -188,6 +190,7 @@ const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark
                 setShowDiscovery(false);
                 setShowCreateGroup(false);
                 setViewingUserId(null);
+                setHighlightMessageId(undefined);
             }}
             theme={theme}
             onToggleTheme={onToggleTheme}
@@ -315,13 +318,22 @@ const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark
                                 <h2 className="text-3xl font-black italic uppercase tracking-tighter">Notifications</h2>
                                 <button onClick={markAllAsRead} className="text-sm font-bold text-primary hover:underline">Mark all read</button>
                             </div>
-                            <NotificationList notifications={notifications} onSelectChat={(id, personal) => personal ? handleSelectPersonal(id) : handleSelectGroup(id)} onMarkAllRead={markAllAsRead} />
+                            <NotificationList
+                                notifications={notifications}
+                                onSelectChat={(id, personal, msgId) => {
+                                    if (personal) handleSelectPersonal(id);
+                                    else handleSelectGroup(id);
+                                    setHighlightMessageId(msgId);
+                                }}
+                                onMarkAllRead={markAllAsRead}
+                            />
                         </motion.div>
                     )}
 
                     {activeTab === 'chat' && activeId && (
-                        <motion.div key="chat" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="h-full -m-6 md:-m-12 lg:-m-16 overflow-hidden">
+                        <motion.div key="chat" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="h-full overflow-hidden">
                             <ChatInterface
+                                highlightMessageId={highlightMessageId}
                                 chatId={activeId}
                                 isPersonal={isPersonal}
                                 title={isPersonal ? personalChatTitle : (activeGroup?.name || '')}
@@ -335,7 +347,18 @@ const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark
 
                     {activeTab === 'profile' && (
                         <motion.div key="profile" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="h-full">
-                            <AccountSettings onBack={() => setActiveTab('home')} logout={logout} />
+                            <AccountSettings
+                                onBack={() => setActiveTab('home')}
+                                logout={() => {
+                                    logout();
+                                    setActiveTab('home');
+                                    setActiveId(null);
+                                    setShowDiscovery(false);
+                                    setShowCreateGroup(false);
+                                    setViewingUserId(null);
+                                    setHighlightMessageId(undefined);
+                                }}
+                            />
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -349,10 +372,9 @@ const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark
                         currentUserId={user?.id || ''}
                         onClose={() => setViewingUserId(null)}
                         onMessage={(targetId: string) => {
-                            // Logic to start chat 
-                            // For now just close, as integrating "Start Chat" logic might needs more service calls if chat doesn't exist
                             setViewingUserId(null);
-                            // TODO: Implement direct jump to chat if we want that polish
+                            const combinedId = [user?.id, targetId].sort().join('_');
+                            handleSelectPersonal(combinedId);
                         }}
                     />
                 )}

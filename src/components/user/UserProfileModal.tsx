@@ -107,38 +107,42 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                             <p className="text-sm text-gray-400 mb-8">{user.bio || 'Member of the Cluster'}</p>
 
                             {!isMe && (
-                                <div className="flex gap-3 w-full">
-                                    <Button
-                                        className="flex-1 gap-2"
-                                        onClick={() => onMessage?.(userId)}
-                                    >
-                                        <MessageSquare className="w-4 h-4" /> Message
-                                    </Button>
-                                    {status === 'accepted' ? (
+                                <div className="flex flex-col gap-3 w-full">
+                                    {status === 'accepted' && (
                                         <Button
-                                            variant="outline"
-                                            className="flex-1 gap-2 border-red-500/50 text-red-400 hover:bg-red-500/10"
-                                            onClick={handleUnfollow}
+                                            className="w-full gap-2 bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/20"
+                                            onClick={() => onMessage?.(userId)}
                                         >
-                                            <UserMinus className="w-4 h-4" /> Unfollow
-                                        </Button>
-                                    ) : status === 'pending' ? (
-                                        <Button
-                                            variant="secondary"
-                                            className="flex-1 gap-2 opacity-70 cursor-not-allowed"
-                                            disabled
-                                        >
-                                            Requested
-                                        </Button>
-                                    ) : (
-                                        <Button
-                                            variant="secondary"
-                                            className="flex-1 gap-2"
-                                            onClick={handleFollow}
-                                        >
-                                            <UserPlus className="w-4 h-4" /> Follow
+                                            <MessageSquare className="w-4 h-4" /> Message Now
                                         </Button>
                                     )}
+                                    <div className="flex gap-3 w-full">
+                                        {status === 'accepted' ? (
+                                            <Button
+                                                variant="outline"
+                                                className="flex-1 gap-2 border-red-500/50 text-red-400 hover:bg-red-500/10"
+                                                onClick={handleUnfollow}
+                                            >
+                                                <UserMinus className="w-4 h-4" /> End Chat
+                                            </Button>
+                                        ) : status === 'pending' ? (
+                                            <Button
+                                                variant="secondary"
+                                                className="flex-1 gap-2 opacity-70 cursor-not-allowed"
+                                                disabled
+                                            >
+                                                Requested
+                                            </Button>
+                                        ) : (
+                                            <Button
+                                                variant="secondary"
+                                                className="flex-1 gap-2"
+                                                onClick={handleFollow}
+                                            >
+                                                <UserPlus className="w-4 h-4" /> Follow
+                                            </Button>
+                                        )}
+                                    </div>
                                 </div>
                             )}
                         </div>

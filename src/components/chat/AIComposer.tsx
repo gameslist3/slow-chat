@@ -165,41 +165,45 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                 </AnimatePresence>
 
                 {recState === 'idle' ? (
-                    <div className="flex items-end gap-3 bg-[#152238]/80 backdrop-blur-xl border border-white/10 p-2 rounded-[2rem] shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all hover:border-white/20">
+                    <div className="flex items-end gap-4 bg-[#152238]/80 backdrop-blur-xl border border-white/5 p-3 rounded-[2.5rem] shadow-[0_12px_40px_rgba(0,0,0,0.4)] transition-all focus-within:border-primary/30">
                         {/* Attachment Button */}
-                        <button
-                            onClick={() => fileInputRef.current?.click()}
-                            className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-all text-[#A9B4D0] hover:text-white shrink-0"
-                        >
-                            <Icon name="plus" className="w-5 h-5" />
-                        </button>
+                        <div className="pb-1.5 flex items-center justify-center">
+                            <button
+                                onClick={() => fileInputRef.current?.click()}
+                                className="w-11 h-11 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-all text-[#A9B4D0] hover:text-white shrink-0"
+                            >
+                                <Icon name="plus" className="w-5 h-5" />
+                            </button>
+                        </div>
                         <input type="file" ref={fileInputRef} className="hidden" onChange={handleFile} />
 
                         {/* Text Input */}
-                        <div className="flex-1 py-2.5 px-2">
+                        <div className="flex-1 py-3 px-1">
                             <textarea
                                 ref={textareaRef}
                                 value={text}
                                 onChange={e => setText(e.target.value)}
                                 onKeyDown={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendText())}
                                 placeholder="Message"
-                                className="w-full bg-transparent border-none focus:ring-0 p-0 text-[15px] placeholder:text-[#64748B] text-[#E6ECFF] resize-none max-h-[120px] min-h-[24px] custom-scrollbar leading-relaxed"
+                                className="w-full bg-transparent border-none focus:ring-0 outline-none p-0 text-[15px] placeholder:text-[#64748B] text-[#E6ECFF] resize-none max-h-[120px] min-h-[24px] custom-scrollbar leading-relaxed"
                                 rows={1}
                             />
                         </div>
 
                         {/* Mic / Send Button */}
-                        <button
-                            onClick={text.trim() ? handleSendText : startRecording}
-                            disabled={cooldown > 0}
-                            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-lg shrink-0
-                                ${text.trim()
-                                    ? 'bg-[#3B82F6] text-white hover:bg-[#2563EB] hover:scale-105'
-                                    : 'bg-[#1E3A8A]/50 text-[#7FA6FF] hover:bg-[#1E3A8A] hover:text-white'}
-                            `}
-                        >
-                            {text.trim() ? <Icon name="send" className="w-4 h-4 ml-0.5" /> : <Icon name="mic" className="w-4 h-4" />}
-                        </button>
+                        <div className="pb-1.5 flex items-center justify-center">
+                            <button
+                                onClick={text.trim() ? handleSendText : startRecording}
+                                disabled={cooldown > 0}
+                                className={`w-11 h-11 rounded-full flex items-center justify-center transition-all shadow-lg shrink-0
+                                    ${text.trim()
+                                        ? 'bg-[#3B82F6] text-white hover:bg-[#2563EB] hover:scale-105 shadow-blue-500/20'
+                                        : 'bg-[#1E3A8A]/50 text-[#7FA6FF] hover:bg-[#1E3A8A] hover:text-white'}
+                                `}
+                            >
+                                {text.trim() ? <Icon name="send" className="w-5 h-5 ml-1" /> : <Icon name="mic" className="w-5 h-5" />}
+                            </button>
+                        </div>
                     </div>
                 ) : (
                     /* Recording State Pill */
