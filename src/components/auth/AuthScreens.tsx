@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Icon } from '../common/Icon';
+import { Check } from 'lucide-react';
 import { validateEmail, registerUserStep1, loginUserWithPassword, generateAnonymousName } from '../../services/firebaseAuthService';
 import { useToast } from '../../context/ToastContext';
 import { Logo } from '../common/Logo';
@@ -66,6 +67,10 @@ export const SignInScreen = ({ onBack, onSuccess, onForgotPassword }: any) => {
 
     const handleSignIn = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!validateEmail(email)) {
+            toast("Unreal email protocol detected.", "error");
+            return;
+        }
         setLoading(true);
         try {
             const user = await loginUserWithPassword({ email, password });
@@ -166,10 +171,24 @@ export const SignUpScreen = ({ onBack, onSuccess }: any) => {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [acceptedTerms, setAcceptedTerms] = useState(false);
     const [showTermsModal, setShowTermsModal] = useState(false);
     const [loading, setLoading] = useState(false);
     const { toast } = useToast();
+
+    const getPasswordStrength = (pwd: string) => {
+        if (!pwd) return 0;
+        let score = 0;
+        if (pwd.length >= 8) score++;
+        if (/[A-Z]/.test(pwd) && /[a-z]/.test(pwd)) score++;
+        if (/[0-9]/.test(pwd) || /[^A-Za-z0-9]/.test(pwd)) score++;
+        return score;
+    };
+
+    const strength = getPasswordStrength(password);
+    const isMatched = password === confirmPassword && password.length > 0;
+    const canSubmit = validateEmail(email) && strength >= 2 && isMatched && acceptedTerms;
 
     const handleSignUp = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -246,6 +265,19 @@ export const SignUpScreen = ({ onBack, onSuccess }: any) => {
                                     <Icon name={showPassword ? "eyeOff" : "eye"} className="w-4 h-4" />
                                 </button>
                             </div>
+                            {/* Strength Indicator */}
+                            {password && (
+                                <div className="mt-2 px-2 flex flex-col gap-1">
+                                    <div className="flex gap-1 h-1 w-full rounded-full overflow-hidden bg-white/5">
+                                        <div className={`h-full transition-all duration-500 ${strength >= 1 ? 'w-1/3 bg-rose-500' : 'w-0'}`} />
+                                        <div className={`h-full transition-all duration-500 ${strength >= 2 ? 'w-1/3 bg-amber-500' : 'w-0'}`} />
+                                        <div className={`h-full transition-all duration-500 ${strength >= 3 ? 'w-1/3 bg-emerald-500' : 'w-0'}`} />
+                                    </div>
+                                    <span className={`text-[9px] font-bold uppercase tracking-widest ${strength === 0 ? 'text-rose-500' : strength === 1 ? 'text-rose-400' : strength === 2 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                                        {strength === 0 ? 'Too Short' : strength === 1 ? 'Weak Protocol' : strength === 2 ? 'Medium Security' : 'Strong Protocol'}
+                                    </span>
+                                </div>
+                            )}
                         </div>
 
                         {/* Confirm Password */}
@@ -254,23 +286,52 @@ export const SignUpScreen = ({ onBack, onSuccess }: any) => {
                             <div className="relative group">
                                 <Icon name="lock" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 z-10" />
                                 <input
-                                    type={showPassword ? "text" : "password"}
+                                    type={showConfirmPassword ? "text" : "password"}
                                     required
                                     value={confirmPassword}
                                     onChange={e => setConfirmPassword(e.target.value)}
                                     className="w-full h-12 pl-12 pr-12 rounded-full bg-[#FFFFFF05] border border-white/10 focus:border-[#5B79B7]/50 text-white placeholder-slate-500 text-sm transition-all"
                                     placeholder={confirmPassword ? "" : "Confirm Password"}
                                 />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+                                >
+                                    <Icon name={showConfirmPassword ? "eyeOff" : "eye"} className="w-4 h-4" />
+                                </button>
                             </div>
+                            {confirmPassword && !isMatched && (
+                                <span className="text-[9px] font-bold text-rose-500 uppercase tracking-widest mt-1 ml-2">Passwords Mismatch</span>
+                            )}
+                            {confirmPassword && isMatched && (
+                                <span className="text-[9px] font-bold text-emerald-500 uppercase tracking-widest mt-1 ml-2 flex items-center gap-1">
+                                    <Check className="w-3 h-3" /> Identity Verified
+                                </span>
+                            )}
                         </div>
                     </div>
 
+                    {/* Terms Checkbox */}
+                    <div className="flex items-start gap-3 px-4 mt-2 mb-2">
+                        <button
+                            type="button"
+                            onClick={() => setAcceptedTerms(!acceptedTerms)}
+                            className={`shrink-0 w-5 h-5 rounded-lg border flex items-center justify-center transition-all ${acceptedTerms ? 'bg-primary border-primary text-white' : 'bg-white/5 border-white/10 text-transparent'}`}
+                        >
+                            <Check className="w-3.5 h-3.5" />
+                        </button>
+                        <p className="text-[10px] text-slate-400 leading-normal">
+                            I accept the <button type="button" onClick={() => setShowTermsModal(true)} className="text-[#5B79B7] font-bold hover:underline">Terms & Conditions</button> and agree to the neural storage policy.
+                        </p>
+                    </div>
+
                     <button
-                        disabled={loading}
-                        className={`w-full h-12 rounded-full text-sm font-bold transition-all transition-all duration-300 mt-2
-                            ${email && password && confirmPassword
+                        disabled={!canSubmit || loading}
+                        className={`w-full h-12 rounded-full text-sm font-bold transition-all duration-300
+                            ${canSubmit
                                 ? 'bg-[#5B79B7] text-white shadow-[0_0_15px_rgba(91,121,183,0.4)]'
-                                : 'bg-[#FFFFFF0A] border border-white/10 text-slate-500'}
+                                : 'bg-[#FFFFFF0A] border border-white/10 text-slate-500 opacity-50 cursor-not-allowed'}
                         `}
                     >
                         {loading ? <Icon name="rotate" className="w-5 h-5 animate-spin mx-auto" /> : 'Create account'}

@@ -62,6 +62,8 @@ export const subscribeToNotifications = (uid: string, callback: (notifications: 
     return onSnapshot(q, (snap) => {
         const notices = snap.docs.map(doc => ({ ...doc.data(), id: doc.id } as Notification));
         callback(notices);
+    }, (error) => {
+        console.error("Critical: Notification sync failed", error);
     });
 };
 

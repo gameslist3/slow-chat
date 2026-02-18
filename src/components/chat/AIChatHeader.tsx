@@ -75,7 +75,7 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
     };
 
     return (
-        <header className="h-20 flex items-center justify-between px-4 md:px-8 absolute top-0 left-0 right-0 z-[100] bg-[#0B1221]/80 backdrop-blur-xl border-b border-white/5 transition-all duration-300">
+        <header className="h-20 flex items-center justify-between px-4 md:px-8 relative z-[100] bg-[#0B1221]/80 backdrop-blur-xl border-b border-white/5 transition-all duration-300">
             {/* Left: Back + Group Label */}
             <div className="flex items-center gap-3">
                 <button

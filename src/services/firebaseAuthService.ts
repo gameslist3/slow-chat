@@ -11,7 +11,14 @@ import { User, UserCredentials } from '../types';
 
 // Email validation
 export const validateEmail = (email: string): boolean => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!regex.test(email)) return false;
+
+    // Additional "unreal" check: common disposable domains or missing TLD depth
+    const parts = email.split('@')[1].split('.');
+    if (parts.length < 2 || parts[parts.length - 1].length < 2) return false;
+
+    return true;
 };
 
 // ... (existing helper functions)
@@ -202,8 +209,11 @@ export const loginUserWithPassword = async (creds: UserCredentials): Promise<Use
         if (error.code === 'auth/configuration-not-found') {
             throw new Error('Email/Password login is not enabled in Firebase Console. Please enable it in Authentication > Sign-in method.');
         }
-        if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
-            return null;
+        if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+            throw new Error("Incorrect password. Please verify and retry.");
+        }
+        if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email') {
+            throw new Error("No account found with this address.");
         }
         throw error;
     }
