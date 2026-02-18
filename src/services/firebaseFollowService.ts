@@ -223,6 +223,13 @@ export const unfollowUser = async (otherUserId: string): Promise<void> => {
         sn1.docs.forEach(d => batch.delete(d.ref));
         sn2.docs.forEach(d => batch.delete(d.ref));
 
+        // 4.5 Cleanup Notifications (For Peer)
+        const p1 = query(notificationsRef, where('userId', '==', otherUserId), where('groupId', '==', currentUser.uid));
+        const p2 = query(notificationsRef, where('userId', '==', otherUserId), where('groupId', '==', chatId));
+        const [sp1, sp2] = await Promise.all([getDocs(p1), getDocs(p2)]);
+        sp1.docs.forEach(d => batch.delete(d.ref));
+        sp2.docs.forEach(d => batch.delete(d.ref));
+
         await batch.commit();
 
         // 5. Notify the other user about the termination (Optional, but good for protocol feel)
@@ -318,26 +325,38 @@ export const subscribeToFriends = (userId: string, callback: (friends: any[]) =>
     let results1: any[] = [];
     let results2: any[] = [];
 
-    const update = () => {
-        const friends1 = results1.map(d => {
+    const update = async () => {
+        const fetchUserData = async (uid: string) => {
+            const snap = await getDoc(doc(db, 'users', uid));
+            return snap.exists() ? snap.data().username : 'User';
+        };
+
+        const friends1Promise = results1.map(async (d) => {
             const data = d.data();
+            const latestName = await fetchUserData(data.toId);
             return {
                 requestId: d.id,
                 uid: data.toId,
-                username: data.toUsername || 'User',
+                username: latestName,
                 direction: 'outgoing'
             };
         });
 
-        const friends2 = results2.map(d => {
+        const friends2Promise = results2.map(async (d) => {
             const data = d.data();
+            const latestName = await fetchUserData(data.fromId);
             return {
                 requestId: d.id,
                 uid: data.fromId,
-                username: data.fromUsername || 'User',
+                username: latestName,
                 direction: 'incoming'
             };
         });
+
+        const [friends1, friends2] = await Promise.all([
+            Promise.all(friends1Promise),
+            Promise.all(friends2Promise)
+        ]);
 
         const combined = [...friends1, ...friends2];
         const uniqueFriends = Array.from(new Map(combined.map(item => [item.uid, item])).values());

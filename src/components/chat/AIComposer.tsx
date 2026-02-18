@@ -52,6 +52,7 @@ export const AIComposer: React.FC<AIComposerProps> = ({
     const [uploading, setUploading] = useState(false);
     const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
     const [audioUrl, setAudioUrl] = useState<string | null>(null);
+    const [isPlaying, setIsPlaying] = useState(false);
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -205,7 +206,10 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                     <div className="flex items-center gap-4 bg-[#EF4444]/10 backdrop-blur-xl border border-[#EF4444]/20 p-2 rounded-[2rem] shadow-2xl animate-in slide-in-from-bottom-2">
                         <button
                             onClick={() => { stopRecording(); setRecState('idle'); setAudioBlob(null); setAudioUrl(null); }}
-                            className="w-10 h-10 rounded-full bg-[#EF4444]/20 hover:bg-[#EF4444]/30 text-[#EF4444] flex items-center justify-center transition-colors"
+                            disabled={recState === 'recording'}
+                            className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors
+                                ${recState === 'recording' ? 'bg-white/5 text-white/20 cursor-not-allowed' : 'bg-[#EF4444]/20 hover:bg-[#EF4444]/30 text-[#EF4444]'}
+                            `}
                         >
                             <Icon name="trash" className="w-5 h-5" />
                         </button>
@@ -235,15 +239,29 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                         ) : (
                             <div className="flex-1 flex items-center gap-3 min-w-[200px]">
                                 <div className="flex-1 h-10 bg-black/20 rounded-full overflow-hidden flex items-center px-4 gap-3 border border-white/5">
-                                    <button onClick={() => { const a = document.getElementById('preview-audio') as HTMLAudioElement; if (a.paused) a.play(); else a.pause(); }}>
-                                        <Icon name="play" className="w-3 h-3 text-[#E6ECFF]" />
+                                    <button onClick={() => {
+                                        const a = document.getElementById('preview-audio') as HTMLAudioElement;
+                                        if (a.paused) { a.play(); setIsPlaying(true); } else { a.pause(); setIsPlaying(false); }
+                                    }}>
+                                        <Icon name={isPlaying ? "pause" : "play"} className="w-3 h-3 text-[#E6ECFF]" />
                                     </button>
                                     <div className="flex-1 h-6 flex items-center gap-0.5 opacity-60">
                                         {[...Array(20)].map((_, i) => (
-                                            <div key={i} className="w-0.5 bg-[#E6ECFF] rounded-full" style={{ height: `${20 + Math.random() * 60}%` }} />
+                                            <div
+                                                key={i}
+                                                className={`w-0.5 bg-[#E6ECFF] rounded-full ${isPlaying ? 'animate-pulse' : ''}`}
+                                                style={{ height: isPlaying ? `${Math.random() * 80 + 20}%` : '20%', transition: 'all 0.2s' }}
+                                            />
                                         ))}
                                     </div>
-                                    <audio id="preview-audio" src={audioUrl!} className="hidden" onEnded={() => { }} />
+                                    <audio
+                                        id="preview-audio"
+                                        src={audioUrl!}
+                                        className="hidden"
+                                        onEnded={() => setIsPlaying(false)}
+                                        onPause={() => setIsPlaying(false)}
+                                        onPlay={() => setIsPlaying(true)}
+                                    />
                                 </div>
                                 <button
                                     onClick={handleSendVoice}

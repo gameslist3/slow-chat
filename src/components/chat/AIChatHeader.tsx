@@ -102,12 +102,14 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
 
             {/* Right: Share + Options */}
             <div className="flex items-center gap-3">
-                <button
-                    onClick={handleShare}
-                    className="w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center hover:bg-white/10 hover:border-white/20 transition-all group"
-                >
-                    {copied ? <Check className="w-5 h-5 text-[#7ED957]" /> : <Share2 className="w-5 h-5 text-[#A9B4D0] group-hover:text-white" />}
-                </button>
+                {!isPersonal && (
+                    <button
+                        onClick={handleShare}
+                        className="w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center hover:bg-white/10 hover:border-white/20 transition-all group"
+                    >
+                        {copied ? <Check className="w-5 h-5 text-[#7ED957]" /> : <Share2 className="w-5 h-5 text-[#A9B4D0] group-hover:text-white" />}
+                    </button>
+                )}
 
                 <div className="relative">
                     <button

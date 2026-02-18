@@ -82,11 +82,23 @@ export const AISidebar: React.FC<AISidebarProps> = ({
             </nav>
 
             {/* Bottom Section: User & Config */}
-            <div className="mt-auto flex flex-col gap-4">
+            <div className="mt-auto flex flex-col gap-6 items-center md:items-stretch">
+                {/* Theme Toggle Mini (Now explicitly above profile in mobile if desired, or just part of stack) */}
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onToggleTheme?.();
+                    }}
+                    className="w-10 h-10 md:w-full md:h-12 rounded-full md:rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center md:justify-start md:px-4 gap-3 text-[#7C89A6] hover:text-white hover:bg-white/10 transition-all group"
+                >
+                    <Icon name={theme === 'dark' ? 'moon' : 'sun'} className="w-5 h-5 transition-transform group-hover:rotate-12" />
+                    <span className="hidden md:block text-xs font-bold uppercase tracking-widest">{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</span>
+                </button>
+
                 {/* User Profile Pill */}
                 <div
                     onClick={onOpenSettings}
-                    className="flex items-center gap-3 p-2 rounded-full hover:bg-[#FFFFFF05] transition-colors cursor-pointer group"
+                    className="flex flex-col md:flex-row items-center gap-3 p-2 rounded-full md:rounded-2xl hover:bg-[#FFFFFF05] transition-colors cursor-pointer group border border-transparent hover:border-white/5"
                 >
                     <div className="relative shrink-0">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#182B52] to-[#0F1C34] flex items-center justify-center text-white font-bold border border-[#FFFFFF10] shadow-lg group-hover:border-[#5B79B7] transition-colors">
@@ -99,19 +111,21 @@ export const AISidebar: React.FC<AISidebarProps> = ({
                         <span className="text-sm font-bold text-[#E6ECFF] truncate">
                             {user?.username || 'Guest'}
                         </span>
+                        <span className="text-[10px] text-[#7C89A6] font-bold uppercase tracking-tighter">Verified Node</span>
                     </div>
 
-                    {/* Theme Toggle Mini */}
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onToggleTheme?.();
-                        }}
-                        className="ml-auto w-8 h-8 rounded-full flex items-center justify-center text-[#7C89A6] hover:text-white hover:bg-white/10 transition-colors"
-                    >
-                        <Icon name={theme === 'dark' ? 'moon' : 'sun'} className="w-4 h-4" />
-                    </button>
+                    <div className="hidden md:block ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Icon name="arrowRight" className="w-4 h-4 text-[#7C89A6]" />
+                    </div>
                 </div>
+
+                {/* Logout Action (Mobile focused) */}
+                <button
+                    onClick={(e) => { e.stopPropagation(); onLogout(); }}
+                    className="md:hidden w-10 h-10 rounded-full bg-red-500/10 text-red-400 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all"
+                >
+                    <Icon name="logout" className="w-5 h-5" />
+                </button>
             </div>
         </div>
     );

@@ -181,7 +181,14 @@ const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark
             onOpenSettings={() => { setActiveTab('profile'); setActiveId(null); }}
             onGoHome={() => { setActiveTab('home'); setActiveId(null); setShowDiscovery(false); }}
             user={user}
-            onLogout={logout}
+            onLogout={() => {
+                logout();
+                setActiveTab('home');
+                setActiveId(null);
+                setShowDiscovery(false);
+                setShowCreateGroup(false);
+                setViewingUserId(null);
+            }}
             theme={theme}
             onToggleTheme={onToggleTheme}
             unreadCount={unreadCount}

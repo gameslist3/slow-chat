@@ -63,7 +63,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     };
 
     return (
-        <div className="w-full h-full flex flex-col relative overflow-hidden bg-transparent">
+        <div className="w-full h-[100dvh] flex flex-col relative overflow-hidden bg-transparent">
             {/* Header */}
             <div className="shrink-0 z-40 bg-black/20 backdrop-blur-md border-b border-white/5">
                 <AIChatHeader
@@ -79,7 +79,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-hidden relative">
+            <div className="flex-1 overflow-hidden relative flex flex-col">
                 {loading && messages.length === 0 ? (
                     <div className="max-w-4xl mx-auto py-10 space-y-8 px-8 w-full">
                         {[1, 2, 3].map(i => (
@@ -94,7 +94,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                         ))}
                     </div>
                 ) : (
-                    <div className="h-full w-full overflow-y-auto custom-scrollbar pb-32 px-4 md:px-0">
+                    <div className="flex-1 w-full overflow-y-auto custom-scrollbar pb-2 px-4 md:px-0 scroll-smooth">
                         {messages.length === 0 ? (
                             <div className="h-full flex flex-col items-center justify-center opacity-30 text-center p-8">
                                 <div className="w-24 h-24 bg-blue-500/20 rounded-full flex items-center justify-center mb-6 animate-pulse">
@@ -104,14 +104,16 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                                 <p className="text-sm text-blue-200/50 mt-2">Begin transmission</p>
                             </div>
                         ) : (
-                            <AIMessageList
-                                messages={messages}
-                                currentUserId={user?.id || ''}
-                                highlightId={highlightMessageId}
-                                onReply={handleReply}
-                                onReaction={toggleReaction}
-                                onProfileClick={onProfileClick}
-                            />
+                            <div className="pb-32">
+                                <AIMessageList
+                                    messages={messages}
+                                    currentUserId={user?.id || ''}
+                                    highlightId={highlightMessageId}
+                                    onReply={handleReply}
+                                    onReaction={toggleReaction}
+                                    onProfileClick={onProfileClick}
+                                />
+                            </div>
                         )}
                     </div>
                 )}

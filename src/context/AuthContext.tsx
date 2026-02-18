@@ -4,7 +4,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { doc, updateDoc, getDoc, onSnapshot, collection, query, where } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 import * as firebaseAuth from '../services/firebaseAuthService';
-import { leaveGroup as leaveGroupService } from '../services/firebaseGroupService';
+import * as firebaseGroupService from '../services/firebaseGroupService';
 
 interface AuthContextType {
     user: User | null;
@@ -118,11 +118,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (!user) return;
 
         try {
-            // Firestore update is now handled by firebaseGroupService.joinGroup called in App.tsx
-            // We just update the local state to trigger UI changes immediately
+            // 1. Update Firestore
+            await firebaseGroupService.joinGroup(groupId, user.id);
+
+            // 2. Optimistic UI Update
             if (!user.joinedGroups.includes(groupId)) {
-                // Note: Firestore listener in AuthProvider will 
-                // handle the final state update. This is optimistic.
                 setUser({
                     ...user,
                     joinedGroups: [...user.joinedGroups, groupId]
@@ -130,6 +130,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
         } catch (e) {
             console.error("Context joinGroup failed", e);
+            throw e;
         }
     };
 
@@ -137,7 +138,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (!user) return;
 
         // Clean up group data
-        await leaveGroupService(groupId, user.id);
+        await firebaseGroupService.leaveGroup(groupId, user.id);
 
         // Update local state
         const updated = { ...user, joinedGroups: user.joinedGroups.filter(id => id !== groupId) };

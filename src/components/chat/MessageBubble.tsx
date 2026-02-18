@@ -68,7 +68,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                     relative px-5 py-3 text-[15px] font-medium leading-relaxed tracking-wide break-words overflow-hidden shadow-lg
                     ${isMe
                         ? 'bg-[rgba(127,166,255,0.18)] text-[#E6ECFF] rounded-[1.25rem] rounded-tr-sm border border-white/5'
-                        : 'bg-[rgba(255,255,255,0.05)] text-[#E6ECFF] rounded-[1.25rem] rounded-tl-sm border border-[rgba(255,255,255,0.12)]'
+                        : 'bg-[rgba(255,255,255,0.05)] text-[#E6ECFF] rounded-[1.25rem] rounded-tl-sm border border-white/5'
                     }
                     ${message.type === 'image' || message.type === 'video' ? 'p-1 bg-transparent border-0 shadow-none' : ''}
                 `}>

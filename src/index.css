@@ -235,3 +235,11 @@
     transform: translateY(-10px);
   }
 }
+
+@layer utilities {
+  .pulse-highlight {
+    animation: none;
+    border-color: transparent !important;
+    background-color: transparent !important;
+  }
+}
