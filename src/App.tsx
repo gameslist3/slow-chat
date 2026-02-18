@@ -339,7 +339,7 @@ const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark
                                 isPersonal={isPersonal}
                                 title={isPersonal ? personalChatTitle : (activeGroup?.name || '')}
                                 image={!isPersonal ? activeGroup?.image || '👥' : '👤'}
-                                memberCount={!isPersonal ? activeGroup?.members || 0 : 2}
+                                memberCount={!isPersonal ? (activeGroup?.memberCount || activeGroup?.members || 0) : 2}
                                 onLeave={() => setActiveTab('home')}
                                 onProfileClick={(userId) => setViewingUserId(userId)}
                             />

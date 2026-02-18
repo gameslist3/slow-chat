@@ -52,9 +52,9 @@ export const sendFollowRequest = async (toUserId: string, toUsername: string): P
     if (latestDeclined) {
         const lastDeclinedTime = latestDeclined.data().timestamp;
         const diff = (Date.now() - lastDeclinedTime) / 1000 / 60; // in minutes
-        if (diff < 60) {
-            const wait = Math.ceil(60 - diff);
-            throw new Error(`Connection link unstable. Retry available in ${wait} minute${wait > 1 ? 's' : ''}.`);
+        if (diff < 1440) {
+            const waitHours = Math.ceil((1440 - diff) / 60);
+            throw new Error(`Connection link unstable. Retry available in ${waitHours} hour${waitHours > 1 ? 's' : ''}.`);
         }
     }
 
@@ -271,7 +271,7 @@ export const getFollowStatus = async (toUserId: string): Promise<'none' | 'pendi
             // Check if still in cooldown (Mutual check)
             // Check if still in cooldown (Mutual check)
             const diff = (Date.now() - (data.timestamp || 0)) / 1000 / 60;
-            if (diff < 60) return 'cooldown';
+            if (diff < 1440) return 'cooldown';
             return 'none';
         }
         return data.status as 'pending' | 'accepted';

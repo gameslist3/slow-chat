@@ -344,16 +344,16 @@ export const NameScreen = ({ onNameSelected }: { onNameSelected: (name: string) 
                 </div>
 
                 <h2 className="text-3xl font-black uppercase italic tracking-tighter mb-2 text-white">Identity</h2>
-                <p className="text-[10px] uppercase tracking-widest text-slate-500 font-black mb-10">Select your digital alias</p>
+                <p className="text-[10px] uppercase tracking-widest text-slate-500 font-black mb-10">Select your digital name</p>
 
                 <div className="bg-black/20 border border-white/5 rounded-2xl p-6 mb-8 backdrop-blur-md">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-blue-400/80 block mb-2">Protocol Alias</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-blue-400/80 block mb-2">Protocol Name</span>
                     <p className="text-2xl font-black italic tracking-tighter truncate text-white">{name}</p>
                 </div>
 
                 <div className="flex gap-4">
                     <button onClick={() => setName(generateAnonymousName())} className="w-14 h-14 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center hover:bg-white/10 transition-all group">
-                        <Icon name="shuffle" className="w-6 h-6 text-slate-400 group-hover:text-white transition-colors" />
+                        <Icon name="rotate" className="w-6 h-6 text-slate-400 group-hover:text-white transition-colors" />
                     </button>
                     <button
                         onClick={handleConfirm}

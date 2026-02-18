@@ -27,10 +27,10 @@ export const GroupCard: React.FC<GroupCardProps> = ({ group, isJoined, onAction 
                         </div>
                     )}
                 </div>
-                {group.memberCount > 0 && (
+                {(group.memberCount > 0 || group.members > 0) && (
                     <div className="px-3 py-1 bg-white/5 rounded-full border border-white/5 flex items-center gap-2">
                         <Users className="w-3 h-3 text-white/40" />
-                        <span className="text-[10px] font-bold text-white/60">{group.memberCount}</span>
+                        <span className="text-[10px] font-bold text-white/60">{group.memberCount || group.members}</span>
                     </div>
                 )}
             </div>

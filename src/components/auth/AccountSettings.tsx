@@ -106,14 +106,14 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
                                         onClick={startEditing}
                                         className="btn-primary w-full md:w-auto px-6 h-12 rounded-xl text-xs font-bold tracking-widest uppercase shadow-lg relative z-10"
                                     >
-                                        Change Alias
+                                        change name
                                     </motion.button>
                                 )}
                             </div>
                         ) : (
                             <div className="glass-panel rounded-3xl p-8 space-y-8 animate-in zoom-in-95 duration-500 relative overflow-hidden backdrop-blur-xl">
                                 <div className="flex justify-between items-center">
-                                    <h3 className="text-sm font-bold text-primary uppercase tracking-widest">New Alias</h3>
+                                    <h3 className="text-sm font-bold text-primary uppercase tracking-widest">new name</h3>
                                     <button onClick={() => setIsEditing(false)} className="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center transition-all text-gray-400 hover:text-white"><Icon name="x" className="w-4 h-4" /></button>
                                 </div>
 
@@ -128,7 +128,7 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
                                         onClick={handleShuffle}
                                         className="flex-1 glass-card bg-white/5 h-14 rounded-xl flex items-center justify-center font-bold text-xs tracking-widest uppercase hover:bg-white/10 transition-all gap-2"
                                     >
-                                        <Icon name="shuffle" className="w-4 h-4" /> Shuffle
+                                        <Icon name="rotate" className="w-4 h-4" /> Shuffle
                                     </motion.button>
                                     <motion.button
                                         whileHover={{ scale: 1.02 }}

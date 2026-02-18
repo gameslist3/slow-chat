@@ -58,7 +58,7 @@ export const AILayout: React.FC<AILayoutProps> = ({
                         <Icon name="menu" className="w-5 h-5 text-muted-foreground" />
                     </button>
                     <div className="flex items-center gap-2">
-                        <Logo className="h-8 w-8 text-blue-500 drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
+                        <Logo className="h-10 w-10 text-blue-500 drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
                     </div>
                     <button onClick={onOpenSettings} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
                         <span className="text-xs font-bold">{user?.username?.[0].toUpperCase()}</span>

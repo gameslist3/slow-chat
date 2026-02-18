@@ -133,6 +133,14 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                                             >
                                                 Requested
                                             </Button>
+                                        ) : status === 'cooldown' ? (
+                                            <Button
+                                                variant="secondary"
+                                                className="flex-1 gap-2 opacity-50 cursor-not-allowed"
+                                                disabled
+                                            >
+                                                Protocol Unstable
+                                            </Button>
                                         ) : (
                                             <Button
                                                 variant="secondary"

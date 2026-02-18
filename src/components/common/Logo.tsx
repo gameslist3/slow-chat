@@ -5,7 +5,7 @@ interface LogoProps {
     showText?: boolean;
 }
 
-export const Logo: React.FC<LogoProps> = ({ className = "w-auto h-8", showText = false }) => {
+export const Logo: React.FC<LogoProps> = ({ className = "w-auto h-10", showText = false }) => {
     return (
         <div className={`relative flex items-center gap-2 ${className}`}>
             <img
