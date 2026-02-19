@@ -212,6 +212,12 @@ export const unfollowUser = async (otherUserId: string): Promise<void> => {
         const chatIds = [currentUser.uid, otherUserId].sort();
         const chatId = chatIds.join('_');
         const chatRef = doc(db, 'personal_chats', chatId);
+
+        // 3.1 Fetch and delete all messages for a clean wipe
+        const messagesRef = collection(db, `personal_chats/${chatId}/messages`);
+        const messagesSnap = await getDocs(messagesRef);
+        messagesSnap.docs.forEach(d => batch.delete(d.ref));
+
         batch.delete(chatRef);
 
         // 4. Cleanup Notifications (For current user)

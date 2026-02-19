@@ -175,19 +175,34 @@ export const NotificationList: React.FC<{
     const tenMins = 10 * 60 * 1000;
     const now = Date.now();
 
-    const [initialUnreadIds] = useState(() => new Set(notifications.filter(n => !n.read).map(n => n.id)));
+    const [sessionInitialIds, setSessionInitialIds] = useState<Set<string> | null>(null);
 
-    const followReqFilter = (n: Notification) =>
-        n.type === 'follow_request' && (!n.read || (n.updatedAt && now - n.updatedAt < tenMins));
+    // Capture initial unread IDs when notifications first arrive
+    useEffect(() => {
+        if (!sessionInitialIds && notifications.length > 0) {
+            const unread = notifications.filter(n => !n.read).map(n => n.id);
+            setSessionInitialIds(new Set(unread));
+        }
+    }, [notifications, sessionInitialIds]);
+
+    const followReqFilter = (n: Notification) => {
+        if (n.type !== 'follow_request') return false;
+        // Keep visible if:
+        // 1. Not yet actioned (no followStatus or status is 'pending')
+        // 2. Actioned but within the 10min "recent" window
+        const isActioned = !!n.followStatus && n.followStatus !== 'pending';
+        if (!isActioned) return true;
+        return n.updatedAt && now - n.updatedAt < tenMins;
+    };
 
     const recentActivityFilter = (n: Notification) => {
         if (n.type === 'follow_request') return false;
-        // Show if unread OR if it was unread when the panel opened
-        return !n.read || initialUnreadIds.has(n.id);
+        // Show if unread OR if it was unread when the panel opened during THIS mount session
+        return !n.read || (sessionInitialIds?.has(n.id) ?? false);
     };
 
     return (
-        <div className="flex flex-col h-full bg-background/50">
+        <div className="flex flex-col h-full bg-background/50 pt-8 md:pt-0">
             <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-8">
                 <AnimatePresence mode="popLayout">
                     {notifications.filter(followReqFilter).length === 0 && notifications.filter(recentActivityFilter).length === 0 ? (

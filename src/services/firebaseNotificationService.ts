@@ -87,8 +87,7 @@ export const markAllAsRead = async (uid: string): Promise<void> => {
 
     const q = query(collection(db, 'notifications'),
         where('userId', '==', uid),
-        where('read', '==', false),
-        where('type', '!=', 'follow_request')
+        where('read', '==', false)
     );
     const snap = await getDocs(q);
 

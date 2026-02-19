@@ -95,7 +95,7 @@ export interface Notification {
     timestamp: number;
     read: boolean;
     updatedAt?: number;
-    followStatus?: 'accepted' | 'declined';
+    followStatus?: 'accepted' | 'declined' | 'pending';
 }
 
 export interface PersonalChat {

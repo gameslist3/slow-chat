@@ -189,12 +189,6 @@ const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark
             user={user}
             onLogout={() => {
                 logout();
-                setActiveTab('home');
-                setActiveId(null);
-                setShowDiscovery(false);
-                setShowCreateGroup(false);
-                setViewingUserId(null);
-                setHighlightMessageId(undefined);
             }}
             theme={theme}
             onToggleTheme={onToggleTheme}
@@ -312,13 +306,17 @@ const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark
 
                     {activeTab === 'friends' && (
                         <motion.div key="friends" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
-                            <FriendsList onSelectFriend={(id) => handleSelectPersonal(id)} />
+                            <FriendsList onSelectFriend={(friendId) => {
+                                if (!user?.id) return;
+                                const combinedId = [user.id, friendId].sort().join('_');
+                                handleSelectPersonal(combinedId);
+                            }} />
                         </motion.div>
                     )}
 
                     {activeTab === 'inbox' && (
-                        <motion.div key="inbox" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-8">
-                            <div className="flex items-center justify-between">
+                        <motion.div key="inbox" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-8 pt-12">
+                            <div className="flex items-center justify-between px-2">
                                 <h2 className="text-3xl font-black italic uppercase tracking-tighter">Notifications</h2>
                                 <button onClick={() => user?.id && markAllAsRead(user.id)} className="text-sm font-bold text-primary hover:underline">Mark all read</button>
                             </div>
@@ -355,12 +353,6 @@ const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark
                                 onBack={() => setActiveTab('home')}
                                 logout={() => {
                                     logout();
-                                    setActiveTab('home');
-                                    setActiveId(null);
-                                    setShowDiscovery(false);
-                                    setShowCreateGroup(false);
-                                    setViewingUserId(null);
-                                    setHighlightMessageId(undefined);
                                 }}
                             />
                         </motion.div>
