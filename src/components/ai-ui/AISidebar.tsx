@@ -11,8 +11,6 @@ interface AISidebarProps {
     onGoHome: () => void;
     user: User | null;
     onLogout: () => void;
-    theme?: 'light' | 'dark';
-    onToggleTheme?: () => void;
     unreadCount?: number;
 }
 
@@ -23,8 +21,6 @@ export const AISidebar: React.FC<AISidebarProps> = ({
     onGoHome,
     user,
     onLogout,
-    theme = 'dark',
-    onToggleTheme,
     unreadCount = 0
 }) => {
     const navItems = [
@@ -36,11 +32,11 @@ export const AISidebar: React.FC<AISidebarProps> = ({
 
     return (
         <div className="h-full flex flex-col relative w-full px-4 py-6">
-            {/* Branding - Top Left (Icon Only) */}
+            {/* Branding - Top Left (Icon Only) - Increased Size (+50%) */}
             <div className="px-4 mb-10 flex items-center justify-center md:justify-start">
                 <div className="relative group cursor-pointer hover:scale-110 transition-transform duration-300">
                     <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <Logo className="w-12 h-12 md:w-14 md:h-14 text-white relative z-10 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
+                    <Logo className="w-16 h-16 md:w-20 md:h-20 text-white relative z-10 drop-shadow-[0_0_20px_rgba(59,130,246,0.5)]" />
                 </div>
             </div>
 
@@ -65,10 +61,10 @@ export const AISidebar: React.FC<AISidebarProps> = ({
                             <div className="relative">
                                 <Icon
                                     name={item.icon}
-                                    className={`w-5 h-5 transition-transform group-hover:scale-110 ${isActive ? 'text-white' : 'text-[#7C89A6] group-hover:text-white'}`}
+                                    className={`w-6 h-6 transition-transform group-hover:scale-110 ${isActive ? 'text-white' : 'text-[#7C89A6] group-hover:text-white'}`}
                                 />
                                 {isNotifications && unreadCount > 0 && (
-                                    <div className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-0.5 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-[#0B1220]">
+                                    <div className="absolute -top-1.5 -right-1.5 min-w-[18px] h-4.5 px-0.5 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-[#0B1220]">
                                         {unreadCount > 9 ? '9+' : unreadCount}
                                     </div>
                                 )}
@@ -83,18 +79,6 @@ export const AISidebar: React.FC<AISidebarProps> = ({
 
             {/* Bottom Section: User & Config */}
             <div className="mt-auto flex flex-col gap-6 items-center md:items-stretch">
-                {/* Theme Toggle Mini (Now explicitly above profile in mobile if desired, or just part of stack) */}
-                <button
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onToggleTheme?.();
-                    }}
-                    className="w-10 h-10 md:w-full md:h-12 rounded-full md:rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center md:justify-start md:px-4 gap-3 text-[#7C89A6] hover:text-white hover:bg-white/10 transition-all group"
-                >
-                    <Icon name={theme === 'dark' ? 'moon' : 'sun'} className="w-5 h-5 transition-transform group-hover:rotate-12" />
-                    <span className="hidden md:block text-xs font-bold uppercase tracking-widest">{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</span>
-                </button>
-
                 {/* User Profile Pill */}
                 <div
                     onClick={onOpenSettings}

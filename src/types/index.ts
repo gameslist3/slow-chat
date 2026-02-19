@@ -71,6 +71,7 @@ export interface Group {
     lastActivity: number;
     mutedBy: string[];
     unreadCounts?: { [userId: string]: number };
+    unreadCount?: number;
     lastMessage?: string;
 }
 

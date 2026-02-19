@@ -47,10 +47,7 @@ const AppContent = () => {
     const [isClient, setIsClient] = useState(false);
     const [forceShow, setForceShow] = useState(false);
     const [showPolicy, setShowPolicy] = useState(false);
-    const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-        const saved = localStorage.getItem('slowchat_theme');
-        return (saved as any) || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    });
+    const [theme] = useState<'dark'>('dark');
 
     useEffect(() => {
         setIsClient(true);
@@ -66,13 +63,9 @@ const AppContent = () => {
     }, []);
 
     useEffect(() => {
-        if (theme === 'dark') {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-        localStorage.setItem('slowchat_theme', theme);
-    }, [theme]);
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('slowchat_theme', 'dark');
+    }, []);
 
     useEffect(() => {
         const accepted = localStorage.getItem('slowchat_storage_accepted');
@@ -105,10 +98,7 @@ const AppContent = () => {
                 {showPolicy && <StoragePolicyModal onAccept={handleAcceptPolicy} />}
                 <div className="flex-1 w-full flex flex-col overflow-hidden min-h-full">
                     {isAuthenticated ? (
-                        <AuthenticatedSection
-                            theme={theme}
-                            onToggleTheme={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
-                        />
+                        <AuthenticatedSection />
                     ) : (
                         <AuthSection />
                     )}
@@ -118,7 +108,7 @@ const AppContent = () => {
     );
 };
 
-const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark', onToggleTheme: () => void }) => {
+const AuthenticatedSection = () => {
     const { user, logout, joinGroup: joinContext } = useAuth();
     const { toast } = useToast();
     const [activeTab, setActiveTab] = useState<'home' | 'direct' | 'groups' | 'friends' | 'inbox' | 'chat' | 'profile'>('home');
@@ -190,8 +180,6 @@ const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark
             onLogout={() => {
                 logout();
             }}
-            theme={theme}
-            onToggleTheme={onToggleTheme}
             unreadCount={unreadCount}
         >
             <div className="w-full h-full flex flex-col px-4 md:px-8 lg:px-12 max-w-[1600px] mx-auto">
@@ -253,7 +241,10 @@ const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark
                             <AnimatePresence mode="wait">
                                 {showCreateGroup ? (
                                     <motion.div key="create" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
-                                        <CreateGroup onGroupCreated={(id) => { handleSelectGroup(id); setShowCreateGroup(false); }} />
+                                        <CreateGroup
+                                            onGroupCreated={(id) => { handleSelectGroup(id); setShowCreateGroup(false); }}
+                                            onBack={() => setShowCreateGroup(false)}
+                                        />
                                     </motion.div>
                                 ) : showDiscovery ? (
                                     <motion.div key="discovery" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}>

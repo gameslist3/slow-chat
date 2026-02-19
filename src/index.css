@@ -39,7 +39,8 @@
     --radius-lg: 24px;
     --radius-pill: 9999px;
 
-    --font-main: 'Inter', sans-serif;
+    --font-main: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-heading: 'Outfit', 'Inter', sans-serif;
   }
 
   /* Force Dark Mode Appearance */
@@ -47,6 +48,7 @@
     background-color: var(--bg-core);
     color: var(--text-primary);
     font-family: var(--font-main);
+    letter-spacing: -0.01em;
   }
 
   body {
@@ -58,6 +60,17 @@
     /* Deep Navy Gradient Background */
     background: radial-gradient(circle at 50% -20%, #152238 0%, #0B1221 60%);
     background-attachment: fixed;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+    letter-spacing: -0.02em;
+    font-weight: 700;
   }
 }
 

@@ -18,7 +18,7 @@ export const WelcomeScreen = ({ onSignIn, onSignUp }: { onSignIn: () => void, on
                 transition={{ duration: 1, ease: "easeOut" }}
                 className="mb-8"
             >
-                <Logo className="w-64 h-auto text-white" />
+                <Logo className="w-96 h-auto text-white" />
             </motion.div>
 
             {/* Tagline */}
@@ -89,7 +89,7 @@ export const SignInScreen = ({ onBack, onSuccess, onForgotPassword }: any) => {
         <div className="w-full min-h-screen flex flex-col items-center justify-center p-6 bg-[#0B1220] text-white">
             <div className="w-full max-w-md flex flex-col items-center">
                 {/* Logo top */}
-                <Logo className="w-32 h-auto mb-12 opacity-80" />
+                <Logo className="w-48 h-auto mb-12 opacity-80" />
 
                 {/* Sign In Header */}
                 <div className="flex items-center gap-4 w-full mb-8">
@@ -212,7 +212,7 @@ export const SignUpScreen = ({ onBack, onSuccess }: any) => {
         <div className="w-full min-h-screen flex flex-col items-center justify-center p-6 bg-[#0B1220] text-white">
             <div className="w-full max-w-md flex flex-col items-center">
                 {/* Logo top */}
-                <Logo className="w-32 h-auto mb-12 opacity-80" />
+                <Logo className="w-48 h-auto mb-12 opacity-80" />
 
                 {/* Join Header */}
                 <div className="flex items-center gap-4 w-full mb-8">

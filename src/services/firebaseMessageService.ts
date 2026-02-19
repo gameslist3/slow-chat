@@ -86,9 +86,8 @@ export async function sendMessage(
                 [`unreadCounts.${content.recipientId}`]: increment(1)
             });
         } else {
+            // Update group's lastActivity and increment unread counts for other members
             const groupRef = doc(db, 'groups', targetId);
-            // Increment unread for all members EXCEPT sender
-            // Note: In real production with huge groups, we'd use a different approach
             const groupSnap = await getDoc(groupRef);
             if (groupSnap.exists()) {
                 const memberIds = groupSnap.data().memberIds || [];
@@ -200,17 +199,23 @@ export async function markAsSeen(
 
     if (isPersonal) {
         // Mark all messages from the other user as 'seen'
-        const q = query(messagesRef, where('senderId', '!=', userId), where('status', '!=', 'seen'));
+        // FIX: Firestore does not support multiple '!=' inequalities. 
+        // We query for 'sent' status and filter senderId on client or just check senderId if status is available.
+        const q = query(messagesRef, where('status', '==', 'sent'));
         const snap = await getDocs(q);
         const batch = writeBatch(db);
-        snap.docs.forEach(d => batch.update(d.ref, { status: 'seen' }));
+        snap.docs.forEach(d => {
+            if (d.data().senderId !== userId) {
+                batch.update(d.ref, { status: 'seen' });
+            }
+        });
         await batch.commit();
 
         // Reset unread counts on chat record
         const chatRef = doc(db, 'personal_chats', targetId);
         await updateDoc(chatRef, { [`unreadCounts.${userId}`]: 0 });
     } else {
-        // Update group readBy and Reset unread count for user
+        // Update group readBy for recent messages
         const q = query(messagesRef, orderBy('timestamp', 'desc'), limit(20));
         const snap = await getDocs(q);
         const batch = writeBatch(db);

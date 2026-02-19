@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Group } from '../../types';
 import { Icon } from '../common/Icon';
+import { Logo } from '../common/Logo';
 
 interface HomeViewProps {
     user: any;
@@ -104,44 +105,67 @@ const GroupItem = ({
     group: Group;
     index: number;
     onClick: () => void;
-}) => (
-    <motion.button
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: index * 0.05 }}
-        whileHover={{ y: -5, boxShadow: '0 10px 30px -10px rgba(0,0,0,0.3)' }}
-        onClick={onClick}
-        className="group relative flex flex-col p-6 rounded-[1.5rem] bg-[#152238]/60 border border-white/5 hover:border-[#5B79B7]/30 transition-all text-left overflow-hidden w-full h-40"
-    >
-        {/* Hover Glow Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#5B79B7]/0 to-[#5B79B7]/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+}) => {
+    const isGapesTeam = group.name === 'Gapes Team' || group.name === 'System Intelligence';
+    const unreadCount = group.unreadCount || 0;
 
-        <div className="flex items-center gap-4 z-10 w-full mb-4">
-            {/* Icon - No Background */}
-            <div className="w-12 h-12 flex items-center justify-center text-4xl shrink-0">
-                {group.image || '💬'}
+    return (
+        <motion.button
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.05 }}
+            whileHover={{ y: -5, boxShadow: '0 10px 30px -10px rgba(0,0,0,0.3)' }}
+            onClick={onClick}
+            className="group relative flex flex-col p-6 rounded-[1.5rem] bg-[#152238]/60 border border-white/5 hover:border-[#5B79B7]/30 transition-all text-left overflow-hidden w-full h-40"
+        >
+            {/* Unread Badge */}
+            {unreadCount > 0 && (
+                <div className="absolute top-4 right-4 bg-[#5B79B7] text-white text-[10px] font-black px-2 py-1 rounded-full shadow-[0_0_15px_rgba(91,121,183,0.5)] z-20">
+                    {unreadCount}
+                </div>
+            )}
+
+            {/* Hover Glow Background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-[#5B79B7]/0 to-[#5B79B7]/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+
+            <div className="flex items-center gap-4 z-10 w-full mb-4">
+                {/* Icon or Logo */}
+                <div className="w-12 h-12 flex items-center justify-center shrink-0">
+                    {isGapesTeam ? (
+                        <Logo className="w-12 h-12" />
+                    ) : (
+                        <span className="text-4xl">{group.image || '💬'}</span>
+                    )}
+                </div>
+
+                {/* Name */}
+                <div className="flex-1 min-w-0">
+                    <h3 className="text-[#E6ECFF] font-bold text-lg leading-tight truncate">
+                        {isGapesTeam ? 'Gapes Team' : group.name}
+                    </h3>
+                    {isGapesTeam && (
+                        <p className="text-[10px] text-[#5B79B7] font-black uppercase tracking-widest mt-1">Official Protocol</p>
+                    )}
+                </div>
             </div>
 
-            {/* Name */}
-            <div className="flex-1 min-w-0">
-                <h3 className="text-[#E6ECFF] font-bold text-lg leading-tight truncate">
-                    {group.name}
-                </h3>
-            </div>
-        </div>
+            {/* Bottom Metadata Row */}
+            <div className="mt-auto flex items-center justify-between z-10 w-full">
+                {/* Members (Left) */}
+                {!isGapesTeam ? (
+                    <div className="flex items-center gap-2 text-[#7C89A6] text-xs font-bold">
+                        <Icon name="users" className="w-4 h-4" />
+                        <span>{group.members || 1} User</span>
+                    </div>
+                ) : (
+                    <div />
+                )}
 
-        {/* Bottom Metadata Row */}
-        <div className="mt-auto flex items-center justify-between z-10 w-full">
-            {/* Members (Left) */}
-            <div className="flex items-center gap-2 text-[#7C89A6] text-xs font-bold">
-                <Icon name="users" className="w-4 h-4" />
-                <span>{group.members || 1} User</span>
+                {/* Category Pill (Right) */}
+                <div className="px-3 py-1 rounded-full border border-white/10 text-[#A9B4D0] text-[10px] font-bold uppercase tracking-wider bg-black/20">
+                    {group.category || 'General'}
+                </div>
             </div>
-
-            {/* Category Pill (Right) */}
-            <div className="px-3 py-1 rounded-full border border-white/10 text-[#A9B4D0] text-[10px] font-bold uppercase tracking-wider bg-black/20">
-                {group.category || 'General'}
-            </div>
-        </div>
-    </motion.button>
-);
+        </motion.button>
+    );
+};
