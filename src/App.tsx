@@ -16,7 +16,7 @@ import { Icon } from './components/common/Icon';
 import { useInbox } from './hooks/useChat';
 import { HomeView } from './components/home/HomeView';
 import { AuroraBackground } from './components/ui/AuroraBackground';
-import { updateUserStatus } from './services/firebaseAuthService';
+import { updateUserStatus, updateActiveChat } from './services/firebaseAuthService';
 import { FriendsList } from './components/social/FriendsList';
 import { NotificationList } from './components/chat/NotificationCenter';
 import { subscribeToNotifications, markAllAsRead } from './services/firebaseNotificationService';
@@ -153,12 +153,14 @@ const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark
         setActiveId(id);
         setIsPersonal(false);
         setActiveTab('chat');
+        if (user?.id) updateActiveChat(user.id, id);
     };
 
     const handleSelectPersonal = (chatId: string) => {
         setActiveId(chatId);
         setIsPersonal(true);
         setActiveTab('chat');
+        if (user?.id) updateActiveChat(user.id, chatId);
     };
 
     const activeGroup = !isPersonal ? (myGroups.find(g => g.id === activeId) || null) : null;
@@ -178,6 +180,7 @@ const AuthenticatedSection = ({ theme, onToggleTheme }: { theme: 'light' | 'dark
                 setActiveTab(tab as any);
                 setActiveId(null);
                 setHighlightMessageId(undefined);
+                if (user?.id) updateActiveChat(user.id, null);
                 setShowDiscovery(tab === 'explore' || tab === 'groups');
                 setShowCreateGroup(false);
             }}

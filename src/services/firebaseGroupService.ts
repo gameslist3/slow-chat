@@ -197,7 +197,7 @@ export const initializeSystemGroup = async (): Promise<void> => {
         const now = Date.now();
         await setDoc(sysRef, {
             id: sysId,
-            name: 'System Intelligence',
+            name: 'Gapes Team',
             category: 'Updates',
             image: '📡',
             members: 0,

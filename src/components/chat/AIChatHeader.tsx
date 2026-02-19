@@ -3,6 +3,7 @@ import { Settings, Info, Share2, MoreVertical, BellOff, LogOut, Check, Bell } fr
 import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '../../context/ToastContext';
 import { toggleMuteGroup, leaveGroup, isMuted } from '../../services/firebaseGroupService';
+import { deletePersonalChat } from '../../services/firebaseMessageService';
 import { unfollowUser } from '../../services/firebaseFollowService';
 import { useAuth } from '../../context/AuthContext';
 import { Icon } from '../common/Icon';
@@ -61,9 +62,7 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
         if (!user) return;
         try {
             if (isPersonal) {
-                const ids = groupId.split('_');
-                const otherId = ids.find(id => id !== user.id);
-                if (otherId) await unfollowUser(otherId);
+                await deletePersonalChat(groupId);
             } else {
                 await leaveGroup(groupId, user.id);
             }
@@ -73,6 +72,9 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
             toast("Override failed", "error");
         }
     };
+
+    const isGapesTeam = title === 'Gapes Team' || title === 'System Intelligence';
+    const displayTitle = title === 'System Intelligence' ? 'Gapes Team' : title;
 
     return (
         <header className="h-20 flex items-center justify-between px-4 md:px-8 relative z-[100] bg-[#0B1221]/80 backdrop-blur-xl border-b border-white/5 transition-all duration-300">
@@ -87,11 +89,11 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
 
                 <div className="flex items-center gap-3 px-2 py-1.5 rounded-full pr-6 group cursor-pointer hover:bg-white/5 transition-colors">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#1F2937] to-[#111827] flex items-center justify-center text-lg border border-white/10 text-white shadow-lg">
-                        {image}
+                        {isGapesTeam ? 'GT' : image}
                     </div>
                     <div className="flex flex-col">
                         <div className="flex items-center gap-2">
-                            <h2 className="text-base font-bold text-[#E6ECFF] leading-none tracking-tight">{title}</h2>
+                            <h2 className="text-base font-bold text-[#E6ECFF] leading-none tracking-tight">{displayTitle}</h2>
                         </div>
                         {!isPersonal && (
                             <span className="text-[11px] font-medium text-[#7C89A6] mt-0.5">{memberCount} members</span>
@@ -102,7 +104,7 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
 
             {/* Right: Share + Options */}
             <div className="flex items-center gap-3">
-                {!isPersonal && (
+                {!isPersonal && !isGapesTeam && (
                     <button
                         onClick={handleShare}
                         className="w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center hover:bg-white/10 hover:border-white/20 transition-all group"
@@ -111,35 +113,37 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
                     </button>
                 )}
 
-                <div className="relative">
-                    <button
-                        onClick={() => setShowMore(!showMore)}
-                        className={`w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center transition-all ${showMore ? 'bg-[#5B79B7] border-[#5B79B7] text-white' : 'hover:bg-white/10 hover:border-white/20 text-[#A9B4D0] hover:text-white'}`}
-                    >
-                        <MoreVertical className="w-5 h-5" />
-                    </button>
+                {!isGapesTeam && (
+                    <div className="relative">
+                        <button
+                            onClick={() => setShowMore(!showMore)}
+                            className={`w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center transition-all ${showMore ? 'bg-[#5B79B7] border-[#5B79B7] text-white' : 'hover:bg-white/10 hover:border-white/20 text-[#A9B4D0] hover:text-white'}`}
+                        >
+                            <MoreVertical className="w-5 h-5" />
+                        </button>
 
-                    <AnimatePresence>
-                        {showMore && (
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                                className="absolute right-0 mt-2 w-64 bg-[#152238]/95 border border-white/10 rounded-2xl shadow-2xl py-2 overflow-hidden z-50 backdrop-blur-2xl ring-1 ring-black/50"
-                            >
-                                <button onClick={handleToggleMute} className="w-full h-12 flex items-center gap-3 px-4 text-xs font-bold uppercase tracking-wider text-[#A9B4D0] hover:bg-white/5 hover:text-white transition-all">
-                                    {muted ? <Bell className="w-4 h-4" /> : <BellOff className="w-4 h-4" />}
-                                    {muted ? 'Unmute' : 'Mute Notifications'}
-                                </button>
-                                <div className="h-px bg-white/5 mx-4 my-1" />
-                                <button onClick={handleLeave} className="w-full h-12 flex items-center gap-3 px-4 text-xs font-bold uppercase tracking-wider text-rose-400 hover:bg-rose-500/10 transition-all">
-                                    <LogOut className="w-4 h-4" />
-                                    {isPersonal ? 'End Chat' : 'Leave Group'}
-                                </button>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
+                        <AnimatePresence>
+                            {showMore && (
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                                    className="absolute right-0 mt-2 w-64 bg-[#152238]/95 border border-white/10 rounded-2xl shadow-2xl py-2 overflow-hidden z-50 backdrop-blur-2xl ring-1 ring-black/50"
+                                >
+                                    <button onClick={handleToggleMute} className="w-full h-12 flex items-center gap-3 px-4 text-xs font-bold uppercase tracking-wider text-[#A9B4D0] hover:bg-white/5 hover:text-white transition-all">
+                                        {muted ? <Bell className="w-4 h-4" /> : <BellOff className="w-4 h-4" />}
+                                        {muted ? 'Unmute' : 'Mute Notifications'}
+                                    </button>
+                                    <div className="h-px bg-white/5 mx-4 my-1" />
+                                    <button onClick={handleLeave} className="w-full h-12 flex items-center gap-3 px-4 text-xs font-bold uppercase tracking-wider text-rose-400 hover:bg-rose-500/10 transition-all">
+                                        <LogOut className="w-4 h-4" />
+                                        {isPersonal ? 'Delete Chat' : 'Leave Group'}
+                                    </button>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+                )}
             </div>
         </header>
     );

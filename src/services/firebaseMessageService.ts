@@ -108,55 +108,68 @@ export async function sendMessage(
         const notifiedUserIds = new Set<string>();
 
         if (content.isPersonal) {
-            // Personal chat alerts: Always notify recipient
+            // Personal chat alerts: Always notify recipient UNLESS they are active in the same chat
             if (content.recipientId) {
-                await createNotification(content.recipientId, {
-                    type: 'message',
-                    senderName: senderUsername,
-                    text: content.text || `Sent a ${content.type}`,
-                    groupId: targetId,
-                    messageId: docRef.id
-                });
+                const recipientDoc = await getDoc(doc(db, 'users', content.recipientId));
+                const recipientActiveChat = recipientDoc.exists() ? recipientDoc.data().activeChatId : null;
+
+                if (recipientActiveChat !== targetId) {
+                    await createNotification(content.recipientId, {
+                        type: 'message',
+                        senderName: senderUsername,
+                        text: content.text || `Sent a ${content.type}`,
+                        groupId: targetId,
+                        messageId: docRef.id
+                    });
+                }
                 notifiedUserIds.add(content.recipientId);
             }
         } else {
             // Group Chat: Filtered Notifications (Mentions & Replies Only)
+            // Note: We could also check occupancy here if needed, but the user specifically asked for replies to NOT show if screen is open.
 
             // 1. Check for Replies
             if (content.replyTo) {
-                // We need to resolve the username to a UID. 
-                // In a real app we'd have this ID in reply metadata.
-                // Fallback to query.
                 const replyToUserId = await getUserIdByUsername(content.replyTo.sender);
 
                 if (replyToUserId && replyToUserId !== senderId) {
-                    await createNotification(replyToUserId, {
-                        type: 'message', // Using 'message' type but with clarity in text
-                        senderName: senderUsername,
-                        text: `replied to you: "${content.text?.substring(0, 50)}${content.text && content.text.length > 50 ? '...' : ''}"`,
-                        groupId: targetId,
-                        messageId: docRef.id
-                    });
+                    const recipientDoc = await getDoc(doc(db, 'users', replyToUserId));
+                    const recipientActiveChat = recipientDoc.exists() ? recipientDoc.data().activeChatId : null;
+
+                    if (recipientActiveChat !== targetId) {
+                        await createNotification(replyToUserId, {
+                            type: 'message',
+                            senderName: senderUsername,
+                            text: `replied to you: "${content.text?.substring(0, 50)}${content.text && content.text.length > 50 ? '...' : ''}"`,
+                            groupId: targetId,
+                            messageId: docRef.id
+                        });
+                    }
                     notifiedUserIds.add(replyToUserId);
                 }
             }
 
-            // 2. Check for Mentions in text
+            // 2. Check for Mentions
             if (content.text) {
                 const mentionMatches = content.text.match(/@\w+/g) || [];
-                const mentionedUsernames = mentionMatches.map(m => m.slice(1)); // remove @
+                const mentionedUsernames = mentionMatches.map(m => m.slice(1));
 
                 if (mentionedUsernames.length > 0) {
                     for (const username of mentionedUsernames) {
                         const uid = await getUserIdByUsername(username);
                         if (uid && uid !== senderId && !notifiedUserIds.has(uid)) {
-                            await createNotification(uid, {
-                                type: 'message',
-                                senderName: senderUsername,
-                                text: `mentioned you: "${content.text?.substring(0, 50)}..."`,
-                                groupId: targetId,
-                                messageId: docRef.id
-                            });
+                            const recipientDoc = await getDoc(doc(db, 'users', uid));
+                            const recipientActiveChat = recipientDoc.exists() ? recipientDoc.data().activeChatId : null;
+
+                            if (recipientActiveChat !== targetId) {
+                                await createNotification(uid, {
+                                    type: 'message',
+                                    senderName: senderUsername,
+                                    text: `mentioned you: "${content.text?.substring(0, 50)}..."`,
+                                    groupId: targetId,
+                                    messageId: docRef.id
+                                });
+                            }
                             notifiedUserIds.add(uid);
                         }
                     }
@@ -307,10 +320,28 @@ export function subscribeToPersonalChats(userId: string, callback: (chats: Perso
     return onSnapshot(q, (snap) => {
         const chats = snap.docs.map(d => ({ ...d.data(), id: d.id } as PersonalChat));
         callback(chats);
-    }, (error) => {
-        console.error("Error in subscribeToPersonalChats:", error);
-        // Fallback: If permission error (likely due to deletion of a doc we're listening to?), 
-        // we might want to reload or ignore. 
-        // But for a list query, deletion of one doc shouldn't break the query unless rules are weird.
     });
+}
+
+/**
+ * Delete a personal chat permanently
+ */
+export async function deletePersonalChat(chatId: string): Promise<void> {
+    try {
+        const messagesRef = collection(db, `personal_chats/${chatId}/messages`);
+        const snap = await getDocs(messagesRef);
+        const batch = writeBatch(db);
+
+        // Delete all messages
+        snap.docs.forEach(d => batch.delete(d.ref));
+
+        // Delete the chat document
+        batch.delete(doc(db, 'personal_chats', chatId));
+
+        await batch.commit();
+        console.log('[Firestore] Personal chat deleted:', chatId);
+    } catch (error) {
+        console.error('[Firestore] DeletePersonalChat Error:', error);
+        throw error;
+    }
 }

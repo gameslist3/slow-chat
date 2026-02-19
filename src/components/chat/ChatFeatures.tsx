@@ -121,14 +121,20 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
             {/* Composer - Floating Absolute */}
             <div className="absolute bottom-0 left-0 right-0 z-50">
-                <AIComposer
-                    groupId={chatId}
-                    userId={user?.id || ''}
-                    onSend={handleSendMessage}
-                    replyingTo={replyingTo}
-                    onCancelReply={cancelReply}
-                    cooldown={remaining}
-                />
+                {(title === 'Gapes Team' || title === 'System Intelligence') ? (
+                    <div className="mx-4 mb-6 p-4 rounded-3xl bg-secondary/10 border border-secondary/20 backdrop-blur-xl text-center">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-secondary opacity-60">Transmission Restricted: Gapes Team Only</p>
+                    </div>
+                ) : (
+                    <AIComposer
+                        groupId={chatId}
+                        userId={user?.id || ''}
+                        onSend={handleSendMessage}
+                        replyingTo={replyingTo}
+                        onCancelReply={cancelReply}
+                        cooldown={remaining}
+                    />
+                )}
             </div>
         </div>
     );

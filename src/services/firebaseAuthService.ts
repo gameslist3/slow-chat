@@ -232,6 +232,19 @@ export const updateUserStatus = async (uid: string, status: 'online' | 'offline'
     }
 };
 
+/**
+ * Update user's active chat for notification suppression
+ */
+export const updateActiveChat = async (uid: string, chatId: string | null): Promise<void> => {
+    if (!uid) return;
+    try {
+        const userRef = doc(db, 'users', uid);
+        await updateDoc(userRef, { activeChatId: chatId });
+    } catch (error) {
+        console.error('[Auth] Error updating active chat:', error);
+    }
+};
+
 // Logout
 export const logoutUser = async (): Promise<void> => {
     const user = auth.currentUser;
