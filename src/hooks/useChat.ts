@@ -17,7 +17,7 @@ export const useChat = (chatId: string, isPersonal: boolean = false) => {
 
     // Messaging Subscription
     useEffect(() => {
-        if (!chatId) return;
+        if (!chatId || !user?.id) return;
         setLoading(true);
         const unsubscribe = subscribeToMessages(chatId, isPersonal, (newMessages) => {
             // Filter out system messages to focus on direct communication (WhatsApp/Instagram style)

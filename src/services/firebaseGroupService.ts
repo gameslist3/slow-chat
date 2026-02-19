@@ -18,7 +18,7 @@ import {
     increment,
     limit
 } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db, auth } from '../config/firebase';
 import { Group } from '../types';
 
 export const CATEGORIES = [
@@ -48,8 +48,12 @@ export const getGroups = async (): Promise<Group[]> => {
 export const subscribeToGroups = (callback: (groups: Group[]) => void) => {
     const q = query(collection(db, 'groups'), orderBy('lastActivity', 'desc'));
     return onSnapshot(q, (snapshot) => {
+        if (!auth.currentUser) return;
         const groups = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Group));
         callback(groups);
+    }, (error) => {
+        if (error.code === 'permission-denied') return;
+        console.error('[Firestore] Groups Subscription Error:', error);
     });
 };
 

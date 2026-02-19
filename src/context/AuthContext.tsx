@@ -29,12 +29,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Listen to Firebase Auth state changes
     useEffect(() => {
         let snapshotUnsubscribe: (() => void) | null = null;
+        let noteUnsubscribe: (() => void) | null = null;
 
         const authUnsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
             if (firebaseUser) {
                 // 1. Subscribe to user document for core profile
                 const userRef = doc(db, 'users', firebaseUser.uid);
                 snapshotUnsubscribe = onSnapshot(userRef, (userSnap) => {
+                    // Auth Guard
+                    if (!auth.currentUser) return;
+
                     if (userSnap.exists()) {
                         const userData = userSnap.data();
                         setUser(prev => {
@@ -62,6 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     }
                     setLoading(false);
                 }, (err) => {
+                    if (err.code === 'permission-denied') return;
                     console.error('[AuthContext] Snapshot error:', err);
                     setLoading(false);
                 });
@@ -69,16 +74,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 // 2. Subscribe to notifications for accurate unreadCount (Client-side derivation)
                 const notificationsRef = collection(db, 'notifications');
                 const q = query(notificationsRef, where('userId', '==', firebaseUser.uid), where('read', '==', false));
-                const noteUnsubscribe = onSnapshot(q, (snap) => {
+                noteUnsubscribe = onSnapshot(q, (snap) => {
+                    // Auth Guard
+                    if (!auth.currentUser) return;
+
                     const count = snap.size;
                     setUser(prev => prev ? { ...prev, unreadCount: count } : null);
+                }, (err) => {
+                    if (err.code === 'permission-denied') return;
+                    console.error('[AuthContext] Notifications Snapshot error:', err);
                 });
-
-                return () => {
-                    if (snapshotUnsubscribe) snapshotUnsubscribe();
-                    noteUnsubscribe();
-                };
             } else {
+                // EXPLICIT LOGOUT CLEANUP
+                if (snapshotUnsubscribe) {
+                    snapshotUnsubscribe();
+                    snapshotUnsubscribe = null;
+                }
+                if (noteUnsubscribe) {
+                    noteUnsubscribe();
+                    noteUnsubscribe = null;
+                }
                 setUser(null);
                 setLoading(false);
             }
@@ -87,6 +102,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return () => {
             authUnsubscribe();
             if (snapshotUnsubscribe) snapshotUnsubscribe();
+            if (noteUnsubscribe) noteUnsubscribe();
         };
     }, []);
 

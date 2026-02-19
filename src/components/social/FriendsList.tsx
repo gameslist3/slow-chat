@@ -30,20 +30,23 @@ export const FriendsList: React.FC<{ onSelectFriend?: (friendId: string) => void
     useEffect(() => {
         if (!currentUser) return;
 
+        let unsubFriends: (() => void) | null = null;
+        let unsubRequests: (() => void) | null = null;
+
         // Subscribe to friends
-        const unsubFriends = subscribeToFriends(currentUser.uid, (data) => {
+        unsubFriends = subscribeToFriends(currentUser.uid, (data) => {
             setFriends(data);
             setLoading(false);
         });
 
         // Subscribe to pending requests
-        const unsubRequests = getPendingRequests((data) => {
+        unsubRequests = getPendingRequests((data) => {
             setRequests(data);
         });
 
         return () => {
-            unsubFriends();
-            unsubRequests();
+            if (unsubFriends) unsubFriends();
+            if (unsubRequests) unsubRequests();
         };
     }, [currentUser]);
 

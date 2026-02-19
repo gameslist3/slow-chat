@@ -300,11 +300,15 @@ export function subscribeToMessages(
     const q = query(messagesRef, orderBy('timestamp', 'asc'));
 
     return onSnapshot(q, (snapshot) => {
+        if (!auth.currentUser) return;
         const messages = snapshot.docs.map(doc => ({
             ...doc.data(),
             id: doc.id
         } as Message));
         callback(messages);
+    }, (error) => {
+        if (error.code === 'permission-denied') return;
+        console.error('[Firestore] Message Subscription Error:', error);
     });
 }
 
@@ -318,8 +322,12 @@ export function subscribeToPersonalChats(userId: string, callback: (chats: Perso
     );
 
     return onSnapshot(q, (snap) => {
+        if (!auth.currentUser) return;
         const chats = snap.docs.map(d => ({ ...d.data(), id: d.id } as PersonalChat));
         callback(chats);
+    }, (error) => {
+        if (error.code === 'permission-denied') return;
+        console.error('[Firestore] Personal Chats Subscription Error:', error);
     });
 }
 

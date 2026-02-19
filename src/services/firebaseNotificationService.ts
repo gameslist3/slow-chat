@@ -60,9 +60,11 @@ export const subscribeToNotifications = (uid: string, callback: (notifications: 
     );
 
     return onSnapshot(q, (snap) => {
+        if (!auth.currentUser) return;
         const notices = snap.docs.map(doc => ({ ...doc.data(), id: doc.id } as Notification));
         callback(notices);
     }, (error) => {
+        if (error.code === 'permission-denied') return;
         console.error("Critical: Notification sync failed", error);
     });
 };

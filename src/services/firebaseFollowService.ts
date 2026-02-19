@@ -301,6 +301,7 @@ export const getPendingRequests = (callback: (requests: FollowRequest[]) => void
     );
 
     return onSnapshot(q, (snap) => {
+        if (!auth.currentUser) return;
         const reqs = snap.docs.map(doc => ({ ...doc.data(), id: doc.id } as FollowRequest));
 
         // Filter: Pending OR (Accepted/Declined AND updatedAt within 10 mins)
@@ -313,6 +314,9 @@ export const getPendingRequests = (callback: (requests: FollowRequest[]) => void
         });
 
         callback(filtered);
+    }, (error) => {
+        if (error.code === 'permission-denied') return;
+        console.error('[Firestore] Pending Requests Subscription Error:', error);
     });
 };
 /**
@@ -371,13 +375,21 @@ export const subscribeToFriends = (userId: string, callback: (friends: any[]) =>
     };
 
     const unsub1 = onSnapshot(q1, (snap) => {
+        if (!auth.currentUser) return;
         results1 = snap.docs;
         update();
+    }, (error) => {
+        if (error.code === 'permission-denied') return;
+        console.error('[Firestore] Friends Subscription Error 1:', error);
     });
 
     const unsub2 = onSnapshot(q2, (snap) => {
+        if (!auth.currentUser) return;
         results2 = snap.docs;
         update();
+    }, (error) => {
+        if (error.code === 'permission-denied') return;
+        console.error('[Firestore] Friends Subscription Error 2:', error);
     });
 
     return () => {
