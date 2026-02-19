@@ -249,7 +249,10 @@ const AuthenticatedSection = () => {
                                     <motion.div key="create" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
                                         <CreateGroup
                                             onGroupCreated={(id) => { handleSelectGroup(id); setShowCreateGroup(false); }}
-                                            onBack={() => setShowCreateGroup(false)}
+                                            onBack={() => {
+                                                setShowCreateGroup(false);
+                                                if (!showDiscovery) setActiveTab('home');
+                                            }}
                                         />
                                     </motion.div>
                                 ) : showDiscovery ? (
@@ -262,7 +265,10 @@ const AuthenticatedSection = () => {
                                             onSelectGroup={handleSelectGroup}
                                             joinedGroupIds={user?.joinedGroups || []}
                                             onCreateGroup={() => setShowCreateGroup(true)}
-                                            onBack={() => setShowDiscovery(false)}
+                                            onBack={() => {
+                                                setShowDiscovery(false);
+                                                setActiveTab('home');
+                                            }}
                                         />
                                     </motion.div>
                                 ) : (

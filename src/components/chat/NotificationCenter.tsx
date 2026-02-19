@@ -145,9 +145,8 @@ export const NotificationList: React.FC<{
 
     // Process notifications only on mount
     useEffect(() => {
-        if (onMarkAllRead) {
-            onMarkAllRead();
-        }
+        // Removed redundant onMarkAllRead() here to prevent race conditions
+        // App.tsx handles the one-time markAllAsRead when activeTab becomes 'inbox'
     }, []);
 
     // Logic for processing notifications
@@ -197,8 +196,11 @@ export const NotificationList: React.FC<{
 
     const recentActivityFilter = (n: Notification) => {
         if (n.type === 'follow_request') return false;
-        // Show if unread OR if it was unread when the panel opened during THIS mount session
-        return !n.read || (sessionInitialIds?.has(n.id) ?? false);
+        // Show if unread OR if it was among the last 20 notifications
+        // This ensures read context remains visible even after auto-marking
+        const isUnread = !n.read || (sessionInitialIds?.has(n.id) ?? false);
+        const index = notifications.indexOf(n);
+        return isUnread || index < 20;
     };
 
     return (
