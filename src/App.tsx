@@ -139,6 +139,12 @@ const AuthenticatedSection = () => {
         return () => unsubscribe();
     }, [user?.id]);
 
+    useEffect(() => {
+        if (activeTab === 'inbox' && user?.id) {
+            markAllAsRead(user.id);
+        }
+    }, [activeTab, user?.id]);
+
     const handleSelectGroup = (id: string) => {
         setActiveId(id);
         setIsPersonal(false);

@@ -13,9 +13,9 @@ service cloud.firestore {
     
     // Users collection
     match /users/{userId} {
-      allow read: if isSignedIn();
-      allow create: if isSignedIn();
-      allow update, delete: if isOwner(userId);
+      allow read, create: if isSignedIn();
+      allow update: if isSignedIn(); // Allow bidirectional connection updates
+      allow delete: if isOwner(userId);
     }
     
     // Groups collection

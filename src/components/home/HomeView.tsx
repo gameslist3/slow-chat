@@ -85,6 +85,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                                 group={group}
                                 index={i}
                                 onClick={() => onSelectGroup(group.id)}
+                                userId={user?.id}
                             />
                         ))}
                     </div>
@@ -100,14 +101,16 @@ const onGoBrowse = () => { }; // Placeholder if not passed, but effectively just
 const GroupItem = ({
     group,
     index,
-    onClick
+    onClick,
+    userId
 }: {
     group: Group;
     index: number;
     onClick: () => void;
+    userId?: string;
 }) => {
     const isGapesTeam = group.name === 'Gapes Team' || group.name === 'System Intelligence';
-    const unreadCount = group.unreadCount || 0;
+    const unreadCount = userId ? (group.unreadCounts?.[userId] || 0) : 0;
 
     return (
         <motion.button

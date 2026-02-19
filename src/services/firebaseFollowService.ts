@@ -104,6 +104,16 @@ export const acceptFollowRequest = async (requestId: string): Promise<void> => {
             updatedAt: Date.now()
         });
 
+        transaction.update(fromUserRef, {
+            following: arrayUnion(data.toId),
+            followers: arrayUnion(data.toId)
+        });
+
+        transaction.update(toUserRef, {
+            following: arrayUnion(data.fromId),
+            followers: arrayUnion(data.fromId)
+        });
+
         const chatIds = [data.fromId, data.toId].sort();
         const chatId = chatIds.join('_');
         const chatRef = doc(db, 'personal_chats', chatId);
@@ -220,7 +230,7 @@ export const unfollowUser = async (otherUserId: string): Promise<void> => {
 
         batch.delete(chatRef);
 
-        // 4. Cleanup Notifications (For current user)
+        // 4. Cleanup Notifications (ONLY for current user to avoid permission errors)
         const notificationsRef = collection(db, 'notifications');
         const n1 = query(notificationsRef, where('userId', '==', currentUser.uid), where('groupId', '==', otherUserId));
         const n2 = query(notificationsRef, where('userId', '==', currentUser.uid), where('groupId', '==', chatId));
@@ -229,12 +239,8 @@ export const unfollowUser = async (otherUserId: string): Promise<void> => {
         sn1.docs.forEach(d => batch.delete(d.ref));
         sn2.docs.forEach(d => batch.delete(d.ref));
 
-        // 4.5 Cleanup Notifications (For Peer)
-        const p1 = query(notificationsRef, where('userId', '==', otherUserId), where('groupId', '==', currentUser.uid));
-        const p2 = query(notificationsRef, where('userId', '==', otherUserId), where('groupId', '==', chatId));
-        const [sp1, sp2] = await Promise.all([getDocs(p1), getDocs(p2)]);
-        sp1.docs.forEach(d => batch.delete(d.ref));
-        sp2.docs.forEach(d => batch.delete(d.ref));
+        // Note: Peer notifications are not deleted here because of Firestore security rules (can't delete someone else's document).
+        // They will remain as historical logs or be cleared when the peer marks them as read.
 
         await batch.commit();
 

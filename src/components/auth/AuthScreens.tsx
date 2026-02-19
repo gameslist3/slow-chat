@@ -18,7 +18,7 @@ export const WelcomeScreen = ({ onSignIn, onSignUp }: { onSignIn: () => void, on
                 transition={{ duration: 1, ease: "easeOut" }}
                 className="mb-8"
             >
-                <Logo className="w-96 h-auto text-white" />
+                <Logo className="w-48 md:w-96 h-auto text-white" />
             </motion.div>
 
             {/* Tagline */}
