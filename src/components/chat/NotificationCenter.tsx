@@ -168,9 +168,9 @@ export const NotificationList: React.FC<{
 
     const recentActivityFilter = (n: Notification) => {
         if (n.type === 'follow_request') return false;
-        const isUnread = !n.read || (sessionInitialIds?.has(n.id) ?? false);
-        return isUnread;
+        return true; // show all notifications
     };
+
 
     console.log("[NotificationList] Filtered counts:", {
         total: notifications.length,

@@ -192,7 +192,7 @@ export const cancelFollowRequest = async (toUserId: string): Promise<void> => {
 };
 
 /**
- * Unfollow a user (Redo for Phase 23)
+ * Unfollow a user (Redo for Phase 24)
  * Absolute bidirectional social graph pruning and atomic chat termination.
  */
 export const unfollowUser = async (otherUserId: string): Promise<void> => {
