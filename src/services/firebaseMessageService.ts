@@ -337,22 +337,29 @@ export function subscribeToPersonalChats(userId: string, callback: (chats: Perso
 }
 
 /**
- * Delete a personal chat permanently
+ * Delete a personal chat permanently (Redo for Phase 22)
+ * Removes all messages and the chat document itself instantly.
  */
 export async function deletePersonalChat(chatId: string): Promise<void> {
+    console.log("Deleting chat:", chatId);
     try {
         const messagesRef = collection(db, `personal_chats/${chatId}/messages`);
         const snap = await getDocs(messagesRef);
+
         const batch = writeBatch(db);
 
-        // Delete all messages
-        snap.docs.forEach(d => batch.delete(d.ref));
+        // 1. Delete all messages first for a clean wipe
+        snap.docs.forEach(d => {
+            batch.delete(d.ref);
+        });
 
-        // Delete the chat document
-        batch.delete(doc(db, 'personal_chats', chatId));
+        // 2. Delete the chat parent document
+        const chatRef = doc(db, 'personal_chats', chatId);
+        batch.delete(chatRef);
 
+        // 3. Commit atomically
         await batch.commit();
-        console.log('[Firestore] Personal chat deleted:', chatId);
+        console.log('[Firestore] Chat and messages deleted successfully:', chatId);
     } catch (error) {
         console.error('[Firestore] DeletePersonalChat Error:', error);
         throw error;

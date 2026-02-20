@@ -192,17 +192,20 @@ export const cancelFollowRequest = async (toUserId: string): Promise<void> => {
 };
 
 /**
- * Unfollow a user (Delete connection and chat)
+ * Unfollow a user (Redo for Phase 22)
+ * Removes connection from social graph and wipes the chat instantly.
  */
 export const unfollowUser = async (otherUserId: string): Promise<void> => {
     const currentUser = auth.currentUser;
     if (!currentUser) throw new Error("Authentication required for protocol termination.");
 
+    console.log("Unfollow + delete chat running");
+
     try {
         const batch = writeBatch(db);
         const requestsRef = collection(db, 'follow_requests');
 
-        // 0. Prune Social Graph (Bidirectional)
+        // 1. Prune Social Graph (Bidirectional arrayRemove)
         const userRef = doc(db, 'users', currentUser.uid);
         const otherRef = doc(db, 'users', otherUserId);
 
@@ -215,19 +218,17 @@ export const unfollowUser = async (otherUserId: string): Promise<void> => {
             followers: arrayRemove(currentUser.uid)
         });
 
-        // 1. Find all active or accepted connections between these users
+        // 2. Clear Active Connections (Requests)
         const q1 = query(requestsRef, where('fromId', '==', currentUser.uid), where('toId', '==', otherUserId));
         const q2 = query(requestsRef, where('fromId', '==', otherUserId), where('toId', '==', currentUser.uid));
-
         const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
 
-        // 2. Mark all as 'declined' with fresh timestamp to trigger the cooldown
         const now = Date.now();
         [...snap1.docs, ...snap2.docs].forEach(d => {
             batch.update(d.ref, {
                 status: 'declined',
                 updatedAt: now,
-                timestamp: now
+                timestamp: now // Cooldown trigger
             });
         });
 
@@ -236,14 +237,15 @@ export const unfollowUser = async (otherUserId: string): Promise<void> => {
         const chatId = chatIds.join('_');
         const chatRef = doc(db, 'personal_chats', chatId);
 
-        // 3.1 Cleanup messages subcollection (Done via batch for consistency)
+        // 3.1 Cleanup messages subcollection first
         const messagesRef = collection(db, `personal_chats/${chatId}/messages`);
         const messagesSnap = await getDocs(messagesRef);
         messagesSnap.docs.forEach(d => batch.delete(d.ref));
 
+        // 3.2 Delete the chat parent doc
         batch.delete(chatRef);
 
-        // 4. Cleanup Notifications
+        // 4. Cleanup Notifications (for currentUser)
         const notificationsRef = collection(db, 'notifications');
         const n1 = query(notificationsRef, where('userId', '==', currentUser.uid), where('groupId', '==', otherUserId));
         const n2 = query(notificationsRef, where('userId', '==', currentUser.uid), where('groupId', '==', chatId));
@@ -252,18 +254,12 @@ export const unfollowUser = async (otherUserId: string): Promise<void> => {
         sn1.docs.forEach(d => batch.delete(d.ref));
         sn2.docs.forEach(d => batch.delete(d.ref));
 
+        // 5. Commit atomic cleanup
         await batch.commit();
-
-        // 5. Notify the other user (Optional)
-        await createNotification(otherUserId, {
-            type: 'system',
-            senderName: 'System',
-            text: 'A connection protocol has been terminated.',
-            groupId: 'system'
-        });
+        console.log('[FollowService] Unfollow and chat deletion complete.');
 
     } catch (error) {
-        console.error("[FollowService] Termination Error:", error);
+        console.error("[FollowService] Unfollow Termination Error:", error);
         throw error;
     }
 };
@@ -290,7 +286,6 @@ export const getFollowStatus = async (toUserId: string): Promise<'none' | 'pendi
 
         const data = doc.data();
         if (data.status === 'declined') {
-            // Check if still in cooldown (Mutual check)
             // Check if still in cooldown (Mutual check)
             const diff = (Date.now() - (data.timestamp || 0)) / 1000 / 60;
             if (diff < 1440) return 'cooldown';
@@ -335,6 +330,7 @@ export const getPendingRequests = (callback: (requests: FollowRequest[]) => void
         console.error('[Firestore] Pending Requests Subscription Error:', error);
     });
 };
+
 /**
  * Subscribe to mutual friends (accepted follow requests)
  */
@@ -424,14 +420,11 @@ export const getFriends = async (userId: string): Promise<any[]> => {
 
     const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
 
-    const friends: any[] = [];
-
-    // I'll use a Map to avoid duplicates and handle user details
     const friendMap = new Map();
 
     for (const d of snap1.docs) {
         const data = d.data();
-        friendMap.set(data.toId, { id: data.toId, username: '...' }); // Needs detail fetching
+        friendMap.set(data.toId, { id: data.toId, username: '...' });
     }
     for (const d of snap2.docs) {
         const data = d.data();

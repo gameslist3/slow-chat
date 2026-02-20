@@ -30,7 +30,8 @@ export const createNotification = async (
     }
 ): Promise<void> => {
     // Check if group is muted by user (if applicable)
-    if (data.groupId) {
+    // CRITICAL: Friend requests bypass mute checks
+    if (data.groupId && data.type !== 'follow_request') {
         const userDoc = await getDoc(doc(db, 'users', userId));
         if (userDoc.exists()) {
             const mutedGroups = userDoc.data().mutedGroups || [];
@@ -48,10 +49,12 @@ export const createNotification = async (
 };
 
 /**
- * Subscribe to notifications for the current user
+ * Subscribe to notifications with diagnostic logging
  */
 export const subscribeToNotifications = (uid: string, callback: (notifications: Notification[]) => void) => {
     if (!uid) return () => { };
+
+    console.log("[NotificationService] Subscribing for UID:", uid);
 
     const q = query(collection(db, 'notifications'),
         where('userId', '==', uid),
@@ -62,10 +65,10 @@ export const subscribeToNotifications = (uid: string, callback: (notifications: 
     return onSnapshot(q, (snap) => {
         if (!auth.currentUser) return;
         const notices = snap.docs.map(doc => ({ ...doc.data(), id: doc.id } as Notification));
+        console.log(`[NotificationService] Sync complete. Count: ${notices.length}`);
         callback(notices);
     }, (error) => {
-        if (error.code === 'permission-denied') return;
-        console.error("Critical: Notification sync failed", error);
+        console.error("Critical: Notification sync failed. Check Firestore Indexes.", error);
     });
 };
 

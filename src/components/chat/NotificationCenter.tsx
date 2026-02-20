@@ -33,8 +33,6 @@ const FollowRequestItem = ({ note, onSelectPersonal }: { note: Notification; onS
 
     const handleAction = async (action: 'accept' | 'decline') => {
         const newStatus = action === 'accept' ? 'accepted' : 'declined';
-
-        // Optimistic UI
         setActionStatus(newStatus);
         setLoading(false);
 
@@ -64,10 +62,7 @@ const FollowRequestItem = ({ note, onSelectPersonal }: { note: Notification; onS
                     toast(`Request declined`, 'info');
                 }
             }
-
-            // Hide after 2 seconds
             setTimeout(() => setHidden(true), 2000);
-
         } catch (err: any) {
             console.error(err);
         }
@@ -92,7 +87,6 @@ const FollowRequestItem = ({ note, onSelectPersonal }: { note: Notification; onS
             className={`p-5 md:p-6 rounded-[2rem] bg-secondary/5 border border-secondary/20 relative overflow-hidden group shadow-xl ${actionStatus === 'declined' ? 'opacity-50 grayscale pointer-events-none' : ''}`}
         >
             <div className="absolute inset-0 bg-gradient-to-br from-secondary/10 to-transparent opacity-30 transition-opacity group-hover:opacity-50" />
-
             <div className="flex gap-4 md:gap-5 items-center relative z-10 text-left">
                 <div className="w-12 h-12 md:w-14 md:h-14 bg-secondary text-black rounded-2xl flex items-center justify-center font-black text-xl shadow-lg border border-white/10 group-hover:scale-105 transition-transform">
                     {note.senderName.slice(0, 2).toUpperCase()}
@@ -112,7 +106,6 @@ const FollowRequestItem = ({ note, onSelectPersonal }: { note: Notification; onS
                     </button>
                 )}
             </div>
-
             {actionStatus === 'pending' && (
                 <div className="flex gap-3 relative z-10 mt-6">
                     <button
@@ -143,63 +136,47 @@ export const NotificationList: React.FC<{
 
     const user = auth.currentUser;
 
-    // Process notifications only on mount
-    useEffect(() => {
-        // Removed redundant onMarkAllRead() here to prevent race conditions
-        // App.tsx handles the one-time markAllAsRead when activeTab becomes 'inbox'
-    }, []);
-
-    // Logic for processing notifications
     const isPersonalNote = (note: Notification): boolean => {
         const type = note.type;
         const gId = note.groupId || '';
-        // If it's a message/reply and groupId contains underscore, it's personal
         if (type === 'message' || type === 'reply') return gId.includes('_');
         return type === 'follow_accept';
     };
 
     const handleSelect = async (note: Notification) => {
         if (!note.read) await markAsRead(note.id);
-
-        if (note.senderName === 'System' || note.type === 'follow_request') {
-            return;
-        }
-
+        if (note.senderName === 'System' || note.type === 'follow_request') return;
         const chatId = note.groupId;
-        if (chatId) {
-            onSelectChat(chatId, isPersonalNote(note), note.messageId);
-        }
+        if (chatId) onSelectChat(chatId, isPersonalNote(note), note.messageId);
     };
-
-    const tenMins = 10 * 60 * 1000;
-    const now = Date.now();
 
     const [sessionInitialIds, setSessionInitialIds] = useState<Set<string> | null>(null);
 
-    // Capture initial unread IDs when notifications first arrive
     useEffect(() => {
         if (!sessionInitialIds && notifications.length > 0) {
             const unread = notifications.filter(n => !n.read).map(n => n.id);
+            console.log("[NotificationList] Capturing initial unread IDs:", unread);
             setSessionInitialIds(new Set(unread));
         }
     }, [notifications, sessionInitialIds]);
 
     const followReqFilter = (n: Notification) => {
         if (n.type !== 'follow_request') return false;
-        // Keep visible UNTIL actioned (no followStatus or status is 'pending')
-        // AND not read? No, user says "until accepted or declined"
         const isActioned = !!n.followStatus && n.followStatus !== 'pending';
         return !isActioned;
     };
 
     const recentActivityFilter = (n: Notification) => {
         if (n.type === 'follow_request') return false;
-        // Show if:
-        // 1. Unread
-        // 2. Was unread when we opened the panel (session context)
         const isUnread = !n.read || (sessionInitialIds?.has(n.id) ?? false);
         return isUnread;
     };
+
+    console.log("[NotificationList] Filtered counts:", {
+        total: notifications.length,
+        pendingReqs: notifications.filter(followReqFilter).length,
+        recentActivity: notifications.filter(recentActivityFilter).length
+    });
 
     return (
         <div className="flex flex-col h-full bg-background/50 pt-8 md:pt-0">
@@ -212,7 +189,6 @@ export const NotificationList: React.FC<{
                         </div>
                     ) : (
                         <div className="space-y-10">
-                            {/* Pending Requests */}
                             {notifications.filter(followReqFilter).length > 0 && (
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between px-2 text-[9px] font-bold tracking-widest text-secondary opacity-60 uppercase">
@@ -227,7 +203,6 @@ export const NotificationList: React.FC<{
                                 </div>
                             )}
 
-                            {/* Recent Activity */}
                             <div className="space-y-4">
                                 {notifications.filter(recentActivityFilter).length > 0 && (
                                     <div className="px-2 text-[9px] font-bold tracking-widest text-primary opacity-40 uppercase">
@@ -243,26 +218,12 @@ export const NotificationList: React.FC<{
                                             initial={{ opacity: 0, y: 20 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             exit={{ opacity: 0, scale: 0.95 }}
-                                            transition={{
-                                                delay: index * 0.05,
-                                                type: 'spring',
-                                                damping: 20,
-                                                stiffness: 100
-                                            }}
+                                            transition={{ delay: index * 0.05, type: 'spring', damping: 20, stiffness: 100 }}
                                             onClick={() => handleSelect(note)}
-                                            className={`
-                                                group relative p-4 rounded-3xl transition-all cursor-pointer border
-                                                ${note.read
-                                                    ? 'opacity-40 grayscale bg-foreground/5 border-transparent'
-                                                    : 'bg-foreground/5 border-white/5 hover:border-primary/40 hover:bg-primary/5'}
-                                            `}
+                                            className={`group relative p-4 rounded-3xl transition-all cursor-pointer border ${note.read ? 'opacity-40 grayscale bg-foreground/5 border-transparent' : 'bg-foreground/5 border-white/5 hover:border-primary/40 hover:bg-primary/5'}`}
                                         >
                                             <div className="flex gap-4 items-start text-left">
-                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-transform group-hover:scale-110
-                                                    ${note.type === 'mention' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' :
-                                                        note.type === 'reply' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
-                                                            'bg-foreground/5 text-muted-foreground border-white/5'}
-                                                `}>
+                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-transform group-hover:scale-110 ${note.type === 'mention' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' : note.type === 'reply' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : 'bg-foreground/5 text-muted-foreground border-white/5'}`}>
                                                     <IconForType type={note.type} />
                                                 </div>
                                                 <div className="flex-1 min-w-0">
@@ -270,9 +231,7 @@ export const NotificationList: React.FC<{
                                                         <span className="font-bold text-xs tracking-tight text-foreground/90">{note.senderName}</span>
                                                         <span className="text-[8px] font-bold opacity-30 tracking-widest uppercase">{new Date(note.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                                     </div>
-                                                    <p className="text-xs font-medium line-clamp-2 text-muted-foreground leading-relaxed group-hover:text-foreground transition-colors text-left">
-                                                        {note.text}
-                                                    </p>
+                                                    <p className="text-xs font-medium line-clamp-2 text-muted-foreground leading-relaxed group-hover:text-foreground transition-colors text-left">{note.text}</p>
                                                 </div>
                                             </div>
                                             {!note.read && (
@@ -292,14 +251,11 @@ export const NotificationList: React.FC<{
 export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose, onSelectChat }) => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const containerRef = React.useRef<HTMLDivElement>(null);
-    const { user } = useAuth(); // Import useAuth hook
+    const { user } = useAuth();
 
-    // Close on click outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-                onClose();
-            }
+            if (containerRef.current && !containerRef.current.contains(event.target as Node)) onClose();
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -316,11 +272,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose,
             <div className="flex items-center justify-end p-2 md:hidden">
                 <button onClick={onClose} className="p-2"><X className="w-6 h-6" /></button>
             </div>
-            <NotificationList
-                notifications={notifications}
-                onSelectChat={onSelectChat}
-                onMarkAllRead={() => user?.id && markAllAsRead(user.id)}
-            />
+            <NotificationList notifications={notifications} onSelectChat={onSelectChat} onMarkAllRead={() => user?.id && markAllAsRead(user.id)} />
         </div>
     );
 };

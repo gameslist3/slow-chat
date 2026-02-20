@@ -144,6 +144,7 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
                                                 if (!otherId) return;
                                                 if (confirm("Terminate connection and delete all data?")) {
                                                     try {
+                                                        console.log("[UI] Triggering Unfollow for:", otherId);
                                                         await unfollowUser(otherId);
                                                         toast("Connection terminated", "success");
                                                         onLeave?.();
@@ -159,7 +160,13 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
                                         </button>
                                     )}
 
-                                    <button onClick={handleLeave} className="w-full h-12 flex items-center gap-3 px-4 text-xs font-bold uppercase tracking-wider text-rose-400 hover:bg-rose-500/10 transition-all">
+                                    <button
+                                        onClick={() => {
+                                            console.log("[UI] Triggering Delete Chat/Leave Group for:", groupId);
+                                            handleLeave();
+                                        }}
+                                        className="w-full h-12 flex items-center gap-3 px-4 text-xs font-bold uppercase tracking-wider text-rose-400 hover:bg-rose-500/10 transition-all font-black"
+                                    >
                                         <LogOut className="w-4 h-4" />
                                         {isPersonal ? 'Delete Chat' : 'Leave Group'}
                                     </button>
