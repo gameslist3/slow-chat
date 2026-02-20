@@ -55,9 +55,11 @@ export const FriendsList: React.FC<{ onSelectFriend?: (friendId: string) => void
         setRequests(prev => prev.filter(r => r.id !== reqId));
         try {
             await acceptFollowRequest(reqId);
+            toast("Connection established", "success");
         } catch (error) {
             console.error("Failed to accept request:", error);
             setRequests(originalRequests);
+            toast("Failed to accept connection", "error");
         }
     };
 
@@ -66,9 +68,11 @@ export const FriendsList: React.FC<{ onSelectFriend?: (friendId: string) => void
         setRequests(prev => prev.filter(r => r.id !== reqId));
         try {
             await declineFollowRequest(reqId);
+            toast("Request declined", "info");
         } catch (error) {
             console.error("Failed to decline request:", error);
             setRequests(originalRequests);
+            toast("Failed to decline request", "error");
         }
     };
 

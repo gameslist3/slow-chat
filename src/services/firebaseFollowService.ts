@@ -25,15 +25,19 @@ import { createNotification } from './firebaseNotificationService';
  * Send a follow request
  */
 export const sendFollowRequest = async (toUserId: string, toUsername: string): Promise<void> => {
-    const fromUser = auth.currentUser;
-    if (!fromUser) throw new Error("Auth required");
-    if (fromUser.uid === toUserId) throw new Error("You cannot follow yourself");
+    const fromUserAuth = auth.currentUser;
+    if (!fromUserAuth) throw new Error("Auth required");
+    if (fromUserAuth.uid === toUserId) throw new Error("You cannot follow yourself");
+
+    // Fetch sender's actual data from Firestore to avoid 'Someone' issues
+    const senderDoc = await getDoc(doc(db, 'users', fromUserAuth.uid));
+    const senderName = senderDoc.exists() ? senderDoc.data().username : (fromUserAuth.displayName || 'User');
 
     const requestsRef = collection(db, 'follow_requests');
 
     // Check if any request exists in either direction
-    const q1 = query(requestsRef, where('fromId', '==', fromUser.uid), where('toId', '==', toUserId));
-    const q2 = query(requestsRef, where('fromId', '==', toUserId), where('toId', '==', fromUser.uid));
+    const q1 = query(requestsRef, where('fromId', '==', fromUserAuth.uid), where('toId', '==', toUserId));
+    const q2 = query(requestsRef, where('fromId', '==', toUserId), where('toId', '==', fromUserAuth.uid));
 
     const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
 
@@ -45,32 +49,34 @@ export const sendFollowRequest = async (toUserId: string, toUsername: string): P
         throw new Error("A connection protocol is already active between these users.");
     }
 
-    // Check for Cooldown: If the last request between these users was declined < 5 mins ago (Either direction)
+    // Check for Cooldown: If the last request between these users was declined < 24 hours ago (Either direction)
     const allDocs = [...snap1.docs, ...snap2.docs].sort((a, b) => (b.data().timestamp || 0) - (a.data().timestamp || 0));
     const latestDeclined = allDocs.find(d => d.data().status === 'declined');
 
     if (latestDeclined) {
         const lastDeclinedTime = latestDeclined.data().timestamp;
         const diff = (Date.now() - lastDeclinedTime) / 1000 / 60; // in minutes
-        if (diff < 1440) {
-            const waitHours = Math.ceil((1440 - diff) / 60);
-            throw new Error(`Connection link unstable. Retry available in ${waitHours} hour${waitHours > 1 ? 's' : ''}.`);
+        if (diff < 1440) { // 24 hours = 1440 minutes
+            const remainingMins = 1440 - diff;
+            const waitHours = Math.ceil(remainingMins / 60);
+            throw new Error(`Link severed. Re-initialization available in ${waitHours} hour${waitHours > 1 ? 's' : ''}.`);
         }
     }
 
     await addDoc(requestsRef, {
-        fromId: fromUser.uid,
-        fromUsername: fromUser.displayName || 'Someone',
+        fromId: fromUserAuth.uid,
+        fromUsername: senderName,
         toId: toUserId,
+        toUsername: toUsername,
         status: 'pending',
         timestamp: Date.now()
     });
 
     await createNotification(toUserId, {
         type: 'follow_request',
-        senderName: fromUser.displayName || 'Someone',
+        senderName: senderName,
         text: 'wants to connect with you.',
-        groupId: fromUser.uid // Store requesterId
+        groupId: fromUserAuth.uid // Store requesterId
     });
 };
 
@@ -297,6 +303,7 @@ export const getPendingRequests = (callback: (requests: FollowRequest[]) => void
 
     const q = query(collection(db, 'follow_requests'),
         where('toId', '==', user.uid),
+        where('status', '==', 'pending'), // STRICTLY PENDING ONLY
         orderBy('timestamp', 'desc'),
         limit(20)
     );
@@ -304,16 +311,7 @@ export const getPendingRequests = (callback: (requests: FollowRequest[]) => void
     return onSnapshot(q, (snap) => {
         if (!auth.currentUser) return;
         const reqs = snap.docs.map(doc => ({ ...doc.data(), id: doc.id } as FollowRequest));
-
-        const tenMins = 10 * 60 * 1000;
-        const now = Date.now();
-        const filtered = reqs.filter(r => {
-            if (r.status === 'pending') return true;
-            if (r.updatedAt && (now - r.updatedAt < tenMins)) return true;
-            return false;
-        });
-
-        callback(filtered);
+        callback(reqs);
     }, (error) => {
         if (error.code === 'permission-denied') return;
         console.error('[Firestore] Pending Requests Subscription Error:', error);

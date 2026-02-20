@@ -163,12 +163,12 @@ export const NotificationList: React.FC<{
 
     const followReqFilter = (n: Notification) => {
         if (n.type !== 'follow_request') return false;
-        // Show if unread
-        if (!n.read) return true;
-        // Show if it was actioned (accepted/declined) but NOT yet read? 
-        // Actually, the user wants 'Mark all read' to clear them.
-        // So we only show if it has a followStatus and is NOT read.
-        return false;
+
+        // Persistent until actioned (accepted or declined)
+        // Note: we can check n.followStatus if provided by markAsRead, 
+        // but it's better to check if it's still 'pending' or missing (default pending)
+        const status = n.followStatus || 'pending';
+        return status === 'pending';
     };
 
     const recentActivityFilter = (n: Notification) => {
@@ -208,7 +208,7 @@ export const NotificationList: React.FC<{
                 <AnimatePresence mode="popLayout">
                     {notifications.filter(followReqFilter).length === 0 && notifications.filter(recentActivityFilter).length === 0 ? (
                         <div className="py-20 text-center opacity-20 flex flex-col items-center gap-6">
-                            <div className="text-7xl drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]">🔔</div>
+                            <RotateCw className="w-12 h-12 animate-pulse" />
                             <span className="text-[10px] font-bold tracking-widest uppercase">All caught up</span>
                         </div>
                     ) : (
