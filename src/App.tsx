@@ -156,20 +156,8 @@ const AuthenticatedSection = () => {
         }
     }, [activeTab, user?.id]);
 
-    // NEW: Auto-navigation when a personal chat is added (Signal for accepted request)
-    const prevChatCount = React.useRef(-1);
-    useEffect(() => {
-        // Only trigger if we already had a count (not first load) AND it increased
-        if (prevChatCount.current !== -1 && personalChats.length > prevChatCount.current) {
-            // A new chat appeared! Find it and navigate if it's the latest
-            const newChat = personalChats[0]; // Assuming order is desc by timestamp
-            if (newChat && activeTab !== 'chat') {
-                handleSelectPersonal(newChat.id);
-                toast(`Secure connection with ${newChat.usernames?.[Object.keys(newChat.usernames).find(id => id !== user?.id) || ''] || 'User'} established.`, 'success');
-            }
-        }
-        prevChatCount.current = personalChats.length;
-    }, [personalChats, activeTab, user?.id]);
+    // Navigation logic removed to ensure users land on Home screen after login/refresh
+    // Active chat should only be selected by manual user interaction.
 
     const handleSelectGroup = (id: string) => {
         setActiveId(id);

@@ -161,12 +161,31 @@ export const NotificationList: React.FC<{
         if (chatId) onSelectChat(chatId, isPersonalNote(note), note.messageId);
     };
 
+    const [now, setNow] = useState(Date.now());
+
+    // Force periodic re-render to handle real-time 24h expiry
+    useEffect(() => {
+        const interval = setInterval(() => setNow(Date.now()), 60000); // Tick every minute
+        return () => clearInterval(interval);
+    }, []);
+
+    const WINDOW_24H = 24 * 60 * 60 * 1000;
+
     const requests = notifications
-        .filter(n => n.type === 'follow_request' && (n.followStatus === 'pending' || !n.followStatus))
+        .filter(n => {
+            if (n.type !== 'follow_request') return false;
+            const status = n.followStatus || 'pending';
+            // Only show pending friend requests
+            return status === 'pending';
+        })
         .sort((a, b) => b.timestamp - a.timestamp);
 
     const activity = notifications
-        .filter(n => n.type !== 'follow_request')
+        .filter(n => {
+            if (n.type === 'follow_request') return false;
+            // All other activity hides after 24h
+            return (now - n.timestamp) < WINDOW_24H;
+        })
         .sort((a, b) => b.timestamp - a.timestamp);
 
     return (
