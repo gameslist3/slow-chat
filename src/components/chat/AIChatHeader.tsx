@@ -59,14 +59,10 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
     };
 
     const handleLeave = async () => {
-        if (!user) return;
+        if (!user || isPersonal) return;
         try {
-            if (isPersonal) {
-                await deletePersonalChat(groupId);
-            } else {
-                await leaveGroup(groupId, user.id);
-            }
-            toast("Connection terminated", "success");
+            await leaveGroup(groupId, user.id);
+            toast("Group left", "success");
             onLeave?.();
         } catch (error) {
             toast("Override failed", "error");
@@ -136,15 +132,14 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
                                     </button>
                                     <div className="h-px bg-white/5 mx-4 my-1" />
 
-                                    {isPersonal && (
+                                    {isPersonal ? (
                                         <button
                                             onClick={async () => {
                                                 if (!user) return;
                                                 const otherId = groupId.split('_').find(id => id !== user.id);
                                                 if (!otherId) return;
-                                                if (confirm("Terminate connection and delete all data?")) {
+                                                if (confirm("Terminate connection? This will permanently remove the chat.")) {
                                                     try {
-                                                        console.log("[UI] Triggering Unfollow for connection:", groupId);
                                                         await unfollowUser(otherId);
                                                         toast("Connection terminated", "success");
                                                         onLeave?.();
@@ -158,18 +153,15 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
                                             <Icon name="userMinus" className="w-4 h-4" />
                                             Unfollow
                                         </button>
+                                    ) : (
+                                        <button
+                                            onClick={handleLeave}
+                                            className="w-full h-12 flex items-center gap-3 px-4 text-xs font-bold uppercase tracking-wider text-rose-400 hover:bg-rose-500/10 transition-all font-black"
+                                        >
+                                            <LogOut className="w-4 h-4" />
+                                            Leave Group
+                                        </button>
                                     )}
-
-                                    <button
-                                        onClick={() => {
-                                            console.log("[UI] Triggering Delete Chat/Leave Group for ID:", groupId);
-                                            handleLeave();
-                                        }}
-                                        className="w-full h-12 flex items-center gap-3 px-4 text-xs font-bold uppercase tracking-wider text-rose-400 hover:bg-rose-500/10 transition-all font-black"
-                                    >
-                                        <LogOut className="w-4 h-4" />
-                                        {isPersonal ? 'Delete Chat' : 'Leave Group'}
-                                    </button>
                                 </motion.div>
                             )}
                         </AnimatePresence>

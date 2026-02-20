@@ -157,9 +157,10 @@ const AuthenticatedSection = () => {
     }, [activeTab, user?.id]);
 
     // NEW: Auto-navigation when a personal chat is added (Signal for accepted request)
-    const prevChatCount = React.useRef(personalChats.length);
+    const prevChatCount = React.useRef(-1);
     useEffect(() => {
-        if (personalChats.length > prevChatCount.current) {
+        // Only trigger if we already had a count (not first load) AND it increased
+        if (prevChatCount.current !== -1 && personalChats.length > prevChatCount.current) {
             // A new chat appeared! Find it and navigate if it's the latest
             const newChat = personalChats[0]; // Assuming order is desc by timestamp
             if (newChat && activeTab !== 'chat') {
@@ -168,7 +169,7 @@ const AuthenticatedSection = () => {
             }
         }
         prevChatCount.current = personalChats.length;
-    }, [personalChats, user?.id]);
+    }, [personalChats, activeTab, user?.id]);
 
     const handleSelectGroup = (id: string) => {
         setActiveId(id);

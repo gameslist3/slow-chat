@@ -1,14 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Icon } from '../common/Icon';
 import {
-    getPendingRequests,
     subscribeToFriends,
-    acceptFollowRequest,
-    declineFollowRequest,
     unfollowUser
 } from '../../services/firebaseFollowService';
 import { auth } from '../../config/firebase';
-import { FollowRequest } from '../../types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '../../context/ToastContext';
 
@@ -21,60 +17,19 @@ interface Friend {
 
 export const FriendsList: React.FC<{ onSelectFriend?: (friendId: string) => void }> = ({ onSelectFriend }) => {
     const [friends, setFriends] = useState<Friend[]>([]);
-    const [requests, setRequests] = useState<FollowRequest[]>([]);
-    const [showRequests, setShowRequests] = useState(false);
-    const [loading, setLoading] = useState(true);
     const currentUser = auth.currentUser;
     const { toast } = useToast();
 
     useEffect(() => {
         if (!currentUser) return;
 
-        let unsubFriends: (() => void) | null = null;
-        let unsubRequests: (() => void) | null = null;
-
         // Subscribe to friends
-        unsubFriends = subscribeToFriends(currentUser.uid, (data) => {
+        const unsubFriends = subscribeToFriends(currentUser.uid, (data) => {
             setFriends(data);
-            setLoading(false);
         });
 
-        // Subscribe to pending requests
-        unsubRequests = getPendingRequests((data) => {
-            setRequests(data);
-        });
-
-        return () => {
-            if (unsubFriends) unsubFriends();
-            if (unsubRequests) unsubRequests();
-        };
+        return () => unsubFriends();
     }, [currentUser]);
-
-    const handleAccept = async (reqId: string) => {
-        const originalRequests = [...requests];
-        setRequests(prev => prev.filter(r => r.id !== reqId));
-        try {
-            await acceptFollowRequest(reqId);
-            toast("Connection established", "success");
-        } catch (error) {
-            console.error("Failed to accept request:", error);
-            setRequests(originalRequests);
-            toast("Failed to accept connection", "error");
-        }
-    };
-
-    const handleDecline = async (reqId: string) => {
-        const originalRequests = [...requests];
-        setRequests(prev => prev.filter(r => r.id !== reqId));
-        try {
-            await declineFollowRequest(reqId);
-            toast("Request declined", "info");
-        } catch (error) {
-            console.error("Failed to decline request:", error);
-            setRequests(originalRequests);
-            toast("Failed to decline request", "error");
-        }
-    };
 
     const handleUnfollowFriend = async (friendId: string, username: string) => {
         if (!confirm(`Are you sure you want to terminate connection with ${username}?`)) return;
@@ -107,7 +62,7 @@ export const FriendsList: React.FC<{ onSelectFriend?: (friendId: string) => void
             </header>
 
             {/* Content Section */}
-            <div className="flex-1 px-4 md:px-12 lg:px-20 pb-20 max-w-[1400px] mx-auto w-full space-y-12">
+            <div className="flex-1 px-4 md:px-12 lg:px-20 pb-20 max-w-[1400px] mx-auto w-full">
 
                 {/* Friends Grid */}
                 <div>
@@ -150,57 +105,6 @@ export const FriendsList: React.FC<{ onSelectFriend?: (friendId: string) => void
                         ))}
                     </div>
                 </div>
-
-                {/* Pending Requests Section (Below Grid) */}
-                {requests.length > 0 && (
-                    <section className="animate-in fade-in slide-in-from-bottom-8 duration-700">
-                        <div className="flex items-center gap-3 mb-6 px-2">
-                            <h3 className="text-xl font-bold text-[#E6ECFF]">Pending Requests</h3>
-                            <span className="px-2.5 py-0.5 rounded-full bg-[#3B82F6] text-white text-xs font-bold shadow-lg shadow-blue-900/20">
-                                {requests.length} New
-                            </span>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {requests.map((req) => (
-                                <div key={req.id} className="flex items-center justify-between p-4 rounded-[1.25rem] bg-[#152238]/40 border border-white/5 shadow-lg backdrop-blur-sm hover:bg-[#152238]/60 transition-colors">
-                                    {/* Left: Icon + Name */}
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 rounded-full bg-[#1E3A8A] flex items-center justify-center text-lg text-white font-bold border-2 border-[#152238] ring-2 ring-[#3B82F6]/20">
-                                            {req.fromUsername[0].toUpperCase()}
-                                        </div>
-                                        <div>
-                                            <h4 className="text-[#E6ECFF] font-bold text-base leading-tight mb-1">{req.fromUsername}</h4>
-                                            <span className="px-2 py-0.5 rounded-full bg-white/5 text-[10px] font-bold text-[#7C89A6] uppercase tracking-wide">
-                                                Request
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    {/* Right: Actions */}
-                                    <div className="flex flex-col items-end gap-3">
-                                        <span className="text-[#7C89A6] text-[10px] font-bold opacity-60">Now</span>
-                                        <div className="flex items-center gap-2">
-                                            <button
-                                                onClick={() => handleAccept(req.id!)}
-                                                className="px-4 py-1.5 rounded-full bg-[#10B981]/20 text-[#10B981] hover:bg-[#10B981] hover:text-white text-[10px] font-bold uppercase tracking-wider transition-all"
-                                            >
-                                                Accept
-                                            </button>
-                                            <button
-                                                onClick={() => handleDecline(req.id!)}
-                                                className="px-4 py-1.5 rounded-full bg-white/5 text-[#A9B4D0] hover:bg-white/10 hover:text-white text-[10px] font-bold uppercase tracking-wider transition-all"
-                                            >
-                                                Decline
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
-                )}
-
             </div>
         </div>
     );

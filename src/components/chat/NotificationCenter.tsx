@@ -161,27 +161,13 @@ export const NotificationList: React.FC<{
         if (chatId) onSelectChat(chatId, isPersonalNote(note), note.messageId);
     };
 
-    const followReqFilter = (n: Notification) => {
-        if (n.type !== 'follow_request') return false;
+    const requests = notifications
+        .filter(n => n.type === 'follow_request' && (n.followStatus === 'pending' || !n.followStatus))
+        .sort((a, b) => b.timestamp - a.timestamp);
 
-        // Persistent until actioned (accepted or declined)
-        // Note: we can check n.followStatus if provided by markAsRead, 
-        // but it's better to check if it's still 'pending' or missing (default pending)
-        const status = n.followStatus || 'pending';
-        return status === 'pending';
-    };
-
-    const recentActivityFilter = (n: Notification) => {
-        if (n.type === 'follow_request') return false;
-        return !n.read; // ONLY show unread notifications in the activity section
-    };
-
-
-    console.log("[NotificationList] Filtered counts:", {
-        total: notifications.length,
-        pendingReqs: notifications.filter(followReqFilter).length,
-        recentActivity: notifications.filter(recentActivityFilter).length
-    });
+    const activity = notifications
+        .filter(n => n.type !== 'follow_request')
+        .sort((a, b) => b.timestamp - a.timestamp);
 
     return (
         <div className="flex flex-col h-full bg-background/50 pt-8 md:pt-0">
@@ -197,66 +183,68 @@ export const NotificationList: React.FC<{
                 </div>
             )}
 
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-8">
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-12">
                 <AnimatePresence mode="popLayout">
-                    {notifications.filter(followReqFilter).length === 0 && notifications.filter(recentActivityFilter).length === 0 ? (
+                    {requests.length === 0 && activity.length === 0 ? (
                         <div className="py-20 text-center opacity-20 flex flex-col items-center gap-6">
                             <Bell className="w-12 h-12 animate-pulse" />
                             <span className="text-[10px] font-bold tracking-widest uppercase">All caught up</span>
                         </div>
                     ) : (
-                        <div className="space-y-10">
-                            {notifications.filter(followReqFilter).length > 0 && (
+                        <div className="space-y-12">
+                            {/* Section 1: Friend Requests (Pinned Top) */}
+                            {requests.length > 0 && (
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between px-2 text-[9px] font-bold tracking-widest text-secondary opacity-60 uppercase">
-                                        <span>Follow Requests</span>
+                                        <span>Friend Requests</span>
                                         <div className="w-1.5 h-1.5 rounded-full bg-secondary animate-ping" />
                                     </div>
-                                    {notifications
-                                        .filter(followReqFilter)
-                                        .map(note => (
+                                    <div className="space-y-4">
+                                        {requests.map(note => (
                                             <FollowRequestItem key={note.id} note={note} onSelectPersonal={(id) => onSelectChat(id, true)} />
                                         ))}
+                                    </div>
                                 </div>
                             )}
 
-                            <div className="space-y-4">
-                                {notifications.filter(recentActivityFilter).length > 0 && (
+                            {/* Section 2: Other Notifications (Sorted Newest -> Oldest) */}
+                            {activity.length > 0 && (
+                                <div className="space-y-4">
                                     <div className="px-2 text-[9px] font-bold tracking-widest text-primary opacity-40 uppercase">
                                         <span>Recent Activity</span>
                                     </div>
-                                )}
-                                {notifications
-                                    .filter(recentActivityFilter)
-                                    .map((note, index) => (
-                                        <motion.div
-                                            key={note.id}
-                                            layout
-                                            initial={{ opacity: 0, y: 20 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, scale: 0.95 }}
-                                            transition={{ delay: index * 0.05, type: 'spring', damping: 20, stiffness: 100 }}
-                                            onClick={() => handleSelect(note)}
-                                            className={`group relative p-4 rounded-3xl transition-all cursor-pointer border ${note.read ? 'opacity-40 grayscale bg-foreground/5 border-transparent' : 'bg-foreground/5 border-white/5 hover:border-primary/40 hover:bg-primary/5'}`}
-                                        >
-                                            <div className="flex gap-4 items-start text-left">
-                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-transform group-hover:scale-110 ${note.type === 'mention' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' : note.type === 'reply' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : 'bg-foreground/5 text-muted-foreground border-white/5'}`}>
-                                                    <IconForType type={note.type} />
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex items-center justify-between gap-2 mb-1">
-                                                        <span className="font-bold text-xs tracking-tight text-foreground/90">{note.senderName}</span>
-                                                        <span className="text-[8px] font-bold opacity-30 tracking-widest uppercase">{new Date(note.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                    <div className="space-y-4">
+                                        {activity.map((note, index) => (
+                                            <motion.div
+                                                key={note.id}
+                                                layout
+                                                initial={{ opacity: 0, y: 20 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, scale: 0.95 }}
+                                                transition={{ delay: index * 0.05, type: 'spring', damping: 20, stiffness: 100 }}
+                                                onClick={() => handleSelect(note)}
+                                                className={`group relative p-4 rounded-3xl transition-all cursor-pointer border ${note.read ? 'opacity-40 grayscale bg-foreground/5 border-transparent' : 'bg-foreground/5 border-white/5 hover:border-primary/40 hover:bg-primary/5'}`}
+                                            >
+                                                <div className="flex gap-4 items-start text-left">
+                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-transform group-hover:scale-110 ${note.type === 'mention' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' : note.type === 'reply' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : note.type === 'follow_accept' ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-foreground/5 text-muted-foreground border-white/5'}`}>
+                                                        <IconForType type={note.type} />
                                                     </div>
-                                                    <p className="text-xs font-medium line-clamp-2 text-muted-foreground leading-relaxed group-hover:text-foreground transition-colors text-left">{note.text}</p>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-center justify-between gap-2 mb-1">
+                                                            <span className="font-bold text-xs tracking-tight text-foreground/90">{note.senderName}</span>
+                                                            <span className="text-[8px] font-bold opacity-30 tracking-widest uppercase">{new Date(note.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                        </div>
+                                                        <p className="text-xs font-medium line-clamp-2 text-muted-foreground leading-relaxed group-hover:text-foreground transition-colors text-left">{note.text}</p>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            {!note.read && (
-                                                <div className="absolute top-4 right-4 w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary-rgb),1)]" />
-                                            )}
-                                        </motion.div>
-                                    ))}
-                            </div>
+                                                {!note.read && (
+                                                    <div className="absolute top-4 right-4 w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary-rgb),1)]" />
+                                                )}
+                                            </motion.div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
                 </AnimatePresence>
