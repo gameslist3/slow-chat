@@ -17,6 +17,7 @@ export interface User {
     sessions?: DeviceSession[];
     unreadCount: number;
     notificationsClearedAt?: number;
+    groupJoinTimes?: { [groupId: string]: number };
 }
 
 export interface UserCredentials {

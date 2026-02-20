@@ -116,7 +116,8 @@ export const joinGroup = async (groupId: string, userId: string): Promise<void> 
         });
 
         transaction.update(userRef, {
-            joinedGroups: arrayUnion(groupId)
+            joinedGroups: arrayUnion(groupId),
+            [`groupJoinTimes.${groupId}`]: Date.now()
         });
     });
 };
@@ -151,9 +152,11 @@ export const leaveGroup = async (groupId: string, userId: string): Promise<void>
                 memberIds: arrayRemove(userId)
             });
 
+            // Clean up groupJoinTimes record completely upon leaving
             transaction.update(userRef, {
                 joinedGroups: arrayRemove(groupId),
-                mutedGroups: arrayRemove(groupId)
+                mutedGroups: arrayRemove(groupId),
+                [`groupJoinTimes.${groupId}`]: 0 // Resetting or deleting is fine, 0 works as a flag
             });
         });
     } catch (error) {

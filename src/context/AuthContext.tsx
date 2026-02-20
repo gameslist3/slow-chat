@@ -51,8 +51,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                                 following: userData.following || [],
                                 followers: userData.followers || [],
                                 unreadCount: 0,
-                                lastUsernameChange: userData.lastUsernameChange,
+                                // Include the new field
                                 notificationsClearedAt: userData.notificationsClearedAt,
+                                groupJoinTimes: userData.groupJoinTimes || {},
                                 sessions: userData.sessions || []
                             };
                             return {
@@ -62,7 +63,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                                 mutedGroups: userData.mutedGroups || [],
                                 following: userData.following || [],
                                 followers: userData.followers || [],
-                                notificationsClearedAt: userData.notificationsClearedAt
+                                // Also update on subsequent snapshots
+                                notificationsClearedAt: userData.notificationsClearedAt,
+                                groupJoinTimes: userData.groupJoinTimes || {}
                             };
                         });
                     }

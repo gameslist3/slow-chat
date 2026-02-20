@@ -63,6 +63,7 @@ export const registerUserStep1 = async (creds: UserCredentials): Promise<boolean
             followers: [],
             unreadCount: 0,
             notificationsClearedAt: 0,
+            groupJoinTimes: {},
             createdAt: Date.now(),
             sessions: []
         });
@@ -124,6 +125,7 @@ export const completeRegistration = async (email: string, username: string): Pro
             followers: userData?.followers || [],
             unreadCount: userData?.unreadCount || 0,
             notificationsClearedAt: userData?.notificationsClearedAt || 0,
+            groupJoinTimes: userData?.groupJoinTimes || {},
             lastUsernameChange: userData?.lastUsernameChange,
             sessions: userData?.sessions || []
         };
@@ -169,6 +171,7 @@ export const loginUserWithPassword = async (creds: UserCredentials): Promise<Use
                 followers: [],
                 unreadCount: 0,
                 notificationsClearedAt: 0,
+                groupJoinTimes: {},
                 createdAt: Date.now(),
                 sessions: []
             });
@@ -205,6 +208,7 @@ export const loginUserWithPassword = async (creds: UserCredentials): Promise<Use
             followers: userData.followers || [],
             unreadCount: userData.unreadCount || 0,
             notificationsClearedAt: userData.notificationsClearedAt || 0,
+            groupJoinTimes: userData.groupJoinTimes || {},
             lastUsernameChange: userData.lastUsernameChange,
             sessions
         };

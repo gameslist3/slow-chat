@@ -184,6 +184,30 @@ const AuthenticatedSection = () => {
     const otherUserId = activePersonalChat?.userIds.find((id: string) => id !== user?.id);
     const personalChatTitle = isPersonal ? (activePersonalChat?.usernames?.[otherUserId || ''] || 'User') : '';
 
+    // Auto-Redirect: If user is in a chat that gets deleted (unfollow/cleanup), send them home instantly
+    useEffect(() => {
+        if (activeTab === 'chat' && activeId) {
+            if (isPersonal) {
+                // Check if current personal chat still exists in inbox
+                const exists = personalChats.some(c => c.id === activeId);
+                if (!exists) {
+                    console.log("[App] Active personal chat deleted. Redirecting home.");
+                    setActiveId(null);
+                    setActiveTab('home');
+                    if (user?.id) updateActiveChat(user.id, null);
+                }
+            } else {
+                // For groups, if user is no longer in joinedGroups, redirect
+                if (user && !user.joinedGroups.includes(activeId)) {
+                    console.log("[App] Left active group. Redirecting home.");
+                    setActiveId(null);
+                    setActiveTab('home');
+                    if (user?.id) updateActiveChat(user.id, null);
+                }
+            }
+        }
+    }, [activeTab, activeId, isPersonal, personalChats, user?.joinedGroups]);
+
     // Calculate unread notifications
     const unreadCount = notifications.filter(n => !n.read).length;
 

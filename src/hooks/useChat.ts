@@ -19,8 +19,14 @@ export const useChat = (chatId: string, isPersonal: boolean = false) => {
     const [loadingMore, setLoadingMore] = useState(false);
     const [hasMore, setHasMore] = useState(true);
 
-    // Initial window: Last 24 hours
-    const [startTime] = useState(() => Date.now() - 24 * 60 * 60 * 1000);
+    // Initial window: Last 24 hours OR since user joined (for Clean Slate groups)
+    const [startTime] = useState(() => {
+        const window24h = Date.now() - 24 * 60 * 60 * 1000;
+        if (!isPersonal && user?.groupJoinTimes?.[chatId]) {
+            return Math.max(window24h, user.groupJoinTimes[chatId]);
+        }
+        return window24h;
+    });
 
     // Messaging Subscription (Real-time for current window)
     useEffect(() => {
@@ -40,26 +46,42 @@ export const useChat = (chatId: string, isPersonal: boolean = false) => {
 
     const loadMore = useCallback(async () => {
         if (loadingMore || !hasMore || !chatId) return;
+
+        // Find oldest message timestamp to fetch before it
+        const oldest = history[0] || realtimeMessages[0];
+        const oldestTs = oldest ? ((oldest.timestamp as any)?.toMillis?.() || Date.now()) : Date.now();
+
+        // Enforce Clean Slate: Stop if we've reached the start of the allowed window
+        if (oldestTs <= startTime) {
+            setHasMore(false);
+            return;
+        }
+
         setLoadingMore(true);
-
         try {
-            // Find oldest message timestamp to fetch before it
-            const oldest = history[0] || realtimeMessages[0];
-            const beforeTs = oldest ? ((oldest.timestamp as any)?.toMillis?.() || Date.now()) : Date.now();
+            const chunk = await fetchPreviousMessages(chatId, isPersonal, oldestTs);
 
-            const chunk = await fetchPreviousMessages(chatId, isPersonal, beforeTs);
+            // Filter chunk locally to respect startTime (safety floor)
+            const validChunk = chunk.filter(m => {
+                const ts = (m.timestamp as any)?.toMillis?.() || 0;
+                return ts >= startTime;
+            });
 
-            if (chunk.length === 0) {
+            if (validChunk.length === 0) {
                 setHasMore(false);
             } else {
-                setHistory(prev => [...chunk, ...prev]);
+                setHistory(prev => [...validChunk, ...prev]);
+                // If we hit the floor exactly, no more to load
+                if (validChunk.some(m => ((m.timestamp as any)?.toMillis?.() || 0) <= startTime)) {
+                    setHasMore(false);
+                }
             }
         } catch (error) {
             console.error("[useChat] LoadMore error:", error);
         } finally {
             setLoadingMore(false);
         }
-    }, [chatId, isPersonal, history, realtimeMessages, loadingMore, hasMore]);
+    }, [chatId, isPersonal, history, realtimeMessages, loadingMore, hasMore, startTime]);
 
     const sendMessage = useCallback(async (content: {
         text?: string,
