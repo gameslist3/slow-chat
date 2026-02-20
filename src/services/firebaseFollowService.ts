@@ -42,35 +42,43 @@ export const sendFollowRequest = async (toUserId: string, toUsername: string): P
     const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
 
     // Check for active connections (Pending or Accepted)
-    const active1 = snap1.docs.find(d => d.data().status !== 'declined');
-    const active2 = snap2.docs.find(d => d.data().status !== 'declined');
+    const active1 = snap1.docs.find(d => d.data().status === 'pending' || d.data().status === 'accepted');
+    const active2 = snap2.docs.find(d => d.data().status === 'pending' || d.data().status === 'accepted');
 
     if (active1 || active2) {
-        throw new Error("A connection protocol is already active between these users.");
-    }
-
-    // Check for Cooldown: If the last request between these users was declined < 24 hours ago (Either direction)
-    const allDocs = [...snap1.docs, ...snap2.docs].sort((a, b) => (b.data().timestamp || 0) - (a.data().timestamp || 0));
-    const latestDeclined = allDocs.find(d => d.data().status === 'declined');
-
-    if (latestDeclined) {
-        const lastDeclinedTime = latestDeclined.data().timestamp;
-        const diff = (Date.now() - lastDeclinedTime) / 1000 / 60; // in minutes
-        if (diff < 1440) { // 24 hours = 1440 minutes
-            const remainingMins = 1440 - diff;
-            const waitHours = Math.ceil(remainingMins / 60);
-            throw new Error(`Link severed. Re-initialization available in ${waitHours} hour${waitHours > 1 ? 's' : ''}.`);
+        const activeDoc = active1 || active2;
+        if (activeDoc?.data().status === 'accepted') {
+            throw new Error("Protocol already active. Connection established.");
         }
+        throw new Error("A connection protocol is already pending between these users.");
     }
 
-    await addDoc(requestsRef, {
-        fromId: fromUserAuth.uid,
-        fromUsername: senderName,
-        toId: toUserId,
-        toUsername: toUsername,
-        status: 'pending',
-        timestamp: Date.now()
-    });
+    // Reuse or Create: If a declined request exists, overwrite it.
+    // We prioritize the request from the current sender to be the one we reuse.
+    const declinedSelf = snap1.docs.find(d => d.data().status === 'declined');
+    const declinedOther = snap2.docs.find(d => d.data().status === 'declined');
+    const declinedDoc = declinedSelf || declinedOther;
+
+    if (declinedDoc) {
+        await updateDoc(declinedDoc.ref, {
+            fromId: fromUserAuth.uid,
+            fromUsername: senderName,
+            toId: toUserId,
+            toUsername: toUsername,
+            status: 'pending',
+            timestamp: Date.now(),
+            updatedAt: Date.now()
+        });
+    } else {
+        await addDoc(requestsRef, {
+            fromId: fromUserAuth.uid,
+            fromUsername: senderName,
+            toId: toUserId,
+            toUsername: toUsername,
+            status: 'pending',
+            timestamp: Date.now()
+        });
+    }
 
     await createNotification(toUserId, {
         type: 'follow_request',
@@ -283,8 +291,6 @@ export const getFollowStatus = async (toUserId: string): Promise<'none' | 'pendi
 
         const data = doc.data();
         if (data.status === 'declined') {
-            const diff = (Date.now() - (data.timestamp || 0)) / 1000 / 60;
-            if (diff < 1440) return 'cooldown';
             return 'none';
         }
         return data.status as 'pending' | 'accepted';
