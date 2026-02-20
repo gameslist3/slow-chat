@@ -355,6 +355,7 @@ export async function deletePersonalChat(chatId: string): Promise<void> {
 
         // 2. Delete the chat parent document
         const chatRef = doc(db, 'personal_chats', chatId);
+        console.log('[Firebase] Deleting personal chat document for ID:', chatId);
         batch.delete(chatRef);
 
         // 3. Commit atomically

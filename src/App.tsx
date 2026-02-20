@@ -351,7 +351,12 @@ const AuthenticatedSection = () => {
                                 title={isPersonal ? personalChatTitle : (activeGroup?.name || '')}
                                 image={!isPersonal ? activeGroup?.image || '👥' : '👤'}
                                 memberCount={!isPersonal ? (activeGroup?.memberCount || activeGroup?.members || 0) : 2}
-                                onLeave={() => setActiveTab('home')}
+                                onLeave={() => {
+                                    setActiveId(null);
+                                    setActiveTab('home');
+                                    setIsPersonal(false);
+                                    if (user?.id) updateActiveChat(user.id, null);
+                                }}
                                 onProfileClick={(userId) => setViewingUserId(userId)}
                             />
                         </motion.div>

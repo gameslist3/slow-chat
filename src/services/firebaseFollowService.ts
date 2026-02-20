@@ -192,14 +192,14 @@ export const cancelFollowRequest = async (toUserId: string): Promise<void> => {
 };
 
 /**
- * Unfollow a user (Redo for Phase 22)
- * Removes connection from social graph and wipes the chat instantly.
+ * Unfollow a user (Redo for Phase 23)
+ * Absolute bidirectional social graph pruning and atomic chat termination.
  */
 export const unfollowUser = async (otherUserId: string): Promise<void> => {
     const currentUser = auth.currentUser;
     if (!currentUser) throw new Error("Authentication required for protocol termination.");
 
-    console.log("Unfollow + delete chat running");
+    console.log("[Social] Unfollow + delete chat running for:", otherUserId);
 
     try {
         const batch = writeBatch(db);
@@ -245,16 +245,7 @@ export const unfollowUser = async (otherUserId: string): Promise<void> => {
         // 3.2 Delete the chat parent doc
         batch.delete(chatRef);
 
-        // 4. Cleanup Notifications (for currentUser)
-        const notificationsRef = collection(db, 'notifications');
-        const n1 = query(notificationsRef, where('userId', '==', currentUser.uid), where('groupId', '==', otherUserId));
-        const n2 = query(notificationsRef, where('userId', '==', currentUser.uid), where('groupId', '==', chatId));
-
-        const [sn1, sn2] = await Promise.all([getDocs(n1), getDocs(n2)]);
-        sn1.docs.forEach(d => batch.delete(d.ref));
-        sn2.docs.forEach(d => batch.delete(d.ref));
-
-        // 5. Commit atomic cleanup
+        // 4. Commit atomic cleanup
         await batch.commit();
         console.log('[FollowService] Unfollow and chat deletion complete.');
 
@@ -286,7 +277,6 @@ export const getFollowStatus = async (toUserId: string): Promise<'none' | 'pendi
 
         const data = doc.data();
         if (data.status === 'declined') {
-            // Check if still in cooldown (Mutual check)
             const diff = (Date.now() - (data.timestamp || 0)) / 1000 / 60;
             if (diff < 1440) return 'cooldown';
             return 'none';
@@ -315,7 +305,6 @@ export const getPendingRequests = (callback: (requests: FollowRequest[]) => void
         if (!auth.currentUser) return;
         const reqs = snap.docs.map(doc => ({ ...doc.data(), id: doc.id } as FollowRequest));
 
-        // Filter: Pending OR (Accepted/Declined AND updatedAt within 10 mins)
         const tenMins = 10 * 60 * 1000;
         const now = Date.now();
         const filtered = reqs.filter(r => {
