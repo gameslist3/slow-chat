@@ -41,31 +41,36 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
         };
         loadUser();
 
-        // Real-time Follow Status
+        // Pure Reactive Follow Status Synchronization
         const requestsRef = collection(db, 'follow_requests');
         const q1 = query(requestsRef, where('fromId', '==', currentUserId), where('toId', '==', userId));
         const q2 = query(requestsRef, where('fromId', '==', userId), where('toId', '==', currentUserId));
 
+        let res1: any[] = [];
+        let res2: any[] = [];
+
+        const updateStatus = () => {
+            const combined = [...res1, ...res2].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+            const active = combined.find(d => d.status !== 'declined');
+
+            if (active) {
+                setStatus(active.status);
+            } else {
+                setStatus('none');
+            }
+            setLoading(false);
+        };
+
         const unsub1 = onSnapshot(q1, (snap) => {
-            const active = snap.docs.find(d => d.data().status !== 'declined');
-            if (active) setStatus(active.data().status);
-            else setStatus(prev => {
-                // If this listener finds nothing, only clear if the other listener also has nothing (handled by sync)
-                // Actually, a simpler way is to check BOTH in one place, but since we have two listeners:
-                // If snap is empty, and we were in a state that this listener controls, reset it.
-                return (prev === 'pending' || prev === 'accepted') ? 'none' : prev;
-            });
+            res1 = snap.docs.map(d => d.data());
+            updateStatus();
         });
 
         const unsub2 = onSnapshot(q2, (snap) => {
-            const active = snap.docs.find(d => d.data().status !== 'declined');
-            if (active) setStatus(active.data().status);
-            else setStatus(prev => {
-                return (prev === 'pending' || prev === 'accepted') ? 'none' : prev;
-            });
+            res2 = snap.docs.map(d => d.data());
+            updateStatus();
         });
 
-        setLoading(false);
         return () => {
             unsub1();
             unsub2();

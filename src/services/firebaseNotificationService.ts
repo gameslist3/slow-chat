@@ -97,22 +97,28 @@ export const markAllAsRead = async (uid: string): Promise<void> => {
         batch.update(userRef, {
             notificationsClearedAt: Date.now()
         });
+        await batch.commit(); // Commit the user document update separately
 
-        // 2. Mark existing unread notifications as read
+        // 2. Mark existing unread notifications as read (Chunked for batch limits)
         const q = query(collection(db, 'notifications'),
             where('userId', '==', uid),
             where('read', '==', false)
         );
         const snap = await getDocs(q);
+        const docs = snap.docs;
 
-        snap.docs.forEach(d => {
-            batch.update(d.ref, {
-                read: true,
-                updatedAt: Date.now()
+        for (let i = 0; i < docs.length; i += 450) {
+            const b = writeBatch(db);
+            const chunk = docs.slice(i, i + 450);
+            chunk.forEach(d => {
+                b.update(d.ref, {
+                    read: true,
+                    updatedAt: Date.now()
+                });
             });
-        });
+            await b.commit();
+        }
 
-        await batch.commit();
         console.log("[NotificationService] Everything marked read and cleared barrier updated.");
     } catch (error) {
         console.error("[NotificationService] markAllAsRead Error:", error);

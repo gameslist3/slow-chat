@@ -175,7 +175,7 @@ export const NotificationList: React.FC<{
     const requests = notifications
         .filter(n => {
             if (n.type !== 'follow_request') return false;
-            // Always show pending friend requests regardless of read status or clearedAt
+            // PENDING friend requests are always visible (Pinned Top)
             return (n.followStatus || 'pending') === 'pending';
         })
         .sort((a, b) => b.timestamp - a.timestamp);
@@ -184,13 +184,14 @@ export const NotificationList: React.FC<{
         .filter(n => {
             if (n.type === 'follow_request') return false;
 
-            // 24h Visibility Window (UI-only expiration)
+            // 24h Visibility Window (Production Requirement)
             const isWithin24H = (now - n.timestamp) < WINDOW_24H;
             if (!isWithin24H) return false;
 
-            // Mark all read barrier: hide if older than clearing timestamp
-            // UNLESS it's unread (real-time new notifications must show)
-            if (n.timestamp <= clearedAt && n.read) return false;
+            // Mark all read behavior: Hide if older than clearing timestamp AND marked as read
+            // This ensures new notifications show up even if user clicked "Mark all read" recently
+            const isCleared = n.timestamp <= clearedAt && n.read;
+            if (isCleared) return false;
 
             return true;
         })
