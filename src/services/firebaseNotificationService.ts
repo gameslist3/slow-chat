@@ -58,8 +58,7 @@ export const subscribeToNotifications = (uid: string, callback: (notifications: 
 
     const q = query(collection(db, 'notifications'),
         where('userId', '==', uid),
-        orderBy('timestamp', 'desc'),
-        limit(50)
+        orderBy('timestamp', 'desc')
     );
 
     return onSnapshot(q, (snap) => {
@@ -91,14 +90,21 @@ export const markAllAsRead = async (uid: string): Promise<void> => {
     if (!uid) return;
 
     try {
+        const batch = writeBatch(db);
+
+        // 1. Update user document cleared timestamp
+        const userRef = doc(db, 'users', uid);
+        batch.update(userRef, {
+            notificationsClearedAt: Date.now()
+        });
+
+        // 2. Mark existing unread notifications as read
         const q = query(collection(db, 'notifications'),
             where('userId', '==', uid),
             where('read', '==', false)
         );
         const snap = await getDocs(q);
-        if (snap.empty) return;
 
-        const batch = writeBatch(db);
         snap.docs.forEach(d => {
             batch.update(d.ref, {
                 read: true,
@@ -107,6 +113,7 @@ export const markAllAsRead = async (uid: string): Promise<void> => {
         });
 
         await batch.commit();
+        console.log("[NotificationService] Everything marked read and cleared barrier updated.");
     } catch (error) {
         console.error("[NotificationService] markAllAsRead Error:", error);
     }

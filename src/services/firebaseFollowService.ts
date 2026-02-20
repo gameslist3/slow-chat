@@ -205,8 +205,10 @@ export const cancelFollowRequest = async (toUserId: string): Promise<void> => {
     await batch.commit();
 };
 
+import { terminatePersonalChat } from './firebaseMessageService';
+
 /**
- * Unfollow a user (Redo for Phase 24)
+ * Unfollow a user (Redo for Phase 24/32)
  * Absolute bidirectional social graph pruning and atomic chat termination.
  */
 export const unfollowUser = async (otherUserId: string): Promise<void> => {
@@ -216,10 +218,8 @@ export const unfollowUser = async (otherUserId: string): Promise<void> => {
     console.log("[Social] Unfollow + delete chat running for:", otherUserId);
 
     try {
-        const batch = writeBatch(db);
-        const requestsRef = collection(db, 'follow_requests');
-
         // 1. Prune Social Graph (Bidirectional arrayRemove)
+        const batch = writeBatch(db);
         const userRef = doc(db, 'users', currentUser.uid);
         const otherRef = doc(db, 'users', otherUserId);
 
@@ -232,36 +232,25 @@ export const unfollowUser = async (otherUserId: string): Promise<void> => {
             followers: arrayRemove(currentUser.uid)
         });
 
-        // 2. Clear Active Connections (Requests)
+        // 2. Clear Active Connections (Requests) - Completely delete to allow re-requesting
+        const requestsRef = collection(db, 'follow_requests');
         const q1 = query(requestsRef, where('fromId', '==', currentUser.uid), where('toId', '==', otherUserId));
         const q2 = query(requestsRef, where('fromId', '==', otherUserId), where('toId', '==', currentUser.uid));
         const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
 
-        const now = Date.now();
         [...snap1.docs, ...snap2.docs].forEach(d => {
-            batch.update(d.ref, {
-                status: 'declined',
-                updatedAt: now,
-                timestamp: now // Cooldown trigger
-            });
+            batch.delete(d.ref);
         });
 
-        // 3. Terminate Personal Chat
+        // Atomic commit for graph changes
+        await batch.commit();
+
+        // 3. Terminate Personal Chat (Handles subcollections and metadata)
         const chatIds = [currentUser.uid, otherUserId].sort();
         const chatId = chatIds.join('_');
-        const chatRef = doc(db, 'personal_chats', chatId);
+        await terminatePersonalChat(chatId);
 
-        // 3.1 Cleanup messages subcollection first
-        const messagesRef = collection(db, `personal_chats/${chatId}/messages`);
-        const messagesSnap = await getDocs(messagesRef);
-        messagesSnap.docs.forEach(d => batch.delete(d.ref));
-
-        // 3.2 Delete the chat parent doc
-        batch.delete(chatRef);
-
-        // 4. Commit atomic cleanup
-        await batch.commit();
-        console.log('[FollowService] Unfollow and chat deletion complete.');
+        console.log('[FollowService] Unfollow and bidirectional cleanup complete.');
 
     } catch (error) {
         console.error("[FollowService] Unfollow Termination Error:", error);

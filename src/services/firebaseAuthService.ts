@@ -62,6 +62,7 @@ export const registerUserStep1 = async (creds: UserCredentials): Promise<boolean
             following: [],
             followers: [],
             unreadCount: 0,
+            notificationsClearedAt: 0,
             createdAt: Date.now(),
             sessions: []
         });
@@ -122,6 +123,7 @@ export const completeRegistration = async (email: string, username: string): Pro
             following: userData?.following || [],
             followers: userData?.followers || [],
             unreadCount: userData?.unreadCount || 0,
+            notificationsClearedAt: userData?.notificationsClearedAt || 0,
             lastUsernameChange: userData?.lastUsernameChange,
             sessions: userData?.sessions || []
         };
@@ -166,6 +168,7 @@ export const loginUserWithPassword = async (creds: UserCredentials): Promise<Use
                 following: [],
                 followers: [],
                 unreadCount: 0,
+                notificationsClearedAt: 0,
                 createdAt: Date.now(),
                 sessions: []
             });
@@ -201,6 +204,7 @@ export const loginUserWithPassword = async (creds: UserCredentials): Promise<Use
             following: userData.following || [],
             followers: userData.followers || [],
             unreadCount: userData.unreadCount || 0,
+            notificationsClearedAt: userData.notificationsClearedAt || 0,
             lastUsernameChange: userData.lastUsernameChange,
             sessions
         };
@@ -286,6 +290,7 @@ export const getUserById = async (uid: string): Promise<User | null> => {
         following: userData.following || [],
         followers: userData.followers || [],
         unreadCount: userData.unreadCount || 0,
+        notificationsClearedAt: userData.notificationsClearedAt || 0,
         lastUsernameChange: userData.lastUsernameChange,
         sessions: userData.sessions || []
     };

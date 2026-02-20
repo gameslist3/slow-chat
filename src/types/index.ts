@@ -16,6 +16,7 @@ export interface User {
     lastUsernameChange?: number; // timestamp
     sessions?: DeviceSession[];
     unreadCount: number;
+    notificationsClearedAt?: number;
 }
 
 export interface UserCredentials {

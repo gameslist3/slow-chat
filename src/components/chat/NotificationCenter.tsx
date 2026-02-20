@@ -170,23 +170,29 @@ export const NotificationList: React.FC<{
     }, []);
 
     const WINDOW_24H = 24 * 60 * 60 * 1000;
+    const clearedAt = user?.notificationsClearedAt || 0;
 
     const requests = notifications
         .filter(n => {
             if (n.type !== 'follow_request') return false;
-            const status = n.followStatus || 'pending';
-            // Only show pending friend requests
-            return status === 'pending';
+            // Always show pending friend requests regardless of read status or clearedAt
+            return (n.followStatus || 'pending') === 'pending';
         })
         .sort((a, b) => b.timestamp - a.timestamp);
 
     const activity = notifications
         .filter(n => {
             if (n.type === 'follow_request') return false;
-            // Only show unread notifications in activity (cleared on Mark all Read)
-            if (n.read) return false;
-            // All other activity hides after 24h
-            return (now - n.timestamp) < WINDOW_24H;
+
+            // 24h Visibility Window (UI-only expiration)
+            const isWithin24H = (now - n.timestamp) < WINDOW_24H;
+            if (!isWithin24H) return false;
+
+            // Mark all read barrier: hide if older than clearing timestamp
+            // UNLESS it's unread (real-time new notifications must show)
+            if (n.timestamp <= clearedAt && n.read) return false;
+
+            return true;
         })
         .sort((a, b) => b.timestamp - a.timestamp);
 

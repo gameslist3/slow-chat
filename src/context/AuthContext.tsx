@@ -52,6 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                                 followers: userData.followers || [],
                                 unreadCount: 0,
                                 lastUsernameChange: userData.lastUsernameChange,
+                                notificationsClearedAt: userData.notificationsClearedAt,
                                 sessions: userData.sessions || []
                             };
                             return {
@@ -60,7 +61,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                                 joinedGroups: userData.joinedGroups || [],
                                 mutedGroups: userData.mutedGroups || [],
                                 following: userData.following || [],
-                                followers: userData.followers || []
+                                followers: userData.followers || [],
+                                notificationsClearedAt: userData.notificationsClearedAt
                             };
                         });
                     }
