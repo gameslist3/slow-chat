@@ -20,7 +20,7 @@ import { updateUserStatus, updateActiveChat } from './services/firebaseAuthServi
 import { FriendsList } from './components/social/FriendsList';
 import { NotificationList } from './components/chat/NotificationCenter';
 import { subscribeToNotifications, markAllAsRead } from './services/firebaseNotificationService';
-import { unfollowUser } from './services/firebaseFollowService';
+import { unfollowUser, getPendingRequests } from './services/firebaseFollowService';
 import { markAsSeen } from './services/firebaseMessageService';
 
 const AuthSection = () => {
@@ -121,6 +121,7 @@ const AuthenticatedSection = () => {
     const [showCreateGroup, setShowCreateGroup] = useState(false);
     const [viewingUserId, setViewingUserId] = useState<string | null>(null);
     const [highlightMessageId, setHighlightMessageId] = useState<string | undefined>(undefined);
+    const [followRequestsCount, setFollowRequestsCount] = useState(0);
     const { personalChats } = useInbox();
 
     console.log('[AuthenticatedSection] Rendering', { user: user?.username, activeTab, myGroupsCount: myGroups.length });
@@ -137,7 +138,16 @@ const AuthenticatedSection = () => {
     useEffect(() => {
         if (!user?.id) return;
         const unsubscribe = subscribeToNotifications(user.id, setNotifications);
-        return () => unsubscribe();
+
+        // Also subscribe to pending follow requests for the badge
+        const unsubRequests = getPendingRequests((reqs) => {
+            setFollowRequestsCount(reqs.length);
+        });
+
+        return () => {
+            unsubscribe();
+            unsubRequests();
+        };
     }, [user?.id]);
 
     useEffect(() => {
@@ -145,6 +155,20 @@ const AuthenticatedSection = () => {
             markAllAsRead(user.id);
         }
     }, [activeTab, user?.id]);
+
+    // NEW: Auto-navigation when a personal chat is added (Signal for accepted request)
+    const prevChatCount = React.useRef(personalChats.length);
+    useEffect(() => {
+        if (personalChats.length > prevChatCount.current) {
+            // A new chat appeared! Find it and navigate if it's the latest
+            const newChat = personalChats[0]; // Assuming order is desc by timestamp
+            if (newChat && activeTab !== 'chat') {
+                handleSelectPersonal(newChat.id);
+                toast(`Secure connection with ${newChat.usernames?.[Object.keys(newChat.usernames).find(id => id !== user?.id) || ''] || 'User'} established.`, 'success');
+            }
+        }
+        prevChatCount.current = personalChats.length;
+    }, [personalChats, user?.id]);
 
     const handleSelectGroup = (id: string) => {
         setActiveId(id);
@@ -194,6 +218,7 @@ const AuthenticatedSection = () => {
                 logout();
             }}
             unreadCount={unreadCount}
+            followRequestsCount={followRequestsCount}
         >
             <div className="w-full h-full flex flex-col px-4 md:px-8 lg:px-12 max-w-[1600px] mx-auto">
                 <AnimatePresence mode="wait">
@@ -238,7 +263,7 @@ const AuthenticatedSection = () => {
                                             <button
                                                 onClick={handleUnfollow}
                                                 className="absolute top-4 right-4 w-10 h-10 rounded-xl bg-destructive/10 text-destructive opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center hover:bg-destructive hover:text-white"
-                                                title="End Chat"
+                                                title="Unfollow"
                                             >
                                                 <Icon name="userMinus" className="w-5 h-5" />
                                             </button>

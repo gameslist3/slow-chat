@@ -185,15 +185,8 @@ export const NotificationList: React.FC<{
 
     return (
         <div className="flex flex-col h-full bg-background/50 pt-8 md:pt-0">
-            {/* Header with Mark All Read */}
-            <div className="shrink-0 p-6 pb-0 flex items-center justify-between border-b border-white/5 bg-background/20 backdrop-blur-xl">
-                <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
-                        <Bell className="w-4 h-4 text-primary" />
-                    </div>
-                    <span className="text-xs font-black uppercase tracking-widest text-foreground/80">Signals</span>
-                </div>
-                {notifications.some(n => !n.read) && (
+            {notifications.some(n => !n.read) && (
+                <div className="shrink-0 p-6 pb-2 flex items-center justify-end bg-background/20 backdrop-blur-xl">
                     <button
                         onClick={onMarkAllRead}
                         className="px-4 py-2 rounded-xl bg-foreground/5 border border-white/5 text-[9px] font-bold tracking-[0.2em] uppercase hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-all flex items-center gap-2"
@@ -201,14 +194,14 @@ export const NotificationList: React.FC<{
                         <Check className="w-3 h-3" />
                         Mark All Read
                     </button>
-                )}
-            </div>
+                </div>
+            )}
 
             <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-8">
                 <AnimatePresence mode="popLayout">
                     {notifications.filter(followReqFilter).length === 0 && notifications.filter(recentActivityFilter).length === 0 ? (
                         <div className="py-20 text-center opacity-20 flex flex-col items-center gap-6">
-                            <RotateCw className="w-12 h-12 animate-pulse" />
+                            <Bell className="w-12 h-12 animate-pulse" />
                             <span className="text-[10px] font-bold tracking-widest uppercase">All caught up</span>
                         </div>
                     ) : (

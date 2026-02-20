@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, MessageSquare, UserPlus, UserMinus } from 'lucide-react';
 import { Button } from '../ui/Button';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { db } from '../../config/firebase';
 import { getUserById } from '../../services/firebaseAuthService';
-import { getFollowStatus, sendFollowRequest, unfollowUser } from '../../services/firebaseFollowService';
+import { sendFollowRequest, unfollowUser } from '../../services/firebaseFollowService';
 import { useToast } from '../../context/ToastContext';
 
 interface UserProfileModalProps {
@@ -26,24 +28,42 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
     const isMe = userId === currentUserId;
 
     useEffect(() => {
-        const load = async () => {
-            setLoading(true);
+        if (!userId || isMe) return;
+
+        const loadUser = async () => {
             try {
-                const [u, s] = await Promise.all([
-                    getUserById(userId),
-                    getFollowStatus(userId)
-                ]);
+                const u = await getUserById(userId);
                 setUser(u);
-                setStatus(s || 'none');
             } catch (e) {
                 toast("Failed to load profile", "error");
                 onClose();
-            } finally {
-                setLoading(false);
             }
         };
-        if (userId) load();
-    }, [userId]);
+        loadUser();
+
+        // Real-time Follow Status
+        const requestsRef = collection(db, 'follow_requests');
+        const q1 = query(requestsRef, where('fromId', '==', currentUserId), where('toId', '==', userId));
+        const q2 = query(requestsRef, where('fromId', '==', userId), where('toId', '==', currentUserId));
+
+        const unsub1 = onSnapshot(q1, (snap) => {
+            const active = snap.docs.find(d => d.data().status !== 'declined');
+            if (active) setStatus(active.data().status);
+            else setStatus(prev => prev === 'none' || prev === 'pending' ? 'none' : prev);
+        });
+
+        const unsub2 = onSnapshot(q2, (snap) => {
+            const active = snap.docs.find(d => d.data().status !== 'declined');
+            if (active) setStatus(active.data().status);
+            else setStatus(prev => prev === 'none' || prev === 'pending' ? 'none' : prev);
+        });
+
+        setLoading(false);
+        return () => {
+            unsub1();
+            unsub2();
+        };
+    }, [userId, currentUserId, isMe]);
 
     const handleFollow = async () => {
         try {
@@ -120,26 +140,18 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                                         {status === 'accepted' ? (
                                             <Button
                                                 variant="outline"
-                                                className="flex-1 gap-2 border-red-500/50 text-red-400 hover:bg-red-500/10"
+                                                className="flex-1 gap-2 border-red-500/50 text-red-500 hover:bg-red-500/10 hover:border-red-500 transition-all font-bold"
                                                 onClick={handleUnfollow}
                                             >
-                                                <UserMinus className="w-4 h-4" /> End Chat
+                                                <UserMinus className="w-4 h-4" /> Unfollow
                                             </Button>
                                         ) : status === 'pending' ? (
                                             <Button
                                                 variant="secondary"
-                                                className="flex-1 gap-2 opacity-70 cursor-not-allowed"
+                                                className="flex-1 gap-2 opacity-70 cursor-not-allowed font-bold"
                                                 disabled
                                             >
                                                 Requested
-                                            </Button>
-                                        ) : status === 'cooldown' ? (
-                                            <Button
-                                                variant="secondary"
-                                                className="flex-1 gap-2 opacity-50 cursor-not-allowed"
-                                                disabled
-                                            >
-                                                Protocol Unstable
                                             </Button>
                                         ) : (
                                             <Button

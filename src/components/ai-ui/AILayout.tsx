@@ -14,6 +14,7 @@ interface AILayoutProps {
     user: User | null;
     onLogout: () => void;
     unreadCount?: number;
+    followRequestsCount?: number;
 }
 
 export const AILayout: React.FC<AILayoutProps> = ({
@@ -24,7 +25,8 @@ export const AILayout: React.FC<AILayoutProps> = ({
     onGoHome,
     user,
     onLogout,
-    unreadCount = 0
+    unreadCount = 0,
+    followRequestsCount = 0
 }) => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -42,6 +44,7 @@ export const AILayout: React.FC<AILayoutProps> = ({
                     user={user}
                     onLogout={onLogout}
                     unreadCount={unreadCount}
+                    followRequestsCount={followRequestsCount}
                 />
             </aside>
 
@@ -92,6 +95,7 @@ export const AILayout: React.FC<AILayoutProps> = ({
                                 user={user}
                                 onLogout={onLogout}
                                 unreadCount={unreadCount}
+                                followRequestsCount={followRequestsCount}
                             />
                         </motion.aside>
                     </>

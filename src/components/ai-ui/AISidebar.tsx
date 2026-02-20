@@ -12,6 +12,7 @@ interface AISidebarProps {
     user: User | null;
     onLogout: () => void;
     unreadCount?: number;
+    followRequestsCount?: number;
 }
 
 export const AISidebar: React.FC<AISidebarProps> = ({
@@ -21,7 +22,8 @@ export const AISidebar: React.FC<AISidebarProps> = ({
     onGoHome,
     user,
     onLogout,
-    unreadCount = 0
+    unreadCount = 0,
+    followRequestsCount = 0
 }) => {
     const navItems = [
         { id: 'home', icon: 'zap' as any, label: 'Home', action: onGoHome },
@@ -45,6 +47,7 @@ export const AISidebar: React.FC<AISidebarProps> = ({
                 {navItems.map((item) => {
                     const isActive = activeTab === item.id;
                     const isNotifications = item.id === 'inbox';
+                    const isFriends = item.id === 'friends';
 
                     return (
                         <button
@@ -64,8 +67,13 @@ export const AISidebar: React.FC<AISidebarProps> = ({
                                     className={`w-6 h-6 transition-transform group-hover:scale-110 ${isActive ? 'text-white' : 'text-[#7C89A6] group-hover:text-white'}`}
                                 />
                                 {isNotifications && unreadCount > 0 && (
-                                    <div className="absolute -top-1.5 -right-1.5 min-w-[18px] h-4.5 px-0.5 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-[#0B1220]">
+                                    <div className="absolute -top-1.5 -right-1.5 min-w-[18px] h-4.5 px-0.5 bg-red-500 text-white text-[9px] font-bold rounded-full flex-center border-2 border-[#0B1220]">
                                         {unreadCount > 9 ? '9+' : unreadCount}
+                                    </div>
+                                )}
+                                {isFriends && followRequestsCount > 0 && (
+                                    <div className="absolute -top-1.5 -right-1.5 min-w-[18px] h-4.5 px-0.5 bg-blue-500 text-white text-[9px] font-bold rounded-full flex-center border-2 border-[#0B1220] animate-pulse">
+                                        {followRequestsCount > 9 ? '9+' : followRequestsCount}
                                     </div>
                                 )}
                             </div>
