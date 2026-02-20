@@ -202,35 +202,48 @@ export const unfollowUser = async (otherUserId: string): Promise<void> => {
         const batch = writeBatch(db);
         const requestsRef = collection(db, 'follow_requests');
 
+        // 0. Prune Social Graph (Bidirectional)
+        const userRef = doc(db, 'users', currentUser.uid);
+        const otherRef = doc(db, 'users', otherUserId);
+
+        batch.update(userRef, {
+            following: arrayRemove(otherUserId),
+            followers: arrayRemove(otherUserId)
+        });
+        batch.update(otherRef, {
+            following: arrayRemove(currentUser.uid),
+            followers: arrayRemove(currentUser.uid)
+        });
+
         // 1. Find all active or accepted connections between these users
         const q1 = query(requestsRef, where('fromId', '==', currentUser.uid), where('toId', '==', otherUserId));
         const q2 = query(requestsRef, where('fromId', '==', otherUserId), where('toId', '==', currentUser.uid));
 
         const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
 
-        // 2. Mark all as 'declined' with fresh timestamp to trigger the 60min mutual cooldown
+        // 2. Mark all as 'declined' with fresh timestamp to trigger the cooldown
         const now = Date.now();
         [...snap1.docs, ...snap2.docs].forEach(d => {
             batch.update(d.ref, {
                 status: 'declined',
                 updatedAt: now,
-                timestamp: now // This ensures the 1-hour cooldown kicks in
+                timestamp: now
             });
         });
 
-        // 3. Terminate Personal Chat (Removes it from sidebar for both)
+        // 3. Terminate Personal Chat
         const chatIds = [currentUser.uid, otherUserId].sort();
         const chatId = chatIds.join('_');
         const chatRef = doc(db, 'personal_chats', chatId);
 
-        // 3.1 Fetch and delete all messages for a clean wipe
+        // 3.1 Cleanup messages subcollection (Done via batch for consistency)
         const messagesRef = collection(db, `personal_chats/${chatId}/messages`);
         const messagesSnap = await getDocs(messagesRef);
         messagesSnap.docs.forEach(d => batch.delete(d.ref));
 
         batch.delete(chatRef);
 
-        // 4. Cleanup Notifications (ONLY for current user to avoid permission errors)
+        // 4. Cleanup Notifications
         const notificationsRef = collection(db, 'notifications');
         const n1 = query(notificationsRef, where('userId', '==', currentUser.uid), where('groupId', '==', otherUserId));
         const n2 = query(notificationsRef, where('userId', '==', currentUser.uid), where('groupId', '==', chatId));
@@ -239,16 +252,13 @@ export const unfollowUser = async (otherUserId: string): Promise<void> => {
         sn1.docs.forEach(d => batch.delete(d.ref));
         sn2.docs.forEach(d => batch.delete(d.ref));
 
-        // Note: Peer notifications are not deleted here because of Firestore security rules (can't delete someone else's document).
-        // They will remain as historical logs or be cleared when the peer marks them as read.
-
         await batch.commit();
 
-        // 5. Notify the other user about the termination (Optional, but good for protocol feel)
+        // 5. Notify the other user (Optional)
         await createNotification(otherUserId, {
             type: 'system',
             senderName: 'System',
-            text: 'A connection protocol has been terminated by the peer.',
+            text: 'A connection protocol has been terminated.',
             groupId: 'system'
         });
 

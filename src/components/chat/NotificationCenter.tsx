@@ -186,21 +186,19 @@ export const NotificationList: React.FC<{
 
     const followReqFilter = (n: Notification) => {
         if (n.type !== 'follow_request') return false;
-        // Keep visible if:
-        // 1. Not yet actioned (no followStatus or status is 'pending')
-        // 2. Actioned but within the 10min "recent" window
+        // Keep visible UNTIL actioned (no followStatus or status is 'pending')
+        // AND not read? No, user says "until accepted or declined"
         const isActioned = !!n.followStatus && n.followStatus !== 'pending';
-        if (!isActioned) return true;
-        return n.updatedAt && now - n.updatedAt < tenMins;
+        return !isActioned;
     };
 
     const recentActivityFilter = (n: Notification) => {
         if (n.type === 'follow_request') return false;
-        // Show if unread OR if it was among the last 20 notifications
-        // This ensures read context remains visible even after auto-marking
+        // Show if:
+        // 1. Unread
+        // 2. Was unread when we opened the panel (session context)
         const isUnread = !n.read || (sessionInitialIds?.has(n.id) ?? false);
-        const index = notifications.indexOf(n);
-        return isUnread || index < 20;
+        return isUnread;
     };
 
     return (

@@ -87,16 +87,24 @@ export const markAsRead = async (notificationId: string, extra?: { followStatus?
 export const markAllAsRead = async (uid: string): Promise<void> => {
     if (!uid) return;
 
-    const q = query(collection(db, 'notifications'),
-        where('userId', '==', uid),
-        where('read', '==', false)
-    );
-    const snap = await getDocs(q);
+    try {
+        const q = query(collection(db, 'notifications'),
+            where('userId', '==', uid),
+            where('read', '==', false)
+        );
+        const snap = await getDocs(q);
+        if (snap.empty) return;
 
-    const batch = writeBatch(db);
-    snap.docs.forEach(d => {
-        batch.update(d.ref, { read: true });
-    });
+        const batch = writeBatch(db);
+        snap.docs.forEach(d => {
+            batch.update(d.ref, {
+                read: true,
+                updatedAt: Date.now()
+            });
+        });
 
-    await batch.commit();
+        await batch.commit();
+    } catch (error) {
+        console.error("[NotificationService] markAllAsRead Error:", error);
+    }
 };

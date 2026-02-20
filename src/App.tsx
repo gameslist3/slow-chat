@@ -21,6 +21,7 @@ import { FriendsList } from './components/social/FriendsList';
 import { NotificationList } from './components/chat/NotificationCenter';
 import { subscribeToNotifications, markAllAsRead } from './services/firebaseNotificationService';
 import { unfollowUser } from './services/firebaseFollowService';
+import { markAsSeen } from './services/firebaseMessageService';
 
 const AuthSection = () => {
     const { user, completeLogin, loginWithData } = useAuth();
@@ -149,14 +150,20 @@ const AuthenticatedSection = () => {
         setActiveId(id);
         setIsPersonal(false);
         setActiveTab('chat');
-        if (user?.id) updateActiveChat(user.id, id);
+        if (user?.id) {
+            updateActiveChat(user.id, id);
+            markAsSeen(id, false, user.id); // Reset count instantly
+        }
     };
 
     const handleSelectPersonal = (chatId: string) => {
         setActiveId(chatId);
         setIsPersonal(true);
         setActiveTab('chat');
-        if (user?.id) updateActiveChat(user.id, chatId);
+        if (user?.id) {
+            updateActiveChat(user.id, chatId);
+            markAsSeen(chatId, true, user.id); // Reset count instantly
+        }
     };
 
     const activeGroup = !isPersonal ? (myGroups.find(g => g.id === activeId) || null) : null;
