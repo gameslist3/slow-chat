@@ -27,14 +27,13 @@ const IconForType = ({ type }: { type: Notification['type'] }) => {
 
 const FollowRequestItem = ({ note, onSelectPersonal }: { note: Notification; onSelectPersonal: (chatId: string) => void }) => {
     const [loading, setLoading] = useState(false);
-    const [actionStatus, setActionStatus] = useState<'pending' | 'accepted' | 'declined'>(note.followStatus || (note.read ? 'accepted' : 'pending'));
+    const [actionStatus, setActionStatus] = useState<'pending' | 'accepted' | 'declined'>(note.followStatus || 'pending');
     const [hidden, setHidden] = useState(false);
     const { toast } = useToast();
 
     const handleAction = async (action: 'accept' | 'decline') => {
+        setLoading(true);
         const newStatus = action === 'accept' ? 'accepted' : 'declined';
-        setActionStatus(newStatus);
-        setLoading(false);
 
         try {
             const requestsRef = collection(db, 'follow_requests');
@@ -62,9 +61,12 @@ const FollowRequestItem = ({ note, onSelectPersonal }: { note: Notification; onS
                     toast(`Request declined`, 'info');
                 }
             }
-            setTimeout(() => setHidden(true), 2000);
+            setActionStatus(newStatus);
         } catch (err: any) {
             console.error(err);
+            toast("Action failed", "error");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -84,29 +86,35 @@ const FollowRequestItem = ({ note, onSelectPersonal }: { note: Notification; onS
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9, height: 0 }}
-            className={`p-5 md:p-6 rounded-[2rem] bg-secondary/5 border border-secondary/20 relative overflow-hidden group shadow-xl ${actionStatus === 'declined' ? 'opacity-50 grayscale pointer-events-none' : ''}`}
+            className={`p-5 md:p-6 rounded-[2rem] bg-secondary/5 border border-secondary/20 relative overflow-hidden group shadow-xl ${actionStatus === 'declined' ? 'opacity-40 grayscale pointer-events-none' : ''}`}
         >
             <div className="absolute inset-0 bg-gradient-to-br from-secondary/10 to-transparent opacity-30 transition-opacity group-hover:opacity-50" />
             <div className="flex gap-4 md:gap-5 items-center relative z-10 text-left">
                 <div className="w-12 h-12 md:w-14 md:h-14 bg-secondary text-black rounded-2xl flex items-center justify-center font-black text-xl shadow-lg border border-white/10 group-hover:scale-105 transition-transform">
                     {note.senderName.slice(0, 2).toUpperCase()}
                 </div>
-                <div className="flex-1">
-                    <p className="font-bold text-base tracking-tight text-white">{note.senderName}</p>
-                    <p className="text-[9px] font-bold text-secondary tracking-widest uppercase opacity-70 mt-1 text-left">
-                        {actionStatus === 'accepted' ? 'Connection Established' : actionStatus === 'declined' ? 'Protocol Terminated' : 'Follow Request'}
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                        <p className="font-bold text-base tracking-tight text-white truncate">{note.senderName}</p>
+                        <span className="text-[8px] font-bold opacity-30 tracking-widest uppercase shrink-0">
+                            {new Date(note.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                    </div>
+                    <p className="text-[9px] font-bold text-secondary tracking-widest uppercase opacity-70 mt-1 text-left truncate">
+                        {actionStatus === 'accepted' ? 'Connection Established' : actionStatus === 'declined' ? 'Protocol Terminated' : 'Wants to connect'}
                     </p>
                 </div>
                 {actionStatus === 'accepted' && (
                     <button
                         onClick={(e) => { e.stopPropagation(); handleOpenChat(); }}
-                        className="w-10 h-10 rounded-xl bg-secondary/20 border border-secondary/30 flex items-center justify-center hover:bg-secondary hover:text-black transition-all"
+                        className="w-10 h-10 rounded-xl bg-secondary/20 border border-secondary/30 flex items-center justify-center hover:bg-secondary hover:text-black transition-all shadow-lg"
                     >
                         <MessageSquare className="w-5 h-5" />
                     </button>
                 )}
             </div>
-            {actionStatus === 'pending' && (
+
+            {actionStatus === 'pending' ? (
                 <div className="flex gap-3 relative z-10 mt-6">
                     <button
                         onClick={() => handleAction('accept')}
@@ -123,6 +131,10 @@ const FollowRequestItem = ({ note, onSelectPersonal }: { note: Notification; onS
                         {loading ? '...' : 'DECLINE'}
                     </button>
                 </div>
+            ) : actionStatus === 'declined' && (
+                <div className="mt-4 text-center">
+                    <span className="text-[9px] font-bold tracking-[0.2em] text-destructive/60 uppercase">Link Severed - Permanent</span>
+                </div>
             )}
         </motion.div>
     );
@@ -133,7 +145,6 @@ export const NotificationList: React.FC<{
     onSelectChat: (chatId: string, isPersonal: boolean, messageId?: string) => void;
     onMarkAllRead?: () => void;
 }> = ({ notifications, onSelectChat, onMarkAllRead }) => {
-
     const user = auth.currentUser;
 
     const isPersonalNote = (note: Notification): boolean => {
@@ -150,25 +161,19 @@ export const NotificationList: React.FC<{
         if (chatId) onSelectChat(chatId, isPersonalNote(note), note.messageId);
     };
 
-    const [sessionInitialIds, setSessionInitialIds] = useState<Set<string> | null>(null);
-
-    useEffect(() => {
-        if (!sessionInitialIds && notifications.length > 0) {
-            const unread = notifications.filter(n => !n.read).map(n => n.id);
-            console.log("[NotificationList] Capturing initial unread IDs:", unread);
-            setSessionInitialIds(new Set(unread));
-        }
-    }, [notifications, sessionInitialIds]);
-
     const followReqFilter = (n: Notification) => {
         if (n.type !== 'follow_request') return false;
-        const isActioned = !!n.followStatus && n.followStatus !== 'pending';
-        return !isActioned;
+        // Show if unread
+        if (!n.read) return true;
+        // Show if it was actioned (accepted/declined) but NOT yet read? 
+        // Actually, the user wants 'Mark all read' to clear them.
+        // So we only show if it has a followStatus and is NOT read.
+        return false;
     };
 
     const recentActivityFilter = (n: Notification) => {
         if (n.type === 'follow_request') return false;
-        return true; // show all notifications
+        return !n.read; // ONLY show unread notifications in the activity section
     };
 
 
@@ -180,6 +185,25 @@ export const NotificationList: React.FC<{
 
     return (
         <div className="flex flex-col h-full bg-background/50 pt-8 md:pt-0">
+            {/* Header with Mark All Read */}
+            <div className="shrink-0 p-6 pb-0 flex items-center justify-between border-b border-white/5 bg-background/20 backdrop-blur-xl">
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
+                        <Bell className="w-4 h-4 text-primary" />
+                    </div>
+                    <span className="text-xs font-black uppercase tracking-widest text-foreground/80">Signals</span>
+                </div>
+                {notifications.some(n => !n.read) && (
+                    <button
+                        onClick={onMarkAllRead}
+                        className="px-4 py-2 rounded-xl bg-foreground/5 border border-white/5 text-[9px] font-bold tracking-[0.2em] uppercase hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-all flex items-center gap-2"
+                    >
+                        <Check className="w-3 h-3" />
+                        Mark All Read
+                    </button>
+                )}
+            </div>
+
             <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-8">
                 <AnimatePresence mode="popLayout">
                     {notifications.filter(followReqFilter).length === 0 && notifications.filter(recentActivityFilter).length === 0 ? (
