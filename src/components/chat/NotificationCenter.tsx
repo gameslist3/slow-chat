@@ -183,6 +183,8 @@ export const NotificationList: React.FC<{
     const activity = notifications
         .filter(n => {
             if (n.type === 'follow_request') return false;
+            // Only show unread notifications in activity (cleared on Mark all Read)
+            if (n.read) return false;
             // All other activity hides after 24h
             return (now - n.timestamp) < WINDOW_24H;
         })

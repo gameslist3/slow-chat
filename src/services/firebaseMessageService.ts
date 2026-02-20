@@ -295,14 +295,23 @@ export async function toggleReaction(
 export function subscribeToMessages(
     targetId: string,
     isPersonal: boolean,
-    callback: (messages: Message[]) => void
+    callback: (messages: Message[]) => void,
+    startTime?: number
 ): () => void {
     const path = isPersonal
         ? `personal_chats/${targetId}/messages`
         : `groups/${targetId}/messages`;
 
     const messagesRef = collection(db, path);
-    const q = query(messagesRef, orderBy('timestamp', 'asc'));
+    let q = query(messagesRef, orderBy('timestamp', 'asc'));
+
+    if (startTime) {
+        // Important: orderBy + where on same field is fine.
+        q = query(messagesRef,
+            where('timestamp', '>=', Timestamp.fromMillis(startTime)),
+            orderBy('timestamp', 'asc')
+        );
+    }
 
     return onSnapshot(q, (snapshot) => {
         if (!auth.currentUser) return;
@@ -315,6 +324,37 @@ export function subscribeToMessages(
         if (error.code === 'permission-denied') return;
         console.error('[Firestore] Message Subscription Error:', error);
     });
+}
+
+/**
+ * Fetch a chunk of history before a certain timestamp
+ */
+export async function fetchPreviousMessages(
+    targetId: string,
+    isPersonal: boolean,
+    beforeTimestamp: number,
+    limitCount: number = 50
+): Promise<Message[]> {
+    const path = isPersonal
+        ? `personal_chats/${targetId}/messages`
+        : `groups/${targetId}/messages`;
+
+    const messagesRef = collection(db, path);
+    const q = query(messagesRef,
+        where('timestamp', '<', Timestamp.fromMillis(beforeTimestamp)),
+        orderBy('timestamp', 'desc'),
+        limit(limitCount)
+    );
+
+    const snap = await getDocs(q);
+    // Reverse because we queried descending for the 'before' chunk
+    return snap.docs
+        .map(d => ({ ...d.data(), id: d.id } as Message))
+        .sort((a, b) => {
+            const tA = (a.timestamp as any)?.toMillis?.() || 0;
+            const tB = (b.timestamp as any)?.toMillis?.() || 0;
+            return tA - tB;
+        });
 }
 
 /**

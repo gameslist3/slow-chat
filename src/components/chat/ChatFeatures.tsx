@@ -39,7 +39,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         handleReply,
         cancelReply,
         replyingTo,
-        loading
+        loading,
+        loadingMore,
+        loadMore,
+        hasMore
     } = useChat(chatId, isPersonal);
 
     const { user } = useAuth();
@@ -61,6 +64,28 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             toast(error.message || "Failed to send message", "error");
         }
     };
+
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const lastScrollHeight = useRef<number>(0);
+
+    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        const target = e.currentTarget;
+        if (target.scrollTop < 100 && hasMore && !loadingMore && !loading) {
+            lastScrollHeight.current = target.scrollHeight;
+            loadMore();
+        }
+    };
+
+    // Maintain scroll when history prepends
+    React.useEffect(() => {
+        if (scrollRef.current && lastScrollHeight.current > 0 && !loadingMore) {
+            const diff = scrollRef.current.scrollHeight - lastScrollHeight.current;
+            if (diff > 0) {
+                scrollRef.current.scrollTop += diff;
+                lastScrollHeight.current = 0;
+            }
+        }
+    }, [messages.length, loadingMore]);
 
     return (
         <div className="w-full h-full flex flex-col relative overflow-hidden bg-transparent">
@@ -94,7 +119,16 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                         ))}
                     </div>
                 ) : (
-                    <div className="flex-1 w-full overflow-y-auto custom-scrollbar pb-2 px-4 md:px-0 scroll-smooth">
+                    <div
+                        ref={scrollRef}
+                        onScroll={handleScroll}
+                        className="flex-1 w-full overflow-y-auto custom-scrollbar pb-2 px-4 md:px-0 scroll-smooth"
+                    >
+                        {loadingMore && (
+                            <div className="py-4 text-center opacity-40 text-[10px] font-black uppercase tracking-widest animate-pulse">
+                                Retrieving deep history...
+                            </div>
+                        )}
                         {messages.length === 0 ? (
                             <div className="h-full flex flex-col items-center justify-center opacity-30 text-center p-8">
                                 <div className="w-24 h-24 bg-blue-500/20 rounded-full flex items-center justify-center mb-6 animate-pulse">

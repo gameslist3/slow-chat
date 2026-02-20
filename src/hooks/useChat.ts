@@ -6,32 +6,60 @@ import {
     toggleReaction as toggleFirebaseReaction,
     subscribeToMessages,
     markAsSeen as markFirebaseSeen,
-    subscribeToPersonalChats
+    subscribeToPersonalChats,
+    fetchPreviousMessages
 } from '../services/firebaseMessageService';
 
 export const useChat = (chatId: string, isPersonal: boolean = false) => {
     const { user } = useAuth();
-    const [messages, setMessages] = useState<Message[]>([]);
+    const [realtimeMessages, setRealtimeMessages] = useState<Message[]>([]);
+    const [history, setHistory] = useState<Message[]>([]);
     const [replyingTo, setReplyingTo] = useState<Message | null>(null);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [hasMore, setHasMore] = useState(true);
 
-    // Messaging Subscription
+    // Initial window: Last 24 hours
+    const [startTime] = useState(() => Date.now() - 24 * 60 * 60 * 1000);
+
+    // Messaging Subscription (Real-time for current window)
     useEffect(() => {
         if (!chatId || !user?.id) return;
         setLoading(true);
         const unsubscribe = subscribeToMessages(chatId, isPersonal, (newMessages) => {
-            // Filter out system messages to focus on direct communication (WhatsApp/Instagram style)
             const filtered = newMessages.filter(m => m.type !== 'system');
-            setMessages(filtered);
+            setRealtimeMessages(filtered);
             setLoading(false);
 
-            // Mark as seen when new messages arrive and we are active
             if (user?.id) {
                 markFirebaseSeen(chatId, isPersonal, user.id);
             }
-        });
+        }, startTime);
         return () => unsubscribe();
-    }, [chatId, isPersonal, user?.id]);
+    }, [chatId, isPersonal, user?.id, startTime]);
+
+    const loadMore = useCallback(async () => {
+        if (loadingMore || !hasMore || !chatId) return;
+        setLoadingMore(true);
+
+        try {
+            // Find oldest message timestamp to fetch before it
+            const oldest = history[0] || realtimeMessages[0];
+            const beforeTs = oldest ? ((oldest.timestamp as any)?.toMillis?.() || Date.now()) : Date.now();
+
+            const chunk = await fetchPreviousMessages(chatId, isPersonal, beforeTs);
+
+            if (chunk.length === 0) {
+                setHasMore(false);
+            } else {
+                setHistory(prev => [...chunk, ...prev]);
+            }
+        } catch (error) {
+            console.error("[useChat] LoadMore error:", error);
+        } finally {
+            setLoadingMore(false);
+        }
+    }, [chatId, isPersonal, history, realtimeMessages, loadingMore, hasMore]);
 
     const sendMessage = useCallback(async (content: {
         text?: string,
@@ -77,13 +105,16 @@ export const useChat = (chatId: string, isPersonal: boolean = false) => {
     const cancelReply = () => setReplyingTo(null);
 
     return {
-        messages,
+        messages: [...history, ...realtimeMessages],
         sendMessage,
         toggleReaction,
         replyingTo,
         handleReply,
         cancelReply,
-        loading
+        loading,
+        loadingMore,
+        loadMore,
+        hasMore
     };
 };
 
