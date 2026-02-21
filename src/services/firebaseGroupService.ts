@@ -135,11 +135,13 @@ export const leaveGroup = async (groupId: string, userId: string): Promise<void>
         const q = query(messagesRef, where('senderId', '==', userId));
         const messagesSnap = await getDocs(q);
 
-        const batch = writeBatch(db);
-        messagesSnap.docs.forEach((doc) => {
-            batch.delete(doc.ref);
-        });
-        await batch.commit();
+        const docs = messagesSnap.docs;
+        for (let i = 0; i < docs.length; i += 400) {
+            const batch = writeBatch(db);
+            const chunk = docs.slice(i, i + 400);
+            chunk.forEach(d => batch.delete(d.ref));
+            await batch.commit();
+        }
 
         // 2. Remove user from group (Transaction)
         await runTransaction(db, async (transaction) => {

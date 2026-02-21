@@ -73,6 +73,19 @@ const AppContent = () => {
         if (!accepted) setShowPolicy(true);
     }, []);
 
+    // Capture group ID from URL for deep linking
+    useEffect(() => {
+        const path = window.location.pathname;
+        const match = path.match(/\/chat\/([a-f0-9-]{36}|nexus-[a-z-]+|system-updates)/i);
+        if (match && match[1]) {
+            const prospectiveGroupId = match[1];
+            console.log("[AppContent] Detected prospective group ID from URL:", prospectiveGroupId);
+            sessionStorage.setItem('pendingJoinGroupId', prospectiveGroupId);
+            // Neutralize URL to prevent re-capturing on refresh if state persists
+            window.history.replaceState({}, '', '/');
+        }
+    }, []);
+
     useEffect(() => {
         if (!isAuthenticated || !user?.id) return;
         updateUserStatus(user.id, 'online');
@@ -137,6 +150,28 @@ const AuthenticatedSection = () => {
 
     useEffect(() => {
         if (!user?.id) return;
+
+        // Execute pending join if exists
+        const pendingId = sessionStorage.getItem('pendingJoinGroupId');
+        if (pendingId) {
+            sessionStorage.removeItem('pendingJoinGroupId');
+            console.log("[AuthenticatedSection] Executing pending join for:", pendingId);
+
+            if (!user.joinedGroups.includes(pendingId)) {
+                joinContext(pendingId).then(() => {
+                    setActiveTab('chat');
+                    setActiveId(pendingId);
+                    setIsPersonal(false);
+                    if (user?.id) updateActiveChat(user.id, pendingId);
+                }).catch(err => console.error("[App] Pending join failed:", err));
+            } else {
+                setActiveTab('chat');
+                setActiveId(pendingId);
+                setIsPersonal(false);
+                if (user?.id) updateActiveChat(user.id, pendingId);
+            }
+        }
+
         const unsubscribe = subscribeToNotifications(user.id, setNotifications);
 
         // Also subscribe to pending follow requests for the badge
@@ -155,6 +190,13 @@ const AuthenticatedSection = () => {
             markAllAsRead(user.id);
         }
     }, [activeTab, user?.id]);
+
+    // Real-time unread management: Mark as seen when entering chat
+    useEffect(() => {
+        if (activeId && user?.id) {
+            markAsSeen(activeId, isPersonal, user.id);
+        }
+    }, [activeId, isPersonal, user?.id]);
 
     // Navigation logic removed to ensure users land on Home screen after login/refresh
     // Active chat should only be selected by manual user interaction.
@@ -209,9 +251,28 @@ const AuthenticatedSection = () => {
     }, [activeTab, activeId, isPersonal, personalChats, user?.joinedGroups]);
 
     // Calculate unread notifications
-    const unreadCount = notifications.filter(n => !n.read).length;
+    const notificationUnread = notifications.filter(n => !n.read).length;
 
-    console.log('[App] Rendering AuthenticatedSection', { activeTab, activeId, isAuthenticated: !!user });
+    // Calculate unread from personal chats
+    const friendsUnread = personalChats.reduce((sum, chat) => {
+        return sum + (user?.id ? (chat.unreadCounts?.[user.id] || 0) : 0);
+    }, 0);
+
+    // Calculate unread from joined groups
+    const groupsUnread = myGroups.reduce((sum, group) => {
+        return sum + (user?.id ? (group.unreadCounts?.[user.id] || 0) : 0);
+    }, 0);
+
+    const totalUnread = notificationUnread + friendsUnread + groupsUnread;
+
+    console.log('[App] Rendering AuthenticatedSection', {
+        activeTab,
+        activeId,
+        notificationUnread,
+        friendsUnread,
+        groupsUnread,
+        totalUnread
+    });
 
     return (
         <AILayout
@@ -230,8 +291,9 @@ const AuthenticatedSection = () => {
             onLogout={() => {
                 logout();
             }}
-            unreadCount={unreadCount}
+            unreadCount={totalUnread}
             followRequestsCount={followRequestsCount}
+            friendsUnread={friendsUnread}
         >
             <div className="w-full h-full flex flex-col px-4 md:px-8 lg:px-12 max-w-[1600px] mx-auto">
                 <AnimatePresence mode="wait">
@@ -268,7 +330,19 @@ const AuthenticatedSection = () => {
 
                                     return (
                                         <div key={chat.id} className="relative group">
-                                            <button onClick={() => handleSelectPersonal(chat.id)} className="bento-item w-full text-left hover:border-primary transition-all">
+                                            <button onClick={() => handleSelectPersonal(chat.id)} className="bento-item w-full text-left hover:border-primary transition-all relative overflow-hidden">
+                                                {/* Unread Badge */}
+                                                {(() => {
+                                                    const unread = user?.id ? (chat.unreadCounts?.[user.id] || 0) : 0;
+                                                    if (unread > 0) {
+                                                        return (
+                                                            <div className="absolute top-4 right-16 bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.5)] z-20">
+                                                                {unread}
+                                                            </div>
+                                                        );
+                                                    }
+                                                    return null;
+                                                })()}
                                                 <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center font-black text-primary mb-4 transition-transform group-hover:scale-110">{name[0]}</div>
                                                 <h3 className="font-bold text-lg">{name}</h3>
                                                 <p className="text-sm text-muted-foreground truncate">{chat.lastMessage || 'Start a conversation'}</p>
@@ -336,15 +410,23 @@ const AuthenticatedSection = () => {
                                             </div>
                                         </div>
                                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                            {myGroups.map(g => (
-                                                <button key={g.id} onClick={() => handleSelectGroup(g.id)} className="bento-item text-left group">
-                                                    <div className="text-4xl mb-4">{g.image}</div>
-                                                    <h3 className="font-bold text-lg group-hover:text-primary transition-colors">{g.name}</h3>
-                                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                        <Icon name="users" className="w-4 h-4" /> {g.members} Members
-                                                    </div>
-                                                </button>
-                                            ))}
+                                            {myGroups.map(g => {
+                                                const unread = user?.id ? (g.unreadCounts?.[user.id] || 0) : 0;
+                                                return (
+                                                    <button key={g.id} onClick={() => handleSelectGroup(g.id)} className="bento-item text-left group relative overflow-hidden">
+                                                        {unread > 0 && (
+                                                            <div className="absolute top-4 right-4 bg-[#5B79B7] text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(91,121,183,0.5)] z-20">
+                                                                {unread}
+                                                            </div>
+                                                        )}
+                                                        <div className="text-4xl mb-4">{g.image}</div>
+                                                        <h3 className="font-bold text-lg group-hover:text-primary transition-colors">{g.name}</h3>
+                                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                            <Icon name="users" className="w-4 h-4" /> {g.members} Members
+                                                        </div>
+                                                    </button>
+                                                );
+                                            })}
                                         </div>
                                     </motion.div>
                                 )}
@@ -354,11 +436,14 @@ const AuthenticatedSection = () => {
 
                     {activeTab === 'friends' && (
                         <motion.div key="friends" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
-                            <FriendsList onSelectFriend={(friendId) => {
-                                if (!user?.id) return;
-                                const combinedId = [user.id, friendId].sort().join('_');
-                                handleSelectPersonal(combinedId);
-                            }} />
+                            <FriendsList
+                                personalChats={personalChats}
+                                onSelectFriend={(friendId) => {
+                                    if (!user?.id) return;
+                                    const combinedId = [user.id, friendId].sort().join('_');
+                                    handleSelectPersonal(combinedId);
+                                }}
+                            />
                         </motion.div>
                     )}
 

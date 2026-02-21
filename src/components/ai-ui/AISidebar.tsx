@@ -13,6 +13,7 @@ interface AISidebarProps {
     onLogout: () => void;
     unreadCount?: number;
     followRequestsCount?: number;
+    friendsUnread?: number;
 }
 
 export const AISidebar: React.FC<AISidebarProps> = ({
@@ -23,7 +24,8 @@ export const AISidebar: React.FC<AISidebarProps> = ({
     user,
     onLogout,
     unreadCount = 0,
-    followRequestsCount = 0
+    followRequestsCount = 0,
+    friendsUnread = 0
 }) => {
     const navItems = [
         { id: 'home', icon: 'zap' as any, label: 'Home', action: onGoHome },
@@ -71,9 +73,9 @@ export const AISidebar: React.FC<AISidebarProps> = ({
                                         {unreadCount > 9 ? '9+' : unreadCount}
                                     </div>
                                 )}
-                                {isFriends && followRequestsCount > 0 && (
+                                {isFriends && friendsUnread > 0 && (
                                     <div className="absolute -top-1.5 -right-1.5 min-w-[18px] h-4.5 px-0.5 bg-blue-500 text-white text-[9px] font-bold rounded-full flex-center border-2 border-[#0B1220] animate-pulse">
-                                        {followRequestsCount > 9 ? '9+' : followRequestsCount}
+                                        {friendsUnread > 9 ? '9+' : friendsUnread}
                                     </div>
                                 )}
                             </div>

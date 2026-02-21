@@ -8,6 +8,8 @@ import { auth } from '../../config/firebase';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '../../context/ToastContext';
 
+import { PersonalChat } from '../../types';
+
 interface Friend {
     requestId: string;
     uid: string;
@@ -15,7 +17,12 @@ interface Friend {
     direction: 'incoming' | 'outgoing';
 }
 
-export const FriendsList: React.FC<{ onSelectFriend?: (friendId: string) => void }> = ({ onSelectFriend }) => {
+interface FriendsListProps {
+    onSelectFriend?: (friendId: string) => void;
+    personalChats?: PersonalChat[];
+}
+
+export const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, personalChats = [] }) => {
     const [friends, setFriends] = useState<Friend[]>([]);
     const currentUser = auth.currentUser;
     const { toast } = useToast();
@@ -98,8 +105,22 @@ export const FriendsList: React.FC<{ onSelectFriend?: (friendId: string) => void
                                 </div>
 
                                 {/* Right: Action/Badge */}
-                                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-[#7FA6FF] group-hover:bg-[#3B82F6] group-hover:text-white transition-all opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 shadow-lg">
-                                    <Icon name="message" className="w-4 h-4" />
+                                <div className="flex items-center gap-3">
+                                    {(() => {
+                                        const chat = personalChats.find(c => c.userIds.includes(friend.uid));
+                                        const unread = chat?.unreadCounts?.[currentUser.uid] || 0;
+                                        if (unread > 0) {
+                                            return (
+                                                <div className="bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.5)]">
+                                                    {unread}
+                                                </div>
+                                            );
+                                        }
+                                        return null;
+                                    })()}
+                                    <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-[#7FA6FF] group-hover:bg-[#3B82F6] group-hover:text-white transition-all opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 shadow-lg">
+                                        <Icon name="message" className="w-4 h-4" />
+                                    </div>
                                 </div>
                             </motion.div>
                         ))}

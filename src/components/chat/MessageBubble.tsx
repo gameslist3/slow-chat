@@ -1,8 +1,8 @@
 import React from 'react';
 import { Message } from '../../types';
 import { useAuth } from '../../context/AuthContext';
-import { Smile, MoreHorizontal, Reply } from 'lucide-react';
-import { Button } from '../ui/Button';
+import { Reply } from 'lucide-react';
+import { GroupInviteCard } from './GroupInviteCard';
 
 interface MessageBubbleProps {
     message: Message;
@@ -15,6 +15,11 @@ interface MessageBubbleProps {
 export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinual, onReact, onReply, onProfileClick }) => {
     const { user } = useAuth();
     const isMe = message.sender === user?.username;
+
+    // Detect internal group links
+    const groupLinkRegex = /\/chat\/([a-f0-9-]{36}|nexus-[a-z-]+|system-updates)/i;
+    const groupLinkMatch = message.text?.match(groupLinkRegex);
+    const linkedGroupId = groupLinkMatch ? groupLinkMatch[1] : null;
 
     // Helper to format time safely
     const formatTime = (ts: any) => {
@@ -74,7 +79,12 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                 `}>
                     {message.type === 'text' && (
                         <div className="max-w-full">
-                            {message.text}
+                            <div className="mb-2">{message.text}</div>
+                            {linkedGroupId && (
+                                <div className="mt-3 mb-1">
+                                    <GroupInviteCard groupId={linkedGroupId} />
+                                </div>
+                            )}
                         </div>
                     )}
 
