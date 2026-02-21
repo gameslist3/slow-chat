@@ -6,6 +6,7 @@ import { Icon } from '../common/Icon';
 import { generateAnonymousName } from '../../services/firebaseAuthService';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeToggle } from '../ai-ui/ThemeToggle';
+import { KeyBackup } from './KeyBackup';
 export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout: () => void }) => {
     const { user, updateUsername, resetPassword } = useAuth();
     const { toast } = useToast();
@@ -14,6 +15,7 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
     const [isEditing, setIsEditing] = useState(false);
     const [tempName, setTempName] = useState('');
     const [lockDate, setLockDate] = useState<Date | null>(null);
+    const [showBackup, setShowBackup] = useState(false);
 
     // Calculate lock state on mount or user update
     useEffect(() => {
@@ -151,6 +153,26 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
                         <div className="space-y-4">
                             <div className="glass-panel p-6 rounded-3xl flex items-center justify-between hover:border-white/10 transition-all">
                                 <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-white/5 rounded-xl text-emerald-500 flex items-center justify-center">
+                                        <Icon name="shield" className="w-5 h-5" />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <p className="font-bold text-base text-foreground">Identity Backup</p>
+                                        <p className="text-xs font-medium text-gray-500">Securely export or restore your E2EE keys.</p>
+                                    </div>
+                                </div>
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="px-4 h-10 glass-card bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 text-xs font-bold tracking-wider uppercase rounded-lg transition-all"
+                                    onClick={() => setShowBackup(true)}
+                                >
+                                    Manage
+                                </motion.button>
+                            </div>
+
+                            <div className="glass-panel p-6 rounded-3xl flex items-center justify-between hover:border-white/10 transition-all">
+                                <div className="flex items-center gap-4">
                                     <div className="w-12 h-12 bg-white/5 rounded-xl text-gray-400 flex items-center justify-center">
                                         <Icon name="key" className="w-5 h-5" />
                                     </div>
@@ -221,6 +243,11 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
 
                 </div>
             </div>
+            <AnimatePresence>
+                {showBackup && (
+                    <KeyBackup onClose={() => setShowBackup(false)} />
+                )}
+            </AnimatePresence>
         </div>
     );
 };

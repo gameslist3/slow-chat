@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 import { DeviceSyncService } from '../../services/crypto/DeviceSyncService';
+import { vault } from '../../services/crypto/LocalVault';
+import { CryptoUtils } from '../../services/crypto/CryptoUtils';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db, auth } from '../../config/firebase';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Monitor, Smartphone, QrCode, ShieldCheck, AlertCircle, X, ChevronRight } from 'lucide-react';
 
@@ -19,7 +23,25 @@ export const DeviceSync: React.FC<DeviceSyncProps> = ({ onClose }) => {
     const startAsOwner = async () => {
         try {
             setMode('owner');
-            setStatus('Initializing session...');
+            setStatus('Checking identity...');
+
+            let identityPrivateKey = await vault.getSecret('identity_private_key');
+
+            if (!identityPrivateKey) {
+                setStatus('Generating new security identity...');
+                const keys = await CryptoUtils.generateIdentityKeyPair();
+                const pubKeyBase64 = await CryptoUtils.exportPublicKey(keys.publicKey);
+
+                await vault.saveSecret('identity_private_key', keys.privateKey);
+
+                if (auth.currentUser) {
+                    await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+                        'publicKeys.identity': pubKeyBase64
+                    });
+                }
+                setStatus('Identity created! Opening sync portal...');
+            }
+
             const { sessionId, publicKey } = await DeviceSyncService.startSyncSession();
             setQrData(JSON.stringify({ s: sessionId, p: publicKey }));
             setStatus('Ready for scanning');
@@ -29,7 +51,8 @@ export const DeviceSync: React.FC<DeviceSyncProps> = ({ onClose }) => {
                 setTimeout(onClose, 2000);
             });
         } catch (err: any) {
-            setError(err.message);
+            console.error(err);
+            setError(err.message || 'Failed to establish primary device.');
         }
     };
 

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Icon } from '../common/Icon';
-import { uploadVoice, uploadMedia } from '../../services/cloudinaryService';
+import { uploadVoice, uploadMedia } from '../../services/firebaseStorageService';
 import { createNotification } from '../../services/firebaseNotificationService'; // New import
 import { updateGroupLastActivity } from '../../services/firebaseGroupService';   // New import
 import { Message, FileMetadata } from '../../types';
@@ -107,8 +107,18 @@ export const AIComposer: React.FC<AIComposerProps> = ({
         if (!audioBlob) return;
         setUploading(true);
         try {
-            const url = await uploadVoice(audioBlob, groupId, userId, () => { });
-            onSend({ media: { url, type: 'audio', name: 'voice_note.webm', size: audioBlob.size }, type: 'audio' });
+            const { url, key, iv } = await uploadVoice(audioBlob, groupId, userId, () => { });
+            onSend({
+                media: {
+                    url,
+                    type: 'audio',
+                    name: 'voice_note.enc',
+                    size: audioBlob.size,
+                    encKey: key,
+                    encIv: iv
+                },
+                type: 'audio'
+            });
             setRecState('idle');
             setAudioBlob(null);
             setAudioUrl(null);
@@ -133,8 +143,18 @@ export const AIComposer: React.FC<AIComposerProps> = ({
 
         setUploading(true);
         try {
-            const url = await uploadMedia(file, groupId, userId, () => { });
-            onSend({ media: { url, type: 'image', name: file.name, size: file.size }, type: 'image' });
+            const { url, key, iv } = await uploadMedia(file, groupId, userId, () => { });
+            onSend({
+                media: {
+                    url,
+                    type: 'image',
+                    name: file.name,
+                    size: file.size,
+                    encKey: key,
+                    encIv: iv
+                },
+                type: 'image'
+            });
         } catch (err) {
             toast('Upload failed', 'error');
         } finally {

@@ -41,7 +41,6 @@ export const useChat = (chatId: string, isPersonal: boolean = false) => {
                 if (!m.encrypted || !m.iv) return m;
 
                 try {
-                    // Identify the peer who sent the message (or who we are talking to)
                     const peerId = isPersonal
                         ? (m.senderId === user.id ? chatId.split('_').find(id => id !== user.id) : m.senderId)
                         : m.senderId;
@@ -59,13 +58,24 @@ export const useChat = (chatId: string, isPersonal: boolean = false) => {
                             }
                         }
                     } else {
-                        // Group Decryption: Fetch sender's group key
                         sessionKey = await GroupEncryptionService.getPeerSenderKey(chatId, peerId, user.id);
                     }
 
                     if (sessionKey) {
-                        const decryptedText = await CryptoUtils.decryptAES(m.text, m.iv, sessionKey);
-                        return { ...m, text: decryptedText, encrypted: false };
+                        const decrypted = await CryptoUtils.decryptAES(m.text, m.iv, sessionKey);
+                        try {
+                            const parsed = JSON.parse(decrypted);
+                            return {
+                                ...m,
+                                text: parsed.text || '',
+                                media: parsed.media,
+                                replyTo: parsed.replyTo,
+                                encrypted: false
+                            };
+                        } catch (e) {
+                            // Fallback for legacy plain-text encryption
+                            return { ...m, text: decrypted, encrypted: false };
+                        }
                     }
                 } catch (err) {
                     console.error("[useChat] Decryption failed for message:", m.id, err);
@@ -120,13 +130,23 @@ export const useChat = (chatId: string, isPersonal: boolean = false) => {
                             }
                         }
                     } else {
-                        // Group Decryption: Fetch sender's group key
                         sessionKey = await GroupEncryptionService.getPeerSenderKey(chatId, peerId, user.id);
                     }
 
                     if (sessionKey) {
-                        const decryptedText = await CryptoUtils.decryptAES(m.text, m.iv, sessionKey);
-                        return { ...m, text: decryptedText, encrypted: false };
+                        const decrypted = await CryptoUtils.decryptAES(m.text, m.iv, sessionKey);
+                        try {
+                            const parsed = JSON.parse(decrypted);
+                            return {
+                                ...m,
+                                text: parsed.text || '',
+                                media: parsed.media,
+                                replyTo: parsed.replyTo,
+                                encrypted: false
+                            };
+                        } catch (e) {
+                            return { ...m, text: decrypted, encrypted: false };
+                        }
                     }
                 } catch (err) {
                     console.error("[useChat] Decryption failed for message:", m.id, err);

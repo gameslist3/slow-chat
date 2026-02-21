@@ -3,6 +3,7 @@ import { Message } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { Reply } from 'lucide-react';
 import { GroupInviteCard } from './GroupInviteCard';
+import { EncryptedMedia } from './EncryptedMedia';
 
 interface MessageBubbleProps {
     message: Message;
@@ -89,73 +90,85 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                     )}
 
                     {message.type === 'audio' && message.media && (
-                        <div className="flex items-center gap-3 min-w-[200px] h-10">
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    const audio = e.currentTarget.nextElementSibling as HTMLAudioElement;
-                                    if (audio.paused) audio.play(); else audio.pause();
-                                    e.currentTarget.querySelector('svg')?.classList.toggle('hidden');
-                                }}
-                                className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors shrink-0"
-                            >
-                                <svg className="w-3 h-3 fill-current ml-0.5 play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-                                <svg className="w-3 h-3 fill-current hidden pause-icon" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" /></svg>
-                            </button>
-                            <audio
-                                src={message.media.url}
-                                onPlay={(e) => {
-                                    (e.currentTarget.previousElementSibling?.querySelector('.play-icon') as HTMLElement).classList.add('hidden');
-                                    (e.currentTarget.previousElementSibling?.querySelector('.pause-icon') as HTMLElement).classList.remove('hidden');
-                                }}
-                                onPause={(e) => {
-                                    (e.currentTarget.previousElementSibling?.querySelector('.play-icon') as HTMLElement).classList.remove('hidden');
-                                    (e.currentTarget.previousElementSibling?.querySelector('.pause-icon') as HTMLElement).classList.add('hidden');
-                                }}
-                                onEnded={(e) => {
-                                    (e.currentTarget.previousElementSibling?.querySelector('.play-icon') as HTMLElement).classList.remove('hidden');
-                                    (e.currentTarget.previousElementSibling?.querySelector('.pause-icon') as HTMLElement).classList.add('hidden');
-                                }}
-                                className="hidden"
-                            />
-                            <div className="flex-1 space-y-1">
-                                <div className="h-0.5 bg-white/20 rounded-full overflow-hidden w-full">
-                                    <div className="h-full bg-white w-0 animate-[progress_1s_linear]" style={{ width: '0%' }} />
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {(message.type === 'image' || message.type === 'video') && (
-                        <div className="relative group/media overflow-hidden rounded-xl">
-                            {message.type === 'image' ? (
-                                <img src={message.media?.url} alt="media" className="max-h-60 w-full object-cover shadow-sm" />
-                            ) : (
-                                <div className="max-h-60 w-full bg-black/90 flex items-center justify-center aspect-video relative">
-                                    <video src={message.media?.url} className="w-full h-full object-cover opacity-50" />
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-xl">
-                                            <div className="w-0 h-0 border-t-[8px] border-t-transparent border-l-[14px] border-l-white border-b-[8px] border-b-transparent ml-1" />
+                        <EncryptedMedia
+                            media={message.media}
+                            type="audio"
+                            render={(url) => (
+                                <div className="flex items-center gap-3 min-w-[200px] h-10">
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            const audio = e.currentTarget.nextElementSibling as HTMLAudioElement;
+                                            if (audio.paused) audio.play(); else audio.pause();
+                                            e.currentTarget.querySelector('svg')?.classList.toggle('hidden');
+                                        }}
+                                        className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors shrink-0"
+                                    >
+                                        <svg className="w-3 h-3 fill-current ml-0.5 play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                                        <svg className="w-3 h-3 fill-current hidden pause-icon" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" /></svg>
+                                    </button>
+                                    <audio
+                                        src={url}
+                                        onPlay={(e) => {
+                                            (e.currentTarget.previousElementSibling?.querySelector('.play-icon') as HTMLElement).classList.add('hidden');
+                                            (e.currentTarget.previousElementSibling?.querySelector('.pause-icon') as HTMLElement).classList.remove('hidden');
+                                        }}
+                                        onPause={(e) => {
+                                            (e.currentTarget.previousElementSibling?.querySelector('.play-icon') as HTMLElement).classList.remove('hidden');
+                                            (e.currentTarget.previousElementSibling?.querySelector('.pause-icon') as HTMLElement).classList.add('hidden');
+                                        }}
+                                        onEnded={(e) => {
+                                            (e.currentTarget.previousElementSibling?.querySelector('.play-icon') as HTMLElement).classList.remove('hidden');
+                                            (e.currentTarget.previousElementSibling?.querySelector('.pause-icon') as HTMLElement).classList.add('hidden');
+                                        }}
+                                        className="hidden"
+                                    />
+                                    <div className="flex-1 space-y-1">
+                                        <div className="h-0.5 bg-white/20 rounded-full overflow-hidden w-full">
+                                            <div className="h-full bg-white w-0 animate-[progress_1s_linear]" style={{ width: '0%' }} />
                                         </div>
                                     </div>
                                 </div>
                             )}
+                        />
+                    )}
 
-                            {/* Download Overlay */}
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/media:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-[2px]">
-                                <a
-                                    href={message.media?.url}
-                                    download={message.media?.name || 'download'}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center gap-2 px-4 py-2 bg-white text-black rounded-full font-bold text-xs hover:scale-105 transition-transform shadow-xl"
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" /></svg>
-                                    Download to View
-                                </a>
-                            </div>
-                        </div>
+                    {(message.type === 'image' || message.type === 'video') && message.media && (
+                        <EncryptedMedia
+                            media={message.media}
+                            type={message.type}
+                            render={(url) => (
+                                <div className="relative group/media overflow-hidden rounded-xl">
+                                    {message.type === 'image' ? (
+                                        <img src={url} alt="media" className="max-h-60 w-full object-cover shadow-sm" />
+                                    ) : (
+                                        <div className="max-h-60 w-full bg-black/90 flex items-center justify-center aspect-video relative">
+                                            <video src={url} className="w-full h-full object-cover opacity-50" />
+                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-xl">
+                                                    <div className="w-0 h-0 border-t-[8px] border-t-transparent border-l-[14px] border-l-white border-b-[8px] border-b-transparent ml-1" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Download Overlay */}
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/media:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-[2px]">
+                                        <a
+                                            href={url}
+                                            download={message.media?.name || 'download'}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center gap-2 px-4 py-2 bg-white text-black rounded-full font-bold text-xs hover:scale-105 transition-transform shadow-xl"
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" /></svg>
+                                            Download to View
+                                        </a>
+                                    </div>
+                                </div>
+                            )}
+                        />
                     )}
 
                     {message.type === 'text' && (

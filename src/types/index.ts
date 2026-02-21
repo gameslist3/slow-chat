@@ -44,6 +44,8 @@ export interface FileMetadata {
     url: string;
     name: string;
     size: number;
+    encKey?: string;
+    encIv?: string;
 }
 
 export type MessageStatus = 'sent' | 'delivered' | 'seen';

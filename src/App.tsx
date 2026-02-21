@@ -136,6 +136,7 @@ const AuthenticatedSection = () => {
     const [viewingUserId, setViewingUserId] = useState<string | null>(null);
     const [highlightMessageId, setHighlightMessageId] = useState<string | undefined>(undefined);
     const [followRequestsCount, setFollowRequestsCount] = useState(0);
+    const [showSyncModal, setShowSyncModal] = useState(true);
     const { personalChats } = useInbox();
 
     console.log('[AuthenticatedSection] Rendering', { user: user?.username, activeTab, myGroupsCount: myGroups.length });
@@ -278,8 +279,8 @@ const AuthenticatedSection = () => {
     return (
         <div className="relative w-full h-full flex flex-col">
             <AnimatePresence>
-                {!isE2EEReady && (
-                    <DeviceSync key="sync" onClose={() => checkE2EEStatus()} />
+                {!isE2EEReady && showSyncModal && (
+                    <DeviceSync key="sync" onClose={() => setShowSyncModal(false)} />
                 )}
             </AnimatePresence>
 

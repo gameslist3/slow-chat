@@ -4,6 +4,7 @@ import {
     getDownloadURL
 } from 'firebase/storage';
 import { storage } from '../config/firebase';
+import { CryptoUtils } from './crypto/CryptoUtils';
 
 export interface UploadProgress {
     progress: number;
@@ -46,6 +47,33 @@ export const uploadFile = (
 };
 
 /**
+ * Upload a file with E2EE
+ */
+export const uploadEncryptedFile = async (
+    file: File | Blob,
+    path: string,
+    onProgress: (progress: number) => void
+): Promise<{ url: string; key: string; iv: string }> => {
+    // 1. Generate per-file key
+    const aesKey = await CryptoUtils.generateAESKey();
+
+    // 2. Read file as ArrayBuffer
+    const buffer = await file.arrayBuffer();
+
+    // 3. Encrypt buffer
+    const { ciphertext, iv } = await CryptoUtils.encryptBuffer(buffer, aesKey);
+
+    // 4. Upload ciphertext (as a generic blob)
+    const url = await uploadFile(new Blob([ciphertext]), path, onProgress);
+
+    // 5. Export key and IV for storage in message
+    const exportedKey = await CryptoUtils.exportRawKey(aesKey);
+    const ivBase64 = btoa(String.fromCharCode(...iv));
+
+    return { url, key: exportedKey, iv: ivBase64 };
+};
+
+/**
  * Specifically for voice recordings
  */
 export const uploadVoice = async (
@@ -53,10 +81,10 @@ export const uploadVoice = async (
     groupId: string,
     userId: string,
     onProgress: (progress: number) => void
-): Promise<string> => {
-    const filename = `voice_${Date.now()}.webm`;
+): Promise<{ url: string; key: string; iv: string }> => {
+    const filename = `voice_${Date.now()}.enc`;
     const path = `groups/${groupId}/voice/${userId}/${filename}`;
-    return uploadFile(blob, path, onProgress);
+    return uploadEncryptedFile(blob, path, onProgress);
 };
 
 /**
@@ -67,8 +95,8 @@ export const uploadMedia = async (
     groupId: string,
     userId: string,
     onProgress: (progress: number) => void
-): Promise<string> => {
-    const filename = `${Date.now()}_${file.name}`;
+): Promise<{ url: string; key: string; iv: string }> => {
+    const filename = `${Date.now()}_${file.name}.enc`;
     const path = `groups/${groupId}/media/${userId}/${filename}`;
-    return uploadFile(file, path, onProgress);
+    return uploadEncryptedFile(file, path, onProgress);
 };

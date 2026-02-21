@@ -63,6 +63,20 @@ export class CryptoUtils {
         };
     }
 
+    // Encrypt ArrayBuffer using AES-GCM
+    static async encryptBuffer(data: ArrayBuffer, key: CryptoKey): Promise<{ ciphertext: ArrayBuffer; iv: Uint8Array }> {
+        const iv = window.crypto.getRandomValues(new Uint8Array(12));
+        const ciphertext = await window.crypto.subtle.encrypt(
+            {
+                name: 'AES-GCM',
+                iv: iv
+            },
+            key,
+            data
+        );
+        return { ciphertext, iv };
+    }
+
     // Decrypt content using AES-GCM
     static async decryptAES(ciphertextBase64: string, ivBase64: string, key: CryptoKey): Promise<string> {
         const iv = new Uint8Array(atob(ivBase64).split('').map(c => c.charCodeAt(0)));
@@ -78,6 +92,18 @@ export class CryptoUtils {
         );
 
         return new TextDecoder().decode(decrypted);
+    }
+
+    // Decrypt ArrayBuffer using AES-GCM
+    static async decryptBuffer(data: ArrayBuffer, iv: BufferSource, key: CryptoKey): Promise<ArrayBuffer> {
+        return await window.crypto.subtle.decrypt(
+            {
+                name: 'AES-GCM',
+                iv: iv
+            },
+            key,
+            data
+        );
     }
 
     // Derive Shared Secret (Diffie-Hellman)
@@ -172,5 +198,50 @@ export class CryptoUtils {
             true,
             ['encrypt', 'decrypt']
         );
+    }
+
+    // PBKDF2: Derive AES key from password
+    static async deriveKeyFromPassword(password: string, salt: Uint8Array): Promise<CryptoKey> {
+        const encoder = new TextEncoder();
+        const baseKey = await window.crypto.subtle.importKey(
+            'raw',
+            encoder.encode(password),
+            'PBKDF2',
+            false,
+            ['deriveKey']
+        );
+
+        return window.crypto.subtle.deriveKey(
+            {
+                name: 'PBKDF2',
+                salt: salt as any,
+                iterations: 100000,
+                hash: 'SHA-256'
+            },
+            baseKey,
+            { name: 'AES-GCM', length: 256 },
+            true,
+            ['encrypt', 'decrypt']
+        );
+    }
+
+    // Encrypt with password (for backup)
+    static async encryptWithPassword(text: string, password: string): Promise<{ ciphertext: string; iv: string; salt: string }> {
+        const salt = window.crypto.getRandomValues(new Uint8Array(16));
+        const key = await this.deriveKeyFromPassword(password, salt);
+        const { ciphertext, iv } = await this.encryptAES(text, key);
+
+        return {
+            ciphertext,
+            iv,
+            salt: btoa(String.fromCharCode(...salt))
+        };
+    }
+
+    // Decrypt with password (for recovery)
+    static async decryptWithPassword(ciphertext: string, iv: string, salt: string, password: string): Promise<string> {
+        const saltBytes = new Uint8Array(atob(salt).split('').map(c => c.charCodeAt(0)));
+        const key = await this.deriveKeyFromPassword(password, saltBytes);
+        return this.decryptAES(ciphertext, iv, key);
     }
 }

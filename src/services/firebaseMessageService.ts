@@ -83,12 +83,19 @@ export async function sendMessage(
                 sessionKey = await CryptoUtils.establishSession(content.recipientId, pubKeys.identity);
             }
 
-            if (content.text) {
-                const { ciphertext, iv } = await CryptoUtils.encryptAES(content.text, sessionKey);
-                messageData.text = ciphertext;
-                messageData.iv = iv;
-                messageData.encrypted = true;
-            }
+            const payload = {
+                text: content.text || '',
+                media: content.media,
+                replyTo: content.replyTo
+            };
+
+            const { ciphertext, iv } = await CryptoUtils.encryptAES(JSON.stringify(payload), sessionKey);
+            messageData.text = ciphertext;
+            messageData.iv = iv;
+            messageData.encrypted = true;
+            // Clear binary metadata from root level as it's now in the encrypted payload
+            delete messageData.media;
+            delete messageData.replyTo;
         } else if (!content.isPersonal && content.text) {
             // Group E2EE Logic
             try {
@@ -102,11 +109,21 @@ export async function sendMessage(
                     await GroupEncryptionService.distributeMyKey(targetId, members, senderId);
 
                     const mySenderKey = await GroupEncryptionService.getMySenderKey(targetId);
-                    const { ciphertext, iv } = await CryptoUtils.encryptAES(content.text, mySenderKey);
+
+                    const payload = {
+                        text: content.text || '',
+                        media: content.media,
+                        replyTo: content.replyTo
+                    };
+
+                    const { ciphertext, iv } = await CryptoUtils.encryptAES(JSON.stringify(payload), mySenderKey);
 
                     messageData.text = ciphertext;
                     messageData.iv = iv;
                     messageData.encrypted = true;
+                    // Clear binary metadata from root level
+                    delete messageData.media;
+                    delete messageData.replyTo;
                     console.log(`[GroupE2EE] Message encrypted for group ${targetId}`);
                 }
             } catch (err) {
@@ -167,7 +184,7 @@ export async function sendMessage(
                     await createNotification(content.recipientId, {
                         type: 'message',
                         senderName: senderUsername,
-                        text: content.text || `Sent a ${content.type}`,
+                        text: `Sent a ${content.type === 'text' ? 'message' : content.type}`,
                         groupId: targetId,
                         messageId: docRef.id
                     });
@@ -190,7 +207,7 @@ export async function sendMessage(
                         await createNotification(replyToUserId, {
                             type: 'message',
                             senderName: senderUsername,
-                            text: `replied to you: "${content.text?.substring(0, 50)}${content.text && content.text.length > 50 ? '...' : ''}"`,
+                            text: `replied to your message`,
                             groupId: targetId,
                             messageId: docRef.id
                         });
@@ -215,7 +232,7 @@ export async function sendMessage(
                                 await createNotification(uid, {
                                     type: 'message',
                                     senderName: senderUsername,
-                                    text: `mentioned you: "${content.text?.substring(0, 50)}..."`,
+                                    text: `mentioned you in a message`,
                                     groupId: targetId,
                                     messageId: docRef.id
                                 });
