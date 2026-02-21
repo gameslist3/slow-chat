@@ -195,48 +195,46 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
                         </div>
                     </div>
 
-                </div>
-            </div>
+                    {/* Danger Zone */}
+                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300 pb-20">
+                        <h2 className="text-sm font-bold text-red-500 uppercase tracking-widest pl-2">Danger Zone</h2>
 
-            {/* Danger Zone */}
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300 pb-20">
-                <h2 className="text-sm font-bold text-red-500 uppercase tracking-widest pl-2">Danger Zone</h2>
-
-                <div className="glass-panel p-6 rounded-3xl border-red-500/20 bg-red-500/5 hover:bg-red-500/10 transition-all">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-red-500/10 rounded-xl text-red-500 flex items-center justify-center">
-                                <Icon name="trash" className="w-5 h-5" />
-                            </div>
-                            <div className="flex flex-col">
-                                <p className="font-bold text-base text-red-500">Hard Reset</p>
-                                <p className="text-xs font-medium text-gray-500 max-w-sm">Wipes all users, groups, and global chat history. Use once to fix E2EE mismatch issues.</p>
+                        <div className="glass-panel p-6 rounded-3xl border-red-500/20 bg-red-500/5 hover:bg-red-500/10 transition-all">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-red-500/10 rounded-xl text-red-500 flex items-center justify-center">
+                                        <Icon name="trash" className="w-5 h-5" />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <p className="font-bold text-base text-red-500">Hard Reset</p>
+                                        <p className="text-xs font-medium text-gray-500 max-w-sm">Wipes all users, groups, and global chat history. Use once to fix E2EE mismatch issues.</p>
+                                    </div>
+                                </div>
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={async () => {
+                                        if (confirm("⚠️ WARNING: This will permanently WIPE all users, groups, and messages. This action is irreversible. Proceed?")) {
+                                            await MaintenanceService.wipeDatabase();
+                                            toast("Database Wiped. Refreshing app...", "info");
+                                            setTimeout(() => window.location.reload(), 2000);
+                                        }
+                                    }}
+                                    className="px-6 h-12 bg-red-500 text-white text-xs font-black tracking-widest uppercase rounded-xl shadow-lg shadow-red-500/20 hover:bg-red-600 transition-all"
+                                >
+                                    Wipe All Data
+                                </motion.button>
                             </div>
                         </div>
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={async () => {
-                                if (confirm("⚠️ WARNING: This will permanently WIPE all users, groups, and messages. This action is irreversible. Proceed?")) {
-                                    await MaintenanceService.wipeDatabase();
-                                    toast("Database Wiped. Refreshing app...", "info");
-                                    setTimeout(() => window.location.reload(), 2000);
-                                }
-                            }}
-                            className="px-6 h-12 bg-red-500 text-white text-xs font-black tracking-widest uppercase rounded-xl shadow-lg shadow-red-500/20 hover:bg-red-600 transition-all"
-                        >
-                            Wipe All Data
-                        </motion.button>
                     </div>
+
+                    <AnimatePresence>
+                        {showBackup && (
+                            <KeyBackup onClose={() => setShowBackup(false)} />
+                        )}
+                    </AnimatePresence>
                 </div>
             </div>
         </div>
-            </div >
-    <AnimatePresence>
-        {showBackup && (
-            <KeyBackup onClose={() => setShowBackup(false)} />
-        )}
-    </AnimatePresence>
-        </div >
     );
 };
