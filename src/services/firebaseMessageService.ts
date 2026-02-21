@@ -134,8 +134,10 @@ export async function sendMessage(
             }
         }
 
-        if (content.replyTo) messageData.replyTo = content.replyTo;
-        if (content.media) messageData.media = content.media;
+        if (!messageData.encrypted) {
+            if (content.replyTo) messageData.replyTo = content.replyTo;
+            if (content.media) messageData.media = content.media;
+        }
 
         if (content.isPersonal) {
             messageData.status = 'sent';

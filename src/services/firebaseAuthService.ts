@@ -173,6 +173,11 @@ export const loginUserWithPassword = async (creds: UserCredentials): Promise<Use
         // SELF-HEALING: If user exists in Auth but not Firestore, create profile now
         if (!userDoc.exists()) {
             console.warn(`[Auth] User profile missing in Firestore for ${uid}. Creating default profile.`);
+            // Generate E2EE Identity Key Pair for self-healing
+            const identityKeyPair = await CryptoUtils.generateIdentityKeyPair();
+            const publicIdentityKeyBase64 = await CryptoUtils.exportPublicKey(identityKeyPair.publicKey);
+            await vault.saveSecret('identity_private_key', identityKeyPair.privateKey);
+
             await setDoc(doc(db, 'users', uid), {
                 id: uid,
                 email: creds.email,
@@ -185,7 +190,10 @@ export const loginUserWithPassword = async (creds: UserCredentials): Promise<Use
                 notificationsClearedAt: 0,
                 groupJoinTimes: {},
                 createdAt: Date.now(),
-                sessions: []
+                sessions: [],
+                publicKeys: {
+                    identity: publicIdentityKeyBase64
+                }
             });
             userDoc = await getDoc(doc(db, 'users', uid));
         }
@@ -308,6 +316,7 @@ export const getUserById = async (uid: string): Promise<User | null> => {
         unreadCount: userData.unreadCount || 0,
         notificationsClearedAt: userData.notificationsClearedAt || 0,
         lastUsernameChange: userData.lastUsernameChange,
-        sessions: userData.sessions || []
+        sessions: userData.sessions || [],
+        publicKeys: userData.publicKeys || null
     };
 };

@@ -58,7 +58,12 @@ export const useChat = (chatId: string, isPersonal: boolean = false) => {
                             }
                         }
                     } else {
-                        sessionKey = await GroupEncryptionService.getPeerSenderKey(chatId, peerId, user.id);
+                        // FIX: If I am the sender, use my own sender key
+                        if (m.senderId === user.id) {
+                            sessionKey = await GroupEncryptionService.getMySenderKey(chatId);
+                        } else {
+                            sessionKey = await GroupEncryptionService.getPeerSenderKey(chatId, peerId, user.id);
+                        }
                     }
 
                     if (sessionKey) {
@@ -76,10 +81,12 @@ export const useChat = (chatId: string, isPersonal: boolean = false) => {
                             // Fallback for legacy plain-text encryption
                             return { ...m, text: decrypted, encrypted: false };
                         }
+                    } else {
+                        return { ...m, text: "🔒 Decryption pending: Connecting to peer security identity..." };
                     }
                 } catch (err) {
                     console.error("[useChat] Decryption failed for message:", m.id, err);
-                    return { ...m, text: "🔒 Decryption error: Secret key unavailable on this device." };
+                    return { ...m, text: "🔒 Decryption error: Secure channel corrupted or key mismatch." };
                 }
                 return m;
             }));
@@ -130,7 +137,12 @@ export const useChat = (chatId: string, isPersonal: boolean = false) => {
                             }
                         }
                     } else {
-                        sessionKey = await GroupEncryptionService.getPeerSenderKey(chatId, peerId, user.id);
+                        // FIX: If I am the sender, use my own sender key
+                        if (m.senderId === user.id) {
+                            sessionKey = await GroupEncryptionService.getMySenderKey(chatId);
+                        } else {
+                            sessionKey = await GroupEncryptionService.getPeerSenderKey(chatId, peerId, user.id);
+                        }
                     }
 
                     if (sessionKey) {
@@ -147,10 +159,12 @@ export const useChat = (chatId: string, isPersonal: boolean = false) => {
                         } catch (e) {
                             return { ...m, text: decrypted, encrypted: false };
                         }
+                    } else {
+                        return { ...m, text: "🔒 Decryption pending: Connecting to peer security identity..." };
                     }
                 } catch (err) {
                     console.error("[useChat] Decryption failed for message:", m.id, err);
-                    return { ...m, text: "🔒 Decryption error: Secret key unavailable on this device." };
+                    return { ...m, text: "🔒 Decryption error: Secure channel corrupted or key mismatch." };
                 }
                 return m;
             }));
