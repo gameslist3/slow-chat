@@ -431,10 +431,13 @@ export async function fetchPreviousMessages(
  * Terminate a personal chat and all its messages
  */
 export async function terminatePersonalChat(chatId: string): Promise<void> {
+    // 1. Delete the chat metadata first so UI updates instantly
+    await deleteDoc(doc(db, 'personal_chats', chatId));
+
+    // 2. Cleanup messages in the background/batches
     const messagesRef = collection(db, `personal_chats/${chatId}/messages`);
     const snap = await getDocs(messagesRef);
 
-    // Delete messages in batches of 400 to stay well under Firestore limits
     const docs = snap.docs;
     for (let i = 0; i < docs.length; i += 400) {
         const batch = writeBatch(db);
@@ -442,9 +445,6 @@ export async function terminatePersonalChat(chatId: string): Promise<void> {
         chunk.forEach(d => batch.delete(d.ref));
         await batch.commit();
     }
-
-    // Finally delete the chat metadata
-    await deleteDoc(doc(db, 'personal_chats', chatId));
 }
 
 /**
