@@ -97,41 +97,10 @@ export async function sendMessage(
             delete messageData.media;
             delete messageData.replyTo;
         } else if (!content.isPersonal && content.text) {
-            // Group E2EE Logic
-            try {
-                const groupDoc = await getDoc(doc(db, 'groups', targetId));
-                if (groupDoc.exists()) {
-                    const groupData = groupDoc.data();
-                    const members = groupData.joinedMembers || [];
-
-                    // Basic distribution check: distribute if members > 1
-                    // In a real app, we'd throttle this or use a 'lastDistributed' timestamp
-                    await GroupEncryptionService.distributeMyKey(targetId, members, senderId);
-
-                    const mySenderKey = await GroupEncryptionService.getMySenderKey(targetId);
-
-                    const payload = {
-                        text: content.text || '',
-                        media: content.media,
-                        replyTo: content.replyTo
-                    };
-
-                    const { ciphertext, iv } = await CryptoUtils.encryptAES(JSON.stringify(payload), mySenderKey);
-
-                    messageData.text = ciphertext;
-                    messageData.iv = iv;
-                    messageData.encrypted = true;
-                    // Clear binary metadata from root level
-                    delete messageData.media;
-                    delete messageData.replyTo;
-                    console.log(`[GroupE2EE] Message encrypted for group ${targetId}`);
-                }
-            } catch (err) {
-                console.error("[GroupE2EE] Failed to encrypt message:", err);
-                // Fallback to plain text for now, or throw error to block leak
-                // User requirement is TRUE E2EE, so throwing error is safer.
-                throw new Error("Group E2EE negotiation failed.");
-            }
+            // Group Messaging: Plaintext (E2EE removed to allow all members to see historic messages)
+            messageData.text = content.text;
+            if (content.media) messageData.media = content.media;
+            if (content.replyTo) messageData.replyTo = content.replyTo;
         }
 
         if (!messageData.encrypted) {

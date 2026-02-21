@@ -82,13 +82,14 @@ export const useChat = (chatId: string, isPersonal: boolean = false) => {
                             return { ...m, text: decrypted, encrypted: false };
                         }
                     } else {
+                        if (!isPersonal) return { ...m, encrypted: false }; // Fallback for groups
                         return { ...m, text: "🔒 Decryption pending: Connecting to peer security identity..." };
                     }
                 } catch (err) {
                     console.error("[useChat] Decryption failed for message:", m.id, err);
+                    if (!isPersonal) return { ...m, encrypted: false };
                     return { ...m, text: "🔒 Decryption error: Secure channel corrupted or key mismatch." };
                 }
-                return m;
             }));
             return processed;
         };
@@ -160,13 +161,14 @@ export const useChat = (chatId: string, isPersonal: boolean = false) => {
                             return { ...m, text: decrypted, encrypted: false };
                         }
                     } else {
+                        if (!isPersonal) return { ...m, encrypted: false }; // Fallback for groups
                         return { ...m, text: "🔒 Decryption pending: Connecting to peer security identity..." };
                     }
                 } catch (err) {
                     console.error("[useChat] Decryption failed for message:", m.id, err);
+                    if (!isPersonal) return { ...m, encrypted: false };
                     return { ...m, text: "🔒 Decryption error: Secure channel corrupted or key mismatch." };
                 }
-                return m;
             }));
             return processed;
         };
