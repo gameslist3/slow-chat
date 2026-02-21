@@ -35,24 +35,40 @@ export const DeviceSync: React.FC<DeviceSyncProps> = ({ onClose }) => {
 
     // New Device Logic
     useEffect(() => {
-        if (mode === 'new') {
-            const scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: { width: 250, height: 250 } }, false);
+        let scanner: Html5QrcodeScanner | null = null;
 
-            scanner.render(async (decodedText) => {
-                try {
-                    scanner.clear();
-                    setStatus('Requesting access...');
-                    const { s, p } = JSON.parse(decodedText);
-                    await DeviceSyncService.joinSyncSession(s, p);
-                    setStatus('Identity verified! Restarting...');
-                    window.location.reload();
-                } catch (err: any) {
-                    setError('Invalid QR code format or sync failed.');
-                }
-            }, (err) => { });
+        if (mode === 'new') {
+            const timeout = setTimeout(() => {
+                const element = document.getElementById('reader');
+                if (!element) return;
+
+                scanner = new Html5QrcodeScanner("reader", {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 },
+                    rememberLastUsedCamera: true,
+                    aspectRatio: 1.0
+                }, false);
+
+                scanner.render(async (decodedText) => {
+                    try {
+                        if (scanner) scanner.clear();
+                        setStatus('Requesting access...');
+                        const { s, p } = JSON.parse(decodedText);
+                        await DeviceSyncService.joinSyncSession(s, p);
+                        setStatus('Identity verified! Restarting...');
+                        setTimeout(() => window.location.reload(), 1500);
+                    } catch (err: any) {
+                        setError('Invalid QR code format or sync failed.');
+                        setStatus('');
+                    }
+                }, (err) => { });
+            }, 500); // Small delay to ensure DOM is ready
 
             return () => {
-                scanner.clear().catch(e => console.error("Scanner clear fail", e));
+                clearTimeout(timeout);
+                if (scanner) {
+                    scanner.clear().catch(e => console.error("Scanner clear fail", e));
+                }
             };
         }
     }, [mode]);
