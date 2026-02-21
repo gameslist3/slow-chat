@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, enableIndexedDbPersistence } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 // Your web app's Firebase configuration
@@ -18,8 +18,20 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 // Initialize services
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const storage = getStorage(app);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
 
+// Enable persistence
+if (typeof window !== 'undefined') {
+    enableIndexedDbPersistence(db).catch((err: any) => {
+        if (err.code === 'failed-precondition') {
+            console.warn('Persistence failed: Multiple tabs open');
+        } else if (err.code === 'unimplemented') {
+            console.warn('Persistence failed: Browser not supported');
+        }
+    });
+}
+
+export { auth, db, storage };
 export default app;

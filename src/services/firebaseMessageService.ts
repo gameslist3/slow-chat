@@ -21,6 +21,8 @@ import {
 import { db, auth } from '../config/firebase';
 import { Message, ReplyMetadata, Reaction, FileMetadata, PersonalChat } from '../types';
 import { createNotification } from './firebaseNotificationService';
+import { CryptoUtils } from './crypto/CryptoUtils';
+import { GroupEncryptionService } from './crypto/GroupEncryptionService';
 
 /**
  * Universal Sender specifically for the 2026 UI Kit.
@@ -65,6 +67,55 @@ export async function sendMessage(
             type: content.type,
             reactions: []
         };
+
+        // E2EE Logic for Personal Chats
+        if (content.isPersonal && content.recipientId) {
+            let sessionKey = await CryptoUtils.getSessionKey(content.recipientId);
+
+            if (!sessionKey) {
+                console.log(`[E2EE] No session for ${content.recipientId}. Establishing handshake...`);
+                const recipientDoc = await getDoc(doc(db, 'users', content.recipientId));
+                if (!recipientDoc.exists()) throw new Error("Recipient protocol unavailable.");
+
+                const pubKeys = recipientDoc.data().publicKeys;
+                if (!pubKeys?.identity) throw new Error("Recipient has not initialized E2EE protocol.");
+
+                sessionKey = await CryptoUtils.establishSession(content.recipientId, pubKeys.identity);
+            }
+
+            if (content.text) {
+                const { ciphertext, iv } = await CryptoUtils.encryptAES(content.text, sessionKey);
+                messageData.text = ciphertext;
+                messageData.iv = iv;
+                messageData.encrypted = true;
+            }
+        } else if (!content.isPersonal && content.text) {
+            // Group E2EE Logic
+            try {
+                const groupDoc = await getDoc(doc(db, 'groups', targetId));
+                if (groupDoc.exists()) {
+                    const groupData = groupDoc.data();
+                    const members = groupData.joinedMembers || [];
+
+                    // Basic distribution check: distribute if members > 1
+                    // In a real app, we'd throttle this or use a 'lastDistributed' timestamp
+                    await GroupEncryptionService.distributeMyKey(targetId, members, senderId);
+
+                    const mySenderKey = await GroupEncryptionService.getMySenderKey(targetId);
+                    const { ciphertext, iv } = await CryptoUtils.encryptAES(content.text, mySenderKey);
+
+                    messageData.text = ciphertext;
+                    messageData.iv = iv;
+                    messageData.encrypted = true;
+                    console.log(`[GroupE2EE] Message encrypted for group ${targetId}`);
+                }
+            } catch (err) {
+                console.error("[GroupE2EE] Failed to encrypt message:", err);
+                // Fallback to plain text for now, or throw error to block leak
+                // User requirement is TRUE E2EE, so throwing error is safer.
+                throw new Error("Group E2EE negotiation failed.");
+            }
+        }
 
         if (content.replyTo) messageData.replyTo = content.replyTo;
         if (content.media) messageData.media = content.media;

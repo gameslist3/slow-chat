@@ -5,6 +5,7 @@ import { doc, updateDoc, getDoc, onSnapshot, collection, query, where } from 'fi
 import { auth, db } from '../config/firebase';
 import * as firebaseAuth from '../services/firebaseAuthService';
 import * as firebaseGroupService from '../services/firebaseGroupService';
+import { vault } from '../services/crypto/LocalVault';
 
 interface AuthContextType {
     user: User | null;
@@ -18,6 +19,8 @@ interface AuthContextType {
     updateUsername: (newUsername: string) => Promise<boolean>;
     resetPassword: () => boolean;
     loginWithData: (user: User) => void;
+    isE2EEReady: boolean;
+    checkE2EEStatus: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -25,6 +28,16 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(false);
+    const [isE2EEReady, setIsE2EEReady] = useState(false);
+
+    const checkE2EEStatus = async () => {
+        const key = await vault.getSecret('identity_private_key');
+        setIsE2EEReady(!!key);
+    };
+
+    useEffect(() => {
+        if (user) checkE2EEStatus();
+    }, [user]);
 
     // Listen to Firebase Auth state changes
     useEffect(() => {
@@ -224,7 +237,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             logout,
             updateUsername,
             resetPassword,
-            loginWithData
+            loginWithData,
+            isE2EEReady,
+            checkE2EEStatus
         }}>
             {children}
         </AuthContext.Provider>

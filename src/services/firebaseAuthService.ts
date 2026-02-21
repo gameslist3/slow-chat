@@ -8,6 +8,8 @@ import {
 import { doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 import { User, UserCredentials } from '../types';
+import { CryptoUtils } from './crypto/CryptoUtils';
+import { vault } from './crypto/LocalVault';
 
 // Email validation
 export const validateEmail = (email: string): boolean => {
@@ -52,7 +54,14 @@ export const registerUserStep1 = async (creds: UserCredentials): Promise<boolean
             // but the user should be notified.
         }
 
-        // Create Firestore user document
+        // Generate E2EE Identity Key Pair
+        const identityKeyPair = await CryptoUtils.generateIdentityKeyPair();
+        const publicIdentityKeyBase64 = await CryptoUtils.exportPublicKey(identityKeyPair.publicKey);
+
+        // Save Private Key locally
+        await vault.saveSecret('identity_private_key', identityKeyPair.privateKey);
+
+        // Create Firestore user document with Public Key
         await setDoc(doc(db, 'users', firebaseUser.uid), {
             id: firebaseUser.uid,
             email: creds.email,
@@ -65,7 +74,10 @@ export const registerUserStep1 = async (creds: UserCredentials): Promise<boolean
             notificationsClearedAt: 0,
             groupJoinTimes: {},
             createdAt: Date.now(),
-            sessions: []
+            sessions: [],
+            publicKeys: {
+                identity: publicIdentityKeyBase64
+            }
         });
 
         console.log(`[Auth] Profile created in Firestore for ${firebaseUser.uid}`);

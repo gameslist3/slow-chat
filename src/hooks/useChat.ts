@@ -9,6 +9,9 @@ import {
     subscribeToPersonalChats,
     fetchPreviousMessages
 } from '../services/firebaseMessageService';
+import { getUserById } from '../services/firebaseAuthService';
+import { CryptoUtils } from '../services/crypto/CryptoUtils';
+import { GroupEncryptionService } from '../services/crypto/GroupEncryptionService';
 
 export const useChat = (chatId: string, isPersonal: boolean = false) => {
     const { user } = useAuth();
@@ -32,9 +35,51 @@ export const useChat = (chatId: string, isPersonal: boolean = false) => {
     useEffect(() => {
         if (!chatId || !user?.id) return;
         setLoading(true);
-        const unsubscribe = subscribeToMessages(chatId, isPersonal, (newMessages) => {
+
+        const decryptMessages = async (msgs: Message[]) => {
+            const processed = await Promise.all(msgs.map(async (m) => {
+                if (!m.encrypted || !m.iv) return m;
+
+                try {
+                    // Identify the peer who sent the message (or who we are talking to)
+                    const peerId = isPersonal
+                        ? (m.senderId === user.id ? chatId.split('_').find(id => id !== user.id) : m.senderId)
+                        : m.senderId;
+
+                    if (!peerId) return m;
+
+                    let sessionKey: CryptoKey | null = null;
+                    if (isPersonal) {
+                        sessionKey = await CryptoUtils.getSessionKey(peerId);
+                        if (!sessionKey) {
+                            const peerDoc = await getUserById(peerId);
+                            const pubKey = peerDoc?.publicKeys?.identity;
+                            if (pubKey) {
+                                sessionKey = await CryptoUtils.establishSession(peerId, pubKey);
+                            }
+                        }
+                    } else {
+                        // Group Decryption: Fetch sender's group key
+                        sessionKey = await GroupEncryptionService.getPeerSenderKey(chatId, peerId, user.id);
+                    }
+
+                    if (sessionKey) {
+                        const decryptedText = await CryptoUtils.decryptAES(m.text, m.iv, sessionKey);
+                        return { ...m, text: decryptedText, encrypted: false };
+                    }
+                } catch (err) {
+                    console.error("[useChat] Decryption failed for message:", m.id, err);
+                    return { ...m, text: "🔒 Decryption error: Secret key unavailable on this device." };
+                }
+                return m;
+            }));
+            return processed;
+        };
+
+        const unsubscribe = subscribeToMessages(chatId, isPersonal, async (newMessages) => {
             const filtered = newMessages.filter(m => m.type !== 'system');
-            setRealtimeMessages(filtered);
+            const decrypted = await decryptMessages(filtered);
+            setRealtimeMessages(decrypted);
             setLoading(false);
 
             if (user?.id) {
@@ -51,18 +96,62 @@ export const useChat = (chatId: string, isPersonal: boolean = false) => {
         const oldest = history[0] || realtimeMessages[0];
         const oldestTs = oldest ? ((oldest.timestamp as any)?.toMillis?.() || Date.now()) : Date.now();
 
+        if (!user) return;
+
+        const decryptMessages = async (msgs: Message[]) => {
+            const processed = await Promise.all(msgs.map(async (m) => {
+                if (!m.encrypted || !m.iv) return m;
+
+                try {
+                    const peerId = isPersonal
+                        ? (m.senderId === user.id ? chatId.split('_').find(id => id !== user.id) : m.senderId)
+                        : m.senderId;
+
+                    if (!peerId) return m;
+
+                    let sessionKey: CryptoKey | null = null;
+                    if (isPersonal) {
+                        sessionKey = await CryptoUtils.getSessionKey(peerId);
+                        if (!sessionKey) {
+                            const peerDoc = await getUserById(peerId);
+                            const pubKey = peerDoc?.publicKeys?.identity;
+                            if (pubKey) {
+                                sessionKey = await CryptoUtils.establishSession(peerId, pubKey);
+                            }
+                        }
+                    } else {
+                        // Group Decryption: Fetch sender's group key
+                        sessionKey = await GroupEncryptionService.getPeerSenderKey(chatId, peerId, user.id);
+                    }
+
+                    if (sessionKey) {
+                        const decryptedText = await CryptoUtils.decryptAES(m.text, m.iv, sessionKey);
+                        return { ...m, text: decryptedText, encrypted: false };
+                    }
+                } catch (err) {
+                    console.error("[useChat] Decryption failed for message:", m.id, err);
+                    return { ...m, text: "🔒 Decryption error: Secret key unavailable on this device." };
+                }
+                return m;
+            }));
+            return processed;
+        };
+
         // Enforce Clean Slate: Stop if we've reached the start of the allowed window
         if (oldestTs <= startTime) {
             setHasMore(false);
             return;
         }
 
+        if (!user) return;
+
         setLoadingMore(true);
         try {
             const chunk = await fetchPreviousMessages(chatId, isPersonal, oldestTs);
+            const decryptedChunk = await decryptMessages(chunk);
 
             // Filter chunk locally to respect startTime (safety floor)
-            const validChunk = chunk.filter(m => {
+            const validChunk = decryptedChunk.filter(m => {
                 const ts = (m.timestamp as any)?.toMillis?.() || 0;
                 return ts >= startTime;
             });
@@ -101,6 +190,8 @@ export const useChat = (chatId: string, isPersonal: boolean = false) => {
         }
 
         try {
+            if (!user?.id || !user?.username) throw new Error("User session invalid");
+
             const sentMessage = await sendFirebaseMessage(chatId, user.id, user.username, {
                 ...content,
                 replyTo: replyMeta,

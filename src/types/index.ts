@@ -18,6 +18,9 @@ export interface User {
     unreadCount: number;
     notificationsClearedAt?: number;
     groupJoinTimes?: { [groupId: string]: number };
+    publicKeys?: {
+        identity: string;
+    };
 }
 
 export interface UserCredentials {
@@ -57,6 +60,8 @@ export interface Message {
     replyTo?: ReplyMetadata;
     status?: MessageStatus; // For personal chats
     readBy?: string[]; // For group chats
+    encrypted?: boolean;
+    iv?: string;
 }
 
 export interface Group {

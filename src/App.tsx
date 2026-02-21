@@ -8,6 +8,7 @@ import { GroupDiscovery, CreateGroup } from './components/groups/GroupFeatures';
 import { ChatInterface } from './components/chat/ChatFeatures';
 import { AccountSettings } from './components/auth/AccountSettings';
 import { UserProfileModal } from './components/user/UserProfileModal';
+import { DeviceSync } from './components/auth/DeviceSync';
 import { FollowRequests } from './components/auth/FollowRequests';
 import { subscribeToGroups, joinGroup } from './services/firebaseGroupService';
 import { Group, User, PersonalChat } from './types';
@@ -123,7 +124,7 @@ const AppContent = () => {
 };
 
 const AuthenticatedSection = () => {
-    const { user, logout, joinGroup: joinContext } = useAuth();
+    const { user, logout, isE2EEReady, checkE2EEStatus, joinGroup: joinContext } = useAuth();
     const { toast } = useToast();
     const [activeTab, setActiveTab] = useState<'home' | 'direct' | 'groups' | 'friends' | 'inbox' | 'chat' | 'profile'>('home');
     const [activeId, setActiveId] = useState<string | null>(null);
@@ -275,245 +276,253 @@ const AuthenticatedSection = () => {
     });
 
     return (
-        <AILayout
-            activeTab={activeTab === 'chat' ? (isPersonal ? 'friends' : 'home') : (showDiscovery ? 'explore' : activeTab)}
-            onTabChange={(tab) => {
-                setActiveTab(tab as any);
-                setActiveId(null);
-                setHighlightMessageId(undefined);
-                if (user?.id) updateActiveChat(user.id, null);
-                setShowDiscovery(tab === 'explore' || tab === 'groups');
-                setShowCreateGroup(false);
-            }}
-            onOpenSettings={() => { setActiveTab('profile'); setActiveId(null); setHighlightMessageId(undefined); }}
-            onGoHome={() => { setActiveTab('home'); setActiveId(null); setShowDiscovery(false); setHighlightMessageId(undefined); }}
-            user={user}
-            onLogout={() => {
-                logout();
-            }}
-            unreadCount={totalUnread}
-            followRequestsCount={followRequestsCount}
-            friendsUnread={friendsUnread}
-        >
-            <div className="w-full h-full flex flex-col px-4 md:px-8 lg:px-12 max-w-[1600px] mx-auto">
-                <AnimatePresence mode="wait">
-                    {activeTab === 'home' && (
-                        <motion.div key="home" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
-                            <HomeView
-                                user={user}
-                                myGroups={myGroups}
-                                onSelectGroup={handleSelectGroup}
-                                onBrowseGroups={() => { setActiveTab('groups'); setShowDiscovery(true); }}
-                                onCreateGroup={() => { setActiveTab('groups'); setShowCreateGroup(true); }}
-                            />
-                        </motion.div>
-                    )}
-
-                    {activeTab === 'direct' && (
-                        <motion.div key="direct" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-8">
-                            <h2 className="text-3xl font-black italic uppercase tracking-tighter">Messages</h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {personalChats.map(chat => {
-                                    const otherId = chat.userIds.find(id => id !== user?.id);
-                                    const name = chat.usernames?.[otherId || ''] || 'User';
-
-                                    const handleUnfollow = async (e: React.MouseEvent) => {
-                                        e.stopPropagation();
-                                        if (!confirm(`End chat with ${name}?`)) return;
-                                        try {
-                                            if (otherId) await unfollowUser(otherId);
-                                            toast(`Connection with ${name} ended.`, 'info');
-                                        } catch (e) {
-                                            toast("Failed to end chat", "error");
-                                        }
-                                    };
-
-                                    return (
-                                        <div key={chat.id} className="relative group">
-                                            <button onClick={() => handleSelectPersonal(chat.id)} className="bento-item w-full text-left hover:border-primary transition-all relative overflow-hidden">
-                                                {/* Unread Badge */}
-                                                {(() => {
-                                                    const unread = user?.id ? (chat.unreadCounts?.[user.id] || 0) : 0;
-                                                    if (unread > 0) {
-                                                        return (
-                                                            <div className="absolute top-4 right-16 bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.5)] z-20">
-                                                                {unread}
-                                                            </div>
-                                                        );
-                                                    }
-                                                    return null;
-                                                })()}
-                                                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center font-black text-primary mb-4 transition-transform group-hover:scale-110">{name[0]}</div>
-                                                <h3 className="font-bold text-lg">{name}</h3>
-                                                <p className="text-sm text-muted-foreground truncate">{chat.lastMessage || 'Start a conversation'}</p>
-                                            </button>
-                                            <button
-                                                onClick={handleUnfollow}
-                                                className="absolute top-4 right-4 w-10 h-10 rounded-xl bg-destructive/10 text-destructive opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center hover:bg-destructive hover:text-white"
-                                                title="Unfollow"
-                                            >
-                                                <Icon name="userMinus" className="w-5 h-5" />
-                                            </button>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </motion.div>
-                    )}
-
-                    {activeTab === 'groups' && (
-                        <motion.div key="groups" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-8 pb-32">
-                            <AnimatePresence mode="wait">
-                                {showCreateGroup ? (
-                                    <motion.div key="create" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
-                                        <CreateGroup
-                                            onGroupCreated={(id) => { handleSelectGroup(id); setShowCreateGroup(false); }}
-                                            onBack={() => {
-                                                setShowCreateGroup(false);
-                                                if (!showDiscovery) setActiveTab('home');
-                                            }}
-                                        />
-                                    </motion.div>
-                                ) : showDiscovery ? (
-                                    <motion.div key="discovery" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}>
-                                        <GroupDiscovery
-                                            onJoinGroup={async (id: string) => {
-                                                await joinContext(id);
-                                                handleSelectGroup(id);
-                                            }}
-                                            onSelectGroup={handleSelectGroup}
-                                            joinedGroupIds={user?.joinedGroups || []}
-                                            onCreateGroup={() => setShowCreateGroup(true)}
-                                            onBack={() => {
-                                                setShowDiscovery(false);
-                                                setActiveTab('home');
-                                            }}
-                                        />
-                                    </motion.div>
-                                ) : (
-                                    <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                                        <div className="flex items-center justify-between gap-4 flex-wrap mb-8">
-                                            <h2 className="text-3xl font-black italic uppercase tracking-tighter">Groups</h2>
-                                            <div className="flex items-center gap-2">
-                                                <button
-                                                    onClick={() => { setShowDiscovery(!showDiscovery); setShowCreateGroup(false); }}
-                                                    className={`h-12 px-6 rounded-xl flex items-center gap-2 font-bold transition-all ${showDiscovery ? 'bg-primary text-white shadow-lg' : 'bg-surface2 hover:bg-surface text-muted-foreground'}`}
-                                                >
-                                                    <Icon name="compass" className="w-5 h-5" /> Explore
-                                                </button>
-                                                <button
-                                                    onClick={() => { setShowCreateGroup(!showCreateGroup); setShowDiscovery(false); }}
-                                                    className={`h-12 px-6 rounded-xl flex items-center gap-2 font-bold transition-all ${showCreateGroup ? 'bg-primary text-white shadow-lg' : 'btn-primary'}`}
-                                                >
-                                                    <Icon name="plus" className="w-4 h-4" /> New Group
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                            {myGroups.map(g => {
-                                                const unread = user?.id ? (g.unreadCounts?.[user.id] || 0) : 0;
-                                                return (
-                                                    <button key={g.id} onClick={() => handleSelectGroup(g.id)} className="bento-item text-left group relative overflow-hidden">
-                                                        {unread > 0 && (
-                                                            <div className="absolute top-4 right-4 bg-[#5B79B7] text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(91,121,183,0.5)] z-20">
-                                                                {unread}
-                                                            </div>
-                                                        )}
-                                                        <div className="text-4xl mb-4">{g.image}</div>
-                                                        <h3 className="font-bold text-lg group-hover:text-primary transition-colors">{g.name}</h3>
-                                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                            <Icon name="users" className="w-4 h-4" /> {g.members} Members
-                                                        </div>
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </motion.div>
-                    )}
-
-                    {activeTab === 'friends' && (
-                        <motion.div key="friends" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
-                            <FriendsList
-                                personalChats={personalChats}
-                                onSelectFriend={(friendId) => {
-                                    if (!user?.id) return;
-                                    const combinedId = [user.id, friendId].sort().join('_');
-                                    handleSelectPersonal(combinedId);
-                                }}
-                            />
-                        </motion.div>
-                    )}
-
-                    {activeTab === 'inbox' && (
-                        <motion.div key="inbox" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-8 pt-12">
-                            <div className="flex items-center justify-between px-2">
-                                <h2 className="text-3xl font-black italic uppercase tracking-tighter">Notifications</h2>
-                                <button onClick={() => user?.id && markAllAsRead(user.id)} className="text-sm font-bold text-primary hover:underline">Mark all read</button>
-                            </div>
-                            <NotificationList
-                                notifications={notifications}
-                                onSelectChat={(id, personal, msgId) => {
-                                    if (personal) handleSelectPersonal(id);
-                                    else handleSelectGroup(id);
-                                    setHighlightMessageId(msgId);
-                                }}
-                                onMarkAllRead={() => user?.id && markAllAsRead(user.id)}
-                            />
-                        </motion.div>
-                    )}
-
-                    {activeTab === 'chat' && activeId && (
-                        <motion.div key="chat" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="h-full overflow-hidden">
-                            <ChatInterface
-                                highlightMessageId={highlightMessageId}
-                                chatId={activeId}
-                                isPersonal={isPersonal}
-                                title={isPersonal ? personalChatTitle : (activeGroup?.name || '')}
-                                image={!isPersonal ? activeGroup?.image || '👥' : '👤'}
-                                memberCount={!isPersonal ? (activeGroup?.memberCount || activeGroup?.members || 0) : 2}
-                                onLeave={() => {
-                                    setActiveId(null);
-                                    setActiveTab('home');
-                                    setIsPersonal(false);
-                                    if (user?.id) updateActiveChat(user.id, null);
-                                }}
-                                onProfileClick={(userId) => setViewingUserId(userId)}
-                            />
-                        </motion.div>
-                    )}
-
-                    {activeTab === 'profile' && (
-                        <motion.div key="profile" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="h-full">
-                            <AccountSettings
-                                onBack={() => setActiveTab('home')}
-                                logout={() => {
-                                    logout();
-                                }}
-                            />
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-            </div>
-
-            {/* Global User Profile Modal */}
+        <div className="relative w-full h-full flex flex-col">
             <AnimatePresence>
-                {viewingUserId && (
-                    <UserProfileModal
-                        userId={viewingUserId}
-                        currentUserId={user?.id || ''}
-                        onClose={() => setViewingUserId(null)}
-                        onMessage={(targetId: string) => {
-                            setViewingUserId(null);
-                            const combinedId = [user?.id, targetId].sort().join('_');
-                            handleSelectPersonal(combinedId);
-                        }}
-                    />
+                {!isE2EEReady && (
+                    <DeviceSync key="sync" onClose={() => checkE2EEStatus()} />
                 )}
             </AnimatePresence>
-        </AILayout>
+
+            <AILayout
+                activeTab={activeTab === 'chat' ? (isPersonal ? 'friends' : 'home') : (showDiscovery ? 'explore' : activeTab)}
+                onTabChange={(tab) => {
+                    setActiveTab(tab as any);
+                    setActiveId(null);
+                    setHighlightMessageId(undefined);
+                    if (user?.id) updateActiveChat(user.id, null);
+                    setShowDiscovery(tab === 'explore' || tab === 'groups');
+                    setShowCreateGroup(false);
+                }}
+                onOpenSettings={() => { setActiveTab('profile'); setActiveId(null); setHighlightMessageId(undefined); }}
+                onGoHome={() => { setActiveTab('home'); setActiveId(null); setShowDiscovery(false); setHighlightMessageId(undefined); }}
+                user={user}
+                onLogout={() => {
+                    logout();
+                }}
+                unreadCount={totalUnread}
+                followRequestsCount={followRequestsCount}
+                friendsUnread={friendsUnread}
+            >
+                <div className="w-full h-full flex flex-col px-4 md:px-8 lg:px-12 max-w-[1600px] mx-auto">
+                    <AnimatePresence mode="wait">
+                        {activeTab === 'home' && (
+                            <motion.div key="home" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                                <HomeView
+                                    user={user}
+                                    myGroups={myGroups}
+                                    onSelectGroup={handleSelectGroup}
+                                    onBrowseGroups={() => { setActiveTab('groups'); setShowDiscovery(true); }}
+                                    onCreateGroup={() => { setActiveTab('groups'); setShowCreateGroup(true); }}
+                                />
+                            </motion.div>
+                        )}
+
+                        {activeTab === 'direct' && (
+                            <motion.div key="direct" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-8">
+                                <h2 className="text-3xl font-black italic uppercase tracking-tighter">Messages</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {personalChats.map(chat => {
+                                        const otherId = chat.userIds.find(id => id !== user?.id);
+                                        const name = chat.usernames?.[otherId || ''] || 'User';
+
+                                        const handleUnfollow = async (e: React.MouseEvent) => {
+                                            e.stopPropagation();
+                                            if (!confirm(`End chat with ${name}?`)) return;
+                                            try {
+                                                if (otherId) await unfollowUser(otherId);
+                                                toast(`Connection with ${name} ended.`, 'info');
+                                            } catch (e) {
+                                                toast("Failed to end chat", "error");
+                                            }
+                                        };
+
+                                        return (
+                                            <div key={chat.id} className="relative group" >
+                                                <button onClick={() => handleSelectPersonal(chat.id)} className="bento-item w-full text-left hover:border-primary transition-all relative overflow-hidden">
+                                                    {/* Unread Badge */}
+                                                    {(() => {
+                                                        const unread = user?.id ? (chat.unreadCounts?.[user.id] || 0) : 0;
+                                                        if (unread > 0) {
+                                                            return (
+                                                                <div className="absolute top-4 right-16 bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.5)] z-20">
+                                                                    {unread}
+                                                                </div>
+                                                            );
+                                                        }
+                                                        return null;
+                                                    })()}
+                                                    <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center font-black text-primary mb-4 transition-transform group-hover:scale-110">{name[0]}</div>
+                                                    <h3 className="font-bold text-lg">{name}</h3>
+                                                    <p className="text-sm text-muted-foreground truncate">{chat.lastMessage || 'Start a conversation'}</p>
+                                                </button>
+                                                <button
+                                                    onClick={handleUnfollow}
+                                                    className="absolute top-4 right-4 w-10 h-10 rounded-xl bg-destructive/10 text-destructive opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center hover:bg-destructive hover:text-white"
+                                                    title="Unfollow"
+                                                >
+                                                    <Icon name="userMinus" className="w-5 h-5" />
+                                                </button>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </motion.div>
+                        )}
+
+                        {activeTab === 'groups' && (
+                            <motion.div key="groups" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-8 pb-32">
+                                <AnimatePresence mode="wait">
+                                    {showCreateGroup ? (
+                                        <motion.div key="create" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
+                                            <CreateGroup
+                                                onGroupCreated={(id) => { handleSelectGroup(id); setShowCreateGroup(false); }}
+                                                onBack={() => {
+                                                    setShowCreateGroup(false);
+                                                    if (!showDiscovery) setActiveTab('home');
+                                                }}
+                                            />
+                                        </motion.div>
+                                    ) : showDiscovery ? (
+                                        <motion.div key="discovery" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}>
+                                            <GroupDiscovery
+                                                onJoinGroup={async (id: string) => {
+                                                    await joinContext(id);
+                                                    handleSelectGroup(id);
+                                                }}
+                                                onSelectGroup={handleSelectGroup}
+                                                joinedGroupIds={user?.joinedGroups || []}
+                                                onCreateGroup={() => setShowCreateGroup(true)}
+                                                onBack={() => {
+                                                    setShowDiscovery(false);
+                                                    setActiveTab('home');
+                                                }}
+                                            />
+                                        </motion.div>
+                                    ) : (
+                                        <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                                            <div className="flex items-center justify-between gap-4 flex-wrap mb-8">
+                                                <h2 className="text-3xl font-black italic uppercase tracking-tighter">Groups</h2>
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={() => { setShowDiscovery(!showDiscovery); setShowCreateGroup(false); }}
+                                                        className={`h-12 px-6 rounded-xl flex items-center gap-2 font-bold transition-all ${showDiscovery ? 'bg-primary text-white shadow-lg' : 'bg-surface2 hover:bg-surface text-muted-foreground'}`}
+                                                    >
+                                                        <Icon name="compass" className="w-5 h-5" /> Explore
+                                                    </button>
+                                                    <button
+                                                        onClick={() => { setShowCreateGroup(!showCreateGroup); setShowDiscovery(false); }}
+                                                        className={`h-12 px-6 rounded-xl flex items-center gap-2 font-bold transition-all ${showCreateGroup ? 'bg-primary text-white shadow-lg' : 'btn-primary'}`}
+                                                    >
+                                                        <Icon name="plus" className="w-4 h-4" /> New Group
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                                {myGroups.map(g => {
+                                                    const unread = user?.id ? (g.unreadCounts?.[user.id] || 0) : 0;
+                                                    return (
+                                                        <button key={g.id} onClick={() => handleSelectGroup(g.id)} className="bento-item text-left group relative overflow-hidden">
+                                                            {unread > 0 && (
+                                                                <div className="absolute top-4 right-4 bg-[#5B79B7] text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(91,121,183,0.5)] z-20">
+                                                                    {unread}
+                                                                </div>
+                                                            )}
+                                                            <div className="text-4xl mb-4">{g.image}</div>
+                                                            <h3 className="font-bold text-lg group-hover:text-primary transition-colors">{g.name}</h3>
+                                                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                                <Icon name="users" className="w-4 h-4" /> {g.members} Members
+                                                            </div>
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </motion.div>
+                        )}
+
+                        {activeTab === 'friends' && (
+                            <motion.div key="friends" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
+                                <FriendsList
+                                    personalChats={personalChats}
+                                    onSelectFriend={(friendId) => {
+                                        if (!user?.id) return;
+                                        const combinedId = [user.id, friendId].sort().join('_');
+                                        handleSelectPersonal(combinedId);
+                                    }}
+                                />
+                            </motion.div>
+                        )}
+
+                        {activeTab === 'inbox' && (
+                            <motion.div key="inbox" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-8 pt-12">
+                                <div className="flex items-center justify-between px-2">
+                                    <h2 className="text-3xl font-black italic uppercase tracking-tighter">Notifications</h2>
+                                    <button onClick={() => user?.id && markAllAsRead(user.id)} className="text-sm font-bold text-primary hover:underline">Mark all read</button>
+                                </div>
+                                <NotificationList
+                                    notifications={notifications}
+                                    onSelectChat={(id, personal, msgId) => {
+                                        if (personal) handleSelectPersonal(id);
+                                        else handleSelectGroup(id);
+                                        setHighlightMessageId(msgId);
+                                    }}
+                                    onMarkAllRead={() => user?.id && markAllAsRead(user.id)}
+                                />
+                            </motion.div>
+                        )}
+
+                        {activeTab === 'chat' && activeId && (
+                            <motion.div key="chat" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="h-full overflow-hidden">
+                                <ChatInterface
+                                    highlightMessageId={highlightMessageId}
+                                    chatId={activeId}
+                                    isPersonal={isPersonal}
+                                    title={isPersonal ? personalChatTitle : (activeGroup?.name || '')}
+                                    image={!isPersonal ? activeGroup?.image || '👥' : '👤'}
+                                    memberCount={!isPersonal ? (activeGroup?.memberCount || activeGroup?.members || 0) : 2}
+                                    onLeave={() => {
+                                        setActiveId(null);
+                                        setActiveTab('home');
+                                        setIsPersonal(false);
+                                        if (user?.id) updateActiveChat(user.id, null);
+                                    }}
+                                    onProfileClick={(userId) => setViewingUserId(userId)}
+                                />
+                            </motion.div>
+                        )}
+
+                        {activeTab === 'profile' && (
+                            <motion.div key="profile" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="h-full">
+                                <AccountSettings
+                                    onBack={() => setActiveTab('home')}
+                                    logout={() => {
+                                        logout();
+                                    }}
+                                />
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+
+                {/* Global User Profile Modal */}
+                <AnimatePresence>
+                    {viewingUserId && (
+                        <UserProfileModal
+                            userId={viewingUserId}
+                            currentUserId={user?.id || ''}
+                            onClose={() => setViewingUserId(null)}
+                            onMessage={(targetId: string) => {
+                                setViewingUserId(null);
+                                const combinedId = [user?.id, targetId].sort().join('_');
+                                handleSelectPersonal(combinedId);
+                            }}
+                        />
+                    )}
+                </AnimatePresence>
+            </AILayout>
+        </div>
     );
 };
 
