@@ -228,7 +228,32 @@ export async function sendMessage(
                     }
                 }
             }
-        }
+
+            // 3. Notify all other group members
+            const groupSnap = await getDoc(doc(db, 'groups', targetId));
+            const groupData = groupSnap.exists() ? groupSnap.data() : null;
+
+            if (groupData && groupData.memberIds) {
+                for (const uid of groupData.memberIds) {
+                    if (uid !== senderId && !notifiedUserIds.has(uid)) {
+                        const recipientDoc = await getDoc(doc(db, 'users', uid));
+                        const recipientActiveChat = recipientDoc.exists() ? recipientDoc.data().activeChatId : null;
+
+                        if (recipientActiveChat !== targetId) {
+                            await createNotification(uid, {
+                                type: 'message',
+                                senderName: senderUsername,
+                                text: `Sent a ${content.type === 'text' ? 'message' : content.type}`,
+                                groupId: targetId,
+                                groupName: groupData.name || 'Group',
+                                groupImage: groupData.image || '💬',
+                                messageId: docRef.id
+                            });
+                        }
+                    }
+                }
+            }
+        } // Closes else block
 
         return { ...messageData, id: docRef.id };
     } catch (error) {

@@ -50,7 +50,7 @@ export interface FileMetadata {
     encIv?: string;
 }
 
-export type MessageStatus = 'sent' | 'delivered' | 'seen';
+export type MessageStatus = 'sending' | 'sent' | 'delivered' | 'seen';
 
 export interface Message {
     id: string;

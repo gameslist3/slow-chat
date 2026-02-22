@@ -199,10 +199,30 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                         />
                     )}
 
-                    <div className={`mt-1 flex items-center ${isMe ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`mt-1 flex items-center gap-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
                         <span className={`text-[9px] font-bold opacity-40 uppercase tracking-widest ${isMe ? 'text-[#E6ECFF]' : 'text-[#7C89A6]'}`}>
                             {formatTime(message.timestamp)}
                         </span>
+                        {isMe && message.status === 'sending' && (
+                            <div className="w-2.5 h-2.5 opacity-40 text-white flex items-center justify-center animate-pulse">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                            </div>
+                        )}
+                        {isMe && message.status === 'sent' && (
+                            <div className="w-2.5 h-2.5 opacity-60 text-white flex items-center justify-center">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                            </div>
+                        )}
+                        {isMe && message.status === 'delivered' && (
+                            <div className="w-3 h-3 opacity-60 text-white flex items-center justify-center ml-[-2px]">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /><line x1="20" y1="12" x2="16" y2="16" /></svg>
+                            </div>
+                        )}
+                        {isMe && message.status === 'seen' && (
+                            <div className="w-3 h-3 text-blue-400 flex items-center justify-center ml-[-2px]">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /><line x1="20" y1="12" x2="16" y2="16" /></svg>
+                            </div>
+                        )}
                     </div>
                 </div>
 

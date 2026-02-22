@@ -13,6 +13,8 @@ interface AIComposerProps {
     groupId: string;
     userId: string;
     isPersonal: boolean;
+    onOptimisticAdd?: (msg: Message) => void;
+    onOptimisticRemove?: (id: string) => void;
 }
 
 type RecordingState = 'idle' | 'recording' | 'review';
@@ -24,7 +26,9 @@ export const AIComposer: React.FC<AIComposerProps> = ({
     cooldown = 0,
     groupId,
     userId,
-    isPersonal
+    isPersonal,
+    onOptimisticAdd,
+    onOptimisticRemove
 }) => {
     const [text, setText] = useState('');
     const [recState, setRecState] = useState<RecordingState>('idle');
@@ -90,15 +94,31 @@ export const AIComposer: React.FC<AIComposerProps> = ({
             return;
         }
 
-        setUploading(true);
+        const tempId = `temp_voice_${Date.now()}`;
+        const localUrl = URL.createObjectURL(audioBlob);
+
+        if (onOptimisticAdd) {
+            onOptimisticAdd({
+                id: tempId,
+                sender: '(Me)',
+                senderId: userId,
+                text: '',
+                timestamp: Date.now(),
+                type: 'audio',
+                media: { url: localUrl, type: 'audio', name: 'voice_note.webm', size: audioBlob.size },
+                reactions: [],
+                status: 'sending'
+            });
+        }
+
+        setRecState('idle');
+        setAudioBlob(null);
+        setAudioUrl(null);
+
         console.log(`[AIComposer] Starting voice upload for user: ${userId}, group: ${groupId}`);
 
         try {
-            const { url, key, iv } = await uploadVoice(audioBlob, groupId, userId, isPersonal, (p) => {
-                console.log(`[AIComposer] Voice upload progress: ${p.toFixed(0)}%`);
-            });
-
-            console.log('[AIComposer] Voice upload successful, sending message signal');
+            const { url, key, iv } = await uploadVoice(audioBlob, groupId, userId, isPersonal, (p) => { });
 
             onSend({
                 media: {
@@ -111,16 +131,12 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                 },
                 type: 'audio'
             });
-
-            setRecState('idle');
-            setAudioBlob(null);
-            setAudioUrl(null);
             toast('Sent voice note', 'success');
         } catch (err: any) {
             console.error('[AIComposer] Voice send failed:', err);
             toast(`Voice upload failed: ${err.message || 'Check connection'}`, 'error');
         } finally {
-            setUploading(false);
+            if (onOptimisticRemove) onOptimisticRemove(tempId);
         }
     };
 
@@ -136,16 +152,30 @@ export const AIComposer: React.FC<AIComposerProps> = ({
         if (!file) return;
         if (file.size > 10 * 1024 * 1024) return toast('File exceeds 10MB limit', 'error');
 
-        setUploading(true);
+        const isImage = file.type.startsWith('image/');
+        const type = isImage ? 'image' : 'file';
+        const localUrl = URL.createObjectURL(file);
+        const tempId = `temp_${type}_${Date.now()}`;
+
+        if (onOptimisticAdd) {
+            onOptimisticAdd({
+                id: tempId,
+                sender: '(Me)',
+                senderId: userId,
+                text: '',
+                timestamp: Date.now(),
+                type,
+                media: { url: localUrl, type, name: file.name, size: file.size },
+                reactions: [],
+                status: 'sending'
+            });
+        }
+
+        if (fileInputRef.current) fileInputRef.current.value = '';
+
         console.log(`[AIComposer] Starting media upload. Personal: ${isPersonal}`);
         try {
-            const { url, key, iv } = await uploadMedia(file, groupId, userId, isPersonal, (p) => {
-                console.log(`[AIComposer] Media upload progress: ${p.toFixed(0)}%`);
-            });
-
-            // Basic type detection
-            const isImage = file.type.startsWith('image/');
-            const type = isImage ? 'image' : 'file';
+            const { url, key, iv } = await uploadMedia(file, groupId, userId, isPersonal, (p) => { });
 
             onSend({
                 media: {
@@ -163,7 +193,7 @@ export const AIComposer: React.FC<AIComposerProps> = ({
             console.error('[AIComposer] File upload failed:', err);
             toast(`Upload failed: ${err.message || 'Check connection'}`, 'error');
         } finally {
-            setUploading(false);
+            if (onOptimisticRemove) onOptimisticRemove(tempId);
         }
     };
 

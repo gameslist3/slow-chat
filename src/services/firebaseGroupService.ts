@@ -108,9 +108,11 @@ export const joinGroup = async (groupId: string, userId: string): Promise<void> 
         const groupData = groupSnap.data() as Group;
         if (groupData.memberIds.includes(userId)) return;
 
+        const newCount = (groupData.memberIds?.length || 0) + 1;
+
         transaction.update(groupRef, {
-            members: increment(1),
-            memberCount: increment(1),
+            members: newCount,
+            memberCount: newCount,
             memberIds: arrayUnion(userId),
             lastActivity: Date.now()
         });
@@ -148,9 +150,12 @@ export const leaveGroup = async (groupId: string, userId: string): Promise<void>
             const groupSnap = await transaction.get(groupRef);
             if (!groupSnap.exists()) return;
 
+            const groupData = groupSnap.data() as Group;
+            const newCount = Math.max(0, (groupData.memberIds?.length || 1) - 1);
+
             transaction.update(groupRef, {
-                members: increment(-1),
-                memberCount: increment(-1),
+                members: newCount,
+                memberCount: newCount,
                 memberIds: arrayRemove(userId)
             });
 

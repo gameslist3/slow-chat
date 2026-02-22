@@ -42,7 +42,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         loading,
         loadingMore,
         loadMore,
-        hasMore
+        hasMore,
+        addOptimisticMessage,
+        removeOptimisticMessage
     } = useChat(chatId, isPersonal);
 
     const { user } = useAuth();
@@ -167,6 +169,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                         replyingTo={replyingTo}
                         onCancelReply={cancelReply}
                         cooldown={remaining}
+                        onOptimisticAdd={addOptimisticMessage}
+                        onOptimisticRemove={removeOptimisticMessage}
                     />
                 )}
             </div>

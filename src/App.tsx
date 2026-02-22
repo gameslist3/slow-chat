@@ -435,7 +435,7 @@ const AuthenticatedSection = () => {
                                                             <div className="text-4xl mb-4">{g.image}</div>
                                                             <h3 className="font-bold text-lg group-hover:text-primary transition-colors">{g.name}</h3>
                                                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                                <Icon name="users" className="w-4 h-4" /> {g.members} Members
+                                                                <Icon name="users" className="w-4 h-4" /> {g.memberIds?.length || g.memberCount || g.members} {(g.memberIds?.length || g.memberCount || g.members) === 1 ? 'Member' : 'Members'}
                                                             </div>
                                                         </button>
                                                     );
@@ -486,7 +486,8 @@ const AuthenticatedSection = () => {
                                     isPersonal={isPersonal}
                                     title={isPersonal ? personalChatTitle : (activeGroup?.name || '')}
                                     image={!isPersonal ? activeGroup?.image || '👥' : '👤'}
-                                    memberCount={!isPersonal ? (activeGroup?.memberCount || activeGroup?.members || 0) : 2}
+                                    memberCount={!isPersonal ? (activeGroup?.memberIds?.length || activeGroup?.memberCount || activeGroup?.members || 0) : 2}
+                                    memberIds={!isPersonal ? (activeGroup?.memberIds || []) : []}
                                     onLeave={() => {
                                         setActiveId(null);
                                         setActiveTab('home');

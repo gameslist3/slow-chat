@@ -114,13 +114,12 @@ export const markAllAsRead = async (uid: string): Promise<void> => {
             const chunk = docs.slice(i, i + 450);
             chunk.forEach(d => {
                 const data = d.data();
-                if (data.type === 'follow_request') {
-                    // Keep friend requests, maybe mark as read? 
-                    // User says "Pending friend requests stay until accepted/declined"
-                    // If we mark as read, they won't show in unread count.
-                    // Let's just skip them to keep them unread and visible.
-                } else {
-                    b.delete(d.ref);
+                if (data.type !== 'follow_request') {
+                    // Mark as read instead of deleting
+                    b.update(d.ref, {
+                        read: true,
+                        updatedAt: Date.now()
+                    });
                 }
             });
             await b.commit();

@@ -169,6 +169,15 @@ export const NotificationList: React.FC<{
         return () => clearInterval(interval);
     }, []);
 
+    // Auto-mark as read when screen is opened
+    useEffect(() => {
+        const hasUnreadActivity = notifications.some(n => !n.read && n.type !== 'follow_request');
+        if (hasUnreadActivity && onMarkAllRead) {
+            onMarkAllRead();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     const { user: authUser } = useAuth();
     const autoDeleteWindow = (authUser?.autoDeleteHours || 10) * 60 * 60 * 1000;
     const clearedAt = authUser?.notificationsClearedAt || 0;
@@ -199,18 +208,6 @@ export const NotificationList: React.FC<{
 
     return (
         <div className="flex flex-col h-full bg-background/50 pt-8 md:pt-0">
-            {notifications.some(n => !n.read) && (
-                <div className="shrink-0 p-6 pb-2 flex items-center justify-end bg-background/20 backdrop-blur-xl">
-                    <button
-                        onClick={onMarkAllRead}
-                        className="px-4 py-2 rounded-xl bg-foreground/5 border border-white/5 text-[9px] font-bold tracking-[0.2em] uppercase hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-all flex items-center gap-2"
-                    >
-                        <Check className="w-3 h-3" />
-                        Mark All Read
-                    </button>
-                </div>
-            )}
-
             <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-12">
                 <AnimatePresence mode="popLayout">
                     {requests.length === 0 && activity.length === 0 ? (

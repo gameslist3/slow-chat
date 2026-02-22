@@ -17,6 +17,7 @@ export const useChat = (chatId: string, isPersonal: boolean = false) => {
     const { user } = useAuth();
     const [realtimeMessages, setRealtimeMessages] = useState<Message[]>([]);
     const [history, setHistory] = useState<Message[]>([]);
+    const [optimisticMessages, setOptimisticMessages] = useState<Message[]>([]);
     const [replyingTo, setReplyingTo] = useState<Message | null>(null);
     const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
@@ -261,9 +262,23 @@ export const useChat = (chatId: string, isPersonal: boolean = false) => {
     const handleReply = (message: Message) => setReplyingTo(message);
     const cancelReply = () => setReplyingTo(null);
 
+    const addOptimisticMessage = useCallback((msg: Message) => {
+        setOptimisticMessages(prev => [...prev, msg]);
+    }, []);
+
+    const removeOptimisticMessage = useCallback((id: string) => {
+        setOptimisticMessages(prev => prev.filter(m => m.id !== id));
+    }, []);
+
     return {
-        messages: [...history, ...realtimeMessages],
+        messages: [...history, ...realtimeMessages, ...optimisticMessages].sort((a, b) => {
+            const timeA = (a.timestamp as any)?.toMillis?.() || (typeof a.timestamp === 'number' ? a.timestamp : 0);
+            const timeB = (b.timestamp as any)?.toMillis?.() || (typeof b.timestamp === 'number' ? b.timestamp : 0);
+            return timeA - timeB;
+        }),
         sendMessage,
+        addOptimisticMessage,
+        removeOptimisticMessage,
         toggleReaction,
         replyingTo,
         handleReply,
