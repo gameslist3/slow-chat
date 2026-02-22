@@ -136,20 +136,29 @@ export const AIComposer: React.FC<AIComposerProps> = ({
 
         setUploading(true);
         try {
-            const { url, key, iv } = await uploadMedia(file, groupId, userId, () => { });
+            const { url, key, iv } = await uploadMedia(file, groupId, userId, (p) => {
+                console.log(`[AIComposer] Media upload progress: ${p.toFixed(0)}%`);
+            });
+
+            // Basic type detection
+            const isImage = file.type.startsWith('image/');
+            const type = isImage ? 'image' : 'file';
+
             onSend({
                 media: {
                     url,
-                    type: 'image',
+                    type,
                     name: file.name,
                     size: file.size,
                     encKey: key,
                     encIv: iv
                 },
-                type: 'image'
+                type
             });
-        } catch (err) {
-            toast('Upload failed', 'error');
+            toast(`Sent ${isImage ? 'image' : 'file'}`, 'success');
+        } catch (err: any) {
+            console.error('[AIComposer] File upload failed:', err);
+            toast(`Upload failed: ${err.message || 'Check connection'}`, 'error');
         } finally {
             setUploading(false);
         }

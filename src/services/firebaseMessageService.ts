@@ -96,9 +96,9 @@ export async function sendMessage(
             // Clear binary metadata from root level as it's now in the encrypted payload
             delete messageData.media;
             delete messageData.replyTo;
-        } else if (!content.isPersonal && content.text) {
+        } else if (!content.isPersonal && (content.text || content.media)) {
             // Group Messaging: Plaintext (E2EE removed to allow all members to see historic messages)
-            messageData.text = content.text;
+            if (content.text) messageData.text = content.text;
             if (content.media) messageData.media = content.media;
             if (content.replyTo) messageData.replyTo = content.replyTo;
         }
@@ -137,6 +137,11 @@ export async function sendMessage(
                     }
                 });
                 await updateDoc(groupRef, updates);
+
+                // Update group's lastMessage summary for HomeView
+                await updateDoc(groupRef, {
+                    lastMessage: content.text || `[Sent a ${content.type}]`
+                });
             }
         }
 

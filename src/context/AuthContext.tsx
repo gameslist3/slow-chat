@@ -73,7 +73,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                                 notificationsClearedAt: userData.notificationsClearedAt,
                                 groupJoinTimes: userData.groupJoinTimes || {},
                                 sessions: userData.sessions || [],
-                                autoDeleteHours: userData.autoDeleteHours || 10,
+                                autoDeleteHours: userData.autoDeleteHours || 5,
                                 lastTimerChange: userData.lastTimerChange || 0
                             };
                             return base;
@@ -99,6 +99,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     if (err.code === 'permission-denied') return;
                     console.error('[AuthContext] Notifications Snapshot error:', err);
                 });
+                setIsVerified(false);
+                setUser(null);
+                setLoading(false);
             } else {
                 // EXPLICIT LOGOUT CLEANUP
                 if (snapshotUnsubscribe) {
@@ -115,10 +118,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
         });
 
+        // Verification Polling
+        let pollingInterval: any = null;
+        if (auth.currentUser && !auth.currentUser.emailVerified) {
+            pollingInterval = setInterval(async () => {
+                if (auth.currentUser) {
+                    await auth.currentUser.reload();
+                    if (auth.currentUser.emailVerified) {
+                        setIsVerified(true);
+                        clearInterval(pollingInterval);
+                    }
+                }
+            }, 3000);
+        }
+
         return () => {
             authUnsubscribe();
             if (snapshotUnsubscribe) snapshotUnsubscribe();
             if (noteUnsubscribe) noteUnsubscribe();
+            if (pollingInterval) clearInterval(pollingInterval);
         };
     }, []);
 

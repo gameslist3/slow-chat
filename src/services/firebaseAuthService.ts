@@ -88,7 +88,7 @@ export const registerUserStep1 = async (creds: UserCredentials): Promise<boolean
             following: [],
             followers: [],
             unreadCount: 0,
-            autoDeleteHours: 10,
+            autoDeleteHours: 5,
             lastTimerChange: Date.now(),
             notificationsClearedAt: 0,
             groupJoinTimes: {},

@@ -58,7 +58,7 @@ export interface Message {
     senderId: string;
     text: string;
     timestamp: any; // number | Timestamp
-    type: 'text' | 'image' | 'video' | 'pdf' | 'doc' | 'audio' | 'system';
+    type: 'text' | 'image' | 'video' | 'pdf' | 'doc' | 'audio' | 'system' | 'file';
     media?: FileMetadata;
     reactions: Reaction[];
     replyTo?: ReplyMetadata;
