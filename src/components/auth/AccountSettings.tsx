@@ -129,30 +129,30 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                         onClick={onBack}
-                        className="w-10 h-10 glass-panel rounded-full flex items-center justify-center text-primary transition-all hover:bg-white/10"
+                        className="w-10 h-10 glass-panel rounded-full flex items-center justify-center text-primary transition-all hover:bg-white/10 shrink-0"
                     >
                         <Icon name="arrowLeft" className="w-5 h-5" />
                     </motion.button>
-                    <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">Settings</h1>
+                    <h1 className="text-xl md:text-2xl font-black text-foreground tracking-tight">Settings</h1>
                 </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-4 md:px-24 py-8 custom-scrollbar">
-                <div className="max-w-2xl mx-auto space-y-12">
+            <div className="flex-1 overflow-y-auto px-4 md:px-24 py-6 custom-scrollbar">
+                <div className="max-w-2xl mx-auto space-y-6">
 
                     {/* Identity Section */}
-                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-6 duration-1000">
-                        <h2 className="text-sm font-bold text-gray-500 uppercase tracking-widest pl-2">Profile</h2>
+                    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-6 duration-1000">
+                        <h2 className="text-[11px] font-bold text-gray-500 uppercase tracking-widest pl-2">Profile</h2>
 
                         {!isEditing ? (
                             <div className="glass-panel p-8 rounded-3xl flex flex-col md:flex-row items-center justify-between group relative overflow-hidden gap-6">
                                 <div className="flex items-center gap-6 relative z-10 w-full md:w-auto">
-                                    <div className="w-20 h-20 rounded-2xl bg-primary flex items-center justify-center text-3xl font-black text-white shadow-xl shadow-primary/30">
+                                    <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center text-2xl font-black text-white shadow-xl shadow-primary/30 shrink-0">
                                         {user?.username?.[0]?.toUpperCase() || '?'}
                                     </div>
-                                    <div>
-                                        <h3 className="text-2xl font-bold text-foreground tracking-tight">{user?.username}</h3>
-                                        <p className="text-sm font-medium text-gray-500">{user?.email}</p>
+                                    <div className="min-w-0">
+                                        <h3 className="text-xl font-bold text-foreground tracking-tight truncate">{user?.username}</h3>
+                                        <p className="text-xs font-medium text-gray-500 truncate">{user?.email}</p>
                                     </div>
                                 </div>
                                 {lockDate ? (
@@ -174,9 +174,9 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
                                 )}
                             </div>
                         ) : (
-                            <div className="glass-panel rounded-3xl p-8 space-y-8 animate-in zoom-in-95 duration-500 relative overflow-hidden backdrop-blur-xl">
+                            <div className="glass-panel rounded-3xl p-6 md:p-8 space-y-8 animate-in zoom-in-95 duration-500 relative overflow-hidden backdrop-blur-xl">
                                 <div className="flex justify-between items-center">
-                                    <h3 className="text-sm font-bold text-primary uppercase tracking-widest">new name</h3>
+                                    <h3 className="text-[11px] font-bold text-primary uppercase tracking-widest">new name</h3>
                                     <button onClick={() => setIsEditing(false)} className="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center transition-all text-gray-400 hover:text-white"><Icon name="x" className="w-4 h-4" /></button>
                                 </div>
 
@@ -208,13 +208,13 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
                     </div>
 
                     {/* Message Settings Section */}
-                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-75">
+                    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-75">
                         <div className="flex items-center gap-2 pl-2 text-primary">
                             <Icon name="messageSquare" className="w-5 h-5" />
-                            <h2 className="text-sm font-bold uppercase tracking-widest">Message Settings</h2>
+                            <h2 className="text-[11px] font-bold uppercase tracking-widest">Message Settings</h2>
                         </div>
 
-                        <div className="glass-panel p-8 rounded-3xl space-y-6 relative">
+                        <div className="glass-panel p-6 md:p-8 rounded-3xl space-y-6 relative">
                             <div>
                                 <div className="flex items-center gap-2 mb-1">
                                     <h3 className="font-bold text-foreground text-lg">Auto Delete Messages</h3>
@@ -250,14 +250,14 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
                                     {showDeleteInfo && (
                                         <>
                                             <div
-                                                className="fixed inset-0 z-[60]"
+                                                className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm"
                                                 onClick={() => setShowDeleteInfo(false)}
                                             />
                                             <motion.div
                                                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                                className="absolute top-16 left-8 right-8 z-[70] bg-[#0F1C34] border border-white/10 p-5 rounded-2xl shadow-2xl backdrop-blur-xl"
+                                                className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-32px)] max-w-sm z-[70] bg-[#0F1C34] border border-white/10 p-6 rounded-3xl shadow-2xl overflow-y-auto max-h-[80vh]"
                                             >
                                                 <div className="flex justify-between items-start mb-3">
                                                     <h4 className="text-sm font-bold text-white uppercase tracking-widest">How it works</h4>
@@ -279,10 +279,10 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
                     </div>
 
                     {/* Account Safety Section */}
-                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-100">
+                    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-100">
                         <div className="flex items-center gap-2 pl-2 text-emerald-500">
                             <Icon name="shield" className="w-5 h-5" />
-                            <h2 className="text-sm font-bold uppercase tracking-widest">Account Safety</h2>
+                            <h2 className="text-[11px] font-bold uppercase tracking-widest">Account Safety</h2>
                         </div>
                         <p className="text-xs font-medium text-gray-500 pl-2">Keep your account safe and recover it anytime.</p>
 
@@ -302,7 +302,7 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
                                 </div>
 
                                 {/* Last Login */}
-                                <div className="flex items-center justify-between">
+                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                                     <div className="flex items-center gap-4">
                                         <div className="w-10 h-10 bg-white/5 rounded-lg text-blue-500 flex items-center justify-center">
                                             <Icon name="monitor" className="w-4 h-4" />
@@ -316,13 +316,13 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
                                         whileHover={{ scale: 1.05 }}
                                         whileTap={{ scale: 0.95 }}
                                         onClick={handleLogoutAll}
-                                        className="px-4 h-9 glass-card bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 text-[10px] font-bold tracking-wider uppercase rounded-lg transition-all"
+                                        className="w-full md:w-auto px-4 h-10 glass-card bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 text-[10px] font-bold tracking-wider uppercase rounded-xl transition-all"
                                     >
                                         Logout from all
                                     </motion.button>
                                 </div>
 
-                                <div className="pt-4 border-t border-white/5 flex items-center justify-between">
+                                <div className="pt-4 border-t border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
                                     <div className="flex items-center gap-4">
                                         <div className="w-10 h-10 bg-white/5 rounded-lg text-gray-400 flex items-center justify-center">
                                             <Icon name="key" className="w-4 h-4" />
@@ -336,7 +336,7 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
                                         whileHover={{ scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
                                         onClick={() => setShowBackup(true)}
-                                        className="text-[10px] font-bold text-primary hover:underline uppercase tracking-widest"
+                                        className="w-full md:w-auto h-10 md:h-auto text-[10px] font-bold text-primary hover:underline uppercase tracking-widest bg-primary/10 md:bg-transparent rounded-xl md:rounded-none"
                                     >
                                         Manage
                                     </motion.button>
