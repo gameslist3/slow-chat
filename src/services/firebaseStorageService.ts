@@ -78,25 +78,26 @@ export const uploadEncryptedFile = async (
  */
 export const uploadVoice = async (
     blob: Blob,
-    groupId: string,
+    chatId: string,
     userId: string,
+    isPersonal: boolean,
     onProgress: (progress: number) => void
 ): Promise<{ url: string; key: string; iv: string }> => {
     const filename = `voice_${Date.now()}.enc`;
-    const path = `groups/${groupId}/voice/${userId}/${filename}`;
+    const prefix = isPersonal ? 'chats' : 'groups';
+    const path = `${prefix}/${chatId}/voice/${userId}/${filename}`;
     return uploadEncryptedFile(blob, path, onProgress);
 };
 
-/**
- * For images, videos, docs
- */
 export const uploadMedia = async (
     file: File,
-    groupId: string,
+    chatId: string,
     userId: string,
+    isPersonal: boolean,
     onProgress: (progress: number) => void
 ): Promise<{ url: string; key: string; iv: string }> => {
     const filename = `${Date.now()}_${file.name}.enc`;
-    const path = `groups/${groupId}/media/${userId}/${filename}`;
+    const prefix = isPersonal ? 'chats' : 'groups';
+    const path = `${prefix}/${chatId}/media/${userId}/${filename}`;
     return uploadEncryptedFile(file, path, onProgress);
 };

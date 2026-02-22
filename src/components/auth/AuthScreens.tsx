@@ -386,7 +386,23 @@ export const NameScreen = ({ onNameSelected }: { onNameSelected: (name: string) 
     );
 };
 // --- Verification Pending Screen ---
+import { useAuth } from '../../context/AuthContext';
+
 export const VerificationPendingScreen = ({ onLogout }: { onLogout: () => void }) => {
+    const { checkVerificationStatus } = useAuth();
+    const [refreshing, setRefreshing] = useState(false);
+    const { toast } = useToast();
+
+    const handleRefresh = async () => {
+        setRefreshing(true);
+        try {
+            await checkVerificationStatus();
+        } catch (err) {
+            toast("Identity reload failed", "error");
+        } finally {
+            setRefreshing(false);
+        }
+    };
     return (
         <div className="w-full min-h-screen flex items-center justify-center p-6 bg-[#0B1220] relative overflow-hidden">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-emerald-500/10 blur-[120px] rounded-full pointer-events-none" />
@@ -410,15 +426,24 @@ export const VerificationPendingScreen = ({ onLogout }: { onLogout: () => void }
                 </div>
 
                 <div className="flex flex-col gap-4">
-                    <div className="text-[10px] font-black uppercase tracking-widest text-emerald-500/80 mb-2 animate-pulse">
-                        Waiting for verification...
-                    </div>
+                    <button
+                        onClick={handleRefresh}
+                        disabled={refreshing}
+                        className="w-full h-14 rounded-2xl bg-emerald-500 text-white font-black uppercase tracking-widest text-xs hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 active:scale-95 disabled:opacity-50"
+                    >
+                        {refreshing ? <Icon name="rotate" className="w-5 h-5 animate-spin mx-auto" /> : 'Check Status'}
+                    </button>
+
                     <button
                         onClick={onLogout}
-                        className="w-full h-14 rounded-2xl bg-white/5 border border-white/5 text-slate-400 font-black uppercase tracking-widest text-xs hover:bg-white/10 transition-all"
+                        className="w-full h-12 rounded-2xl bg-white/5 border border-white/5 text-slate-400 font-black uppercase tracking-widest text-xs hover:bg-white/10 transition-all"
                     >
                         Sign out
                     </button>
+
+                    <div className="text-[9px] font-black uppercase tracking-widest text-slate-600 mt-2">
+                        Polling for identity confirmation...
+                    </div>
                 </div>
             </motion.div>
         </div>

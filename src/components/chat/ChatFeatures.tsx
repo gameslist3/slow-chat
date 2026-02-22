@@ -164,6 +164,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                         groupId={chatId}
                         userId={user?.id || ''}
                         onSend={handleSendMessage}
+                        isPersonal={isPersonal}
                         replyingTo={replyingTo}
                         onCancelReply={cancelReply}
                         cooldown={remaining}

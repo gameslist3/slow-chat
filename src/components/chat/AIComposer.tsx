@@ -12,6 +12,7 @@ interface AIComposerProps {
     cooldown?: number;
     groupId: string;
     userId: string;
+    isPersonal: boolean;
 }
 
 type RecordingState = 'idle' | 'recording' | 'review';
@@ -22,7 +23,8 @@ export const AIComposer: React.FC<AIComposerProps> = ({
     onCancelReply,
     cooldown = 0,
     groupId,
-    userId
+    userId,
+    isPersonal
 }) => {
     const [text, setText] = useState('');
     const [recState, setRecState] = useState<RecordingState>('idle');
@@ -92,7 +94,7 @@ export const AIComposer: React.FC<AIComposerProps> = ({
         console.log(`[AIComposer] Starting voice upload for user: ${userId}, group: ${groupId}`);
 
         try {
-            const { url, key, iv } = await uploadVoice(audioBlob, groupId, userId, (p) => {
+            const { url, key, iv } = await uploadVoice(audioBlob, groupId, userId, isPersonal, (p) => {
                 console.log(`[AIComposer] Voice upload progress: ${p.toFixed(0)}%`);
             });
 
@@ -135,8 +137,9 @@ export const AIComposer: React.FC<AIComposerProps> = ({
         if (file.size > 10 * 1024 * 1024) return toast('File exceeds 10MB limit', 'error');
 
         setUploading(true);
+        console.log(`[AIComposer] Starting media upload. Personal: ${isPersonal}`);
         try {
-            const { url, key, iv } = await uploadMedia(file, groupId, userId, (p) => {
+            const { url, key, iv } = await uploadMedia(file, groupId, userId, isPersonal, (p) => {
                 console.log(`[AIComposer] Media upload progress: ${p.toFixed(0)}%`);
             });
 

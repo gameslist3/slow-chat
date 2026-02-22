@@ -13,6 +13,7 @@ interface AuthContextType {
     needsNameSetup: boolean;
     isAuthenticated: boolean;
     loading: boolean;
+    checkVerificationStatus: () => Promise<void>;
     loginEmail: (email: string) => void;
     completeLogin: (username: string) => Promise<void>;
     joinGroup: (groupId: string) => Promise<void>;
@@ -118,13 +119,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
         });
 
-        // Verification Polling
+        return () => {
+            authUnsubscribe();
+            if (snapshotUnsubscribe) snapshotUnsubscribe();
+            if (noteUnsubscribe) noteUnsubscribe();
+        };
+    }, []);
+
+    const checkVerificationStatus = async () => {
+        const currentUser = auth.currentUser;
+        if (currentUser) {
+            await currentUser.reload();
+            if (currentUser.emailVerified) {
+                console.log('[AuthContext] Manual verification check: SUCCESS');
+                setIsVerified(true);
+            } else {
+                console.log('[AuthContext] Manual verification check: STILL PENDING');
+            }
+        }
+    };
+
+    // Reactive Verification Polling: Only runs if user is logged in but not verified
+    useEffect(() => {
         let pollingInterval: any = null;
-        if (auth.currentUser && !auth.currentUser.emailVerified) {
+
+        if (user && !isVerified) {
+            console.log('[AuthContext] Starting verification polling...');
             pollingInterval = setInterval(async () => {
-                if (auth.currentUser) {
-                    await auth.currentUser.reload();
-                    if (auth.currentUser.emailVerified) {
+                const currentUser = auth.currentUser;
+                if (currentUser) {
+                    await currentUser.reload();
+                    if (currentUser.emailVerified) {
+                        console.log('[AuthContext] Email verified via polling! Updating state.');
                         setIsVerified(true);
                         clearInterval(pollingInterval);
                     }
@@ -133,12 +159,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
 
         return () => {
-            authUnsubscribe();
-            if (snapshotUnsubscribe) snapshotUnsubscribe();
-            if (noteUnsubscribe) noteUnsubscribe();
-            if (pollingInterval) clearInterval(pollingInterval);
+            if (pollingInterval) {
+                console.log('[AuthContext] Stopping verification polling.');
+                clearInterval(pollingInterval);
+            }
         };
-    }, []);
+    }, [user, isVerified, auth.currentUser]);
 
     const loginEmail = (email: string) => {
         // Temporary state before username selection
@@ -252,6 +278,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             needsNameSetup,
             isAuthenticated,
             loading,
+            checkVerificationStatus,
             loginEmail,
             completeLogin,
             joinGroup,

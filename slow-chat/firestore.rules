@@ -13,7 +13,7 @@ service cloud.firestore {
 
     function isGroupMember(groupId) {
       return isSignedIn() && 
-             (request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.joinedMembers);
+             (request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.memberIds);
     }
     
     // Users collection
