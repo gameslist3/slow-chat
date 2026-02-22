@@ -13,7 +13,7 @@ export type IconName =
     | 'thumbsUp' | 'thumbsDown' | 'message' | 'check' | 'checkCheck'
     | 'userPlus' | 'userMinus' | 'x' | 'sparkles' | 'users' | 'clock' | 'arrowLeft'
     | 'menu' | 'plus' | 'search' | 'logout' | 'compass' | 'settings' | 'mail'
-    | 'lock' | 'eye' | 'eyeOff' | 'checkCircle' | 'xCircle' | 'arrowRight' | 'shuffle' | 'key' | 'shield' | 'help' | 'save' | 'phone' | 'bell' | 'bellOff' | 'trash' | 'sun' | 'moon' | 'telescope';
+    | 'lock' | 'eye' | 'eyeOff' | 'checkCircle' | 'xCircle' | 'arrowRight' | 'shuffle' | 'key' | 'shield' | 'help' | 'save' | 'phone' | 'bell' | 'bellOff' | 'trash' | 'sun' | 'moon' | 'telescope' | 'messageSquare' | 'monitor' | 'database' | 'chevronRight' | 'chevronDown' | 'arrowUp';
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
     name: IconName;
@@ -46,6 +46,7 @@ const iconRegistry: Record<IconName, React.FC<any>> = {
     thumbsUp: SolarIcons.Like,
     thumbsDown: SolarIcons.Dislike,
     message: SolarIcons.ChatRoundDots,
+    messageSquare: SolarIcons.ChatRoundDots,
     check: SolarIcons.CheckCircle,
     checkCheck: SolarIcons.CheckRead,
     userPlus: SolarIcons.UserPlus,
@@ -56,6 +57,7 @@ const iconRegistry: Record<IconName, React.FC<any>> = {
     clock: SolarIcons.ClockCircle,
     arrowLeft: SolarIcons.AltArrowLeft,
     arrowRight: SolarIcons.AltArrowRight,
+    arrowUp: SolarIcons.AltArrowUp,
     menu: SolarIcons.HamburgerMenu,
     plus: SolarIcons.AddCircle,
     search: SolarIcons.Magnifer,
@@ -80,6 +82,10 @@ const iconRegistry: Record<IconName, React.FC<any>> = {
     sun: SolarIcons.Sun,
     moon: SolarIcons.Moon,
     telescope: SolarIcons.Telescope,
+    monitor: SolarIcons.Monitor,
+    database: SolarIcons.Database,
+    chevronRight: SolarIcons.AltArrowRight,
+    chevronDown: SolarIcons.AltArrowDown,
 };
 
 export const Icon: React.FC<IconProps> = ({ name, className, size = 24, ...props }) => {

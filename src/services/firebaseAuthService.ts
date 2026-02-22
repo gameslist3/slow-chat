@@ -104,6 +104,8 @@ export const registerUserStep1 = async (creds: UserCredentials & { username?: st
             following: [],
             followers: [],
             unreadCount: 0,
+            autoDeleteHours: 10,
+            lastTimerChange: Date.now(),
             notificationsClearedAt: 0,
             groupJoinTimes: {},
             createdAt: Date.now(),

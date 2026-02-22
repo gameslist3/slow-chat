@@ -1,4 +1,12 @@
-import { logoutUser, deleteUserAccount } from '../../services/firebaseAuthService';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Icon } from '../common/Icon';
+import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
+import { generateAnonymousName, logoutUser, deleteUserAccount } from '../../services/firebaseAuthService';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '../../config/firebase';
+import { KeyBackup } from './KeyBackup';
 import { vault } from '../../services/crypto/LocalVault';
 
 export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout: () => void }) => {
@@ -86,6 +94,38 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
         }
     };
 
+    const handleUpdateAutoDelete = async (hours: number) => {
+        if (!user) return;
+        const now = Date.now();
+        const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
+
+        if (user.lastTimerChange && (now - user.lastTimerChange < THIRTY_DAYS)) {
+            const nextAvail = new Date(user.lastTimerChange + THIRTY_DAYS);
+            toast(`You can change auto-delete time again after 30 days. (Avail: ${nextAvail.toLocaleDateString()})`, "error");
+            return;
+        }
+
+        try {
+            const userRef = doc(db, 'users', user.id);
+            await updateDoc(userRef, {
+                autoDeleteHours: hours,
+                lastTimerChange: now
+            });
+            toast(`Auto-delete set to ${hours} hours.`, "success");
+        } catch (error) {
+            toast("Failed to update message settings.", "error");
+        }
+    };
+
+    if (!user) {
+        return (
+            <div className="h-full flex flex-col items-center justify-center bg-transparent">
+                <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4" />
+                <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">Syncing Protocol...</p>
+            </div>
+        );
+    }
+
     return (
         <div className="h-full flex flex-col bg-transparent animate-in fade-in duration-700">
             {/* Minimal Header */}
@@ -114,7 +154,7 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
                             <div className="glass-panel p-8 rounded-3xl flex flex-col md:flex-row items-center justify-between group relative overflow-hidden gap-6">
                                 <div className="flex items-center gap-6 relative z-10 w-full md:w-auto">
                                     <div className="w-20 h-20 rounded-2xl bg-primary flex items-center justify-center text-3xl font-black text-white shadow-xl shadow-primary/30">
-                                        {user?.username?.[0].toUpperCase()}
+                                        {user?.username?.[0]?.toUpperCase() || '?'}
                                     </div>
                                     <div>
                                         <h3 className="text-2xl font-bold text-foreground tracking-tight">{user?.username}</h3>
@@ -171,6 +211,39 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
                                 <p className="text-[10px] font-bold text-gray-500 text-center uppercase tracking-wider">7-Day cooldown applies</p>
                             </div>
                         )}
+                    </div>
+
+                    {/* Message Settings Section */}
+                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-75">
+                        <div className="flex items-center gap-2 pl-2 text-primary">
+                            <Icon name="messageSquare" className="w-5 h-5" />
+                            <h2 className="text-sm font-bold uppercase tracking-widest">Message Settings</h2>
+                        </div>
+
+                        <div className="glass-panel p-8 rounded-3xl space-y-6">
+                            <div>
+                                <h3 className="font-bold text-foreground text-lg mb-1">Auto Delete Messages</h3>
+                                <p className="text-sm text-gray-500 mb-6">All messages will be automatically deleted after selected time.</p>
+
+                                <div className="grid grid-cols-3 gap-4">
+                                    {[5, 10, 20].map((h) => (
+                                        <button
+                                            key={h}
+                                            onClick={() => handleUpdateAutoDelete(h)}
+                                            className={`
+                                                h-14 rounded-2xl font-bold text-sm transition-all border-2
+                                                ${user?.autoDeleteHours === h
+                                                    ? 'bg-primary border-primary text-white shadow-lg shadow-primary/20'
+                                                    : 'bg-white/5 border-white/5 text-gray-400 hover:border-white/10 hover:text-white'
+                                                }
+                                            `}
+                                        >
+                                            {h} Hours
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Account Safety Section */}

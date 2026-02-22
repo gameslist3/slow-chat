@@ -95,7 +95,15 @@ export const useChat = (chatId: string, isPersonal: boolean = false) => {
         };
 
         const unsubscribe = subscribeToMessages(chatId, isPersonal, async (newMessages) => {
-            const filtered = newMessages.filter(m => m.type !== 'system');
+            const now = Date.now();
+            const expiryThreshold = (user?.autoDeleteHours || 10) * 60 * 60 * 1000;
+
+            const filtered = newMessages.filter(m => {
+                if (m.type === 'system') return false;
+                const ts = (m.timestamp as any)?.toMillis?.() || (typeof m.timestamp === 'number' ? m.timestamp : now);
+                return (now - ts) < expiryThreshold;
+            });
+
             const decrypted = await decryptMessages(filtered);
             setRealtimeMessages(decrypted);
             setLoading(false);

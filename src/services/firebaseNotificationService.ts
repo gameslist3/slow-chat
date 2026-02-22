@@ -26,6 +26,8 @@ export const createNotification = async (
         senderName: string,
         text: string,
         groupId?: string,
+        groupName?: string,
+        groupImage?: string,
         messageId?: string
     }
 ): Promise<void> => {
@@ -111,10 +113,15 @@ export const markAllAsRead = async (uid: string): Promise<void> => {
             const b = writeBatch(db);
             const chunk = docs.slice(i, i + 450);
             chunk.forEach(d => {
-                b.update(d.ref, {
-                    read: true,
-                    updatedAt: Date.now()
-                });
+                const data = d.data();
+                if (data.type === 'follow_request') {
+                    // Keep friend requests, maybe mark as read? 
+                    // User says "Pending friend requests stay until accepted/declined"
+                    // If we mark as read, they won't show in unread count.
+                    // Let's just skip them to keep them unread and visible.
+                } else {
+                    b.delete(d.ref);
+                }
             });
             await b.commit();
         }
@@ -122,5 +129,34 @@ export const markAllAsRead = async (uid: string): Promise<void> => {
         console.log("[NotificationService] Everything marked read and cleared barrier updated.");
     } catch (error) {
         console.error("[NotificationService] markAllAsRead Error:", error);
+    }
+};
+
+/**
+ * Permanent cleanup of expired notifications from DB
+ */
+export const cleanupNotifications = async (uid: string, autoDeleteHours: number): Promise<void> => {
+    if (!uid) return;
+    const threshold = Date.now() - (autoDeleteHours * 60 * 60 * 1000);
+
+    try {
+        const q = query(
+            collection(db, 'notifications'),
+            where('userId', '==', uid),
+            where('timestamp', '<=', threshold)
+        );
+        const snap = await getDocs(q);
+
+        // Don't delete friend requests during auto-cleanup
+        const toDelete = snap.docs.filter(d => d.data().type !== 'follow_request');
+
+        if (toDelete.length === 0) return;
+
+        const batch = writeBatch(db);
+        toDelete.forEach(d => batch.delete(d.ref));
+        await batch.commit();
+        console.log(`[NotificationService] Auto-cleanup: Removed ${toDelete.length} expired records.`);
+    } catch (error) {
+        console.error("[NotificationService] Cleanup Error:", error);
     }
 };

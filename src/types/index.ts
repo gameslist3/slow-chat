@@ -21,6 +21,8 @@ export interface User {
     publicKeys?: {
         identity: string;
     };
+    autoDeleteHours?: number; // 5, 10, 20
+    lastTimerChange?: number; // timestamp
 }
 
 export interface UserCredentials {
@@ -99,6 +101,8 @@ export interface Notification {
     userId: string;
     type: 'message' | 'mention' | 'reply' | 'follow_request' | 'follow_accept' | 'system' | 'friends';
     groupId?: string;
+    groupName?: string;
+    groupImage?: string;
     messageId?: string;
     senderName: string;
     text: string;

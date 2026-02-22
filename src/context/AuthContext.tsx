@@ -46,6 +46,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         const authUnsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
             if (firebaseUser) {
+                setLoading(true); // Ensure loading is true while fetching doc
                 // 1. Subscribe to user document for core profile
                 const userRef = doc(db, 'users', firebaseUser.uid);
                 snapshotUnsubscribe = onSnapshot(userRef, (userSnap) => {
@@ -55,7 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     if (userSnap.exists()) {
                         const userData = userSnap.data();
                         setUser(prev => {
-                            if (!prev) return {
+                            const base = {
                                 id: firebaseUser.uid,
                                 email: userData.email,
                                 username: userData.username || '',
@@ -63,23 +64,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                                 mutedGroups: userData.mutedGroups || [],
                                 following: userData.following || [],
                                 followers: userData.followers || [],
-                                unreadCount: 0,
-                                // Include the new field
+                                unreadCount: prev?.unreadCount || 0,
                                 notificationsClearedAt: userData.notificationsClearedAt,
                                 groupJoinTimes: userData.groupJoinTimes || {},
-                                sessions: userData.sessions || []
+                                sessions: userData.sessions || [],
+                                autoDeleteHours: userData.autoDeleteHours || 10,
+                                lastTimerChange: userData.lastTimerChange || 0
                             };
-                            return {
-                                ...prev,
-                                username: userData.username || '',
-                                joinedGroups: userData.joinedGroups || [],
-                                mutedGroups: userData.mutedGroups || [],
-                                following: userData.following || [],
-                                followers: userData.followers || [],
-                                // Also update on subsequent snapshots
-                                notificationsClearedAt: userData.notificationsClearedAt,
-                                groupJoinTimes: userData.groupJoinTimes || {}
-                            };
+                            return base;
                         });
                     }
                     setLoading(false);

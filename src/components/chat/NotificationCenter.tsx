@@ -3,7 +3,7 @@ import { Bell, X, MessageSquare, AtSign, Reply, UserPlus, Check, Trash2, Zap, Ro
 import { collection, query, where, limit, getDocs } from 'firebase/firestore';
 import { db, auth } from '../../config/firebase';
 import { useAuth } from '../../context/AuthContext';
-import { subscribeToNotifications, markAsRead, markAllAsRead } from '../../services/firebaseNotificationService';
+import { subscribeToNotifications, markAsRead, markAllAsRead, cleanupNotifications } from '../../services/firebaseNotificationService';
 import { acceptFollowRequest, declineFollowRequest } from '../../services/firebaseFollowService';
 import { useToast } from '../../context/ToastContext';
 import { Notification } from '../../types';
@@ -169,8 +169,9 @@ export const NotificationList: React.FC<{
         return () => clearInterval(interval);
     }, []);
 
-    const WINDOW_24H = 24 * 60 * 60 * 1000;
-    const clearedAt = user?.notificationsClearedAt || 0;
+    const { user: authUser } = useAuth();
+    const autoDeleteWindow = (authUser?.autoDeleteHours || 10) * 60 * 60 * 1000;
+    const clearedAt = authUser?.notificationsClearedAt || 0;
 
     const requests = notifications
         .filter(n => {
@@ -184,12 +185,11 @@ export const NotificationList: React.FC<{
         .filter(n => {
             if (n.type === 'follow_request') return false;
 
-            // 24h Visibility Window (Production Requirement)
-            const isWithin24H = (now - n.timestamp) < WINDOW_24H;
-            if (!isWithin24H) return false;
+            // Dynamic Visibility Window based on user settings (Production Requirement)
+            const isWithinTimer = (now - n.timestamp) < autoDeleteWindow;
+            if (!isWithinTimer) return false;
 
             // Mark all read behavior: Hide if older than clearing timestamp AND marked as read
-            // This ensures new notifications show up even if user clicked "Mark all read" recently
             const isCleared = n.timestamp <= clearedAt && n.read;
             if (isCleared) return false;
 
@@ -255,11 +255,24 @@ export const NotificationList: React.FC<{
                                             >
                                                 <div className="flex gap-4 items-start text-left">
                                                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-transform group-hover:scale-110 ${note.type === 'mention' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' : note.type === 'reply' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : note.type === 'follow_accept' ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-foreground/5 text-muted-foreground border-white/5'}`}>
-                                                        <IconForType type={note.type} />
+                                                        {note.groupImage ? (
+                                                            <span className="text-xl">{note.groupImage}</span>
+                                                        ) : (
+                                                            <IconForType type={note.type} />
+                                                        )}
                                                     </div>
                                                     <div className="flex-1 min-w-0">
                                                         <div className="flex items-center justify-between gap-2 mb-1">
-                                                            <span className="font-bold text-xs tracking-tight text-foreground/90">{note.senderName}</span>
+                                                            <div className="flex flex-col text-left">
+                                                                {note.groupName && (
+                                                                    <span className="text-[10px] font-black text-primary uppercase tracking-tighter opacity-70">
+                                                                        {note.groupName}
+                                                                    </span>
+                                                                )}
+                                                                <span className="font-bold text-xs tracking-tight text-foreground/90">
+                                                                    {note.groupName ? `> ${note.senderName}` : note.senderName}
+                                                                </span>
+                                                            </div>
                                                             <span className="text-[8px] font-bold opacity-30 tracking-widest uppercase">{new Date(note.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                                         </div>
                                                         <p className="text-xs font-medium line-clamp-2 text-muted-foreground leading-relaxed group-hover:text-foreground transition-colors text-left">{note.text}</p>
@@ -297,8 +310,12 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose,
     useEffect(() => {
         if (!user?.id) return;
         const unsubscribe = subscribeToNotifications(user.id, setNotifications);
+
+        // Initial cleanup of expired alerts from DB
+        cleanupNotifications(user.id, user.autoDeleteHours || 10);
+
         return () => unsubscribe();
-    }, [user?.id]);
+    }, [user?.id, user?.autoDeleteHours]);
 
     return (
         <div ref={containerRef} className="flex flex-col h-full glass-panel rounded-none md:rounded-[2.5rem] overflow-hidden shadow-2xl border-white/5 bg-[#0B1221]/95">

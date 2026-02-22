@@ -175,11 +175,16 @@ export async function sendMessage(
                     const recipientActiveChat = recipientDoc.exists() ? recipientDoc.data().activeChatId : null;
 
                     if (recipientActiveChat !== targetId) {
+                        const groupSnap = await getDoc(doc(db, 'groups', targetId));
+                        const groupData = groupSnap.exists() ? groupSnap.data() : {};
+
                         await createNotification(replyToUserId, {
                             type: 'message',
                             senderName: senderUsername,
                             text: `replied to your message`,
                             groupId: targetId,
+                            groupName: groupData.name || 'Group',
+                            groupImage: groupData.image || '💬',
                             messageId: docRef.id
                         });
                     }
@@ -193,6 +198,9 @@ export async function sendMessage(
                 const mentionedUsernames = mentionMatches.map(m => m.slice(1));
 
                 if (mentionedUsernames.length > 0) {
+                    const groupSnap = await getDoc(doc(db, 'groups', targetId));
+                    const groupData = groupSnap.exists() ? groupSnap.data() : {};
+
                     for (const username of mentionedUsernames) {
                         const uid = await getUserIdByUsername(username);
                         if (uid && uid !== senderId && !notifiedUserIds.has(uid)) {
@@ -205,6 +213,8 @@ export async function sendMessage(
                                     senderName: senderUsername,
                                     text: `mentioned you in a message`,
                                     groupId: targetId,
+                                    groupName: groupData.name || 'Group',
+                                    groupImage: groupData.image || '💬',
                                     messageId: docRef.id
                                 });
                             }
