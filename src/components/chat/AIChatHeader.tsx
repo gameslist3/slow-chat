@@ -7,6 +7,7 @@ import { deletePersonalChat } from '../../services/firebaseMessageService';
 import { unfollowUser } from '../../services/firebaseFollowService';
 import { useAuth } from '../../context/AuthContext';
 import { Icon } from '../common/Icon';
+import { GroupMemberPopup } from './GroupMemberPopup';
 
 interface AIChatHeaderProps {
     groupId: string;
@@ -30,6 +31,7 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
     const [showMore, setShowMore] = useState(false);
     const [muted, setMuted] = useState(false);
     const [copied, setCopied] = useState(false);
+    const [showMembers, setShowMembers] = useState(false);
     const { toast } = useToast();
     const { user } = useAuth();
 
@@ -83,13 +85,16 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
                     <Icon name="arrowLeft" className="w-6 h-6 text-[#E6ECFF] group-hover:scale-110 transition-transform" />
                 </button>
 
-                <div className="flex items-center gap-3 px-2 py-1.5 rounded-full pr-6 group cursor-pointer hover:bg-white/5 transition-colors">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#1F2937] to-[#111827] flex items-center justify-center text-lg border border-white/10 text-white shadow-lg">
+                <div
+                    onClick={() => { if (!isPersonal) setShowMembers(true); }}
+                    className="flex items-center gap-3 px-2 py-1.5 rounded-full pr-6 group cursor-pointer hover:bg-white/5 transition-colors"
+                >
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#1F2937] to-[#111827] flex items-center justify-center text-lg border border-white/10 text-white shadow-lg shrink-0">
                         {isGapesTeam ? 'GT' : image}
                     </div>
-                    <div className="flex flex-col">
+                    <div className="flex flex-col min-w-0">
                         <div className="flex items-center gap-2">
-                            <h2 className="text-base font-bold text-[#E6ECFF] leading-none tracking-tight">{displayTitle}</h2>
+                            <h2 className="text-base font-bold text-[#E6ECFF] leading-none tracking-tight truncate">{displayTitle}</h2>
                         </div>
                         {!isPersonal && (
                             <span className="text-[11px] font-medium text-[#7C89A6] mt-0.5">{memberCount} members</span>
@@ -168,6 +173,14 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
                     </div>
                 )}
             </div>
+
+            {/* Modals */}
+            {showMembers && !isPersonal && (
+                <GroupMemberPopup
+                    groupId={groupId}
+                    onClose={() => setShowMembers(false)}
+                />
+            )}
         </header>
     );
 };

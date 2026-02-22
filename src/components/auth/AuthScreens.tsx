@@ -387,22 +387,44 @@ export const NameScreen = ({ onNameSelected }: { onNameSelected: (name: string) 
 };
 // --- Verification Pending Screen ---
 import { useAuth } from '../../context/AuthContext';
+import { cancelRegistration, resendVerificationEmail } from '../../services/firebaseAuthService';
 
 export const VerificationPendingScreen = ({ onLogout }: { onLogout: () => void }) => {
     const { checkVerificationStatus } = useAuth();
-    const [refreshing, setRefreshing] = useState(false);
+    const [resendCount, setResendCount] = useState(0);
+    const [loading, setLoading] = useState(false);
     const { toast } = useToast();
 
-    const handleRefresh = async () => {
-        setRefreshing(true);
+    // The polling in AuthContext handles the realtime verification check.
+
+    const handleResend = async () => {
+        if (resendCount >= 2) return;
+        setLoading(true);
         try {
-            await checkVerificationStatus();
-        } catch (err) {
-            toast("Identity reload failed", "error");
+            await resendVerificationEmail();
+            setResendCount(prev => prev + 1);
+            toast("Verification email resent.", "success");
+        } catch (err: any) {
+            toast(err.message || "Failed to resend email", "error");
         } finally {
-            setRefreshing(false);
+            setLoading(false);
         }
     };
+
+    const handleCancel = async () => {
+        if (!confirm("Are you sure you want to cancel registration? This will delete your account.")) return;
+        setLoading(true);
+        try {
+            await cancelRegistration();
+            onLogout(); // Clear local state
+            toast("Registration cancelled.", "info");
+        } catch (err: any) {
+            toast(err.message || "Cancel failed", "error");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="w-full min-h-screen flex items-center justify-center p-6 bg-[#0B1220] relative overflow-hidden">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-emerald-500/10 blur-[120px] rounded-full pointer-events-none" />
@@ -427,18 +449,19 @@ export const VerificationPendingScreen = ({ onLogout }: { onLogout: () => void }
 
                 <div className="flex flex-col gap-4">
                     <button
-                        onClick={handleRefresh}
-                        disabled={refreshing}
+                        onClick={handleResend}
+                        disabled={loading || resendCount >= 2}
                         className="w-full h-14 rounded-2xl bg-emerald-500 text-white font-black uppercase tracking-widest text-xs hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 active:scale-95 disabled:opacity-50"
                     >
-                        {refreshing ? <Icon name="rotate" className="w-5 h-5 animate-spin mx-auto" /> : 'Check Status'}
+                        {loading && resendCount < 2 ? <Icon name="rotate" className="w-5 h-5 animate-spin mx-auto" /> : (resendCount >= 2 ? 'Limit Reached' : 'Send Again')}
                     </button>
 
                     <button
-                        onClick={onLogout}
-                        className="w-full h-12 rounded-2xl bg-white/5 border border-white/5 text-slate-400 font-black uppercase tracking-widest text-xs hover:bg-white/10 transition-all"
+                        onClick={handleCancel}
+                        disabled={loading}
+                        className="w-full h-12 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 font-black uppercase tracking-widest text-xs hover:bg-red-500/20 transition-all disabled:opacity-50"
                     >
-                        Sign out
+                        Cancel
                     </button>
 
                     <div className="text-[9px] font-black uppercase tracking-widest text-slate-600 mt-2">

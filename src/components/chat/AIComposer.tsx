@@ -303,6 +303,23 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                         )}
                     </div>
                 )}
+
+                {/* Uploading Overlay */}
+                <AnimatePresence>
+                    {uploading && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-[#0F1C34]/80 backdrop-blur-[2px] rounded-[2.5rem] flex items-center justify-center z-50 border border-white/10"
+                        >
+                            <div className="flex items-center gap-3 text-[#3B82F6] font-bold uppercase tracking-widest text-xs">
+                                <Icon name="rotate" className="w-5 h-5 animate-spin" />
+                                Encrypting & Transmitting...
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
         </div>
     );

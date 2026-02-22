@@ -5,7 +5,9 @@ import {
     sendEmailVerification,
     User as FirebaseUser
 } from 'firebase/auth';
-import { doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, writeBatch } from 'firebase/firestore';
+import {
+    doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, writeBatch, deleteDoc
+} from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 import { User, UserCredentials } from '../types';
 import { CryptoUtils } from './crypto/CryptoUtils';
@@ -125,6 +127,44 @@ export const registerUserStep1 = async (creds: UserCredentials): Promise<boolean
         }
 
         throw new Error(friendlyMessage);
+    }
+};
+
+// Cancel Registration (Delete unverified account)
+export const cancelRegistration = async (): Promise<void> => {
+    try {
+        const currentUser = auth.currentUser;
+        if (!currentUser) throw new Error('No user is currently signed in.');
+
+        console.log(`[Auth] Canceling registration for ${currentUser.uid}`);
+
+        // Delete Firestore document first
+        await deleteDoc(doc(db, 'users', currentUser.uid));
+
+        // Delete Firebase Auth User
+        await currentUser.delete();
+
+        console.log(`[Auth] Registration cancelled successfully`);
+    } catch (error: any) {
+        console.error('[Auth] Registration cancellation error:', error);
+        throw new Error('Failed to cancel registration. Please try again.');
+    }
+};
+
+// Resend Verification Email
+export const resendVerificationEmail = async (): Promise<void> => {
+    try {
+        const currentUser = auth.currentUser;
+        if (!currentUser) throw new Error('No user is currently signed in.');
+
+        console.log(`[Auth] Resending verification email to ${currentUser.email}`);
+        await sendEmailVerification(currentUser);
+    } catch (error: any) {
+        console.error('[Auth] Verification resend error:', error);
+        if (error.code === 'auth/too-many-requests') {
+            throw new Error('Too many requests. Please wait a moment before trying again.');
+        }
+        throw new Error('Failed to resend verification email.');
     }
 };
 

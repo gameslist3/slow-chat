@@ -18,6 +18,7 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
     const [tempName, setTempName] = useState('');
     const [lockDate, setLockDate] = useState<Date | null>(null);
     const [showBackup, setShowBackup] = useState(false);
+    const [showDeleteInfo, setShowDeleteInfo] = useState(false);
 
     // Get current device info
     const currentSession = user?.sessions?.find(s => s.userAgent === navigator.userAgent);
@@ -213,9 +214,17 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
                             <h2 className="text-sm font-bold uppercase tracking-widest">Message Settings</h2>
                         </div>
 
-                        <div className="glass-panel p-8 rounded-3xl space-y-6">
+                        <div className="glass-panel p-8 rounded-3xl space-y-6 relative">
                             <div>
-                                <h3 className="font-bold text-foreground text-lg mb-1">Auto Delete Messages</h3>
+                                <div className="flex items-center gap-2 mb-1">
+                                    <h3 className="font-bold text-foreground text-lg">Auto Delete Messages</h3>
+                                    <button
+                                        onClick={() => setShowDeleteInfo(true)}
+                                        className="w-5 h-5 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors text-gray-400 hover:text-white"
+                                    >
+                                        <Icon name="info" className="w-3 h-3" />
+                                    </button>
+                                </div>
                                 <p className="text-sm text-gray-500 mb-6">All messages will be automatically deleted after selected time.</p>
 
                                 <div className="grid grid-cols-3 gap-4">
@@ -235,6 +244,36 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
                                         </button>
                                     ))}
                                 </div>
+
+                                {/* Info Popup */}
+                                <AnimatePresence>
+                                    {showDeleteInfo && (
+                                        <>
+                                            <div
+                                                className="fixed inset-0 z-[60]"
+                                                onClick={() => setShowDeleteInfo(false)}
+                                            />
+                                            <motion.div
+                                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                className="absolute top-16 left-8 right-8 z-[70] bg-[#0F1C34] border border-white/10 p-5 rounded-2xl shadow-2xl backdrop-blur-xl"
+                                            >
+                                                <div className="flex justify-between items-start mb-3">
+                                                    <h4 className="text-sm font-bold text-white uppercase tracking-widest">How it works</h4>
+                                                    <button onClick={() => setShowDeleteInfo(false)} className="text-gray-500 hover:text-white">
+                                                        <Icon name="x" className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                                <p className="text-sm text-gray-300 leading-relaxed">
+                                                    “Auto Delete Messages automatically removes your sent and received messages after selected time (5hr / 10hr / 20hr).<br /><br />
+                                                    This keeps chats private and storage clean.<br />
+                                                    Default: 10 hours.”
+                                                </p>
+                                            </motion.div>
+                                        </>
+                                    )}
+                                </AnimatePresence>
                             </div>
                         </div>
                     </div>

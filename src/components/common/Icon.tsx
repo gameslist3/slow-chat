@@ -13,7 +13,7 @@ export type IconName =
     | 'thumbsUp' | 'thumbsDown' | 'message' | 'check' | 'checkCheck'
     | 'userPlus' | 'userMinus' | 'x' | 'sparkles' | 'users' | 'clock' | 'arrowLeft'
     | 'menu' | 'plus' | 'search' | 'logout' | 'compass' | 'settings' | 'mail'
-    | 'lock' | 'eye' | 'eyeOff' | 'checkCircle' | 'xCircle' | 'arrowRight' | 'shuffle' | 'key' | 'shield' | 'help' | 'save' | 'phone' | 'bell' | 'bellOff' | 'trash' | 'sun' | 'moon' | 'telescope' | 'messageSquare' | 'monitor' | 'database' | 'chevronRight' | 'chevronDown' | 'arrowUp';
+    | 'lock' | 'eye' | 'eyeOff' | 'checkCircle' | 'xCircle' | 'arrowRight' | 'shuffle' | 'key' | 'shield' | 'help' | 'save' | 'phone' | 'bell' | 'bellOff' | 'trash' | 'sun' | 'moon' | 'telescope' | 'messageSquare' | 'monitor' | 'database' | 'chevronRight' | 'chevronDown' | 'arrowUp' | 'info';
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
     name: IconName;
@@ -58,6 +58,7 @@ const iconRegistry: Record<IconName, React.FC<any>> = {
     arrowLeft: SolarIcons.AltArrowLeft,
     arrowRight: SolarIcons.AltArrowRight,
     arrowUp: SolarIcons.AltArrowUp,
+    info: SolarIcons.InfoCircle,
     menu: SolarIcons.HamburgerMenu,
     plus: SolarIcons.AddCircle,
     search: SolarIcons.Magnifer,

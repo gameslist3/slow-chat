@@ -134,8 +134,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                                 <div className="w-24 h-24 bg-blue-500/20 rounded-full flex items-center justify-center mb-6 animate-pulse">
                                     <div className="text-4xl text-blue-400">💬</div>
                                 </div>
-                                <p className="text-xs uppercase tracking-[0.3em] font-black text-blue-200">No signals detected</p>
-                                <p className="text-sm text-blue-200/50 mt-2">Begin transmission</p>
+                                <p className="text-xs uppercase tracking-[0.3em] font-black text-blue-200">Start chatting</p>
                             </div>
                         ) : (
                             <div className="pb-32">
