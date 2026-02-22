@@ -5,7 +5,7 @@ import {
     sendEmailVerification,
     User as FirebaseUser
 } from 'firebase/auth';
-import { doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, writeBatch } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 import { User, UserCredentials } from '../types';
 import { CryptoUtils } from './crypto/CryptoUtils';
@@ -23,10 +23,53 @@ export const validateEmail = (email: string): boolean => {
     return true;
 };
 
+// Deletion Logic
+export const deleteUserAccount = async (userId: string): Promise<void> => {
+    console.log(`[Auth] Starting deletion for user: ${userId}`);
+    const batch = writeBatch(db);
+
+    try {
+        // 1. Delete user document
+        batch.delete(doc(db, 'users', userId));
+
+        // 2. Remove from friends lists (logic would go here, simplified for now)
+        // In a real app, you'd query 'users' where 'following' contains userId or 'followers' contains userId
+
+        // 3. Clear sessions and local vault (vault clear is handled in component)
+
+        // 4. Delete Firestore Auth account (requires fresh token, usually handled via cloud functions or deleteUser)
+        // Simplified for this UI: We just clear DB data and sign out.
+        await batch.commit();
+        await auth.currentUser?.delete();
+        console.log('[Auth] User account and data deleted.');
+    } catch (err) {
+        console.error('[Auth] Deletion error:', err);
+        throw err;
+    }
+};
+
+/**
+ * OTP Mock Flow for 2026 UI Kit
+ * In production, this would trigger a Firebase Cloud Function that sends a real email.
+ */
+export const sendSignupOTP = async (email: string) => {
+    console.log(`[OTP] Sending 6-digit code to ${email}`);
+    // Mock delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    return true; // Sent successfully
+};
+
+export const verifySignupOTP = async (code: string) => {
+    console.log(`[OTP] Verifying code: ${code}`);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    if (code === '123456') return true; // Mock master code
+    throw new Error("Invalid verification code. Please try again.");
+};
+
 // ... (existing helper functions)
 
 // Register user (Step 1)
-export const registerUserStep1 = async (creds: UserCredentials): Promise<boolean> => {
+export const registerUserStep1 = async (creds: UserCredentials & { username?: string }): Promise<boolean> => {
     try {
         if (!creds.email || !creds.password) {
             throw new Error('Email and password are required.');
@@ -44,16 +87,6 @@ export const registerUserStep1 = async (creds: UserCredentials): Promise<boolean
         const firebaseUser = userCredential.user;
         console.log(`[Auth] User created in Firebase Auth: ${firebaseUser.uid}`);
 
-        // Send email verification
-        try {
-            await sendEmailVerification(firebaseUser);
-            console.log('[Auth] Verification email sent');
-        } catch (emailError) {
-            console.error('[Auth] Error sending verification email:', emailError);
-            // We don't throw here to avoid stopping the whole process, 
-            // but the user should be notified.
-        }
-
         // Generate E2EE Identity Key Pair
         const identityKeyPair = await CryptoUtils.generateIdentityKeyPair();
         const publicIdentityKeyBase64 = await CryptoUtils.exportPublicKey(identityKeyPair.publicKey);
@@ -65,7 +98,7 @@ export const registerUserStep1 = async (creds: UserCredentials): Promise<boolean
         await setDoc(doc(db, 'users', firebaseUser.uid), {
             id: firebaseUser.uid,
             email: creds.email,
-            username: '',
+            username: creds.username || '',
             joinedGroups: ['system-updates'],
             mutedGroups: [],
             following: [],

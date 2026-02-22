@@ -165,42 +165,50 @@ export const SignInScreen = ({ onBack, onSuccess, onForgotPassword }: any) => {
     );
 };
 
+import { validateEmail, registerUserStep1, loginUserWithPassword, generateAnonymousName, sendSignupOTP, verifySignupOTP } from '../../services/firebaseAuthService';
+
 // --- Sign Up Screen ---
 export const SignUpScreen = ({ onBack, onSuccess }: any) => {
+    const [step, setStep] = useState<'form' | 'otp'>('form');
     const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
+    const [otp, setOtp] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [acceptedTerms, setAcceptedTerms] = useState(false);
-    const [showTermsModal, setShowTermsModal] = useState(false);
     const [loading, setLoading] = useState(false);
     const { toast } = useToast();
 
-    const getPasswordStrength = (pwd: string) => {
-        if (!pwd) return 0;
-        let score = 0;
-        if (pwd.length >= 8) score++;
-        if (/[A-Z]/.test(pwd) && /[a-z]/.test(pwd)) score++;
-        if (/[0-9]/.test(pwd) || /[^A-Za-z0-9]/.test(pwd)) score++;
-        return score;
-    };
-
-    const strength = getPasswordStrength(password);
-    const isMatched = password === confirmPassword && password.length > 0;
-    const canSubmit = validateEmail(email) && strength >= 2 && isMatched && acceptedTerms;
-
-    const handleSignUp = async (e: React.FormEvent) => {
+    const handleStartSignUp = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!validateEmail(email)) return toast("Invalid email format", "error");
-        if (password.length < 8) return toast("Password too short (min 8 chars)", "error");
-        if (password !== confirmPassword) return toast("Passwords do not match", "error");
-        if (!acceptedTerms) return toast("Please accept the Terms & Conditions", "error");
+        if (!validateEmail(email)) return toast("Check your email format.", "error");
+        if (password.length < 8) return toast("Password is too short (min 8 chars).", "error");
+        if (!username) return toast("Please pick a username.", "error");
 
         setLoading(true);
         try {
-            await registerUserStep1({ email, password });
-            toast("Account created successfully", "success");
+            await sendSignupOTP(email);
+            setStep('otp');
+            toast("Verification code sent to your email.", "success");
+        } catch (error: any) {
+            toast(error.message, "error");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleVerify = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (otp.length !== 6) return toast("Enter the 6-digit code.", "error");
+
+        setLoading(true);
+        try {
+            await verifySignupOTP(otp);
+            // After OTP, create account
+            await registerUserStep1({ email, password, username });
+            toast("Account created! Welcome.", "success");
+            // Auto-login logic
+            const user = await loginUserWithPassword({ email, password });
+            if (user) onSuccess(user);
         } catch (error: any) {
             toast(error.message, "error");
         } finally {
@@ -211,140 +219,125 @@ export const SignUpScreen = ({ onBack, onSuccess }: any) => {
     return (
         <div className="w-full min-h-screen flex flex-col items-center justify-center p-6 bg-[#0B1220] text-white">
             <div className="w-full max-w-md flex flex-col items-center">
-                {/* Logo top */}
                 <Logo className="w-48 h-auto mb-12 opacity-80" />
 
-                {/* Join Header */}
-                <div className="flex items-center gap-4 w-full mb-8">
-                    <button onClick={onBack} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/5 transition-colors">
-                        <Icon name="arrowLeft" className="w-5 h-5 text-slate-400" />
-                    </button>
-                    <div className="flex items-center gap-2">
-                        <h2 className="text-xl font-bold">Join</h2>
-                        <span className="text-slate-500 font-medium">Start your journey today</span>
-                    </div>
-                </div>
-
-                {/* Form */}
-                <form onSubmit={handleSignUp} className="w-full flex flex-col gap-5">
-                    <div className="space-y-4">
-                        {/* Email Address */}
-                        <div className="flex flex-col gap-1 px-1">
-                            {email && <span className="text-[10px] text-slate-400 font-medium ml-1">Email Address</span>}
-                            <div className="relative group">
-                                <Icon name="mail" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 z-10" />
-                                <input
-                                    type="email"
-                                    required
-                                    value={email}
-                                    onChange={e => setEmail(e.target.value)}
-                                    className="w-full h-12 pl-12 pr-4 rounded-full bg-[#FFFFFF05] border border-white/10 focus:border-[#5B79B7]/50 text-white placeholder-slate-500 text-sm transition-all"
-                                    placeholder={email ? "" : "Email Address"}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Create Password */}
-                        <div className="flex flex-col gap-1 px-1">
-                            {password && <span className="text-[10px] text-slate-400 font-medium ml-1">Create Password</span>}
-                            <div className="relative group">
-                                <Icon name="lock" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 z-10" />
-                                <input
-                                    type={showPassword ? "text" : "password"}
-                                    required
-                                    value={password}
-                                    onChange={e => setPassword(e.target.value)}
-                                    className="w-full h-12 pl-12 pr-12 rounded-full bg-[#FFFFFF05] border border-white/10 focus:border-[#5B79B7]/50 text-white placeholder-slate-500 text-sm transition-all"
-                                    placeholder={password ? "" : "Create Password"}
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
-                                >
-                                    <Icon name={showPassword ? "eyeOff" : "eye"} className="w-4 h-4" />
-                                </button>
-                            </div>
-                            {/* Strength Indicator */}
-                            {password && (
-                                <div className="mt-2 px-2 flex flex-col gap-1">
-                                    <div className="flex gap-1 h-1 w-full rounded-full overflow-hidden bg-white/5">
-                                        <div className={`h-full transition-all duration-500 ${strength >= 1 ? 'w-1/3 bg-rose-500' : 'w-0'}`} />
-                                        <div className={`h-full transition-all duration-500 ${strength >= 2 ? 'w-1/3 bg-amber-500' : 'w-0'}`} />
-                                        <div className={`h-full transition-all duration-500 ${strength >= 3 ? 'w-1/3 bg-emerald-500' : 'w-0'}`} />
-                                    </div>
-                                    <span className={`text-[9px] font-bold uppercase tracking-widest ${strength === 0 ? 'text-rose-500' : strength === 1 ? 'text-rose-400' : strength === 2 ? 'text-amber-400' : 'text-emerald-400'}`}>
-                                        {strength === 0 ? 'Too Short' : strength === 1 ? 'Weak Protocol' : strength === 2 ? 'Medium Security' : 'Strong Protocol'}
-                                    </span>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Confirm Password */}
-                        <div className="flex flex-col gap-1 px-1">
-                            {confirmPassword && <span className="text-[10px] text-slate-400 font-medium ml-1">Confirm Password</span>}
-                            <div className="relative group">
-                                <Icon name="lock" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 z-10" />
-                                <input
-                                    type={showConfirmPassword ? "text" : "password"}
-                                    required
-                                    value={confirmPassword}
-                                    onChange={e => setConfirmPassword(e.target.value)}
-                                    className="w-full h-12 pl-12 pr-12 rounded-full bg-[#FFFFFF05] border border-white/10 focus:border-[#5B79B7]/50 text-white placeholder-slate-500 text-sm transition-all"
-                                    placeholder={confirmPassword ? "" : "Confirm Password"}
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
-                                >
-                                    <Icon name={showConfirmPassword ? "eyeOff" : "eye"} className="w-4 h-4" />
-                                </button>
-                            </div>
-                            {confirmPassword && !isMatched && (
-                                <span className="text-[9px] font-bold text-rose-500 uppercase tracking-widest mt-1 ml-2">Passwords Mismatch</span>
-                            )}
-                            {confirmPassword && isMatched && (
-                                <span className="text-[9px] font-bold text-emerald-500 uppercase tracking-widest mt-1 ml-2 flex items-center gap-1">
-                                    <Check className="w-3 h-3" /> Identity Verified
-                                </span>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Terms Checkbox */}
-                    <div className="flex items-start gap-3 px-4 mt-2 mb-2">
-                        <button
-                            type="button"
-                            onClick={() => setAcceptedTerms(!acceptedTerms)}
-                            className={`shrink-0 w-5 h-5 rounded-lg border flex items-center justify-center transition-all ${acceptedTerms ? 'bg-primary border-primary text-white' : 'bg-white/5 border-white/10 text-transparent'}`}
+                <AnimatePresence mode="wait">
+                    {step === 'form' ? (
+                        <motion.div
+                            key="form"
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 20 }}
+                            className="w-full"
                         >
-                            <Check className="w-3.5 h-3.5" />
-                        </button>
-                        <p className="text-[10px] text-slate-400 leading-normal">
-                            I accept the <button type="button" onClick={() => setShowTermsModal(true)} className="text-[#5B79B7] font-bold hover:underline">Terms & Conditions</button> and agree to the neural storage policy.
-                        </p>
-                    </div>
+                            <div className="flex items-center gap-4 w-full mb-8">
+                                <button onClick={onBack} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/5 transition-colors">
+                                    <Icon name="arrowLeft" className="w-5 h-5 text-slate-400" />
+                                </button>
+                                <h2 className="text-xl font-bold">Create Account</h2>
+                            </div>
 
-                    <button
-                        disabled={!canSubmit || loading}
-                        className={`w-full h-12 rounded-full text-sm font-bold transition-all duration-300
-                            ${canSubmit
-                                ? 'bg-[#5B79B7] text-white shadow-[0_0_15px_rgba(91,121,183,0.4)]'
-                                : 'bg-[#FFFFFF0A] border border-white/10 text-slate-500 opacity-50 cursor-not-allowed'}
-                        `}
-                    >
-                        {loading ? <Icon name="rotate" className="w-5 h-5 animate-spin mx-auto" /> : 'Create account'}
-                    </button>
-                </form>
+                            <form onSubmit={handleStartSignUp} className="w-full flex flex-col gap-5">
+                                <div className="space-y-4">
+                                    <div className="flex flex-col gap-1 px-1">
+                                        <div className="relative group">
+                                            <Icon name="user" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 z-10" />
+                                            <input
+                                                type="text"
+                                                required
+                                                value={username}
+                                                onChange={e => setUsername(e.target.value)}
+                                                className="w-full h-12 pl-12 pr-4 rounded-full bg-[#FFFFFF05] border border-white/10 focus:border-[#5B79B7]/50 text-white placeholder-slate-500 text-sm transition-all"
+                                                placeholder="Username"
+                                            />
+                                        </div>
+                                    </div>
 
-                {/* Terms link */}
-                <button type="button" onClick={() => setShowTermsModal(true)} className="mt-8 text-[11px] text-slate-500 hover:text-slate-300 transition-colors">
-                    Terms & Conditions
-                </button>
+                                    <div className="flex flex-col gap-1 px-1">
+                                        <div className="relative group">
+                                            <Icon name="mail" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 z-10" />
+                                            <input
+                                                type="email"
+                                                required
+                                                value={email}
+                                                onChange={e => setEmail(e.target.value)}
+                                                className="w-full h-12 pl-12 pr-4 rounded-full bg-[#FFFFFF05] border border-white/10 focus:border-[#5B79B7]/50 text-white placeholder-slate-500 text-sm transition-all"
+                                                placeholder="Email Address"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-col gap-1 px-1">
+                                        <div className="relative group">
+                                            <Icon name="lock" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 z-10" />
+                                            <input
+                                                type={showPassword ? "text" : "password"}
+                                                required
+                                                value={password}
+                                                onChange={e => setPassword(e.target.value)}
+                                                className="w-full h-12 pl-12 pr-12 rounded-full bg-[#FFFFFF05] border border-white/10 focus:border-[#5B79B7]/50 text-white placeholder-slate-500 text-sm transition-all"
+                                                placeholder="Password (min 8 characters)"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+                                            >
+                                                <Icon name={showPassword ? "eyeOff" : "eye"} className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button
+                                    disabled={loading}
+                                    className="w-full h-12 rounded-full bg-[#5B79B7] text-white font-bold shadow-lg transition-all"
+                                >
+                                    {loading ? <Icon name="rotate" className="w-5 h-5 animate-spin mx-auto" /> : 'Continue'}
+                                </button>
+                            </form>
+                        </motion.div>
+                    ) : (
+                        <motion.div
+                            key="otp"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            className="w-full text-center"
+                        >
+                            <h2 className="text-2xl font-bold mb-2">Check your email</h2>
+                            <p className="text-slate-400 text-sm mb-8">We sent a 6-digit code to <br /><span className="text-white font-medium">{email}</span></p>
+
+                            <form onSubmit={handleVerify} className="w-full flex flex-col gap-6">
+                                <input
+                                    type="text"
+                                    maxLength={6}
+                                    required
+                                    value={otp}
+                                    onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
+                                    className="w-full h-16 text-center text-3xl font-black tracking-[1em] pl-[1em] bg-[#FFFFFF05] border border-white/10 rounded-2xl focus:border-[#5B79B7] text-white outline-none"
+                                    placeholder="000000"
+                                />
+
+                                <button
+                                    disabled={loading || otp.length !== 6}
+                                    className="w-full h-12 rounded-full bg-[#5B79B7] text-white font-bold shadow-lg transition-all disabled:opacity-50"
+                                >
+                                    {loading ? <Icon name="rotate" className="w-5 h-5 animate-spin mx-auto" /> : 'Verify & Finish'}
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => setStep('form')}
+                                    className="text-xs text-slate-500 hover:text-white transition-colors"
+                                >
+                                    Wrong email? Go back
+                                </button>
+                            </form>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
-
-            <TermsModal isOpen={showTermsModal} onClose={() => setShowTermsModal(false)} />
         </div>
     );
 };

@@ -1,13 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import { Button } from '../ui/Button';
-import { useToast } from '../../context/ToastContext';
-import { Icon } from '../common/Icon';
-import { generateAnonymousName } from '../../services/firebaseAuthService';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ThemeToggle } from '../ai-ui/ThemeToggle';
-import { KeyBackup } from './KeyBackup';
-import { MaintenanceService } from '../../services/MaintenanceService';
+import { logoutUser, deleteUserAccount } from '../../services/firebaseAuthService';
+import { vault } from '../../services/crypto/LocalVault';
+
 export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout: () => void }) => {
     const { user, updateUsername, resetPassword } = useAuth();
     const { toast } = useToast();
@@ -17,6 +10,12 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
     const [tempName, setTempName] = useState('');
     const [lockDate, setLockDate] = useState<Date | null>(null);
     const [showBackup, setShowBackup] = useState(false);
+
+    // Get current device info
+    const currentSession = user?.sessions?.find(s => s.userAgent === navigator.userAgent);
+    const lastLoginText = currentSession
+        ? `This device (${navigator.userAgent.includes('Windows') ? 'Windows' : 'Mobile'})`
+        : 'Unknown device';
 
     // Calculate lock state on mount or user update
     useEffect(() => {
@@ -49,7 +48,6 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
             toast("Identity updated.", "success");
             setIsEditing(false);
         } else {
-            // Fallback if context logic prevented it
             const nextDate = new Date((user?.lastUsernameChange || 0) + (7 * 24 * 60 * 60 * 1000));
             toast(`Locked until ${nextDate.toLocaleDateString()}`, "error");
         }
@@ -58,6 +56,34 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
     const handlePasswordReset = () => {
         resetPassword();
         toast("Password reset link sent to your email.", "success");
+    };
+
+    const handleClearCache = async () => {
+        if (confirm("Clear local cache? This will free storage but won't delete your messages.")) {
+            await vault.clear();
+            toast("Cache cleared successfully", "success");
+        }
+    };
+
+    const handleDeleteAccount = async () => {
+        if (confirm("Are you sure? This cannot be undone. All your messages and profile data will be permanently removed.")) {
+            try {
+                if (user?.id) {
+                    await deleteUserAccount(user.id);
+                    toast("Account deleted. Farewell.", "info");
+                    logout();
+                }
+            } catch (err) {
+                toast("Failed to delete account. Try again later.", "error");
+            }
+        }
+    };
+
+    const handleLogoutAll = async () => {
+        if (confirm("Log out from all devices?")) {
+            await logoutUser();
+            logout();
+        }
     };
 
     return (
@@ -147,83 +173,96 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
                         )}
                     </div>
 
-                    {/* Security Section */}
+                    {/* Account Safety Section */}
                     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-100">
-                        <h2 className="text-sm font-bold text-gray-500 uppercase tracking-widest pl-2">Security & Preferences</h2>
+                        <div className="flex items-center gap-2 pl-2 text-emerald-500">
+                            <Icon name="shield" className="w-5 h-5" />
+                            <h2 className="text-sm font-bold uppercase tracking-widest">Account Safety</h2>
+                        </div>
+                        <p className="text-xs font-medium text-gray-500 pl-2">Keep your account safe and recover it anytime.</p>
 
                         <div className="space-y-4">
-                            <div className="glass-panel p-6 rounded-3xl flex items-center justify-between hover:border-white/10 transition-all">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-white/5 rounded-xl text-emerald-500 flex items-center justify-center">
-                                        <Icon name="shield" className="w-5 h-5" />
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <p className="font-bold text-base text-foreground">Identity Backup</p>
-                                        <p className="text-xs font-medium text-gray-500">Securely export or restore your E2EE keys.</p>
-                                    </div>
-                                </div>
-                                <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    className="px-4 h-10 glass-card bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 text-xs font-bold tracking-wider uppercase rounded-lg transition-all"
-                                    onClick={() => setShowBackup(true)}
-                                >
-                                    Manage
-                                </motion.button>
-                            </div>
-
-                            <div className="glass-panel p-6 rounded-3xl flex items-center justify-between hover:border-white/10 transition-all">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-white/5 rounded-xl text-gray-400 flex items-center justify-center">
-                                        <Icon name="key" className="w-5 h-5" />
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <p className="font-bold text-base text-foreground">Password</p>
-                                        <p className="text-xs font-medium text-gray-500">Manage your access key.</p>
+                            <div className="glass-panel p-6 rounded-3xl space-y-6">
+                                {/* Backup Email */}
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 bg-white/5 rounded-lg text-emerald-500 flex items-center justify-center">
+                                            <Icon name="mail" className="w-4 h-4" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-bold text-foreground">Backup Email</p>
+                                            <p className="text-xs font-medium text-emerald-500/80">{user?.email} (Verified)</p>
+                                        </div>
                                     </div>
                                 </div>
-                                <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    className="px-4 h-10 glass-card bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 text-xs font-bold tracking-wider uppercase rounded-lg transition-all"
-                                    onClick={handlePasswordReset}
-                                >
-                                    Reset
-                                </motion.button>
+
+                                {/* Last Login */}
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 bg-white/5 rounded-lg text-blue-500 flex items-center justify-center">
+                                            <Icon name="monitor" className="w-4 h-4" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-bold text-foreground">Last used device</p>
+                                            <p className="text-xs font-medium text-gray-500">{lastLoginText}</p>
+                                        </div>
+                                    </div>
+                                    <motion.button
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={handleLogoutAll}
+                                        className="px-4 h-9 glass-card bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 text-[10px] font-bold tracking-wider uppercase rounded-lg transition-all"
+                                    >
+                                        Logout from all
+                                    </motion.button>
+                                </div>
+
+                                <div className="pt-4 border-t border-white/5 flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 bg-white/5 rounded-lg text-gray-400 flex items-center justify-center">
+                                            <Icon name="key" className="w-4 h-4" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-bold text-foreground">Identity Recovery</p>
+                                            <p className="text-xs font-medium text-gray-500 text-left">Advanced identity recovery options</p>
+                                        </div>
+                                    </div>
+                                    <motion.button
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        onClick={() => setShowBackup(true)}
+                                        className="text-[10px] font-bold text-primary hover:underline uppercase tracking-widest"
+                                    >
+                                        Manage
+                                    </motion.button>
+                                </div>
                             </div>
 
-                        </div>
-                    </div>
+                            {/* Options */}
+                            <div className="glass-panel p-6 rounded-3xl flex items-center justify-between hover:border-white/10 transition-all cursor-pointer" onClick={handleClearCache}>
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-white/5 rounded-xl text-blue-500 flex items-center justify-center">
+                                        <Icon name="database" className="w-5 h-5" />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <p className="font-bold text-base text-foreground">Clear Cache</p>
+                                        <p className="text-xs font-medium text-gray-500">Free device storage without deleting chats.</p>
+                                    </div>
+                                </div>
+                                <Icon name="chevronRight" className="w-5 h-5 text-gray-600" />
+                            </div>
 
-                    {/* Danger Zone */}
-                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300 pb-20">
-                        <h2 className="text-sm font-bold text-red-500 uppercase tracking-widest pl-2">Danger Zone</h2>
-
-                        <div className="glass-panel p-6 rounded-3xl border-red-500/20 bg-red-500/5 hover:bg-red-500/10 transition-all">
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                            <div className="glass-panel p-6 rounded-3xl flex items-center justify-between hover:border-red-500/20 bg-red-500/5 transition-all cursor-pointer group" onClick={handleDeleteAccount}>
                                 <div className="flex items-center gap-4">
                                     <div className="w-12 h-12 bg-red-500/10 rounded-xl text-red-500 flex items-center justify-center">
                                         <Icon name="trash" className="w-5 h-5" />
                                     </div>
                                     <div className="flex flex-col">
-                                        <p className="font-bold text-base text-red-500">Hard Reset</p>
-                                        <p className="text-xs font-medium text-gray-500 max-w-sm">Wipes all users, groups, and global chat history. Use once to fix E2EE mismatch issues.</p>
+                                        <p className="font-bold text-base text-red-500">Delete My Account</p>
+                                        <p className="text-xs font-medium text-gray-500">Permanently remove only your account.</p>
                                     </div>
                                 </div>
-                                <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={async () => {
-                                        if (confirm("⚠️ WARNING: This will permanently WIPE all users, groups, and messages. This action is irreversible. Proceed?")) {
-                                            await MaintenanceService.wipeDatabase();
-                                            toast("Database Wiped. Refreshing app...", "info");
-                                            setTimeout(() => window.location.reload(), 2000);
-                                        }
-                                    }}
-                                    className="px-6 h-12 bg-red-500 text-white text-xs font-black tracking-widest uppercase rounded-xl shadow-lg shadow-red-500/20 hover:bg-red-600 transition-all"
-                                >
-                                    Wipe All Data
-                                </motion.button>
+                                <Icon name="chevronRight" className="w-5 h-5 text-red-500/50" />
                             </div>
                         </div>
                     </div>

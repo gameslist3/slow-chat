@@ -23,13 +23,13 @@ export const KeyBackup: React.FC<KeyBackupProps> = ({ onClose }) => {
         }
 
         try {
-            setStatus('Fetching keys...');
+            setStatus('Preparing recovery file...');
             setError(null);
 
             const privateKey = await vault.getSecret('identity_private_key');
-            if (!privateKey) throw new Error('Identity key not found on this device.');
+            if (!privateKey) throw new Error('Recovery key not found on this device.');
 
-            setStatus('Encrypting backup...');
+            setStatus('Securing with password...');
             const exportedKey = await CryptoUtils.exportPrivateKey(privateKey);
             const backup = await CryptoUtils.encryptWithPassword(exportedKey, password);
 
@@ -40,22 +40,21 @@ export const KeyBackup: React.FC<KeyBackupProps> = ({ onClose }) => {
                 type: 'slowchat_identity_v1'
             };
 
-            // Download file
-            const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+            const blob = new Blob([JSON.stringify(backupData)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `slowchat_identity_backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.download = `SlowChat_Recovery_Key_${new Date().toISOString().split('T')[0]}.json`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
 
             setSuccess(true);
-            setStatus('Backup complete! Keep your file and password safe.');
+            setStatus('Account key saved! Keep the file and password in a safe place.');
         } catch (err: any) {
             console.error(err);
-            setError(err.message || 'Export failed.');
+            setError(err.message || 'Saving failed.');
         }
     };
 
@@ -64,21 +63,21 @@ export const KeyBackup: React.FC<KeyBackupProps> = ({ onClose }) => {
         if (!file) return;
 
         if (!password) {
-            setError('Please enter your backup password first.');
+            setError('Please enter your recovery password first.');
             return;
         }
 
         try {
-            setStatus('Reading file...');
+            setStatus('Opening recovery file...');
             setError(null);
             const text = await file.text();
             const backup = JSON.parse(text);
 
             if (backup.type !== 'slowchat_identity_v1') {
-                throw new Error('Invalid backup file format.');
+                throw new Error('This is not a valid recovery file.');
             }
 
-            setStatus('Decrypting identity...');
+            setStatus('Unlocking account...');
             const decryptedKeyBase64 = await CryptoUtils.decryptWithPassword(
                 backup.ciphertext,
                 backup.iv,
@@ -88,15 +87,15 @@ export const KeyBackup: React.FC<KeyBackupProps> = ({ onClose }) => {
 
             const privateKey = await CryptoUtils.importPrivateKey(decryptedKeyBase64);
 
-            setStatus('Saving to secure vault...');
+            setStatus('Finalizing recovery...');
             await vault.saveSecret('identity_private_key', privateKey);
 
             setSuccess(true);
-            setStatus('Identity restored! Refreshing app...');
+            setStatus('Account recovered! Restarting...');
             setTimeout(() => window.location.reload(), 2000);
         } catch (err: any) {
             console.error(err);
-            setError('Failed to decrypt. Incorrect password or corrupted file.');
+            setError('Could not unlock. Wrong password or broken file.');
         }
     };
 
@@ -117,12 +116,12 @@ export const KeyBackup: React.FC<KeyBackupProps> = ({ onClose }) => {
                     <div>
                         <h2 className="text-xl font-bold flex items-center gap-2">
                             <Lock className="w-6 h-6 text-emerald-500" />
-                            Security Backup
+                            Identity Recovery
                         </h2>
-                        <p className="text-sm text-zinc-500 text-left">Identity Recovery & Portability</p>
+                        <p className="text-sm text-zinc-500 text-left">Keep your account safe and recover it anytime.</p>
                     </div>
                     <button onClick={onClose} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors">
-                        <X className="w-5 h-5" />
+                        <X className="w-5 h-5 text-gray-500" />
                     </button>
                 </div>
 
@@ -144,8 +143,8 @@ export const KeyBackup: React.FC<KeyBackupProps> = ({ onClose }) => {
                                         <Download className="w-6 h-6" />
                                     </div>
                                     <div className="flex-1">
-                                        <span className="font-semibold block text-zinc-900 dark:text-zinc-100">Export Identity</span>
-                                        <span className="text-xs text-zinc-500">Save your E2EE keys to a secure file.</span>
+                                        <span className="font-semibold block text-zinc-900 dark:text-zinc-100">Save Account Key</span>
+                                        <span className="text-xs text-zinc-500 text-left block">Download a backup file to recover your messages later.</span>
                                     </div>
                                 </button>
 
@@ -157,8 +156,8 @@ export const KeyBackup: React.FC<KeyBackupProps> = ({ onClose }) => {
                                         <Upload className="w-6 h-6" />
                                     </div>
                                     <div className="flex-1">
-                                        <span className="font-semibold block text-zinc-900 dark:text-zinc-100">Restore Identity</span>
-                                        <span className="text-xs text-zinc-500">Import keys from a backup file.</span>
+                                        <span className="font-semibold block text-zinc-900 dark:text-zinc-100">Recover Account</span>
+                                        <span className="text-xs text-zinc-500 text-left block">Import your backup file to regain access.</span>
                                     </div>
                                 </button>
                             </motion.div>
@@ -173,7 +172,7 @@ export const KeyBackup: React.FC<KeyBackupProps> = ({ onClose }) => {
                             >
                                 <div className="space-y-2 text-left">
                                     <label className="text-sm font-bold text-zinc-500 uppercase tracking-widest ml-1">
-                                        Backup Password
+                                        Recovery Password
                                     </label>
                                     <div className="relative">
                                         <input
@@ -192,8 +191,8 @@ export const KeyBackup: React.FC<KeyBackupProps> = ({ onClose }) => {
                                     </div>
                                     <p className="text-[10px] text-zinc-400 ml-1 leading-relaxed">
                                         {mode === 'export'
-                                            ? "This password will be used to encrypt your backup file. You MUST remember it to restore your identity."
-                                            : "Enter the password you used when creating the backup."
+                                            ? "Save this password! You will need it to unlock your account file later."
+                                            : "Enter the password you chose when saving your account key."
                                         }
                                     </p>
                                 </div>
@@ -204,7 +203,7 @@ export const KeyBackup: React.FC<KeyBackupProps> = ({ onClose }) => {
                                         disabled={password.length < 8}
                                         className="w-full py-4 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:hover:bg-emerald-500 text-white rounded-2xl font-bold shadow-lg shadow-emerald-500/30 transition-all active:scale-95"
                                     >
-                                        Download Backup File
+                                        Download Account Key
                                     </button>
                                 ) : (
                                     <label className="block w-full">
@@ -219,7 +218,7 @@ export const KeyBackup: React.FC<KeyBackupProps> = ({ onClose }) => {
                                             w-full py-4 text-center border-2 border-dashed rounded-2xl cursor-pointer transition-all
                                             ${!password ? 'opacity-50 border-zinc-300 pointer-events-none' : 'border-blue-500/50 hover:border-blue-500 bg-blue-50/50 dark:bg-blue-500/10'}
                                         `}>
-                                            <span className="text-blue-600 dark:text-blue-400 font-bold">Select Backup JSON</span>
+                                            <span className="text-blue-600 dark:text-blue-400 font-bold">Select Backup File</span>
                                         </div>
                                     </label>
                                 )}
@@ -228,7 +227,7 @@ export const KeyBackup: React.FC<KeyBackupProps> = ({ onClose }) => {
                                     onClick={() => setMode('selection')}
                                     className="w-full py-2 text-sm text-zinc-400 hover:text-zinc-600 transition-colors font-medium"
                                 >
-                                    Back to options
+                                    Back
                                 </button>
                             </motion.div>
                         )}
@@ -250,7 +249,7 @@ export const KeyBackup: React.FC<KeyBackupProps> = ({ onClose }) => {
                                         onClick={onClose}
                                         className="mt-4 px-8 py-3 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-xl font-bold"
                                     >
-                                        Close
+                                        Done
                                     </button>
                                 )}
                             </motion.div>
@@ -278,8 +277,7 @@ export const KeyBackup: React.FC<KeyBackupProps> = ({ onClose }) => {
 
                 <div className="p-6 bg-zinc-50 dark:bg-zinc-800/50 text-center border-t border-zinc-100 dark:border-zinc-800">
                     <p className="text-[10px] text-zinc-400 leading-relaxed uppercase tracking-wider font-bold">
-                        🔐 Industry Standard Security <br />
-                        <span className="font-normal opacity-60">AES-256 + PBKDF2 Key Derivation (100k rounds)</span>
+                        🔐 Protected Security Identity
                     </p>
                 </div>
             </motion.div>
