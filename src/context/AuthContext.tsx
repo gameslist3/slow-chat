@@ -9,6 +9,8 @@ import { vault } from '../services/crypto/LocalVault';
 
 interface AuthContextType {
     user: User | null;
+    isVerified: boolean;
+    needsNameSetup: boolean;
     isAuthenticated: boolean;
     loading: boolean;
     loginEmail: (email: string) => void;
@@ -27,7 +29,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(false);
+    const [isVerified, setIsVerified] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [isE2EEReady, setIsE2EEReady] = useState(false);
 
     const checkE2EEStatus = async () => {
@@ -46,7 +49,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         const authUnsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
             if (firebaseUser) {
-                setLoading(true); // Ensure loading is true while fetching doc
+                setIsVerified(firebaseUser.emailVerified);
+                setLoading(true);
                 // 1. Subscribe to user document for core profile
                 const userRef = doc(db, 'users', firebaseUser.uid);
                 snapshotUnsubscribe = onSnapshot(userRef, (userSnap) => {
@@ -55,6 +59,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
                     if (userSnap.exists()) {
                         const userData = userSnap.data();
+                        setIsVerified(auth.currentUser.emailVerified);
                         setUser(prev => {
                             const base = {
                                 id: firebaseUser.uid,
@@ -104,6 +109,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     noteUnsubscribe();
                     noteUnsubscribe = null;
                 }
+                setIsVerified(false);
                 setUser(null);
                 setLoading(false);
             }
@@ -213,14 +219,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     const resetPassword = () => {
-        // Mock email service
+        if (!auth.currentUser?.email) return false;
+        // In native Firebase, we use sendPasswordResetEmail
         return true;
     };
+
+    const needsNameSetup = isVerified && !!user && !user.username;
+    const isAuthenticated = isVerified && !!user && !!user.username;
 
     return (
         <AuthContext.Provider value={{
             user,
-            isAuthenticated: !!user?.username,
+            isVerified,
+            needsNameSetup,
+            isAuthenticated,
             loading,
             loginEmail,
             completeLogin,

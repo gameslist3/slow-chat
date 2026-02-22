@@ -2,11 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Icon } from '../common/Icon';
 import { uploadVoice, uploadMedia } from '../../services/firebaseStorageService';
-import { createNotification } from '../../services/firebaseNotificationService'; // New import
-import { updateGroupLastActivity } from '../../services/firebaseGroupService';   // New import
 import { Message, FileMetadata } from '../../types';
 import { useToast } from '../../context/ToastContext';
-import { getUserById } from '../../services/firebaseAuthService'; // Optional if needed for sender name
 
 interface AIComposerProps {
     onSend: (content: { text?: string, media?: FileMetadata, type: Message['type'] }) => void;
@@ -27,25 +24,6 @@ export const AIComposer: React.FC<AIComposerProps> = ({
     groupId,
     userId
 }) => {
-    // Wrapper to handle notifications
-    const handleSendWithNotification = async (content: { text?: string, media?: FileMetadata, type: Message['type'] }) => {
-        onSend(content);
-
-        // Update group activity
-        updateGroupLastActivity(groupId).catch(console.error);
-
-        // Send notifications (Optimistic - fire and forget)
-        // Note: In a real app, this should be server-side (Cloud Functions) to avoid client-side fanaticism
-        // For now, we'll auto-notify other members if we had their IDs. 
-        // Since we don't have member IDs here easily without fetching, we might skip this 
-        // OR we can rely on the message listener in the other client to trigger a local notification?
-        // Actually, the best way for client-side only is:
-        // The RECEIVER subscription sees a new message -> triggers local notification.
-        // But the user asked for "Notification is not working".
-        // Let's assume there's a disconnect.
-
-        // Use the proper service if we can.
-    };
     const [text, setText] = useState('');
     const [recState, setRecState] = useState<RecordingState>('idle');
     const [recordingTime, setRecordingTime] = useState(0);
@@ -105,9 +83,21 @@ export const AIComposer: React.FC<AIComposerProps> = ({
 
     const handleSendVoice = async () => {
         if (!audioBlob) return;
+        if (!userId) {
+            toast('User identity not syncronized', 'error');
+            return;
+        }
+
         setUploading(true);
+        console.log(`[AIComposer] Starting voice upload for user: ${userId}, group: ${groupId}`);
+
         try {
-            const { url, key, iv } = await uploadVoice(audioBlob, groupId, userId, () => { });
+            const { url, key, iv } = await uploadVoice(audioBlob, groupId, userId, (p) => {
+                console.log(`[AIComposer] Voice upload progress: ${p.toFixed(0)}%`);
+            });
+
+            console.log('[AIComposer] Voice upload successful, sending message signal');
+
             onSend({
                 media: {
                     url,
@@ -119,11 +109,14 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                 },
                 type: 'audio'
             });
+
             setRecState('idle');
             setAudioBlob(null);
             setAudioUrl(null);
-        } catch (err) {
-            toast('Voice upload failed', 'error');
+            toast('Sent voice note', 'success');
+        } catch (err: any) {
+            console.error('[AIComposer] Voice send failed:', err);
+            toast(`Voice upload failed: ${err.message || 'Check connection'}`, 'error');
         } finally {
             setUploading(false);
         }

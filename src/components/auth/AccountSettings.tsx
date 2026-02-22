@@ -66,13 +66,6 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
         toast("Password reset link sent to your email.", "success");
     };
 
-    const handleClearCache = async () => {
-        if (confirm("Clear local cache? This will free storage but won't delete your messages.")) {
-            await vault.clear();
-            toast("Cache cleared successfully", "success");
-        }
-    };
-
     const handleDeleteAccount = async () => {
         if (confirm("Are you sure? This cannot be undone. All your messages and profile data will be permanently removed.")) {
             try {
@@ -312,19 +305,6 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
                             </div>
 
                             {/* Options */}
-                            <div className="glass-panel p-6 rounded-3xl flex items-center justify-between hover:border-white/10 transition-all cursor-pointer" onClick={handleClearCache}>
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-white/5 rounded-xl text-blue-500 flex items-center justify-center">
-                                        <Icon name="database" className="w-5 h-5" />
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <p className="font-bold text-base text-foreground">Clear Cache</p>
-                                        <p className="text-xs font-medium text-gray-500">Free device storage without deleting chats.</p>
-                                    </div>
-                                </div>
-                                <Icon name="chevronRight" className="w-5 h-5 text-gray-600" />
-                            </div>
-
                             <div className="glass-panel p-6 rounded-3xl flex items-center justify-between hover:border-red-500/20 bg-red-500/5 transition-all cursor-pointer group" onClick={handleDeleteAccount}>
                                 <div className="flex items-center gap-4">
                                     <div className="w-12 h-12 bg-red-500/10 rounded-xl text-red-500 flex items-center justify-center">

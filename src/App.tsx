@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider, useToast } from './context/ToastContext';
-import { WelcomeScreen, SignInScreen, SignUpScreen, ForgotPasswordScreen, NameScreen } from './components/auth/AuthScreens';
+import { WelcomeScreen, SignInScreen, SignUpScreen, ForgotPasswordScreen, NameScreen, VerificationPendingScreen } from './components/auth/AuthScreens';
 import { StoragePolicyModal } from './components/auth/StoragePolicyModal';
 import { GroupDiscovery, CreateGroup } from './components/groups/GroupFeatures';
 import { ChatInterface } from './components/chat/ChatFeatures';
@@ -25,10 +25,14 @@ import { unfollowUser, getPendingRequests } from './services/firebaseFollowServi
 import { markAsSeen } from './services/firebaseMessageService';
 
 const AuthSection = () => {
-    const { user, completeLogin, loginWithData } = useAuth();
+    const { user, isVerified, needsNameSetup, completeLogin, loginWithData, logout } = useAuth();
     const [step, setStep] = useState('welcome');
 
-    if (user && !user.username) {
+    if (user && !isVerified) {
+        return <VerificationPendingScreen onLogout={logout} />;
+    }
+
+    if (needsNameSetup) {
         return <NameScreen onNameSelected={completeLogin} />;
     }
 
@@ -37,7 +41,7 @@ const AuthSection = () => {
             <AnimatePresence mode="wait">
                 {step === 'welcome' && <WelcomeScreen key="w" onSignIn={() => setStep('signin')} onSignUp={() => setStep('signup')} />}
                 {step === 'signin' && <SignInScreen key="si" onBack={() => setStep('welcome')} onSuccess={loginWithData} onForgotPassword={() => setStep('forgot-password')} />}
-                {step === 'signup' && <SignUpScreen key="su" onBack={() => setStep('welcome')} onSuccess={loginWithData} />}
+                {step === 'signup' && <SignUpScreen key="su" onBack={() => setStep('welcome')} />}
                 {step === 'forgot-password' && <ForgotPasswordScreen key="fp" onBack={() => setStep('signin')} />}
             </AnimatePresence>
         </div>

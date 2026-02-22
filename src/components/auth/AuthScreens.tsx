@@ -165,15 +165,12 @@ export const SignInScreen = ({ onBack, onSuccess, onForgotPassword }: any) => {
     );
 };
 
-import { validateEmail, registerUserStep1, loginUserWithPassword, generateAnonymousName, sendSignupOTP, verifySignupOTP } from '../../services/firebaseAuthService';
-
 // --- Sign Up Screen ---
-export const SignUpScreen = ({ onBack, onSuccess }: any) => {
-    const [step, setStep] = useState<'form' | 'otp'>('form');
+export const SignUpScreen = ({ onBack }: any) => {
+    const [step, setStep] = useState<'form' | 'sent'>('form');
     const [email, setEmail] = useState('');
-    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [otp, setOtp] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const { toast } = useToast();
@@ -182,33 +179,13 @@ export const SignUpScreen = ({ onBack, onSuccess }: any) => {
         e.preventDefault();
         if (!validateEmail(email)) return toast("Check your email format.", "error");
         if (password.length < 8) return toast("Password is too short (min 8 chars).", "error");
-        if (!username) return toast("Please pick a username.", "error");
+        if (password !== confirmPassword) return toast("Passwords do not match.", "error");
 
         setLoading(true);
         try {
-            await sendSignupOTP(email);
-            setStep('otp');
-            toast("Verification code sent to your email.", "success");
-        } catch (error: any) {
-            toast(error.message, "error");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleVerify = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (otp.length !== 6) return toast("Enter the 6-digit code.", "error");
-
-        setLoading(true);
-        try {
-            await verifySignupOTP(otp);
-            // After OTP, create account
-            await registerUserStep1({ email, password, username });
-            toast("Account created! Welcome.", "success");
-            // Auto-login logic
-            const user = await loginUserWithPassword({ email, password });
-            if (user) onSuccess(user);
+            await registerUserStep1({ email, password });
+            setStep('sent');
+            toast("Verification email sent! Check your inbox.", "success");
         } catch (error: any) {
             toast(error.message, "error");
         } finally {
@@ -239,20 +216,6 @@ export const SignUpScreen = ({ onBack, onSuccess }: any) => {
 
                             <form onSubmit={handleStartSignUp} className="w-full flex flex-col gap-5">
                                 <div className="space-y-4">
-                                    <div className="flex flex-col gap-1 px-1">
-                                        <div className="relative group">
-                                            <Icon name="user" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 z-10" />
-                                            <input
-                                                type="text"
-                                                required
-                                                value={username}
-                                                onChange={e => setUsername(e.target.value)}
-                                                className="w-full h-12 pl-12 pr-4 rounded-full bg-[#FFFFFF05] border border-white/10 focus:border-[#5B79B7]/50 text-white placeholder-slate-500 text-sm transition-all"
-                                                placeholder="Username"
-                                            />
-                                        </div>
-                                    </div>
-
                                     <div className="flex flex-col gap-1 px-1">
                                         <div className="relative group">
                                             <Icon name="mail" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 z-10" />
@@ -287,53 +250,54 @@ export const SignUpScreen = ({ onBack, onSuccess }: any) => {
                                             </button>
                                         </div>
                                     </div>
+
+                                    <div className="flex flex-col gap-1 px-1">
+                                        <div className="relative group">
+                                            <Icon name="lock" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 z-10" />
+                                            <input
+                                                type={showPassword ? "text" : "password"}
+                                                required
+                                                value={confirmPassword}
+                                                onChange={e => setConfirmPassword(e.target.value)}
+                                                className="w-full h-12 pl-12 pr-12 rounded-full bg-[#FFFFFF05] border border-white/10 focus:border-[#5B79B7]/50 text-white placeholder-slate-500 text-sm transition-all"
+                                                placeholder="Confirm Password"
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <button
                                     disabled={loading}
                                     className="w-full h-12 rounded-full bg-[#5B79B7] text-white font-bold shadow-lg transition-all"
                                 >
-                                    {loading ? <Icon name="rotate" className="w-5 h-5 animate-spin mx-auto" /> : 'Continue'}
+                                    {loading ? <Icon name="rotate" className="w-5 h-5 animate-spin mx-auto" /> : 'Create Account'}
                                 </button>
                             </form>
                         </motion.div>
                     ) : (
                         <motion.div
-                            key="otp"
+                            key="sent"
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -20 }}
                             className="w-full text-center"
                         >
-                            <h2 className="text-2xl font-bold mb-2">Check your email</h2>
-                            <p className="text-slate-400 text-sm mb-8">We sent a 6-digit code to <br /><span className="text-white font-medium">{email}</span></p>
+                            <div className="w-20 h-20 bg-emerald-500/20 rounded-[2rem] flex items-center justify-center text-emerald-400 text-4xl mx-auto mb-8 border border-emerald-500/20 shadow-[0_0_30px_rgba(52,211,153,0.2)]">
+                                📧
+                            </div>
+                            <h2 className="text-2xl font-bold mb-2">Check your inbox</h2>
+                            <p className="text-slate-400 text-sm mb-8 leading-relaxed">
+                                We sent a secure verification link to:<br />
+                                <span className="text-white font-medium">{email}</span><br /><br />
+                                Click the link in your email to activate your account.
+                            </p>
 
-                            <form onSubmit={handleVerify} className="w-full flex flex-col gap-6">
-                                <input
-                                    type="text"
-                                    maxLength={6}
-                                    required
-                                    value={otp}
-                                    onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
-                                    className="w-full h-16 text-center text-3xl font-black tracking-[1em] pl-[1em] bg-[#FFFFFF05] border border-white/10 rounded-2xl focus:border-[#5B79B7] text-white outline-none"
-                                    placeholder="000000"
-                                />
-
-                                <button
-                                    disabled={loading || otp.length !== 6}
-                                    className="w-full h-12 rounded-full bg-[#5B79B7] text-white font-bold shadow-lg transition-all disabled:opacity-50"
-                                >
-                                    {loading ? <Icon name="rotate" className="w-5 h-5 animate-spin mx-auto" /> : 'Verify & Finish'}
-                                </button>
-
-                                <button
-                                    type="button"
-                                    onClick={() => setStep('form')}
-                                    className="text-xs text-slate-500 hover:text-white transition-colors"
-                                >
-                                    Wrong email? Go back
-                                </button>
-                            </form>
+                            <button
+                                onClick={onBack}
+                                className="w-full h-12 rounded-full bg-[#5B79B7] text-white font-bold shadow-lg transition-all"
+                            >
+                                Back to Login
+                            </button>
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -415,6 +379,45 @@ export const NameScreen = ({ onNameSelected }: { onNameSelected: (name: string) 
                         className="flex-1 h-14 rounded-2xl btn-primary text-white font-black uppercase tracking-widest text-xs shadow-lg shadow-blue-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
                     >
                         {loading ? <Icon name="rotate" className="w-5 h-5 animate-spin mx-auto" /> : 'Confirm'}
+                    </button>
+                </div>
+            </motion.div>
+        </div>
+    );
+};
+// --- Verification Pending Screen ---
+export const VerificationPendingScreen = ({ onLogout }: { onLogout: () => void }) => {
+    return (
+        <div className="w-full min-h-screen flex items-center justify-center p-6 bg-[#0B1220] relative overflow-hidden">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-emerald-500/10 blur-[120px] rounded-full pointer-events-none" />
+
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="w-full max-w-sm glass-panel p-10 rounded-[3rem] border border-white/5 relative z-10 text-center"
+            >
+                <div className="w-20 h-20 bg-emerald-500/20 rounded-[2rem] flex items-center justify-center text-emerald-400 text-4xl mx-auto mb-8 border border-emerald-500/20 shadow-lg shadow-emerald-500/20">
+                    📧
+                </div>
+
+                <h2 className="text-3xl font-black uppercase italic tracking-tighter mb-2 text-white">Verify Email</h2>
+                <p className="text-[10px] uppercase tracking-widest text-slate-500 font-black mb-10">Access Restricted</p>
+
+                <div className="bg-black/20 border border-white/5 rounded-2xl p-6 mb-8 backdrop-blur-md">
+                    <p className="text-sm text-slate-300 leading-relaxed">
+                        We've sent a verification link to your email. Please click it to activate your identity.
+                    </p>
+                </div>
+
+                <div className="flex flex-col gap-4">
+                    <div className="text-[10px] font-black uppercase tracking-widest text-emerald-500/80 mb-2 animate-pulse">
+                        Waiting for verification...
+                    </div>
+                    <button
+                        onClick={onLogout}
+                        className="w-full h-14 rounded-2xl bg-white/5 border border-white/5 text-slate-400 font-black uppercase tracking-widest text-xs hover:bg-white/10 transition-all"
+                    >
+                        Sign out
                     </button>
                 </div>
             </motion.div>

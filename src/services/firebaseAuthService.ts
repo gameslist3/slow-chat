@@ -48,28 +48,8 @@ export const deleteUserAccount = async (userId: string): Promise<void> => {
     }
 };
 
-/**
- * OTP Mock Flow for 2026 UI Kit
- * In production, this would trigger a Firebase Cloud Function that sends a real email.
- */
-export const sendSignupOTP = async (email: string) => {
-    console.log(`[OTP] Sending 6-digit code to ${email}`);
-    // Mock delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    return true; // Sent successfully
-};
-
-export const verifySignupOTP = async (code: string) => {
-    console.log(`[OTP] Verifying code: ${code}`);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    if (code === '123456') return true; // Mock master code
-    throw new Error("Invalid verification code. Please try again.");
-};
-
-// ... (existing helper functions)
-
 // Register user (Step 1)
-export const registerUserStep1 = async (creds: UserCredentials & { username?: string }): Promise<boolean> => {
+export const registerUserStep1 = async (creds: UserCredentials): Promise<boolean> => {
     try {
         if (!creds.email || !creds.password) {
             throw new Error('Email and password are required.');
@@ -87,6 +67,10 @@ export const registerUserStep1 = async (creds: UserCredentials & { username?: st
         const firebaseUser = userCredential.user;
         console.log(`[Auth] User created in Firebase Auth: ${firebaseUser.uid}`);
 
+        // Send Native Verification Email
+        await sendEmailVerification(firebaseUser);
+        console.log(`[Auth] Verification email sent to ${creds.email}`);
+
         // Generate E2EE Identity Key Pair
         const identityKeyPair = await CryptoUtils.generateIdentityKeyPair();
         const publicIdentityKeyBase64 = await CryptoUtils.exportPublicKey(identityKeyPair.publicKey);
@@ -98,7 +82,7 @@ export const registerUserStep1 = async (creds: UserCredentials & { username?: st
         await setDoc(doc(db, 'users', firebaseUser.uid), {
             id: firebaseUser.uid,
             email: creds.email,
-            username: creds.username || '',
+            username: '', // They will pick a name after verification
             joinedGroups: ['system-updates'],
             mutedGroups: [],
             following: [],
@@ -115,7 +99,7 @@ export const registerUserStep1 = async (creds: UserCredentials & { username?: st
             }
         });
 
-        console.log(`[Auth] Profile created in Firestore for ${firebaseUser.uid}`);
+        console.log(`[Auth] Initial profile created for ${firebaseUser.uid}`);
         return true;
     } catch (error: any) {
         console.error('[Auth] Registration error:', error.code, error.message);
