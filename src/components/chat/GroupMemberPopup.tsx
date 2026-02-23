@@ -39,7 +39,15 @@ export const GroupMemberPopup: React.FC<GroupMemberPopupProps> = ({ groupId, onC
         // 2. Subscribe to Group for Member List
         const unsubscribe = onSnapshot(groupRef, async (snapshot) => {
             if (snapshot.exists()) {
-                const memberIds: string[] = snapshot.data().memberIds || [];
+                const data = snapshot.data();
+                const memberIds: string[] = data.memberIds || [];
+
+                if (memberIds.length === 0 && (data.memberCount > 0 || data.members > 0)) {
+                    // Legacy group with no array but has members
+                    setMembers([]);
+                    setLoading(false);
+                    return;
+                }
 
                 // Fetch user data for all members
                 const memberPromises = memberIds.map(id => {
@@ -99,8 +107,8 @@ export const GroupMemberPopup: React.FC<GroupMemberPopupProps> = ({ groupId, onC
                         <div className="flex flex-col">
                             <h3 className="font-black uppercase tracking-[0.2em] text-[10px] text-primary mb-0.5">Community Roster</h3>
                             <div className="flex items-center gap-2 text-xs font-bold text-white/90">
-                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                {members.length} {members.length === 1 ? 'Member' : 'Members'} Active
+                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 hover:bg-emerald-400 group-hover:bg-emerald-400 transition-colors animate-[pulse_2s_ease-in-out_infinite]" />
+                                {members.length} {members.length === 1 ? 'Member' : 'Members'} Listed
                             </div>
                         </div>
                         <button onClick={onClose} className="w-10 h-10 hover:bg-white/10 rounded-2xl flex items-center justify-center transition-all text-gray-400 hover:text-white border border-white/5">
@@ -127,6 +135,14 @@ export const GroupMemberPopup: React.FC<GroupMemberPopupProps> = ({ groupId, onC
                             <div className="flex flex-col items-center justify-center py-10 opacity-50">
                                 <Icon name="rotate" className="w-8 h-8 animate-spin text-primary mb-4" />
                                 <span className="text-xs uppercase tracking-widest font-bold text-primary">Loading roster...</span>
+                            </div>
+                        ) : members.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-10 opacity-60 text-center px-4">
+                                <Icon name="users" className="w-10 h-10 text-[#7C89A6] mb-4 opacity-50" />
+                                <p className="text-sm font-bold text-[#A9B4D0] mb-2">Legacy Cluster Format</p>
+                                <p className="text-xs text-[#7C89A6]">
+                                    This cluster was created before roster tracking was implemented. Detailed member list is unavailable.
+                                </p>
                             </div>
                         ) : (
                             members.map(member => {

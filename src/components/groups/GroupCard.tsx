@@ -13,7 +13,7 @@ interface GroupCardProps {
 
 export const GroupCard: React.FC<GroupCardProps> = ({ group, isJoined, userId, onAction, isMuted }) => {
     const unreadCount = userId ? (group.unreadCounts?.[userId] || 0) : 0;
-    const memberCount = group.memberIds?.length || 0;
+    const memberCount = group.memberIds?.length || group.memberCount || group.members || 0;
     return (
         <div
             onClick={onAction}

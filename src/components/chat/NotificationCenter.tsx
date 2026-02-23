@@ -194,14 +194,10 @@ export const NotificationList: React.FC<{
         .filter(n => {
             if (n.type === 'follow_request') return false;
 
-            // NEW RULE: If it's UNREAD, always show it (bypass timer/clearedAt)
+            // NEW RULE: If it's UNREAD, always show it (bypass timer)
             if (!n.read) return true;
 
-            // Mark all read behavior: Hide if older than clearing timestamp AND marked as read
-            const isCleared = n.timestamp <= clearedAt && n.read;
-            if (isCleared) return false;
-
-            // Dynamic Visibility Window for read alerts
+            // If it IS read, keep it visible until the 5-hour window expires
             const isWithinTimer = (now - n.timestamp) < autoDeleteWindow;
             return isWithinTimer;
         })
