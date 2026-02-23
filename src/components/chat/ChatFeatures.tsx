@@ -102,6 +102,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                     memberCount={memberCount}
                     memberIds={memberIds}
                     onLeave={onLeave}
+                    onMessageClick={onProfileClick}
                 />
             </div>
 

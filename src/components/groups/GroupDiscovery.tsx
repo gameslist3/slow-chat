@@ -142,8 +142,8 @@ export const GroupDiscovery: React.FC<GroupDiscoveryProps> = ({
                                             {group.name}
                                         </h3>
                                         <div className="flex items-center gap-1.5 text-[#7C89A6] text-xs">
-                                            <Icon name="user" className="w-3 h-3 opacity-70" />
-                                            <span>{group.members || 1}</span>
+                                            <Icon name="users" className="w-3 h-3 opacity-70" />
+                                            <span>{group.memberIds?.length || 0} {group.memberIds?.length === 1 ? 'Member' : 'Members'}</span>
                                         </div>
                                     </div>
 

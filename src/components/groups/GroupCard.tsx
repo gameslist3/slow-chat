@@ -6,10 +6,14 @@ import { Group } from '../../types';
 interface GroupCardProps {
     group: Group;
     isJoined: boolean;
+    userId?: string;
     onAction: () => void;
+    isMuted?: boolean;
 }
 
-export const GroupCard: React.FC<GroupCardProps> = ({ group, isJoined, onAction }) => {
+export const GroupCard: React.FC<GroupCardProps> = ({ group, isJoined, userId, onAction, isMuted }) => {
+    const unreadCount = userId ? (group.unreadCounts?.[userId] || 0) : 0;
+    const memberCount = group.memberIds?.length || 0;
     return (
         <div
             onClick={onAction}
@@ -20,18 +24,18 @@ export const GroupCard: React.FC<GroupCardProps> = ({ group, isJoined, onAction 
             <div className="flex justify-between items-start mb-6 relative z-10">
                 <div className="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center text-3xl shadow-inner border border-white/5 group-hover:scale-105 transition-transform text-white relative">
                     {group.image}
-                    {/* Notification Badge (Simulated for now) */}
-                    {isJoined && Math.random() > 0.7 && (
-                        <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-green-500 border-2 border-[#121212] flex items-center justify-center">
-                            <span className="text-[8px] font-black text-white">2</span>
+                    {/* Unread Message Badge */}
+                    {isJoined && !isMuted && unreadCount > 0 && (
+                        <div className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-primary border-2 border-[#121212] flex items-center justify-center shadow-[0_0_10px_rgba(127,166,255,0.5)]">
+                            <span className="text-[9px] font-black text-white">{unreadCount > 99 ? '99+' : unreadCount}</span>
                         </div>
                     )}
                 </div>
-                {(group.memberIds?.length > 0 || group.memberCount > 0 || group.members > 0) && (
+                {memberCount > 0 && (
                     <div className="px-3 py-1 bg-white/5 rounded-full border border-white/5 flex items-center gap-2">
                         <Users className="w-3 h-3 text-white/40" />
                         <span className="text-[10px] font-bold text-white/60">
-                            {group.memberIds?.length || group.memberCount || group.members} {(group.memberIds?.length || group.memberCount || group.members) === 1 ? 'Member' : 'Members'}
+                            {memberCount} {memberCount === 1 ? 'Member' : 'Members'}
                         </span>
                     </div>
                 )}

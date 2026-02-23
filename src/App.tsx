@@ -427,15 +427,15 @@ const AuthenticatedSection = () => {
                                                     const unread = user?.id ? (g.unreadCounts?.[user.id] || 0) : 0;
                                                     return (
                                                         <button key={g.id} onClick={() => handleSelectGroup(g.id)} className="bento-item text-left group relative overflow-hidden">
-                                                            {unread > 0 && (
+                                                            {unread > 0 && !user?.mutedGroups?.includes(g.id) && (
                                                                 <div className="absolute top-4 right-4 bg-[#5B79B7] text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(91,121,183,0.5)] z-20">
-                                                                    {unread}
+                                                                    {unread > 99 ? '99+' : unread}
                                                                 </div>
                                                             )}
                                                             <div className="text-4xl mb-4">{g.image}</div>
                                                             <h3 className="font-bold text-lg group-hover:text-primary transition-colors">{g.name}</h3>
                                                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                                <Icon name="users" className="w-4 h-4" /> {g.memberIds?.length || g.memberCount || g.members} {(g.memberIds?.length || g.memberCount || g.members) === 1 ? 'Member' : 'Members'}
+                                                                <Icon name="users" className="w-4 h-4" /> {g.memberIds?.length || 0} {(g.memberIds?.length || 0) === 1 ? 'Member' : 'Members'}
                                                             </div>
                                                         </button>
                                                     );

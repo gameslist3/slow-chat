@@ -79,10 +79,7 @@ export const EncryptedMedia: React.FC<EncryptedMediaProps> = ({ media, type, cla
     if (loading) {
         return (
             <div className={`flex items-center justify-center bg-white/5 rounded-xl animate-pulse ${className}`} style={{ minHeight: '100px' }}>
-                <div className="flex flex-col items-center gap-2">
-                    <Icon name="rotate" className="w-5 h-5 text-primary/40 animate-spin" />
-                    <span className="text-[10px] text-primary/40 font-bold uppercase tracking-widest">Decrypting</span>
-                </div>
+                <div className="w-8 h-8 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
             </div>
         );
     }

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Message } from '../../types';
 import { useAuth } from '../../context/AuthContext';
-import { Reply } from 'lucide-react';
+import { Reply, File, Download, Play, Pause, Music, Film, Check, CheckCheck } from 'lucide-react';
 import { GroupInviteCard } from './GroupInviteCard';
 import { EncryptedMedia } from './EncryptedMedia';
 
@@ -93,43 +93,60 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                         <EncryptedMedia
                             media={message.media}
                             type="audio"
-                            render={(url) => (
-                                <div className="flex items-center gap-3 min-w-[200px] h-10">
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            const audio = e.currentTarget.nextElementSibling as HTMLAudioElement;
-                                            if (audio.paused) audio.play(); else audio.pause();
-                                            e.currentTarget.querySelector('svg')?.classList.toggle('hidden');
-                                        }}
-                                        className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors shrink-0"
-                                    >
-                                        <svg className="w-3 h-3 fill-current ml-0.5 play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-                                        <svg className="w-3 h-3 fill-current hidden pause-icon" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" /></svg>
-                                    </button>
-                                    <audio
-                                        src={url}
-                                        onPlay={(e) => {
-                                            (e.currentTarget.previousElementSibling?.querySelector('.play-icon') as HTMLElement).classList.add('hidden');
-                                            (e.currentTarget.previousElementSibling?.querySelector('.pause-icon') as HTMLElement).classList.remove('hidden');
-                                        }}
-                                        onPause={(e) => {
-                                            (e.currentTarget.previousElementSibling?.querySelector('.play-icon') as HTMLElement).classList.remove('hidden');
-                                            (e.currentTarget.previousElementSibling?.querySelector('.pause-icon') as HTMLElement).classList.add('hidden');
-                                        }}
-                                        onEnded={(e) => {
-                                            (e.currentTarget.previousElementSibling?.querySelector('.play-icon') as HTMLElement).classList.remove('hidden');
-                                            (e.currentTarget.previousElementSibling?.querySelector('.pause-icon') as HTMLElement).classList.add('hidden');
-                                        }}
-                                        className="hidden"
-                                    />
-                                    <div className="flex-1 space-y-1">
-                                        <div className="h-0.5 bg-white/20 rounded-full overflow-hidden w-full">
-                                            <div className="h-full bg-white w-0 animate-[progress_1s_linear]" style={{ width: '0%' }} />
+                            render={(url) => {
+                                const [isPlaying, setIsPlaying] = React.useState(false);
+                                const [duration, setDuration] = React.useState('0:00');
+                                const audioRef = React.useRef<HTMLAudioElement>(null);
+
+                                const togglePlay = () => {
+                                    if (!audioRef.current) return;
+                                    if (audioRef.current.paused) audioRef.current.play();
+                                    else audioRef.current.pause();
+                                };
+
+                                return (
+                                    <div className="flex items-center gap-4 bg-white/5 py-4 px-5 rounded-2xl min-w-[280px]">
+                                        <button
+                                            onClick={togglePlay}
+                                            className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white shadow-lg hover:scale-105 transition-transform shrink-0"
+                                        >
+                                            {isPlaying ? <Pause className="w-6 h-6 fill-current" /> : <Play className="w-6 h-6 fill-current ml-1" />}
+                                        </button>
+
+                                        <div className="flex-1 flex flex-col gap-2">
+                                            {/* Micro-Waveform */}
+                                            <div className="flex items-end gap-[2px] h-6 w-full opacity-60">
+                                                {[30, 60, 45, 80, 50, 70, 40, 90, 65, 55, 75, 45, 85, 60, 50, 70, 40, 80, 55, 65].map((h, i) => (
+                                                    <div
+                                                        key={i}
+                                                        className={`w-[2px] bg-white rounded-full transition-all duration-300 ${isPlaying ? 'animate-pulse' : ''}`}
+                                                        style={{ height: `${h}%`, animationDelay: `${i * 0.1}s` }}
+                                                    />
+                                                ))}
+                                            </div>
+                                            <div className="flex justify-between items-center text-[10px] font-bold text-white/50 tracking-widest">
+                                                <span>VOICE_NOTE.ENC</span>
+                                                <span>{duration}</span>
+                                            </div>
                                         </div>
+
+                                        <audio
+                                            ref={audioRef}
+                                            src={url}
+                                            onPlay={() => setIsPlaying(true)}
+                                            onPause={() => setIsPlaying(false)}
+                                            onEnded={() => setIsPlaying(false)}
+                                            onLoadedMetadata={(e) => {
+                                                const d = e.currentTarget.duration;
+                                                const m = Math.floor(d / 60);
+                                                const s = Math.floor(d % 60);
+                                                setDuration(`${m}:${s < 10 ? '0' : ''}${s}`);
+                                            }}
+                                            className="hidden"
+                                        />
                                     </div>
-                                </div>
-                            )}
+                                );
+                            }}
                         />
                     )}
 
@@ -138,32 +155,32 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                             media={message.media}
                             type={message.type}
                             render={(url) => (
-                                <div className="relative group/media overflow-hidden rounded-xl">
+                                <div className="relative group/media overflow-hidden rounded-2xl shadow-2xl border border-white/5">
                                     {message.type === 'image' ? (
-                                        <img src={url} alt="media" className="max-h-60 w-full object-cover shadow-sm" />
+                                        <img src={url} alt="media" className="max-h-72 w-full object-cover transition-transform duration-500 group-hover/media:scale-105" />
                                     ) : (
-                                        <div className="max-h-60 w-full bg-black/90 flex items-center justify-center aspect-video relative">
-                                            <video src={url} className="w-full h-full object-cover opacity-50" />
-                                            <div className="absolute inset-0 flex items-center justify-center">
-                                                <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-xl">
-                                                    <div className="w-0 h-0 border-t-[8px] border-t-transparent border-l-[14px] border-l-white border-b-[8px] border-b-transparent ml-1" />
+                                        <div className="max-h-72 w-full bg-[#0B1221] flex items-center justify-center aspect-video relative overflow-hidden">
+                                            <video src={url} className="w-full h-full object-cover opacity-60" />
+                                            {/* Centered Premium Play Icon */}
+                                            <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover/media:bg-black/40 transition-colors">
+                                                <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-2xl group-hover/media:scale-110 transition-transform">
+                                                    <Play className="w-8 h-8 text-white fill-current ml-1" />
                                                 </div>
                                             </div>
                                         </div>
                                     )}
 
-                                    {/* Download Overlay */}
-                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/media:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-[2px]">
+                                    {/* Download Overlay (Center) */}
+                                    <div className="absolute inset-0 opacity-0 group-hover/media:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[4px] bg-black/40">
                                         <a
                                             href={url}
                                             download={message.media?.name || 'download'}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="flex items-center gap-2 px-4 py-2 bg-white text-black rounded-full font-bold text-xs hover:scale-105 transition-transform shadow-xl"
+                                            className="px-6 py-2.5 bg-white text-black rounded-full font-black text-[10px] tracking-widest uppercase hover:scale-105 transition-transform shadow-2xl flex items-center gap-2"
                                             onClick={(e) => e.stopPropagation()}
                                         >
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" /></svg>
-                                            Download to View
+                                            <Download className="w-4 h-4" /> Download to View
                                         </a>
                                     </div>
                                 </div>
@@ -176,23 +193,27 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                             media={message.media}
                             type="file"
                             render={(url) => (
-                                <div className="flex items-center gap-4 p-1 min-w-[220px]">
-                                    <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
+                                <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl min-w-[280px] border border-white/5 group-hover:border-white/10 transition-colors">
+                                    <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
+                                        <File className="w-6 h-6 text-primary" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <div className="text-sm font-bold truncate text-[#E6ECFF]">{message.media?.name}</div>
-                                        <div className="text-[10px] text-gray-500 uppercase tracking-widest font-black mt-0.5">{(message.media?.size || 0) / 1024 > 1024 ? `${((message.media?.size || 0) / (1024 * 1024)).toFixed(1)} MB` : `${((message.media?.size || 0) / 1024).toFixed(0)} KB`}</div>
+                                        <div className="text-sm font-bold truncate text-[#E6ECFF] mb-0.5">{message.media?.name}</div>
+                                        <div className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-black">
+                                            {(message.media?.size || 0) / 1024 > 1024
+                                                ? `${((message.media?.size || 0) / (1024 * 1024)).toFixed(1)} MB`
+                                                : `${((message.media?.size || 0) / 1024).toFixed(0)} KB`}
+                                        </div>
                                     </div>
                                     <a
                                         href={url}
                                         download={message.media?.name || 'file'}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="w-10 h-10 rounded-full bg-primary/20 hover:bg-primary/40 flex items-center justify-center text-primary transition-all active:scale-95"
+                                        className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 hover:bg-primary hover:text-white flex items-center justify-center transition-all active:scale-95"
                                         onClick={(e) => e.stopPropagation()}
                                     >
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" /></svg>
+                                        <Download className="w-5 h-5" />
                                     </a>
                                 </div>
                             )}
@@ -204,18 +225,18 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                             {formatTime(message.timestamp)}
                         </span>
                         {isMe && (message.status === 'sending' || message.status === 'sent') && (
-                            <div className={`w-2.5 h-2.5 opacity-60 text-white flex items-center justify-center ${message.status === 'sending' ? 'animate-pulse' : ''}`}>
-                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                            <div className={`w-3 h-3 opacity-60 text-white flex items-center justify-center ${message.status === 'sending' ? 'animate-pulse' : ''}`}>
+                                <Check className="w-3 h-3 stroke-[3]" />
                             </div>
                         )}
                         {isMe && message.status === 'delivered' && (
                             <div className="w-3 h-3 opacity-60 text-white flex items-center justify-center ml-[-2px]">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /><line x1="20" y1="12" x2="16" y2="16" /></svg>
+                                <CheckCheck className="w-4 h-4 stroke-[3]" />
                             </div>
                         )}
                         {isMe && message.status === 'seen' && (
-                            <div className="w-3 h-3 text-blue-400 flex items-center justify-center ml-[-2px]">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /><line x1="20" y1="12" x2="16" y2="16" /></svg>
+                            <div className="w-3 h-3 text-primary flex items-center justify-center ml-[-2px]">
+                                <CheckCheck className="w-4 h-4 stroke-[3]" />
                             </div>
                         )}
                     </div>

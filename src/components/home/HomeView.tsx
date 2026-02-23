@@ -85,7 +85,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                                 group={group}
                                 index={i}
                                 onClick={() => onSelectGroup(group.id)}
-                                userId={user?.id}
+                                user={user}
                             />
                         ))}
                     </div>
@@ -102,15 +102,15 @@ const GroupItem = ({
     group,
     index,
     onClick,
-    userId
+    user
 }: {
     group: Group;
     index: number;
     onClick: () => void;
-    userId?: string;
+    user?: any;
 }) => {
     const isGapesTeam = group.name === 'Gapes Team' || group.name === 'System Intelligence';
-    const unreadCount = userId ? (group.unreadCounts?.[userId] || 0) : 0;
+    const unreadCount = user?.id ? (group.unreadCounts?.[user.id] || 0) : 0;
 
     return (
         <motion.button
@@ -122,9 +122,9 @@ const GroupItem = ({
             className="group relative flex flex-col p-6 rounded-[1.5rem] bg-[#152238]/60 border border-white/5 hover:border-[#5B79B7]/30 transition-all text-left overflow-hidden w-full h-40"
         >
             {/* Unread Badge */}
-            {unreadCount > 0 && (
+            {unreadCount > 0 && user?.id && !user?.mutedGroups?.includes(group.id) && (
                 <div className="absolute top-4 right-4 bg-[#5B79B7] text-white text-[10px] font-black px-2 py-1 rounded-full shadow-[0_0_15px_rgba(91,121,183,0.5)] z-20">
-                    {unreadCount}
+                    {unreadCount > 99 ? '99+' : unreadCount}
                 </div>
             )}
 
@@ -158,7 +158,7 @@ const GroupItem = ({
                 {!isGapesTeam ? (
                     <div className="flex items-center gap-2 text-[#7C89A6] text-xs font-bold">
                         <Icon name="users" className="w-4 h-4" />
-                        <span>{group.members || 1} User</span>
+                        <span>{group.memberIds?.length || 0} {group.memberIds?.length === 1 ? 'Member' : 'Members'}</span>
                     </div>
                 ) : (
                     <div />

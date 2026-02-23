@@ -18,6 +18,7 @@ interface AIChatHeaderProps {
     memberCount: number;
     memberIds?: string[];
     onLeave?: () => void;
+    onMessageClick?: (userId: string) => void;
 }
 
 export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
@@ -26,7 +27,8 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
     title,
     image,
     memberCount,
-    onLeave
+    onLeave,
+    onMessageClick
 }) => {
     const [showMore, setShowMore] = useState(false);
     const [muted, setMuted] = useState(false);
@@ -181,6 +183,10 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
                 <GroupMemberPopup
                     groupId={groupId}
                     onClose={() => setShowMembers(false)}
+                    onMessageClick={(id) => {
+                        setShowMembers(false);
+                        onMessageClick?.(id);
+                    }}
                 />
             )}
         </header>

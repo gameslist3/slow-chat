@@ -132,7 +132,7 @@ export const markAllAsRead = async (uid: string): Promise<void> => {
 /**
  * Permanent cleanup of expired notifications from DB
  */
-export const cleanupNotifications = async (uid: string, autoDeleteHours: number): Promise<void> => {
+export const cleanupNotifications = async (uid: string, autoDeleteHours: number = 5): Promise<void> => {
     if (!uid) return;
     const threshold = Date.now() - (autoDeleteHours * 60 * 60 * 1000);
 
