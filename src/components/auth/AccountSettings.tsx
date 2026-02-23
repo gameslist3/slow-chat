@@ -142,7 +142,7 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
 
                     {/* Identity Section */}
                     <div className="space-y-4 animate-in fade-in slide-in-from-bottom-6 duration-1000">
-                        <h2 className="text-[11px] font-bold text-gray-500 uppercase tracking-widest pl-2">Profile</h2>
+                        <h2 className="text-[13px] font-bold text-gray-500 uppercase tracking-widest pl-2">Profile</h2>
 
                         {!isEditing ? (
                             <div className="glass-panel p-8 rounded-3xl flex flex-col md:flex-row items-center justify-between group relative overflow-hidden gap-6">
@@ -152,7 +152,7 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
                                     </div>
                                     <div className="min-w-0">
                                         <h3 className="text-xl font-bold text-foreground tracking-tight truncate">{user?.username}</h3>
-                                        <p className="text-xs font-medium text-gray-500 truncate">{user?.email}</p>
+                                        <p className="text-sm font-medium text-gray-500 truncate">{user?.email}</p>
                                     </div>
                                 </div>
                                 {lockDate ? (
@@ -176,7 +176,7 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
                         ) : (
                             <div className="glass-panel rounded-3xl p-6 md:p-8 space-y-8 animate-in zoom-in-95 duration-500 relative overflow-hidden backdrop-blur-xl">
                                 <div className="flex justify-between items-center">
-                                    <h3 className="text-[11px] font-bold text-primary uppercase tracking-widest">new name</h3>
+                                    <h3 className="text-[13px] font-bold text-primary uppercase tracking-widest">new name</h3>
                                     <button onClick={() => setIsEditing(false)} className="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center transition-all text-gray-400 hover:text-white"><Icon name="x" className="w-4 h-4" /></button>
                                 </div>
 
@@ -211,7 +211,7 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
                     <div className="space-y-4 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-75">
                         <div className="flex items-center gap-2 pl-2 text-primary">
                             <Icon name="messageSquare" className="w-5 h-5" />
-                            <h2 className="text-[11px] font-bold uppercase tracking-widest">Message Settings</h2>
+                            <h2 className="text-[13px] font-bold uppercase tracking-widest">Message Settings</h2>
                         </div>
 
                         <div className="glass-panel p-6 md:p-8 rounded-3xl space-y-6 relative">
@@ -282,9 +282,9 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
                     <div className="space-y-4 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-100">
                         <div className="flex items-center gap-2 pl-2 text-emerald-500">
                             <Icon name="shield" className="w-5 h-5" />
-                            <h2 className="text-[11px] font-bold uppercase tracking-widest">Account Safety</h2>
+                            <h2 className="text-[13px] font-bold uppercase tracking-widest">Account Safety</h2>
                         </div>
-                        <p className="text-xs font-medium text-gray-500 pl-2">Keep your account safe and recover it anytime.</p>
+                        <p className="text-sm font-medium text-gray-500 pl-2">Keep your account safe and recover it anytime.</p>
 
                         <div className="space-y-4">
                             <div className="glass-panel p-6 rounded-3xl space-y-6">
@@ -309,7 +309,7 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
                                         </div>
                                         <div>
                                             <p className="text-sm font-bold text-foreground">Last used device</p>
-                                            <p className="text-xs font-medium text-gray-500">{lastLoginText}</p>
+                                            <p className="text-sm font-medium text-gray-500">{lastLoginText}</p>
                                         </div>
                                     </div>
                                     <motion.button
@@ -329,14 +329,14 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
                                         </div>
                                         <div>
                                             <p className="text-sm font-bold text-foreground">Identity Recovery</p>
-                                            <p className="text-xs font-medium text-gray-500 text-left">Advanced identity recovery options</p>
+                                            <p className="text-sm font-medium text-gray-500 text-left">Advanced identity recovery options</p>
                                         </div>
                                     </div>
                                     <motion.button
                                         whileHover={{ scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
                                         onClick={() => setShowBackup(true)}
-                                        className="w-full md:w-auto h-10 md:h-auto text-[10px] font-bold text-primary hover:underline uppercase tracking-widest bg-primary/10 md:bg-transparent rounded-xl md:rounded-none"
+                                        className="w-full md:w-auto px-6 py-3 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-bold text-primary uppercase tracking-widest hover:bg-white/10 transition-all shadow-lg"
                                     >
                                         Manage
                                     </motion.button>
@@ -351,7 +351,7 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
                                     </div>
                                     <div className="flex flex-col">
                                         <p className="font-bold text-base text-red-500">Delete My Account</p>
-                                        <p className="text-xs font-medium text-gray-500">Permanently remove only your account.</p>
+                                        <p className="text-sm font-medium text-gray-500">Permanently remove only your account.</p>
                                     </div>
                                 </div>
                                 <Icon name="chevronRight" className="w-5 h-5 text-red-500/50" />

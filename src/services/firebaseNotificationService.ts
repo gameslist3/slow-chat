@@ -114,13 +114,11 @@ export const markAllAsRead = async (uid: string): Promise<void> => {
             const chunk = docs.slice(i, i + 450);
             chunk.forEach(d => {
                 const data = d.data();
-                if (data.type !== 'follow_request') {
-                    // Mark as read instead of deleting
-                    b.update(d.ref, {
-                        read: true,
-                        updatedAt: Date.now()
-                    });
-                }
+                // Mark as read instead of deleting
+                b.update(d.ref, {
+                    read: true,
+                    updatedAt: Date.now()
+                });
             });
             await b.commit();
         }

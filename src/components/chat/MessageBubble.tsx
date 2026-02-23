@@ -203,13 +203,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                         <span className={`text-[9px] font-bold opacity-40 uppercase tracking-widest ${isMe ? 'text-[#E6ECFF]' : 'text-[#7C89A6]'}`}>
                             {formatTime(message.timestamp)}
                         </span>
-                        {isMe && message.status === 'sending' && (
-                            <div className="w-2.5 h-2.5 opacity-40 text-white flex items-center justify-center animate-pulse">
-                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
-                            </div>
-                        )}
-                        {isMe && message.status === 'sent' && (
-                            <div className="w-2.5 h-2.5 opacity-60 text-white flex items-center justify-center">
+                        {isMe && (message.status === 'sending' || message.status === 'sent') && (
+                            <div className={`w-2.5 h-2.5 opacity-60 text-white flex items-center justify-center ${message.status === 'sending' ? 'animate-pulse' : ''}`}>
                                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
                             </div>
                         )}

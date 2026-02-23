@@ -97,7 +97,9 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
                             <h2 className="text-base font-bold text-[#E6ECFF] leading-none tracking-tight truncate">{displayTitle}</h2>
                         </div>
                         {!isPersonal && (
-                            <span className="text-[11px] font-medium text-[#7C89A6] mt-0.5">{memberCount} members</span>
+                            <span className="text-[11px] font-medium text-[#7C89A6] mt-0.5">
+                                {memberCount} {memberCount === 1 ? 'Member' : 'Members'}
+                            </span>
                         )}
                     </div>
                 </div>
