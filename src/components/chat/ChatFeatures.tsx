@@ -89,6 +89,15 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         }
     }, [messages.length, loadingMore]);
 
+    // Reset unread counts when messages arrive while in chat
+    React.useEffect(() => {
+        if (user?.id && messages.length > 0) {
+            import('../../services/firebaseMessageService').then(m => {
+                m.markAsSeen(chatId, isPersonal, user.id);
+            });
+        }
+    }, [messages.length, user?.id, chatId, isPersonal]);
+
     return (
         <div className="w-full h-full flex flex-col relative overflow-hidden bg-transparent">
             {/* Header */}

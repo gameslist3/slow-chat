@@ -178,6 +178,9 @@ const AuthenticatedSection = () => {
             }
         }
 
+        // Initialize active chat as null on mount to ensure notifications trigger
+        updateActiveChat(user.id, null);
+
         const unsubscribe = subscribeToNotifications(user.id, setNotifications);
 
         // Also subscribe to pending follow requests for the badge

@@ -194,15 +194,16 @@ export const NotificationList: React.FC<{
         .filter(n => {
             if (n.type === 'follow_request') return false;
 
-            // Dynamic Visibility Window based on user settings (Production Requirement)
-            const isWithinTimer = (now - n.timestamp) < autoDeleteWindow;
-            if (!isWithinTimer) return false;
+            // NEW RULE: If it's UNREAD, always show it (bypass timer/clearedAt)
+            if (!n.read) return true;
 
             // Mark all read behavior: Hide if older than clearing timestamp AND marked as read
             const isCleared = n.timestamp <= clearedAt && n.read;
             if (isCleared) return false;
 
-            return true;
+            // Dynamic Visibility Window for read alerts
+            const isWithinTimer = (now - n.timestamp) < autoDeleteWindow;
+            return isWithinTimer;
         })
         .sort((a, b) => b.timestamp - a.timestamp);
 

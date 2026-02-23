@@ -15,7 +15,7 @@ interface MessageBubbleProps {
 
 export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinual, onReact, onReply, onProfileClick }) => {
     const { user } = useAuth();
-    const isMe = message.sender === user?.username;
+    const isMe = message.senderId === user?.id;
 
     // Detect internal group links
     const groupLinkRegex = /\/chat\/([a-f0-9-]{36}|nexus-[a-z-]+|system-updates)/i;

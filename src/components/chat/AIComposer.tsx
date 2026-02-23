@@ -110,9 +110,8 @@ export const AIComposer: React.FC<AIComposerProps> = ({
             });
         }
 
+        // State cleanup happens after upload to prevent null reference errors
         setRecState('idle');
-        setAudioBlob(null);
-        setAudioUrl(null);
 
         console.log(`[AIComposer] Starting voice upload for user: ${userId}, group: ${groupId}`);
 
@@ -136,6 +135,8 @@ export const AIComposer: React.FC<AIComposerProps> = ({
             toast(`Voice upload failed: ${err.message || 'Check connection'}`, 'error');
         } finally {
             if (onOptimisticRemove) onOptimisticRemove(tempId);
+            setAudioBlob(null);
+            setAudioUrl(null);
         }
     };
 
