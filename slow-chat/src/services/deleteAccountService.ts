@@ -11,7 +11,9 @@ import {
     getDocs,
     query,
     where,
-    writeBatch
+    writeBatch,
+    arrayRemove,
+    increment
 } from "firebase/firestore";
 
 import { auth, db } from "../config/firebase";
@@ -63,15 +65,15 @@ export const deleteAccount = async (password: string) => {
             batch.delete(chat.ref);
         }
 
-        // 🧹 REMOVE FROM GROUPS
-        const groups = await getDocs(collection(db, "groups"));
+        // 🧹 REMOVE FROM GROUPS (only groups the user is a member of)
+        const groups = await getDocs(
+            query(collection(db, "groups"), where("memberIds", "array-contains", uid))
+        );
         groups.forEach(group => {
-            const members = group.data().members || [];
-            if (members.includes(uid)) {
-                batch.update(group.ref, {
-                    members: members.filter((m: string) => m !== uid)
-                });
-            }
+            batch.update(group.ref, {
+                memberIds: arrayRemove(uid),
+                members: increment(-1)
+            });
         });
 
         // 💥 COMMIT FIRESTORE DELETE
