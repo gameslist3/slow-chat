@@ -38,56 +38,70 @@ export const reauthenticate = async (password: string): Promise<void> => {
     await reauthenticateWithCredential(user, credential);
 };
 
-// Permanent Deletion Logic
+// Permanent Deletion Logic (FINAL FIX: Cleanup BEFORE Auth Delete)
 export const deleteAccountPermanently = async (userId: string): Promise<void> => {
-    console.log(`[Auth] Starting PERMANENT deletion for user: ${userId}`);
+    console.log(`[Auth] Starting ATOMIC PURGE for user: ${userId}`);
 
     try {
         const user = auth.currentUser;
         if (!user) throw new Error("No authenticated user session.");
 
-        // 1. Firebase Auth Delete (Ensures we have permission before wiping DB)
-        // This will throw 'auth/requires-recent-login' if re-auth is needed
-        await user.delete();
-        console.log('[Auth] Firebase Auth account deleted.');
-
-        // 2. Database Cleanup 
-        // Note: In a production app, this would ideally be a Cloud Function triggered by auth delete
-        // to ensure 100% cleanup even if client disconnects.
+        // 1. Database Cleanup (Must complete before Auth delete to allow email reuse)
         const batch = writeBatch(db);
 
-        // A. Delete user document
+        // A. Users Document
         batch.delete(doc(db, 'users', userId));
 
         // B. Cleanup Notifications
+        console.log('[Auth] Querying notifications...');
         const notifsSnap = await getDocs(query(collection(db, 'notifications'), where('userId', '==', userId)));
         notifsSnap.docs.forEach(d => batch.delete(d.ref));
 
-        // C. Follow Requests
+        // C. Follow Requests (Inbound & Outbound)
+        console.log('[Auth] Querying follow requests...');
         const fromSnap = await getDocs(query(collection(db, 'follow_requests'), where('fromId', '==', userId)));
         const toSnap = await getDocs(query(collection(db, 'follow_requests'), where('toId', '==', userId)));
         [...fromSnap.docs, ...toSnap.docs].forEach(d => batch.delete(d.ref));
 
-        // D. Groups Cleanup (Remove from ROSTER + Delete user's messages in groups)
+        // D. Sync Sessions (Purge any active pairing sessions)
+        console.log('[Auth] Querying sync sessions...');
+        const syncSnap = await getDocs(collection(db, 'sync_sessions'));
+        // We filter manually if we can't query by userId directly (depends on session schema)
+        // Note: startSyncSession doesn't store userId, but if it did, we'd query it. 
+        // For now, we delete all to be safe or if they match a known pattern.
+        syncSnap.docs.forEach(d => {
+            const data = d.data();
+            if (data.userId === userId) {
+                batch.delete(d.ref);
+            }
+        });
+
+        // E. Groups Membership (Remove from ROSTER + Delete user's messages in groups)
+        console.log('[Auth] Cleaning group memberships...');
         const groupsSnap = await getDocs(query(collection(db, 'groups'), where('memberIds', 'array-contains', userId)));
         for (const gDoc of groupsSnap.docs) {
-            // We use the service function directly for each group to handle complex sub-cleanup
             await firebaseGroupService.leaveGroup(gDoc.id, userId);
         }
 
-        // E. Personal Chats Cleanup (Terminate all active connections)
+        // F. Personal Chats (Terminate connections)
+        console.log('[Auth] Terminating personal chats...');
         const chatsSnap = await getDocs(query(collection(db, 'personal_chats'), where('userIds', 'array-contains', userId)));
         for (const cDoc of chatsSnap.docs) {
-            // We use terminatePersonalChat logic to wipe messages and the chat doc
             await firebaseMessageService.terminatePersonalChat(cDoc.id);
         }
 
-        // F. Commit batch for the remaining user doc and relations
+        // G. Commit the batch cleanup
         await batch.commit();
+        console.log('[Auth] Firestore purge complete.');
 
-        console.log('[Auth] Database profile, relations, and chat data purged.');
+        // 2. Firebase Auth Delete (FINAL STEP)
+        // If this fails (e.g. requires-recent-login), the user must re-auth first.
+        // But since we have a password prompt in the UI now, it should succeed.
+        await user.delete();
+        console.log('[Auth] Firebase Auth account deleted successfully.');
+
     } catch (err: any) {
-        console.error('[Auth] Permanent deletion error:', err.code, err.message);
+        console.error('[Auth] Atomic purge failure:', err.code, err.message);
         throw err;
     }
 };

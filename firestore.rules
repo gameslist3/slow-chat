@@ -13,22 +13,21 @@ service cloud.firestore {
 
     function isGroupMember(groupId) {
       return isSignedIn() && 
-             (request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.joinedMembers);
+             (request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.memberIds);
     }
     
     // Users collection
     match /users/{userId} {
       allow read: if isSignedIn();
       allow create: if isSignedIn();
-      allow update: if isOwner(userId);
-      allow delete: if false; // Manual safety
+      allow update, delete: if isOwner(userId);
     }
     
     // Groups collection
     match /groups/{groupId} {
       allow read: if isSignedIn(); // Allow discovery
       allow create: if isSignedIn();
-      allow update: if isSignedIn(); // Allow joining
+      allow update: if isGroupMember(groupId); // Allow joining/leaving only via controlled service logic
       allow delete: if isOwner(resource.data.creatorId);
       
       // Messages subcollection
