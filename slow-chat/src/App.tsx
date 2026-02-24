@@ -1,5 +1,5 @@
 import { deleteAccount } from "./services/deleteAccountService";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider, useToast } from './context/ToastContext';
 import { WelcomeScreen, SignInScreen, SignUpScreen, ForgotPasswordScreen, NameScreen } from './components/auth/AuthScreens';
@@ -75,14 +75,21 @@ const AuthenticatedSection = () => {
     const [myGroups, setMyGroups] = useState<Group[]>([]);
     const { personalChats } = useInbox();
 
+    const joinedGroupsRef = useRef<string[]>(user?.joinedGroups || []);
+
+    // Keep the ref up-to-date with the latest joinedGroups without restarting the subscription
     useEffect(() => {
-        if (!user) return;
+        joinedGroupsRef.current = user?.joinedGroups || [];
+    }, [user?.joinedGroups]);
+
+    useEffect(() => {
+        if (!user?.id) return;
         const unsubscribe = subscribeToGroups((all) => {
-            const joined = all.filter(g => user.joinedGroups.includes(g.id));
+            const joined = all.filter(g => joinedGroupsRef.current.includes(g.id));
             setMyGroups(joined);
         });
         return () => unsubscribe();
-    }, [user?.joinedGroups]);
+    }, [user?.id]); // Only restart when user changes — NOT every state update
 
     const handleJoin = async (id: string) => {
         if (!user) return;

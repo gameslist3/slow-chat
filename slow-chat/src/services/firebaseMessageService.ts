@@ -91,7 +91,10 @@ export async function sendMessage(
             const groupSnap = await getDoc(groupRef);
             if (groupSnap.exists()) {
                 const memberIds = groupSnap.data().memberIds || [];
-                const updates: any = { lastActivity: Date.now() };
+                const updates: any = {
+                    lastActivity: Date.now(),
+                    lastMessage: content.text || `[${content.type}]`
+                };
                 memberIds.forEach((mid: string) => {
                     if (mid !== senderId) {
                         updates[`unreadCounts.${mid}`] = increment(1);

@@ -51,19 +51,16 @@ export const deleteAccount = async (password: string) => {
         );
         fr2.forEach(d => batch.delete(d.ref));
 
-        // 🧹 DELETE PERSONAL CHATS
-        const chats = await getDocs(collection(db, "personal_chats"));
+        // 🧹 DELETE PERSONAL CHATS (only those the user is in)
+        const chats = await getDocs(
+            query(collection(db, "personal_chats"), where("userIds", "array-contains", uid))
+        );
         for (const chat of chats.docs) {
-            const data = chat.data();
-            if (data.userIds?.includes(uid)) {
-
-                const messages = await getDocs(
-                    collection(db, `personal_chats/${chat.id}/messages`)
-                );
-
-                messages.forEach(msg => batch.delete(msg.ref));
-                batch.delete(chat.ref);
-            }
+            const messages = await getDocs(
+                collection(db, `personal_chats/${chat.id}/messages`)
+            );
+            messages.forEach(msg => batch.delete(msg.ref));
+            batch.delete(chat.ref);
         }
 
         // 🧹 REMOVE FROM GROUPS
@@ -91,16 +88,16 @@ export const deleteAccount = async (password: string) => {
         window.location.href = "/signup";
 
     } catch (error: any) {
-        console.error("Delete account error:", error);
+        console.error("❌ Delete account error:", error.code, error.message);
 
-        if (error.code === "auth/wrong-password") {
-            throw new Error("Wrong password");
+        if (error.code === "auth/wrong-password" || error.code === "auth/invalid-credential") {
+            throw new Error("Wrong password. Please try again.");
         }
 
         if (error.code === "auth/requires-recent-login") {
-            throw new Error("Please login again before deleting.");
+            throw new Error("Please log out and log back in before deleting your account.");
         }
 
-        throw error;
+        throw new Error(error.message || "Account deletion failed. Please try again.");
     }
 };

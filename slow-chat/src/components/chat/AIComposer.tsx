@@ -69,7 +69,12 @@ export const AIComposer: React.FC<AIComposerProps> = ({
     const startRecording = async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+
+            // Detect best supported mimeType for this browser/device
+            const mimeTypes = ['audio/webm', 'audio/mp4', 'audio/ogg', ''];
+            const mimeType = mimeTypes.find(m => !m || MediaRecorder.isTypeSupported(m)) || '';
+
+            const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
             audioChunks.current = [];
 
             recorder.ondataavailable = (e) => {
@@ -78,8 +83,11 @@ export const AIComposer: React.FC<AIComposerProps> = ({
 
             recorder.onstop = async () => {
                 if (audioChunks.current.length === 0) return;
-                const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
-                await handleUpload(audioBlob, 'audio');
+                const recordedMimeType = recorder.mimeType || mimeType || 'audio/webm';
+                const ext = recordedMimeType.includes('mp4') ? 'mp4'
+                    : recordedMimeType.includes('ogg') ? 'ogg' : 'webm';
+                const audioBlob = new Blob(audioChunks.current, { type: recordedMimeType });
+                await handleUpload(audioBlob, 'audio', ext);
                 stream.getTracks().forEach(track => track.stop());
             };
 
@@ -123,7 +131,7 @@ export const AIComposer: React.FC<AIComposerProps> = ({
         await handleUpload(file, type);
     };
 
-    const handleUpload = async (file: File | Blob, type: Message['type']) => {
+    const handleUpload = async (file: File | Blob, type: Message['type'], ext: string = 'webm') => {
         setUploading(true);
         try {
             const url = type === 'audio'
@@ -134,7 +142,7 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                 media: {
                     url,
                     type,
-                    name: (file as File).name || `audio_${Date.now()}.webm`,
+                    name: (file as File).name || `audio_${Date.now()}.${ext}`,
                     size: file.size
                 },
                 type
