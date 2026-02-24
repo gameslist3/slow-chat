@@ -38,7 +38,7 @@ export const reauthenticate = async (password: string): Promise<void> => {
     await reauthenticateWithCredential(user, credential);
 };
 
-// Permanent Deletion Logic (FINAL RE-FIX: Atomic Chain with no scans)
+// Permanent Deletion Logic (FINAL PRODUCTION FIX: Atomic Chain)
 export const deleteAccountPermanently = async (userId: string): Promise<void> => {
     console.log(`[Auth] INITIALIZING FULL TERMINATION: ${userId}`);
 
@@ -46,58 +46,74 @@ export const deleteAccountPermanently = async (userId: string): Promise<void> =>
         const user = auth.currentUser;
         if (!user) throw new Error("Critical: No authenticated session. Redirecting to recovery.");
 
-        // PHASE 1: PRE-PURGE DATABASE CLEANUP
-        // We use a batch for primary document deletions
+        // PHASE 1: COMPONENT & SERVICE CLEANUP
+        // We MUST do these first while the user document still exists
+
+        console.log('[Auth] Phase 1: Exiting group rosters...');
+        const groupsSnap = await getDocs(query(collection(db, 'groups'), where('memberIds', 'array-contains', userId)));
+        for (const gDoc of groupsSnap.docs) {
+            // leaveGroup handles user message deletion + group membership decrement
+            await firebaseGroupService.leaveGroup(gDoc.id, userId).catch(err => {
+                console.warn(`[Auth] Non-blocking failure leaving group ${gDoc.id}:`, err);
+            });
+        }
+
+        console.log('[Auth] Phase 2: Wiping personal conversations...');
+        const chatsSnap = await getDocs(query(collection(db, 'personal_chats'), where('userIds', 'array-contains', userId)));
+        for (const cDoc of chatsSnap.docs) {
+            // terminatePersonalChat handles message purging + chat document deletion
+            await firebaseMessageService.terminatePersonalChat(cDoc.id).catch(err => {
+                console.warn(`[Auth] Non-blocking failure terminating chat ${cDoc.id}:`, err);
+            });
+        }
+
+        // PHASE 2: ATOMIC BATCH PURGE
         const batch = writeBatch(db);
 
-        // A. Primary User Document (Includes sessions array)
-        batch.delete(doc(db, 'users', userId));
-
-        // B. Personal Notifications
-        console.log('[Auth] Purging notifications...');
+        // A. Personal Notifications
+        console.log('[Auth] Phase 3: Purging notifications...');
         const notifsSnap = await getDocs(query(collection(db, 'notifications'), where('userId', '==', userId)));
         notifsSnap.docs.forEach(d => batch.delete(d.ref));
 
-        // C. Social Relationship Requests
-        console.log('[Auth] Purging social links...');
+        // B. Social Relationship Requests
+        console.log('[Auth] Phase 4: Purging social links...');
         const fromSnap = await getDocs(query(collection(db, 'follow_requests'), where('fromId', '==', userId)));
         const toSnap = await getDocs(query(collection(db, 'follow_requests'), where('toId', '==', userId)));
         [...fromSnap.docs, ...toSnap.docs].forEach(d => batch.delete(d.ref));
 
-        // PHASE 2: SUB-COLLECTION & SERVICE CLEANUP
-        // These perform their own commits or batches
-        console.log('[Auth] Exiting group rosters...');
-        const groupsSnap = await getDocs(query(collection(db, 'groups'), where('memberIds', 'array-contains', userId)));
-        for (const gDoc of groupsSnap.docs) {
-            await firebaseGroupService.leaveGroup(gDoc.id, userId).catch(err => console.warn(`[Auth] Failed to leave group ${gDoc.id}:`, err));
-        }
+        // C. Sync Sessions (Device Pairing)
+        console.log('[Auth] Phase 5: Purging sync protocols...');
+        const syncSnap = await getDocs(collection(db, 'sync_sessions'));
+        syncSnap.docs.forEach(d => {
+            const data = d.data();
+            if (data.ownerId === userId || data.newDeviceId === userId || d.id.includes(userId)) {
+                batch.delete(d.ref);
+            }
+        });
 
-        console.log('[Auth] Wiping personal conversations...');
-        const chatsSnap = await getDocs(query(collection(db, 'personal_chats'), where('userIds', 'array-contains', userId)));
-        for (const cDoc of chatsSnap.docs) {
-            await firebaseMessageService.terminatePersonalChat(cDoc.id).catch(err => console.warn(`[Auth] Failed to terminate chat ${cDoc.id}:`, err));
-        }
+        // D. Final Database Document (The Root Identity)
+        // This MUST be deleted last to prevent permission errors in previous steps
+        batch.delete(doc(db, 'users', userId));
 
         // COMMIT FIRESTORE CHANGES
         await batch.commit();
         console.log('[Auth] Firestore purge committed successfully.');
 
-        // PHASE 3: THE MOST CRITICAL STEP - FIREBASE AUTH DELETION
-        // This is what releases the email address for reuse.
-        console.log('[Auth] TERMINATING FIREBASE AUTH USER...');
+        // PHASE 3: MISSION CRITICAL - FIREBASE AUTH DELETION
+        // REASON: This is what releases the email address for reuse in Authentication tab.
+        console.log('[Auth] Phase 6: TERMINATING FIREBASE AUTH ACCOUNT...');
 
-        // Re-Verify user object (might have changed during Firestore cleanup delay)
-        const activeUser = auth.currentUser;
-        if (!activeUser) {
-            console.error("[Auth] User object lost! Account might be in limbo.");
-            throw new Error("Auth session lost. Email might still be locked.");
+        const freshUser = auth.currentUser;
+        if (!freshUser) {
+            throw new Error("Critical: Auth session lost during cleanup. Email might still be locked.");
         }
 
-        await activeUser.delete();
-        console.log('[Auth] Full termination successful. User is erased from Firebase Auth.');
+        await freshUser.delete();
+        console.log('[Auth] Full system termination successful. User is erased.');
 
     } catch (err: any) {
-        console.error('[Auth] TERMINATION FAILURE:', err.code, err.message);
+        console.error('[Auth] TERMINATION OVERRIDE FAILED:', err.code, err.message);
+        throw err; // Crucial: Re-throw so UI shows error toast and doesn't redirect falsely
     }
 };
 
