@@ -196,7 +196,7 @@ const AuthenticatedSection = () => {
             )}
 
             {view === 'discovery' && (
-                <div className="flex-1 overflow-y-auto shrink-0">
+                <div className="flex-1 min-h-0 overflow-hidden">
                     <GroupDiscovery
                         onJoinGroup={handleJoin}
                         onSelectGroup={handleSelectGroup}
