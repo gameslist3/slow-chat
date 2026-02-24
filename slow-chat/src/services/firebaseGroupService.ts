@@ -36,9 +36,16 @@ export const getGroups = async (): Promise<Group[]> => {
         const q = query(collection(db, 'groups'), orderBy('lastActivity', 'desc'));
         const snap = await getDocs(q);
         return snap.docs.map(doc => ({ ...doc.data(), id: doc.id } as Group));
-    } catch (error) {
-        console.error('Error getting groups:', error);
-        return [];
+    } catch (error: any) {
+        console.warn('[Groups] Ordered query failed, trying unordered fallback:', error?.code);
+        try {
+            // Fallback: fetch without ordering (works even if lastActivity is missing on some docs)
+            const snap = await getDocs(collection(db, 'groups'));
+            return snap.docs.map(doc => ({ ...doc.data(), id: doc.id } as Group));
+        } catch (fallbackError) {
+            console.error('[Groups] Error getting groups:', fallbackError);
+            return [];
+        }
     }
 };
 

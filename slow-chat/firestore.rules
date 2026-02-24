@@ -14,7 +14,13 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if isSignedIn();
       allow create: if isSignedIn();
-      allow update, delete: if isOwner(userId);
+      // Owner can do full updates (profile, settings, etc.)
+      allow update: if isOwner(userId);
+      // Any signed-in user can update following/followers/joinedGroups (follow accept, leave group, etc.)
+      allow update: if isSignedIn() &&
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['following', 'followers', 'joinedGroups', 'mutedGroups']);
+      allow delete: if isOwner(userId);
     }
 
     /* ================= NOTIFICATIONS ================= */

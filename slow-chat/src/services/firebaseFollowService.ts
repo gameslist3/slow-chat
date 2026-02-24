@@ -73,7 +73,7 @@ export const acceptFollowRequest = async (requestId: string): Promise<void> => {
         const fromUserRef = doc(db, 'users', data.fromId);
         const toUserRef = doc(db, 'users', data.toId);
 
-        // READ ALL DATA FIRST
+        // READ ALL DATA FIRST (required by Firestore transactions)
         const fromUserSnap = await transaction.get(fromUserRef);
         const toUserSnap = await transaction.get(toUserRef);
 
@@ -81,9 +81,23 @@ export const acceptFollowRequest = async (requestId: string): Promise<void> => {
             throw new Error("User profiles not found.");
         }
 
-        // PERFORM ALL WRITES SECOND
-        transaction.update(requestRef, { status: 'accepted' });
+        const fromUsername = fromUserSnap.data()?.username || 'User';
+        const toUsername = toUserSnap.data()?.username || 'User';
 
+        // PERFORM ALL WRITES SECOND
+        // 1. Mark request as accepted
+        transaction.update(requestRef, { status: 'accepted', updatedAt: Date.now() });
+
+        // 2. Update social graph: fromUser gains a follower (toId follows fromId)
+        //    i.e. fromId.followers += toId, toId.following += fromId
+        transaction.update(fromUserRef, {
+            followers: arrayUnion(data.toId)
+        });
+        transaction.update(toUserRef, {
+            following: arrayUnion(data.fromId)
+        });
+
+        // 3. Create personal chat between the two
         const chatIds = [data.fromId, data.toId].sort();
         const chatId = chatIds.join('_');
         const chatRef = doc(db, 'personal_chats', chatId);
@@ -92,8 +106,8 @@ export const acceptFollowRequest = async (requestId: string): Promise<void> => {
             id: chatId,
             userIds: chatIds,
             usernames: {
-                [data.fromId]: fromUserSnap.data()?.username || 'User',
-                [data.toId]: toUserSnap.data()?.username || 'User'
+                [data.fromId]: fromUsername,
+                [data.toId]: toUsername
             },
             lastActivity: Date.now(),
             unreadCounts: { [data.fromId]: 0, [data.toId]: 0 }
@@ -101,8 +115,8 @@ export const acceptFollowRequest = async (requestId: string): Promise<void> => {
 
         return {
             fromId: data.fromId,
-            toUsername: toUserSnap.data()?.username || 'Someone',
-            chatId: chatId
+            toUsername,
+            chatId
         };
     });
 
