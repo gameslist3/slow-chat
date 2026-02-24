@@ -38,70 +38,74 @@ export const reauthenticate = async (password: string): Promise<void> => {
     await reauthenticateWithCredential(user, credential);
 };
 
-// Permanent Deletion Logic (FINAL FIX: Cleanup BEFORE Auth Delete)
+// Permanent Deletion Logic (FINAL FIX: Pure Atomic Chain)
 export const deleteAccountPermanently = async (userId: string): Promise<void> => {
-    console.log(`[Auth] Starting ATOMIC PURGE for user: ${userId}`);
+    console.log(`[Auth] INITIALIZING ATOMIC PURGE: ${userId}`);
 
     try {
         const user = auth.currentUser;
-        if (!user) throw new Error("No authenticated user session.");
+        if (!user) throw new Error("No authenticated session found. Critical failure.");
+        if (user.uid !== userId) throw new Error("Security mismatch: session UID does not match termination target.");
 
-        // 1. Database Cleanup (Must complete before Auth delete to allow email reuse)
+        // 1. PHASE ONE: Firestore Cleanup (MUST succeed before Auth delete)
         const batch = writeBatch(db);
 
         // A. Users Document
         batch.delete(doc(db, 'users', userId));
 
-        // B. Cleanup Notifications
-        console.log('[Auth] Querying notifications...');
+        // B. Personal Notifications
+        console.log('[Auth] Phase 1: Notifications');
         const notifsSnap = await getDocs(query(collection(db, 'notifications'), where('userId', '==', userId)));
         notifsSnap.docs.forEach(d => batch.delete(d.ref));
 
-        // C. Follow Requests (Inbound & Outbound)
-        console.log('[Auth] Querying follow requests...');
+        // C. Follow Protocols (Inbound/Outbound)
+        console.log('[Auth] Phase 2: Social Graph');
         const fromSnap = await getDocs(query(collection(db, 'follow_requests'), where('fromId', '==', userId)));
         const toSnap = await getDocs(query(collection(db, 'follow_requests'), where('toId', '==', userId)));
         [...fromSnap.docs, ...toSnap.docs].forEach(d => batch.delete(d.ref));
 
-        // D. Sync Sessions (Purge any active pairing sessions)
-        console.log('[Auth] Querying sync sessions...');
-        const syncSnap = await getDocs(collection(db, 'sync_sessions'));
-        // We filter manually if we can't query by userId directly (depends on session schema)
-        // Note: startSyncSession doesn't store userId, but if it did, we'd query it. 
-        // For now, we delete all to be safe or if they match a known pattern.
-        syncSnap.docs.forEach(d => {
-            const data = d.data();
-            if (data.userId === userId) {
-                batch.delete(d.ref);
-            }
-        });
-
-        // E. Groups Membership (Remove from ROSTER + Delete user's messages in groups)
-        console.log('[Auth] Cleaning group memberships...');
+        // D. Group Memberships & Cleanup
+        console.log('[Auth] Phase 3: Group Roster Exit');
         const groupsSnap = await getDocs(query(collection(db, 'groups'), where('memberIds', 'array-contains', userId)));
         for (const gDoc of groupsSnap.docs) {
+            // This function handles message cleanup + membership decrement
             await firebaseGroupService.leaveGroup(gDoc.id, userId);
         }
 
-        // F. Personal Chats (Terminate connections)
-        console.log('[Auth] Terminating personal chats...');
+        // E. Personal Chat Termination
+        console.log('[Auth] Phase 4: Direct Message Purge');
         const chatsSnap = await getDocs(query(collection(db, 'personal_chats'), where('userIds', 'array-contains', userId)));
         for (const cDoc of chatsSnap.docs) {
             await firebaseMessageService.terminatePersonalChat(cDoc.id);
         }
 
-        // G. Commit the batch cleanup
-        await batch.commit();
-        console.log('[Auth] Firestore purge complete.');
+        // F. Session Data (Firestore collections 'sessions' or 'sync_sessions')
+        console.log('[Auth] Phase 5: Session Purge');
+        // Check sync_sessions (QR Pairing)
+        const syncSnap = await getDocs(collection(db, 'sync_sessions'));
+        syncSnap.docs.forEach(d => {
+            const data = d.data();
+            // Delete if owner or if any pointer matches
+            if (data.ownerId === userId || data.newDeviceId === userId || d.id.includes(userId)) {
+                batch.delete(d.ref);
+            }
+        });
 
-        // 2. Firebase Auth Delete (FINAL STEP)
-        // If this fails (e.g. requires-recent-login), the user must re-auth first.
-        // But since we have a password prompt in the UI now, it should succeed.
-        await user.delete();
-        console.log('[Auth] Firebase Auth account deleted successfully.');
+        // Final Database Commit
+        await batch.commit();
+        console.log('[Auth] Firestore Purge Complete. Identity is now detached.');
+
+        // 2. PHASE TWO: Firebase Authentication Delete
+        // This is what unlocks the email address for new registrations.
+        console.log('[Auth] Phase 6: Auth Account Termination');
+        const freshUser = auth.currentUser;
+        if (!freshUser) throw new Error("Auth session lost during cleanup. Re-auth required.");
+
+        await freshUser.delete();
+        console.log('[Auth] Full termination successful. User is erased.');
 
     } catch (err: any) {
-        console.error('[Auth] Atomic purge failure:', err.code, err.message);
+        console.error('[Auth] TERMINATION OVERRIDE FAILED:', err.code, err.message);
         throw err;
     }
 };

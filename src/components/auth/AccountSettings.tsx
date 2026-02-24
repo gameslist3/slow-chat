@@ -83,18 +83,27 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
                 // 1. Re-authenticate to ensure recent login
                 await reauthenticate(confirmPassword);
 
-                // 2. Perform permanent deletion
+                // 2. Perform permanent deletion (Atomic Firestore Purge + Auth Delete)
                 await deleteAccountPermanently(user.id);
 
-                toast("Account deleted. Farewell.", "info");
+                // 3. FULL LOCAL WIPE (Critical for Privacy & Sync)
+                await vault.clear();
+                localStorage.clear();
+                sessionStorage.clear();
+
+                toast("Account terminated successfully. Identity erased.", "info");
+
+                // 4. Force global logout/context reset
                 logout();
             }
         } catch (err: any) {
-            console.error(err);
+            console.error('[AccountSettings] Termination Error:', err);
             if (err.code === 'auth/wrong-password') {
                 toast("Invalid security protocol. Access denied.", "error");
+            } else if (err.code === 'auth/requires-recent-login') {
+                toast("Session expired. Please re-login and try again.", "error");
             } else {
-                toast("System failure during termination.", "error");
+                toast("Critical system failure during termination.", "error");
             }
         } finally {
             setIsDeleting(false);
