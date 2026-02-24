@@ -3,6 +3,8 @@ import {
     signInWithEmailAndPassword,
     signOut,
     sendEmailVerification,
+    EmailAuthProvider,
+    reauthenticateWithCredential,
     User as FirebaseUser
 } from 'firebase/auth';
 import {
@@ -12,6 +14,8 @@ import { auth, db } from '../config/firebase';
 import { User, UserCredentials } from '../types';
 import { CryptoUtils } from './crypto/CryptoUtils';
 import { vault } from './crypto/LocalVault';
+import * as firebaseGroupService from './firebaseGroupService';
+import * as firebaseMessageService from './firebaseMessageService';
 
 // Email validation
 export const validateEmail = (email: string): boolean => {
@@ -25,7 +29,70 @@ export const validateEmail = (email: string): boolean => {
     return true;
 };
 
-// Deletion Logic
+// Re-authenticate user
+export const reauthenticate = async (password: string): Promise<void> => {
+    const user = auth.currentUser;
+    if (!user || !user.email) throw new Error('No authenticated user found.');
+
+    const credential = EmailAuthProvider.credential(user.email, password);
+    await reauthenticateWithCredential(user, credential);
+};
+
+// Permanent Deletion Logic
+export const deleteAccountPermanently = async (userId: string): Promise<void> => {
+    console.log(`[Auth] Starting PERMANENT deletion for user: ${userId}`);
+
+    try {
+        const user = auth.currentUser;
+        if (!user) throw new Error("No authenticated user session.");
+
+        // 1. Firebase Auth Delete (Ensures we have permission before wiping DB)
+        // This will throw 'auth/requires-recent-login' if re-auth is needed
+        await user.delete();
+        console.log('[Auth] Firebase Auth account deleted.');
+
+        // 2. Database Cleanup 
+        // Note: In a production app, this would ideally be a Cloud Function triggered by auth delete
+        // to ensure 100% cleanup even if client disconnects.
+        const batch = writeBatch(db);
+
+        // A. Delete user document
+        batch.delete(doc(db, 'users', userId));
+
+        // B. Cleanup Notifications
+        const notifsSnap = await getDocs(query(collection(db, 'notifications'), where('userId', '==', userId)));
+        notifsSnap.docs.forEach(d => batch.delete(d.ref));
+
+        // C. Follow Requests
+        const fromSnap = await getDocs(query(collection(db, 'follow_requests'), where('fromId', '==', userId)));
+        const toSnap = await getDocs(query(collection(db, 'follow_requests'), where('toId', '==', userId)));
+        [...fromSnap.docs, ...toSnap.docs].forEach(d => batch.delete(d.ref));
+
+        // D. Groups Cleanup (Remove from ROSTER + Delete user's messages in groups)
+        const groupsSnap = await getDocs(query(collection(db, 'groups'), where('memberIds', 'array-contains', userId)));
+        for (const gDoc of groupsSnap.docs) {
+            // We use the service function directly for each group to handle complex sub-cleanup
+            await firebaseGroupService.leaveGroup(gDoc.id, userId);
+        }
+
+        // E. Personal Chats Cleanup (Terminate all active connections)
+        const chatsSnap = await getDocs(query(collection(db, 'personal_chats'), where('userIds', 'array-contains', userId)));
+        for (const cDoc of chatsSnap.docs) {
+            // We use terminatePersonalChat logic to wipe messages and the chat doc
+            await firebaseMessageService.terminatePersonalChat(cDoc.id);
+        }
+
+        // F. Commit batch for the remaining user doc and relations
+        await batch.commit();
+
+        console.log('[Auth] Database profile, relations, and chat data purged.');
+    } catch (err: any) {
+        console.error('[Auth] Permanent deletion error:', err.code, err.message);
+        throw err;
+    }
+};
+
+// Deletion Logic (Legacy - will be replaced by permanent delete)
 export const deleteUserAccount = async (userId: string): Promise<void> => {
     console.log(`[Auth] Starting deletion for user: ${userId}`);
     const batch = writeBatch(db);

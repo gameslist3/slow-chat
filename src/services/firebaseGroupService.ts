@@ -58,6 +58,24 @@ export const subscribeToGroups = (callback: (groups: Group[]) => void) => {
 };
 
 /**
+ * Subscribe specifically to groups where user is a member (Phase 6 Fix)
+ */
+export const subscribeToJoinedGroups = (userId: string, callback: (groups: Group[]) => void) => {
+    const q = query(
+        collection(db, 'groups'),
+        where('memberIds', 'array-contains', userId),
+        orderBy('lastActivity', 'desc')
+    );
+    return onSnapshot(q, (snapshot) => {
+        const groups = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Group));
+        callback(groups);
+    }, (error) => {
+        if (error.code === 'permission-denied') return;
+        console.error('[Firestore] Joined Groups Subscription Error:', error);
+    });
+};
+
+/**
  * Create a new group
  */
 export const createGroup = async (

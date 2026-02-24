@@ -158,7 +158,7 @@ const GroupItem = ({
                 {!isGapesTeam ? (
                     <div className="flex items-center gap-2 text-[#7C89A6] text-xs font-bold">
                         <Icon name="users" className="w-4 h-4" />
-                        <span>{group.memberIds?.length || group.memberCount || group.members || 0} {(group.memberIds?.length || group.memberCount || group.members || 0) === 1 ? 'Member' : 'Members'}</span>
+                        <span>{(group.memberIds?.length || 0)} {(group.memberIds?.length || 0) === 1 ? 'Member' : 'Members'}</span>
                     </div>
                 ) : (
                     <div />

@@ -10,7 +10,7 @@ import { AccountSettings } from './components/auth/AccountSettings';
 import { UserProfileModal } from './components/user/UserProfileModal';
 import { DeviceSync } from './components/auth/DeviceSync';
 import { FollowRequests } from './components/auth/FollowRequests';
-import { subscribeToGroups, joinGroup } from './services/firebaseGroupService';
+import { subscribeToGroups, subscribeToJoinedGroups, joinGroup } from './services/firebaseGroupService';
 import { Group, User, PersonalChat } from './types';
 import { AILayout } from './components/ai-ui/AILayout';
 import { Icon } from './components/common/Icon';
@@ -146,13 +146,14 @@ const AuthenticatedSection = () => {
     console.log('[AuthenticatedSection] Rendering', { user: user?.username, activeTab, myGroupsCount: myGroups.length });
 
     useEffect(() => {
-        if (!user) return;
-        const unsubscribe = subscribeToGroups((all) => {
-            const joined = all.filter(g => user.joinedGroups.includes(g.id));
+        if (!user?.id) return;
+        // SOURCE OF TRUTH: Listen to groups where I am a memberIds array-contains match
+        const unsubscribe = subscribeToJoinedGroups(user.id, (joined) => {
+            console.log('[App] Received real-time group sync:', joined.length);
             setMyGroups(joined);
         });
         return () => unsubscribe();
-    }, [user?.joinedGroups]);
+    }, [user?.id]);
 
     useEffect(() => {
         if (!user?.id) return;
@@ -428,6 +429,7 @@ const AuthenticatedSection = () => {
                                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                                 {myGroups.map(g => {
                                                     const unread = user?.id ? (g.unreadCounts?.[user.id] || 0) : 0;
+                                                    const mCount = g.memberIds?.length || 0;
                                                     return (
                                                         <button key={g.id} onClick={() => handleSelectGroup(g.id)} className="bento-item text-left group relative overflow-hidden">
                                                             {unread > 0 && !user?.mutedGroups?.includes(g.id) && (
@@ -438,7 +440,7 @@ const AuthenticatedSection = () => {
                                                             <div className="text-4xl mb-4">{g.image}</div>
                                                             <h3 className="font-bold text-lg group-hover:text-primary transition-colors">{g.name}</h3>
                                                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                                <Icon name="users" className="w-4 h-4" /> {g.memberIds?.length || 0} {(g.memberIds?.length || 0) === 1 ? 'Member' : 'Members'}
+                                                                <Icon name="users" className="w-4 h-4" /> {mCount} {mCount === 1 ? 'Member' : 'Members'}
                                                             </div>
                                                         </button>
                                                     );
@@ -489,7 +491,7 @@ const AuthenticatedSection = () => {
                                     isPersonal={isPersonal}
                                     title={isPersonal ? personalChatTitle : (activeGroup?.name || '')}
                                     image={!isPersonal ? activeGroup?.image || '👥' : '👤'}
-                                    memberCount={!isPersonal ? (activeGroup?.memberIds?.length || activeGroup?.memberCount || activeGroup?.members || 0) : 2}
+                                    memberCount={!isPersonal ? (activeGroup?.memberIds?.length || 0) : 2}
                                     memberIds={!isPersonal ? (activeGroup?.memberIds || []) : []}
                                     onLeave={() => {
                                         setActiveId(null);
