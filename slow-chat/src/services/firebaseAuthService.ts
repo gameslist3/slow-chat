@@ -3,6 +3,7 @@ import {
     signInWithEmailAndPassword,
     signOut,
     sendEmailVerification,
+    sendPasswordResetEmail,
     User as FirebaseUser
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
@@ -212,6 +213,16 @@ export const loginUserWithPassword = async (creds: UserCredentials): Promise<Use
 // Logout
 export const logoutUser = async (): Promise<void> => {
     await signOut(auth);
+};
+
+// Reset Password
+export const resetPasswordEmail = async (email: string): Promise<void> => {
+    try {
+        await sendPasswordResetEmail(auth, email);
+    } catch (error: any) {
+        console.error('[Auth] Password reset error:', error.code, error.message);
+        throw error;
+    }
 };
 
 // Generate anonymous name

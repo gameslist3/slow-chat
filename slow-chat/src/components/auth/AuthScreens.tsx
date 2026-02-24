@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowRight, Mail, KeyRound, ArrowLeft, Shuffle, Lock, User, Eye, EyeOff, CheckCircle2, XCircle } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
-import { validateEmail, registerUserStep1, loginUserWithPassword, generateAnonymousName } from '../../services/firebaseAuthService';
+import { validateEmail, registerUserStep1, loginUserWithPassword, generateAnonymousName, resetPasswordEmail } from '../../services/firebaseAuthService';
 import { useToast } from '../../context/ToastContext';
 import Lottie from 'lottie-react';
 
@@ -249,16 +249,26 @@ export const SignUpScreen = ({ onBack, onSuccess }: any) => {
 export const ForgotPasswordScreen = ({ onBack }: any) => {
     const [email, setEmail] = useState('');
     const [sent, setSent] = useState(false);
+    const [loading, setLoading] = useState(false);
     const { toast } = useToast();
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!validateEmail(email)) {
             toast("Please enter a valid email address.", "error");
             return;
         }
-        setSent(true);
-        toast("Reset link sent!", "success");
+
+        setLoading(true);
+        try {
+            await resetPasswordEmail(email);
+            setSent(true);
+            toast("Reset link sent!", "success");
+        } catch (error: any) {
+            toast(error.message || "Failed to send reset link", "error");
+        } finally {
+            setLoading(false);
+        }
     };
 
     if (sent) return (
@@ -292,7 +302,16 @@ export const ForgotPasswordScreen = ({ onBack }: any) => {
                     autoFocus
                     className="ui-input"
                 />
-                <button className="ui-button-primary w-full h-14">Send Reset Link</button>
+                <button type="submit" disabled={loading} className="ui-button-primary w-full h-14 shadow-lg disabled:opacity-50 flex items-center justify-center">
+                    {loading ? (
+                        <div className="w-8 h-8">
+                            <Lottie
+                                path="https://lottie.host/5ad263fd-441f-445a-8b17-73d09a56391a/g4nsc9vN7b.json"
+                                loop={true}
+                            />
+                        </div>
+                    ) : 'Send Reset Link'}
+                </button>
             </form>
         </div>
     );
