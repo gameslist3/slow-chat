@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Icon } from '../common/Icon';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { generateAnonymousName, logoutUser, reauthenticate, deleteAccountPermanently } from '../../services/firebaseAuthService';
+import { generateAnonymousName, logoutUser } from '../../services/firebaseAuthService';
+import { deleteMyAccount } from '../../services/deleteAccountService';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import { KeyBackup } from './KeyBackup';
@@ -72,30 +73,17 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
     const [isDeleting, setIsDeleting] = useState(false);
 
     const handleDeleteAccount = async () => {
-        if (!confirmPassword) {
-            toast("Identity verification required.", "error");
+        const password = prompt("🧨 DANGER: Enter password to PERMANENTLY delete your account. This cannot be undone.");
+
+        if (!password) {
+            toast("Identity verification cancelled.", "info");
             return;
         }
 
         setIsDeleting(true);
         try {
-            if (user?.id) {
-                // 1. Re-authenticate to ensure recent login
-                await reauthenticate(confirmPassword);
-
-                // 2. Perform permanent deletion (Atomic Firestore Purge + Auth Delete)
-                await deleteAccountPermanently(user.id);
-
-                // 3. FULL LOCAL WIPE (Critical for Privacy & Sync)
-                await vault.clear();
-                localStorage.clear();
-                sessionStorage.clear();
-
-                toast("Account terminated successfully. Identity erased.", "info");
-
-                // 4. Force global logout/context reset
-                logout();
-            }
+            await deleteMyAccount(password);
+            toast("Account terminated. Farewell.", "info");
         } catch (err: any) {
             console.error('[AccountSettings] Termination Error:', err);
             if (err.code === 'auth/wrong-password') {
@@ -103,7 +91,7 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
             } else if (err.code === 'auth/requires-recent-login') {
                 toast("Session expired. Please re-login and try again.", "error");
             } else {
-                toast("Critical system failure during termination.", "error");
+                toast("Critical failure during termination.", "error");
             }
         } finally {
             setIsDeleting(false);
