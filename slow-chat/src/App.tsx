@@ -1,3 +1,4 @@
+import { deleteAccount } from "./services/deleteAccountService";
 import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider, useToast } from './context/ToastContext';
@@ -239,6 +240,18 @@ const AuthenticatedSection = () => {
 };
 
 export default function App() {
+    const handleDeleteAccount = async () => {
+        const password = prompt("Enter your password to delete account");
+
+        if (!password) return;
+
+        try {
+            await deleteAccount(password);
+        } catch (err: any) {
+            alert(err.message);
+        }
+    };
+
     return (
         <ToastProvider>
             <AuthProvider>

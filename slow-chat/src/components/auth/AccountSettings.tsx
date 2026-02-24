@@ -1,3 +1,4 @@
+import { deleteAccount } from "../../services/deleteAccountService";
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../ui/Button';

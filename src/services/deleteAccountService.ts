@@ -3,100 +3,121 @@ import {
     EmailAuthProvider,
     reauthenticateWithCredential
 } from "firebase/auth";
+
 import {
     collection,
     doc,
     getDocs,
     query,
     where,
-    writeBatch
+    writeBatch,
+    deleteDoc
 } from "firebase/firestore";
-import { auth, db } from "../config/firebase";
-import * as firebaseGroupService from "./firebaseGroupService";
-import * as firebaseMessageService from "./firebaseMessageService";
 
-/**
- * PRODUCTION-REFINED ACCOUNT DELETION
- * Following the user's required automated behavior.
- */
-export const deleteMyAccount = async (password: string) => {
+import { auth, db } from "../config/firebase";
+
+export const deleteAccount = async (password: string) => {
     const user = auth.currentUser;
-    if (!user || !user.email) throw new Error("User not logged in or session expired.");
+    if (!user || !user.email) throw new Error("User not logged in");
 
     try {
-        console.log("🧨 Initializing FULL automated account purge...");
+        console.log("🧨 Starting FULL account deletion...");
 
-        // 1. REAUTHENTICATE USER (Required for security-sensitive delete)
+        // -----------------------------
+        // STEP 1: REAUTHENTICATE USER
+        // -----------------------------
         const credential = EmailAuthProvider.credential(user.email, password);
         await reauthenticateWithCredential(user, credential);
-        console.log("✅ Identity verified.");
+        console.log("✅ Re-authentication success");
 
         const uid = user.uid;
         const batch = writeBatch(db);
 
-        // 2. SOCIAL & NOTIFICATION CLEANUP (Batched)
-        console.log("🔥 Purging notifications and social links...");
+        // -----------------------------
+        // STEP 2: DELETE USER DOC
+        // -----------------------------
+        batch.delete(doc(db, "users", uid));
 
-        // Notifications
-        const notifSnap = await getDocs(query(collection(db, "notifications"), where("userId", "==", uid)));
+        // -----------------------------
+        // STEP 3: DELETE NOTIFICATIONS
+        // -----------------------------
+        const notifSnap = await getDocs(
+            query(collection(db, "notifications"), where("userId", "==", uid))
+        );
         notifSnap.forEach(d => batch.delete(d.ref));
 
-        // Follow Requests (Inbound)
-        const fr1 = await getDocs(query(collection(db, "follow_requests"), where("fromId", "==", uid)));
+        // -----------------------------
+        // STEP 4: DELETE FOLLOW REQUESTS
+        // -----------------------------
+        const fr1 = await getDocs(
+            query(collection(db, "follow_requests"), where("fromId", "==", uid))
+        );
         fr1.forEach(d => batch.delete(d.ref));
 
-        // Follow Requests (Outbound)
-        const fr2 = await getDocs(query(collection(db, "follow_requests"), where("toId", "==", uid)));
+        const fr2 = await getDocs(
+            query(collection(db, "follow_requests"), where("toId", "==", uid))
+        );
         fr2.forEach(d => batch.delete(d.ref));
 
-        // 3. SERVICE-BASED CLEANUP (Complex logic)
-        // Note: These use their own batches/transactions for integrity
+        // -----------------------------
+        // STEP 5: DELETE PERSONAL CHATS
+        // -----------------------------
+        const chatSnap = await getDocs(collection(db, "personal_chats"));
 
-        // Exiting Groups (Purges messages + decrements member counts)
-        console.log("🔥 Exiting group memberships...");
-        const groupsSnap = await getDocs(query(collection(db, "groups"), where("memberIds", "array-contains", uid)));
-        for (const g of groupsSnap.docs) {
-            await firebaseGroupService.leaveGroup(g.id, uid).catch((e: any) => console.warn(`Group cleanup skip: ${g.id}`, e));
+        for (const chatDoc of chatSnap.docs) {
+            const data = chatDoc.data();
+            if (data.userIds?.includes(uid)) {
+
+                // delete messages
+                const msgSnap = await getDocs(
+                    collection(db, `personal_chats/${chatDoc.id}/messages`)
+                );
+                msgSnap.forEach(m => batch.delete(m.ref));
+
+                batch.delete(chatDoc.ref);
+            }
         }
 
-        // Personal Chats (Full wipe of messages + chat records)
-        console.log("🔥 Terminating personal conversations...");
-        const chatsSnap = await getDocs(query(collection(db, "personal_chats"), where("userIds", "array-contains", uid)));
-        for (const c of chatsSnap.docs) {
-            await firebaseMessageService.terminatePersonalChat(c.id).catch((e: any) => console.warn(`Chat cleanup skip: ${c.id}`, e));
-        }
-
-        // 4. FINAL IDENTITY PURGE
-        // Sessions / Sync protocols
-        const syncSnap = await getDocs(collection(db, 'sync_sessions'));
-        syncSnap.docs.forEach(d => {
-            const data = d.data();
-            if (data.ownerId === uid || data.newDeviceId === uid || d.id.includes(uid)) {
-                batch.delete(d.ref);
+        // -----------------------------
+        // STEP 6: REMOVE USER FROM GROUPS
+        // -----------------------------
+        const groupsSnap = await getDocs(collection(db, "groups"));
+        groupsSnap.forEach(g => {
+            const members = g.data().members || [];
+            if (members.includes(uid)) {
+                batch.update(g.ref, {
+                    members: members.filter((m: string) => m !== uid)
+                });
             }
         });
 
-        // The Root User Document
-        batch.delete(doc(db, "users", uid));
-
-        // COMMIT FIRESTORE CHANGES
+        // -----------------------------
+        // COMMIT FIRESTORE DELETE
+        // -----------------------------
         await batch.commit();
-        console.log("✅ Firestore data wiped.");
+        console.log("🔥 Firestore data deleted");
 
-        // 5. TERMINATE AUTH USER (Releases email for reuse)
+        // -----------------------------
+        // STEP 7: DELETE AUTH USER
+        // -----------------------------
         await deleteUser(user);
-        console.log("💀 Firebase Authentication user deleted.");
+        console.log("💀 Auth user deleted");
 
-        // 6. LOCAL SANITIZATION
+        // -----------------------------
+        // STEP 8: CLEAR SESSION
+        // -----------------------------
         localStorage.clear();
         sessionStorage.clear();
-        // Clear E2EE Vault if possible (handled in UI usually, but adding for safety)
 
-        console.log("✨ Deletion complete. Redirecting...");
         window.location.href = "/signup";
 
     } catch (err: any) {
-        console.error("❌ Critical termination failure:", err);
-        throw err;
+        console.error("❌ Delete account error:", err);
+
+        if (err.code === "auth/wrong-password") {
+            throw new Error("Wrong password");
+        } else {
+            throw new Error("Account deletion failed");
+        }
     }
 };

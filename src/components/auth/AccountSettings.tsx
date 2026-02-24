@@ -4,7 +4,7 @@ import { Icon } from '../common/Icon';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { generateAnonymousName, logoutUser } from '../../services/firebaseAuthService';
-import { deleteMyAccount } from '../../services/deleteAccountService';
+import { deleteAccount } from '../../services/deleteAccountService';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import { KeyBackup } from './KeyBackup';
@@ -68,33 +68,15 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
         toast("Password reset link sent to your email.", "success");
     };
 
-    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [isDeleting, setIsDeleting] = useState(false);
-
     const handleDeleteAccount = async () => {
-        const password = prompt("🧨 DANGER: Enter password to PERMANENTLY delete your account. This cannot be undone.");
+        const password = prompt("Enter your password to delete account permanently");
 
-        if (!password) {
-            toast("Identity verification cancelled.", "info");
-            return;
-        }
+        if (!password) return;
 
-        setIsDeleting(true);
         try {
-            await deleteMyAccount(password);
-            toast("Account terminated. Farewell.", "info");
+            await deleteAccount(password);
         } catch (err: any) {
-            console.error('[AccountSettings] Termination Error:', err);
-            if (err.code === 'auth/wrong-password') {
-                toast("Invalid security protocol. Access denied.", "error");
-            } else if (err.code === 'auth/requires-recent-login') {
-                toast("Session expired. Please re-login and try again.", "error");
-            } else {
-                toast("Critical failure during termination.", "error");
-            }
-        } finally {
-            setIsDeleting(false);
+            alert(err.message);
         }
     };
 
@@ -359,89 +341,35 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
                             </div>
 
                             {/* Options */}
-                            <div className="glass-panel p-6 rounded-3xl flex items-center justify-between hover:border-red-500/20 bg-red-500/5 transition-all cursor-pointer group" onClick={() => setShowDeleteConfirm(true)}>
+                            <div
+                                onClick={handleDeleteAccount}
+                                className="glass-panel p-6 rounded-3xl flex items-center justify-between hover:border-red-500/20 bg-red-500/5 transition-all cursor-pointer group"
+                            >
                                 <div className="flex items-center gap-4">
                                     <div className="w-12 h-12 bg-red-500/10 rounded-xl text-red-500 flex items-center justify-center">
                                         <Icon name="trash" className="w-5 h-5" />
                                     </div>
+
                                     <div className="flex flex-col">
                                         <p className="font-bold text-base text-red-500">Delete My Account</p>
-                                        <p className="text-sm font-medium text-gray-500">Permanently remove only your account.</p>
+                                        <p className="text-sm font-medium text-gray-500">
+                                            Permanently delete your account & all data
+                                        </p>
                                     </div>
                                 </div>
+
                                 <Icon name="chevronRight" className="w-5 h-5 text-red-500/50" />
                             </div>
+
                         </div>
+
+
+                        <AnimatePresence>
+                            {showBackup && (
+                                <KeyBackup onClose={() => setShowBackup(false)} />
+                            )}
+                        </AnimatePresence>
                     </div>
-
-                    <AnimatePresence>
-                        {showDeleteConfirm && (
-                            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                                <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                    onClick={() => !isDeleting && setShowDeleteConfirm(false)}
-                                    className="absolute inset-0 bg-black/60 backdrop-blur-md"
-                                />
-                                <motion.div
-                                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                                    exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                                    className="relative w-full max-w-sm bg-[#152238] border border-red-500/20 rounded-[2.5rem] p-8 shadow-2xl overflow-hidden"
-                                >
-                                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-red-500/50 to-transparent" />
-
-                                    <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center text-red-500 mx-auto mb-6">
-                                        <Icon name="trash" className="w-8 h-8" />
-                                    </div>
-
-                                    <h3 className="text-xl font-bold text-white text-center mb-2">Protocol Termination</h3>
-                                    <p className="text-sm text-gray-400 text-center mb-8 leading-relaxed">
-                                        This will permanently wipe your identity and all associated data. Enter password to confirm.
-                                    </p>
-
-                                    <div className="space-y-4">
-                                        <input
-                                            type="password"
-                                            placeholder="Enter Password"
-                                            value={confirmPassword}
-                                            onChange={(e) => setConfirmPassword(e.target.value)}
-                                            className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-6 text-white focus:outline-none focus:border-red-500/50 transition-all font-mono"
-                                            autoFocus
-                                        />
-
-                                        <div className="flex gap-3 pt-4">
-                                            <button
-                                                disabled={isDeleting}
-                                                onClick={() => setShowDeleteConfirm(false)}
-                                                className="flex-1 h-14 rounded-2xl text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-white transition-all border border-white/5"
-                                            >
-                                                Abort
-                                            </button>
-                                            <button
-                                                disabled={isDeleting || !confirmPassword}
-                                                onClick={handleDeleteAccount}
-                                                className="flex-1 h-14 rounded-2xl bg-red-500 text-white text-[10px] font-bold uppercase tracking-widest shadow-lg shadow-red-500/20 hover:bg-red-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
-                                            >
-                                                {isDeleting ? (
-                                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                                ) : (
-                                                    'Purge Account'
-                                                )}
-                                            </button>
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            </div>
-                        )}
-                    </AnimatePresence>
-
-                    <AnimatePresence>
-                        {showBackup && (
-                            <KeyBackup onClose={() => setShowBackup(false)} />
-                        )}
-                    </AnimatePresence>
                 </div>
             </div>
         </div>
