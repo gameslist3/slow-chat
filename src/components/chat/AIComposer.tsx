@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Icon } from '../common/Icon';
-import { uploadVoice, uploadMedia } from '../../services/firebaseStorageService';
+import { uploadVoicePlain, uploadMediaPlain } from '../../services/firebaseStorageService';
 import { Message, FileMetadata } from '../../types';
 import { useToast } from '../../context/ToastContext';
 
@@ -116,16 +116,14 @@ export const AIComposer: React.FC<AIComposerProps> = ({
         console.log(`[AIComposer] Starting voice upload for user: ${userId}, group: ${groupId}`);
 
         try {
-            const { url, key, iv } = await uploadVoice(audioBlob, groupId, userId, isPersonal, (p) => { });
+            const url = await uploadVoicePlain(audioBlob, groupId, userId, isPersonal, (p) => { });
 
             onSend({
                 media: {
                     url,
                     type: 'audio',
-                    name: 'voice_note.enc',
-                    size: audioBlob.size,
-                    encKey: key,
-                    encIv: iv
+                    name: 'voice_note.webm',
+                    size: audioBlob.size
                 },
                 type: 'audio'
             });
@@ -175,16 +173,14 @@ export const AIComposer: React.FC<AIComposerProps> = ({
 
         console.log(`[AIComposer] Starting media upload. Personal: ${isPersonal}`);
         try {
-            const { url, key, iv } = await uploadMedia(file, groupId, userId, isPersonal, (p) => { });
+            const url = await uploadMediaPlain(file, groupId, userId, isPersonal, (p) => { });
 
             onSend({
                 media: {
                     url,
                     type,
                     name: file.name,
-                    size: file.size,
-                    encKey: key,
-                    encIv: iv
+                    size: file.size
                 },
                 type
             });

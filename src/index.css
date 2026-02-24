@@ -41,6 +41,22 @@
 
     --font-main: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --font-heading: 'Outfit', 'Inter', sans-serif;
+
+    /* Tailwind Mappings */
+    --ui-background: 222 47% 11%;
+    /* Matches #0B1221 */
+    --ui-text: 226 100% 95%;
+    /* Matches #E6ECFF */
+    --ui-surface: 222 55% 13%;
+    /* Matches #0F1C34 */
+    --ui-surface2: 218 45% 15%;
+    /* Matches #152238 */
+    --ui-border: 222 55% 18%;
+    --ui-muted: 215 25% 27%;
+    --ui-muted-text: 215 16% 47%;
+    --ui-primary: 222 53% 58%;
+    /* matches #5B7DCB */
+    --ui-ring: 222 53% 58%;
   }
 
   /* Force Dark Mode Appearance */

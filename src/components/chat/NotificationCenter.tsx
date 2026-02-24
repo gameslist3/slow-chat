@@ -179,7 +179,7 @@ export const NotificationList: React.FC<{
     }, []);
 
     const { user: authUser } = useAuth();
-    const autoDeleteWindow = 5 * 60 * 60 * 1000; // Strictly 5 hours as per production requirement
+    const autoDeleteWindow = (authUser?.autoDeleteHours || 10) * 60 * 60 * 1000;
     const clearedAt = authUser?.notificationsClearedAt || 0;
 
     const requests = notifications
@@ -305,8 +305,8 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose,
         if (!user?.id) return;
         const unsubscribe = subscribeToNotifications(user.id, setNotifications);
 
-        // Initial cleanup of expired alerts from DB: Strictly 5 hours
-        cleanupNotifications(user.id, 5);
+        // Initial cleanup of expired alerts from DB: Respects user preference
+        cleanupNotifications(user.id, user.autoDeleteHours || 10);
 
         return () => unsubscribe();
     }, [user?.id, user?.autoDeleteHours]);

@@ -125,101 +125,77 @@ export async function sendMessage(
                 [`unreadCounts.${content.recipientId}`]: increment(1)
             });
         } else {
-            // Update group's lastActivity and increment unread counts for other members
-            const groupRef = doc(db, 'groups', targetId);
-            const groupSnap = await getDoc(groupRef);
-            if (groupSnap.exists()) {
-                const memberIds = groupSnap.data().memberIds || [];
-                const updates: any = { lastActivity: Date.now() };
-                memberIds.forEach((mid: string) => {
+            // Group Chat: Filtered Notifications (Mentions & Replies Only)
+            const groupSnap = await getDoc(doc(db, 'groups', targetId));
+            const groupData = groupSnap.exists() ? groupSnap.data() : null;
+
+            if (groupData && groupData.memberIds) {
+                const memberIds = groupData.memberIds as string[];
+
+                // Fetch all members' status in parallel for accurate unread/notification logic
+                const memberDocs = await Promise.all(
+                    memberIds.map(mid => getDoc(doc(db, 'users', mid)))
+                );
+                const memberMap = new Map<string, any>();
+                memberDocs.forEach(d => { if (d.exists()) memberMap.set(d.id, d.data()); });
+
+                // 1. Update Group Metadata (Unread Counts & lastActivity)
+                const groupRef = doc(db, 'groups', targetId);
+                const updates: any = {
+                    lastActivity: Date.now(),
+                    lastMessage: content.text || `[Sent a ${content.type}]`
+                };
+
+                memberIds.forEach((mid) => {
                     if (mid !== senderId) {
-                        updates[`unreadCounts.${mid}`] = increment(1);
+                        const mData = memberMap.get(mid);
+                        // Only increment if not currently active in this chat
+                        if (mData?.activeChatId !== targetId) {
+                            updates[`unreadCounts.${mid}`] = increment(1);
+                        }
                     }
                 });
                 await updateDoc(groupRef, updates);
 
-                // Update group's lastMessage summary for HomeView
-                await updateDoc(groupRef, {
-                    lastMessage: content.text || `[Sent a ${content.type}]`
-                });
-            }
-        }
+                // 2. Notifications (Mentions & Replies)
+                // Track who has been notified to prevent duplicates
+                const notifiedUserIds = new Set<string>();
 
-        // --- Notifications Logic ---
-
-        // Track who has been notified to prevent duplicates (e.g. Reply + Mention)
-        const notifiedUserIds = new Set<string>();
-
-        if (content.isPersonal) {
-            // Personal chat alerts: Always notify recipient UNLESS they are active in the same chat
-            if (content.recipientId) {
-                const recipientDoc = await getDoc(doc(db, 'users', content.recipientId));
-                const recipientActiveChat = recipientDoc.exists() ? recipientDoc.data().activeChatId : null;
-
-                if (recipientActiveChat !== targetId) {
-                    await createNotification(content.recipientId, {
-                        type: 'message',
-                        senderName: senderUsername,
-                        text: `Sent a ${content.type === 'text' ? 'message' : content.type}`,
-                        groupId: targetId,
-                        messageId: docRef.id
-                    });
-                }
-                notifiedUserIds.add(content.recipientId);
-            }
-        } else {
-            // Group Chat: Filtered Notifications (Mentions & Replies Only)
-            // Note: We could also check occupancy here if needed, but the user specifically asked for replies to NOT show if screen is open.
-
-            // 1. Check for Replies
-            if (content.replyTo) {
-                const replyToUserId = await getUserIdByUsername(content.replyTo.sender);
-
-                if (replyToUserId && replyToUserId !== senderId) {
-                    const recipientDoc = await getDoc(doc(db, 'users', replyToUserId));
-                    const recipientActiveChat = recipientDoc.exists() ? recipientDoc.data().activeChatId : null;
-
-                    if (recipientActiveChat !== targetId) {
-                        const groupSnap = await getDoc(doc(db, 'groups', targetId));
-                        const groupData = groupSnap.exists() ? groupSnap.data() : {};
-
-                        await createNotification(replyToUserId, {
-                            type: 'message',
-                            senderName: senderUsername,
-                            text: `replied to your message`,
-                            groupId: targetId,
-                            groupName: groupData.name || 'Group',
-                            groupImage: groupData.image || '💬',
-                            messageId: docRef.id
-                        });
+                if (content.replyTo) {
+                    const replyToUserId = await getUserIdByUsername(content.replyTo.sender);
+                    if (replyToUserId && replyToUserId !== senderId) {
+                        const mData = memberMap.get(replyToUserId);
+                        if (mData?.activeChatId !== targetId) {
+                            await createNotification(replyToUserId, {
+                                type: 'message',
+                                senderName: senderUsername,
+                                text: `replied to your message`,
+                                groupId: targetId,
+                                groupName: groupData?.name || 'Group',
+                                groupImage: groupData?.image || '💬',
+                                messageId: docRef.id
+                            });
+                        }
+                        notifiedUserIds.add(replyToUserId);
                     }
-                    notifiedUserIds.add(replyToUserId);
                 }
-            }
 
-            // 2. Check for Mentions
-            if (content.text) {
-                const mentionMatches = content.text.match(/@\w+/g) || [];
-                const mentionedUsernames = mentionMatches.map(m => m.slice(1));
-
-                if (mentionedUsernames.length > 0) {
-                    const groupSnap = await getDoc(doc(db, 'groups', targetId));
-                    const groupData = groupSnap.exists() ? groupSnap.data() : {};
+                if (content.text) {
+                    const mentionMatches = content.text.match(/@\w+/g) || [];
+                    const mentionedUsernames = mentionMatches.map(m => m.slice(1));
 
                     for (const username of mentionedUsernames) {
                         const uid = await getUserIdByUsername(username);
                         if (uid && uid !== senderId && !notifiedUserIds.has(uid)) {
-                            const recipientDoc = await getDoc(doc(db, 'users', uid));
-                            const recipientActiveChat = recipientDoc.exists() ? recipientDoc.data().activeChatId : null;
-
-                            if (recipientActiveChat !== targetId) {
+                            const mData = memberMap.get(uid);
+                            if (mData?.activeChatId !== targetId) {
                                 await createNotification(uid, {
                                     type: 'message',
                                     senderName: senderUsername,
                                     text: `mentioned you in a message`,
                                     groupId: targetId,
-                                    groupName: groupData.name || 'Group',
-                                    groupImage: groupData.image || '💬',
+                                    groupName: groupData?.name || 'Group',
+                                    groupImage: groupData?.image || '💬',
                                     messageId: docRef.id
                                 });
                             }
@@ -227,31 +203,26 @@ export async function sendMessage(
                         }
                     }
                 }
-            }
 
-            // 3. Notify all other group members
-            const groupSnap = await getDoc(doc(db, 'groups', targetId));
-            const groupData = groupSnap.exists() ? groupSnap.data() : null;
+                // 3. General Notifications for others
+                const recipients = memberIds.filter(uid =>
+                    uid !== senderId &&
+                    !notifiedUserIds.has(uid) &&
+                    memberMap.get(uid)?.activeChatId !== targetId &&
+                    !(memberMap.get(uid)?.mutedGroups || []).includes(targetId)
+                );
 
-            if (groupData && groupData.memberIds) {
-                for (const uid of groupData.memberIds) {
-                    if (uid !== senderId && !notifiedUserIds.has(uid)) {
-                        const recipientDoc = await getDoc(doc(db, 'users', uid));
-                        const recipientActiveChat = recipientDoc.exists() ? recipientDoc.data().activeChatId : null;
-
-                        if (recipientActiveChat !== targetId) {
-                            await createNotification(uid, {
-                                type: 'message',
-                                senderName: senderUsername,
-                                text: `Sent a ${content.type === 'text' ? 'message' : content.type}`,
-                                groupId: targetId,
-                                groupName: groupData.name || 'Group',
-                                groupImage: groupData.image || '💬',
-                                messageId: docRef.id
-                            });
-                        }
-                    }
-                }
+                Promise.all(recipients.map(uid =>
+                    createNotification(uid, {
+                        type: 'message',
+                        senderName: senderUsername,
+                        text: `Sent a ${content.type === 'text' ? 'message' : content.type}`,
+                        groupId: targetId,
+                        groupName: groupData?.name || 'Group',
+                        groupImage: groupData?.image || '💬',
+                        messageId: docRef.id
+                    }).catch(e => console.error(`[MessageService] Notify failed for ${uid}:`, e))
+                )).catch(e => console.error("[MessageService] Batch notify failed:", e));
             }
         } // Closes else block
 

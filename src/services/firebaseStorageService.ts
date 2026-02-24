@@ -101,3 +101,32 @@ export const uploadMedia = async (
     const path = `${prefix}/${chatId}/media/${userId}/${filename}`;
     return uploadEncryptedFile(file, path, onProgress);
 };
+
+/**
+ * Non-encrypted uploads (as requested for Phase 5)
+ */
+export const uploadVoicePlain = async (
+    blob: Blob,
+    chatId: string,
+    userId: string,
+    isPersonal: boolean,
+    onProgress: (progress: number) => void
+): Promise<string> => {
+    const filename = `voice_${Date.now()}.webm`;
+    const prefix = isPersonal ? 'chats' : 'groups';
+    const path = `${prefix}/${chatId}/voice/${userId}/${filename}`;
+    return uploadFile(blob, path, onProgress);
+};
+
+export const uploadMediaPlain = async (
+    file: File,
+    chatId: string,
+    userId: string,
+    isPersonal: boolean,
+    onProgress: (progress: number) => void
+): Promise<string> => {
+    const filename = `${Date.now()}_${file.name}`;
+    const prefix = isPersonal ? 'chats' : 'groups';
+    const path = `${prefix}/${chatId}/media/${userId}/${filename}`;
+    return uploadFile(file, path, onProgress);
+};

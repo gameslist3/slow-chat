@@ -90,134 +90,49 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                     )}
 
                     {message.type === 'audio' && message.media && (
-                        <EncryptedMedia
-                            media={message.media}
-                            type="audio"
-                            render={(url) => {
-                                const [isPlaying, setIsPlaying] = React.useState(false);
-                                const [duration, setDuration] = React.useState('0:00');
-                                const audioRef = React.useRef<HTMLAudioElement>(null);
-
-                                const togglePlay = () => {
-                                    if (!audioRef.current) return;
-                                    if (audioRef.current.paused) audioRef.current.play();
-                                    else audioRef.current.pause();
-                                };
-
-                                return (
+                        !message.media.encKey ? (
+                            <div className="flex items-center gap-4 bg-white/5 py-4 px-5 rounded-2xl min-w-[280px]">
+                                <AudioPlayer url={message.media.url} name={message.media.name} />
+                            </div>
+                        ) : (
+                            <EncryptedMedia
+                                media={message.media}
+                                type="audio"
+                                render={(url) => (
                                     <div className="flex items-center gap-4 bg-white/5 py-4 px-5 rounded-2xl min-w-[280px]">
-                                        <button
-                                            onClick={togglePlay}
-                                            className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white shadow-lg hover:scale-105 transition-transform shrink-0"
-                                        >
-                                            {isPlaying ? <Pause className="w-6 h-6 fill-current" /> : <Play className="w-6 h-6 fill-current ml-1" />}
-                                        </button>
-
-                                        <div className="flex-1 flex flex-col gap-2">
-                                            {/* Micro-Waveform */}
-                                            <div className="flex items-end gap-[2px] h-6 w-full opacity-60">
-                                                {[30, 60, 45, 80, 50, 70, 40, 90, 65, 55, 75, 45, 85, 60, 50, 70, 40, 80, 55, 65].map((h, i) => (
-                                                    <div
-                                                        key={i}
-                                                        className={`w-[2px] bg-white rounded-full transition-all duration-300 ${isPlaying ? 'animate-pulse' : ''}`}
-                                                        style={{ height: `${h}%`, animationDelay: `${i * 0.1}s` }}
-                                                    />
-                                                ))}
-                                            </div>
-                                            <div className="flex justify-between items-center text-[10px] font-bold text-white/50 tracking-widest">
-                                                <span>VOICE_NOTE.ENC</span>
-                                                <span>{duration}</span>
-                                            </div>
-                                        </div>
-
-                                        <audio
-                                            ref={audioRef}
-                                            src={url}
-                                            onPlay={() => setIsPlaying(true)}
-                                            onPause={() => setIsPlaying(false)}
-                                            onEnded={() => setIsPlaying(false)}
-                                            onLoadedMetadata={(e) => {
-                                                const d = e.currentTarget.duration;
-                                                const m = Math.floor(d / 60);
-                                                const s = Math.floor(d % 60);
-                                                setDuration(`${m}:${s < 10 ? '0' : ''}${s}`);
-                                            }}
-                                            className="hidden"
-                                        />
+                                        <AudioPlayer url={url} name={message.media?.name || 'VOICE_NOTE'} />
                                     </div>
-                                );
-                            }}
-                        />
+                                )}
+                            />
+                        )
                     )}
 
                     {(message.type === 'image' || message.type === 'video') && message.media && (
-                        <EncryptedMedia
-                            media={message.media}
-                            type={message.type}
-                            render={(url) => (
-                                <div className="relative group/media overflow-hidden rounded-2xl shadow-2xl border border-white/5">
-                                    {message.type === 'image' ? (
-                                        <img src={url} alt="media" className="max-h-72 w-full object-cover transition-transform duration-500 group-hover/media:scale-105" />
-                                    ) : (
-                                        <div className="max-h-72 w-full bg-[#0B1221] flex items-center justify-center aspect-video relative overflow-hidden">
-                                            <video src={url} className="w-full h-full object-cover opacity-60" />
-                                            {/* Centered Premium Play Icon */}
-                                            <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover/media:bg-black/40 transition-colors">
-                                                <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-2xl group-hover/media:scale-110 transition-transform">
-                                                    <Play className="w-8 h-8 text-white fill-current ml-1" />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* Download Overlay (Center) */}
-                                    <div className="absolute inset-0 opacity-0 group-hover/media:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[4px] bg-black/40">
-                                        <a
-                                            href={url}
-                                            download={message.media?.name || 'download'}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="px-6 py-2.5 bg-white text-black rounded-full font-black text-[10px] tracking-widest uppercase hover:scale-105 transition-transform shadow-2xl flex items-center gap-2"
-                                            onClick={(e) => e.stopPropagation()}
-                                        >
-                                            <Download className="w-4 h-4" /> Download to View
-                                        </a>
-                                    </div>
-                                </div>
-                            )}
-                        />
+                        !message.media.encKey ? (
+                            <MediaRenderer url={message.media.url} type={message.type} name={message.media.name} />
+                        ) : (
+                            <EncryptedMedia
+                                media={message.media}
+                                type={message.type}
+                                render={(url) => (
+                                    <MediaRenderer url={url} type={message.type} name={message.media?.name} />
+                                )}
+                            />
+                        )
                     )}
 
                     {message.type === 'file' && message.media && (
-                        <EncryptedMedia
-                            media={message.media}
-                            type="file"
-                            render={(url) => (
-                                <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl min-w-[280px] border border-white/5 group-hover:border-white/10 transition-colors">
-                                    <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
-                                        <File className="w-6 h-6 text-primary" />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="text-sm font-bold truncate text-[#E6ECFF] mb-0.5">{message.media?.name}</div>
-                                        <div className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-black">
-                                            {(message.media?.size || 0) / 1024 > 1024
-                                                ? `${((message.media?.size || 0) / (1024 * 1024)).toFixed(1)} MB`
-                                                : `${((message.media?.size || 0) / 1024).toFixed(0)} KB`}
-                                        </div>
-                                    </div>
-                                    <a
-                                        href={url}
-                                        download={message.media?.name || 'file'}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 hover:bg-primary hover:text-white flex items-center justify-center transition-all active:scale-95"
-                                        onClick={(e) => e.stopPropagation()}
-                                    >
-                                        <Download className="w-5 h-5" />
-                                    </a>
-                                </div>
-                            )}
-                        />
+                        !message.media.encKey ? (
+                            <FileRenderer url={message.media.url} name={message.media.name} size={message.media.size} />
+                        ) : (
+                            <EncryptedMedia
+                                media={message.media}
+                                type="file"
+                                render={(url) => (
+                                    <FileRenderer url={url} name={message.media?.name} size={message.media?.size} />
+                                )}
+                            />
+                        )
                     )}
 
                     <div className={`mt-1 flex items-center gap-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
@@ -282,3 +197,113 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
         </div>
     );
 };
+
+const AudioPlayer = ({ url, name }: { url: string; name?: string }) => {
+    const [isPlaying, setIsPlaying] = React.useState(false);
+    const [duration, setDuration] = React.useState('0:00');
+    const audioRef = React.useRef<HTMLAudioElement>(null);
+
+    const togglePlay = () => {
+        if (!audioRef.current) return;
+        if (audioRef.current.paused) audioRef.current.play();
+        else audioRef.current.pause();
+    };
+
+    return (
+        <>
+            <button
+                onClick={togglePlay}
+                className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white shadow-lg hover:scale-105 transition-transform shrink-0"
+            >
+                {isPlaying ? <Pause className="w-6 h-6 fill-current" /> : <Play className="w-6 h-6 fill-current ml-1" />}
+            </button>
+
+            <div className="flex-1 flex flex-col gap-2">
+                <div className="flex items-end gap-[2px] h-6 w-full opacity-60">
+                    {[30, 60, 45, 80, 50, 70, 40, 90, 65, 55, 75, 45, 85, 60, 50, 70, 40, 80, 55, 65].map((h, i) => (
+                        <div
+                            key={i}
+                            className={`w-[2px] bg-white rounded-full transition-all duration-300 ${isPlaying ? 'animate-pulse' : ''}`}
+                            style={{ height: `${h}%`, animationDelay: `${i * 0.1}s` }}
+                        />
+                    ))}
+                </div>
+                <div className="flex justify-between items-center text-[10px] font-bold text-white/50 tracking-widest">
+                    <span>{name?.toUpperCase() || 'VOICE_NOTE'}</span>
+                    <span>{duration}</span>
+                </div>
+            </div>
+
+            <audio
+                ref={audioRef}
+                src={url}
+                onPlay={() => setIsPlaying(true)}
+                onPause={() => setIsPlaying(false)}
+                onEnded={() => setIsPlaying(false)}
+                onLoadedMetadata={(e) => {
+                    const d = e.currentTarget.duration;
+                    const m = Math.floor(d / 60);
+                    const s = Math.floor(d % 60);
+                    setDuration(`${m}:${s < 10 ? '0' : ''}${s}`);
+                }}
+                className="hidden"
+            />
+        </>
+    );
+};
+
+const MediaRenderer = ({ url, type, name }: { url: string; type: string; name?: string }) => (
+    <div className="relative group/media overflow-hidden rounded-2xl shadow-2xl border border-white/5">
+        {type === 'image' ? (
+            <img src={url} alt="media" className="max-h-72 w-full object-cover transition-transform duration-500 group-hover/media:scale-105" />
+        ) : (
+            <div className="max-h-72 w-full bg-[#0B1221] flex items-center justify-center aspect-video relative overflow-hidden">
+                <video src={url} className="w-full h-full object-cover opacity-60" />
+                <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover/media:bg-black/40 transition-colors">
+                    <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-2xl group-hover/media:scale-110 transition-transform">
+                        <Play className="w-8 h-8 text-white fill-current ml-1" />
+                    </div>
+                </div>
+            </div>
+        )}
+
+        <div className="absolute inset-0 opacity-0 group-hover/media:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[4px] bg-black/40">
+            <a
+                href={url}
+                download={name || 'download'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-6 py-2.5 bg-white text-black rounded-full font-black text-[10px] tracking-widest uppercase hover:scale-105 transition-transform shadow-2xl flex items-center gap-2"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <Download className="w-4 h-4" /> Download to View
+            </a>
+        </div>
+    </div>
+);
+
+const FileRenderer = ({ url, name, size }: { url: string; name?: string; size?: number }) => (
+    <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl min-w-[280px] border border-white/5 hover:border-white/10 transition-colors">
+        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
+            <File className="w-6 h-6 text-primary" />
+        </div>
+        <div className="flex-1 min-w-0">
+            <div className="text-sm font-bold truncate text-[#E6ECFF] mb-0.5">{name}</div>
+            <div className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-black">
+                {(size || 0) / 1024 > 1024
+                    ? `${((size || 0) / (1024 * 1024)).toFixed(1)} MB`
+                    : `${((size || 0) / 1024).toFixed(0)} KB`}
+            </div>
+        </div>
+        <a
+            href={url}
+            download={name || 'file'}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 hover:bg-primary hover:text-white flex items-center justify-center transition-all active:scale-95"
+            onClick={(e) => e.stopPropagation()}
+        >
+            <Download className="w-5 h-5" />
+        </a>
+    </div>
+);

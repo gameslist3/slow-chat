@@ -225,22 +225,22 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
                                         <Icon name="info" className="w-3 h-3" />
                                     </button>
                                 </div>
-                                <p className="text-sm text-gray-500 mb-6">All messages will be automatically deleted after selected time.</p>
+                                <p className="text-xs text-gray-500 mb-4">Messages will be removed after the selected duration.</p>
 
-                                <div className="grid grid-cols-3 gap-4">
+                                <div className="grid grid-cols-3 gap-3">
                                     {[5, 10, 20].map((h) => (
                                         <button
                                             key={h}
                                             onClick={() => handleUpdateAutoDelete(h)}
                                             className={`
-                                                h-14 rounded-2xl font-bold text-sm transition-all border-2
+                                                h-12 rounded-xl font-bold text-xs transition-all border-2
                                                 ${user?.autoDeleteHours === h
                                                     ? 'bg-primary border-primary text-white shadow-lg shadow-primary/20'
                                                     : 'bg-white/5 border-white/5 text-gray-400 hover:border-white/10 hover:text-white'
                                                 }
                                             `}
                                         >
-                                            {h} Hours
+                                            {h}H
                                         </button>
                                     ))}
                                 </div>
@@ -266,9 +266,7 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
                                                     </button>
                                                 </div>
                                                 <p className="text-sm text-gray-300 leading-relaxed">
-                                                    “Auto Delete Messages automatically removes your sent and received messages after selected time (5hr / 10hr / 20hr).<br /><br />
-                                                    This keeps chats private and storage clean.<br />
-                                                    Default: 10 hours.”
+                                                    Auto Delete Messages automatically removes your sent and received messages after the selected time (5hr / 10hr / 20hr).
                                                 </p>
                                             </motion.div>
                                         </>
