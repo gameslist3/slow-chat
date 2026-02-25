@@ -11,6 +11,8 @@ import {
     query,
     where,
     writeBatch,
+    arrayRemove,
+    increment,
     deleteDoc
 } from "firebase/firestore";
 
@@ -60,35 +62,33 @@ export const deleteAccount = async (password: string) => {
         fr2.forEach(d => batch.delete(d.ref));
 
         // -----------------------------
-        // STEP 5: DELETE PERSONAL CHATS
+        // STEP 5: DELETE PERSONAL CHATS (only those the user is in)
         // -----------------------------
-        const chatSnap = await getDocs(collection(db, "personal_chats"));
+        const chatSnap = await getDocs(
+            query(collection(db, "personal_chats"), where("userIds", "array-contains", uid))
+        );
 
         for (const chatDoc of chatSnap.docs) {
-            const data = chatDoc.data();
-            if (data.userIds?.includes(uid)) {
+            // delete messages
+            const msgSnap = await getDocs(
+                collection(db, `personal_chats/${chatDoc.id}/messages`)
+            );
+            msgSnap.forEach(m => batch.delete(m.ref));
 
-                // delete messages
-                const msgSnap = await getDocs(
-                    collection(db, `personal_chats/${chatDoc.id}/messages`)
-                );
-                msgSnap.forEach(m => batch.delete(m.ref));
-
-                batch.delete(chatDoc.ref);
-            }
+            batch.delete(chatDoc.ref);
         }
 
         // -----------------------------
         // STEP 6: REMOVE USER FROM GROUPS
         // -----------------------------
-        const groupsSnap = await getDocs(collection(db, "groups"));
+        const groupsSnap = await getDocs(
+            query(collection(db, "groups"), where("memberIds", "array-contains", uid))
+        );
         groupsSnap.forEach(g => {
-            const members = g.data().members || [];
-            if (members.includes(uid)) {
-                batch.update(g.ref, {
-                    members: members.filter((m: string) => m !== uid)
-                });
-            }
+            batch.update(g.ref, {
+                memberIds: arrayRemove(uid),
+                members: increment(-1)
+            });
         });
 
         // -----------------------------

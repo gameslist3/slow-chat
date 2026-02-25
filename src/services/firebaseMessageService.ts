@@ -93,8 +93,12 @@ export async function sendMessage(
             messageData.text = ciphertext;
             messageData.iv = iv;
             messageData.encrypted = true;
-            // Clear binary metadata from root level as it's now in the encrypted payload
-            delete messageData.media;
+
+            // Keep media unencrypted at the root level if present
+            if (content.media) {
+                messageData.media = content.media;
+            }
+
             delete messageData.replyTo;
         } else if (!content.isPersonal && (content.text || content.media)) {
             // Group Messaging: Plaintext (E2EE removed to allow all members to see historic messages)

@@ -392,7 +392,7 @@ const AuthenticatedSection = () => {
                                             />
                                         </motion.div>
                                     ) : showDiscovery ? (
-                                        <motion.div key="discovery" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}>
+                                        <motion.div key="discovery" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="flex-1 min-h-0 overflow-hidden">
                                             <GroupDiscovery
                                                 onJoinGroup={async (id: string) => {
                                                     await joinContext(id);
