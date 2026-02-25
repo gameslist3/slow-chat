@@ -74,7 +74,7 @@ export const useChat = (chatId: string, isPersonal: boolean = false) => {
                             return {
                                 ...m,
                                 text: parsed.text || '',
-                                media: parsed.media,
+                                media: m.media || parsed.media, // Prioritize root-level unencrypted media
                                 replyTo: parsed.replyTo,
                                 encrypted: false
                             };
@@ -162,7 +162,7 @@ export const useChat = (chatId: string, isPersonal: boolean = false) => {
                             return {
                                 ...m,
                                 text: parsed.text || '',
-                                media: parsed.media,
+                                media: m.media || parsed.media, // Prioritize root-level unencrypted media
                                 replyTo: parsed.replyTo,
                                 encrypted: false
                             };

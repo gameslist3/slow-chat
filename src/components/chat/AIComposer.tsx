@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Icon } from '../common/Icon';
-import { uploadVoicePlain, uploadMediaPlain } from '../../services/firebaseStorageService';
+import { uploadVoice, uploadMedia } from '../../services/cloudinaryService';
 import { Message, FileMetadata } from '../../types';
 import { useToast } from '../../context/ToastContext';
 
@@ -116,7 +116,7 @@ export const AIComposer: React.FC<AIComposerProps> = ({
         console.log(`[AIComposer] Starting voice upload for user: ${userId}, group: ${groupId}`);
 
         try {
-            const url = await uploadVoicePlain(audioBlob, groupId, userId, isPersonal, (p) => { });
+            const url = await uploadVoice(audioBlob, groupId, userId, (p) => { });
 
             onSend({
                 media: {
@@ -173,7 +173,7 @@ export const AIComposer: React.FC<AIComposerProps> = ({
 
         console.log(`[AIComposer] Starting media upload. Personal: ${isPersonal}`);
         try {
-            const url = await uploadMediaPlain(file, groupId, userId, isPersonal, (p) => { });
+            const url = await uploadMedia(file, groupId, userId, (p) => { });
 
             onSend({
                 media: {

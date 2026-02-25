@@ -229,7 +229,7 @@ const AudioPlayer = ({ url, name }: { url: string; name?: string }) => {
                     ))}
                 </div>
                 <div className="flex justify-between items-center text-[10px] font-bold text-white/50 tracking-widest">
-                    <span>{name?.toUpperCase() || 'VOICE_NOTE'}</span>
+                    <span>{name ? name.toUpperCase().slice(0, 15) : 'VOICE_NOTE'}</span>
                     <span>{duration}</span>
                 </div>
             </div>
@@ -237,14 +237,17 @@ const AudioPlayer = ({ url, name }: { url: string; name?: string }) => {
             <audio
                 ref={audioRef}
                 src={url}
+                preload="metadata"
                 onPlay={() => setIsPlaying(true)}
                 onPause={() => setIsPlaying(false)}
                 onEnded={() => setIsPlaying(false)}
                 onLoadedMetadata={(e) => {
                     const d = e.currentTarget.duration;
-                    const m = Math.floor(d / 60);
-                    const s = Math.floor(d % 60);
-                    setDuration(`${m}:${s < 10 ? '0' : ''}${s}`);
+                    if (isFinite(d)) {
+                        const m = Math.floor(d / 60);
+                        const s = Math.floor(d % 60);
+                        setDuration(`${m}:${s < 10 ? '0' : ''}${s}`);
+                    }
                 }}
                 className="hidden"
             />
@@ -252,35 +255,32 @@ const AudioPlayer = ({ url, name }: { url: string; name?: string }) => {
     );
 };
 
-const MediaRenderer = ({ url, type, name }: { url: string; type: string; name?: string }) => (
-    <div className="relative group/media overflow-hidden rounded-2xl shadow-2xl border border-white/5">
-        {type === 'image' ? (
-            <img src={url} alt="media" className="max-h-72 w-full object-cover transition-transform duration-500 group-hover/media:scale-105" />
-        ) : (
-            <div className="max-h-72 w-full bg-[#0B1221] flex items-center justify-center aspect-video relative overflow-hidden">
-                <video src={url} className="w-full h-full object-cover opacity-60" />
-                <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover/media:bg-black/40 transition-colors">
-                    <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-2xl group-hover/media:scale-110 transition-transform">
-                        <Play className="w-8 h-8 text-white fill-current ml-1" />
-                    </div>
+const MediaRenderer = ({ url, type, name }: { url: string; type: string; name?: string }) => {
+    if (type === 'image') {
+        return (
+            <div className="relative group/media overflow-hidden rounded-2xl shadow-2xl border border-white/5">
+                <img src={url} alt="media" className="max-h-72 w-full object-cover transition-transform duration-500 group-hover/media:scale-105" />
+                <div className="absolute inset-0 opacity-0 group-hover/media:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[4px] bg-black/40 z-10">
+                    <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-6 py-2.5 bg-white text-black rounded-full font-black text-[10px] tracking-widest uppercase hover:scale-105 transition-transform shadow-2xl flex items-center gap-2"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <Download className="w-4 h-4" /> View Full
+                    </a>
                 </div>
             </div>
-        )}
+        );
+    }
 
-        <div className="absolute inset-0 opacity-0 group-hover/media:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[4px] bg-black/40">
-            <a
-                href={url}
-                download={name || 'download'}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-6 py-2.5 bg-white text-black rounded-full font-black text-[10px] tracking-widest uppercase hover:scale-105 transition-transform shadow-2xl flex items-center gap-2"
-                onClick={(e) => e.stopPropagation()}
-            >
-                <Download className="w-4 h-4" /> Download to View
-            </a>
+    return (
+        <div className="relative overflow-hidden rounded-2xl shadow-2xl border border-white/5 bg-[#0B1221]">
+            <video src={url} controls preload="metadata" className="max-h-72 w-full object-contain" onClick={(e) => e.stopPropagation()} />
         </div>
-    </div>
-);
+    );
+};
 
 const FileRenderer = ({ url, name, size }: { url: string; name?: string; size?: number }) => (
     <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl min-w-[280px] border border-white/5 hover:border-white/10 transition-colors">
