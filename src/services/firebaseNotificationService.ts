@@ -158,3 +158,28 @@ export const cleanupNotifications = async (uid: string, autoDeleteHours: number 
         console.error("[NotificationService] Cleanup Error:", error);
     }
 };
+
+/**
+ * Mark all notifications for a specific group/chat as read
+ */
+export const markNotificationsAsReadForGroup = async (userId: string, groupId: string): Promise<void> => {
+    try {
+        const q = query(
+            collection(db, 'notifications'),
+            where('userId', '==', userId),
+            where('groupId', '==', groupId),
+            where('read', '==', false)
+        );
+        const snap = await getDocs(q);
+        if (snap.empty) return;
+
+        const batch = writeBatch(db);
+        snap.docs.forEach(d => {
+            batch.update(d.ref, { read: true, updatedAt: Date.now() });
+        });
+        await batch.commit();
+    } catch (error) {
+        console.error("[NotificationService] markNotificationsAsReadForGroup Error:", error);
+    }
+};
+

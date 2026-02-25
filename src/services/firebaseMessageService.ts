@@ -20,7 +20,7 @@ import {
 } from 'firebase/firestore';
 import { db, auth } from '../config/firebase';
 import { Message, ReplyMetadata, Reaction, FileMetadata, PersonalChat } from '../types';
-import { createNotification } from './firebaseNotificationService';
+import { createNotification, markNotificationsAsReadForGroup } from './firebaseNotificationService';
 import { CryptoUtils } from './crypto/CryptoUtils';
 import { GroupEncryptionService } from './crypto/GroupEncryptionService';
 
@@ -245,6 +245,9 @@ export async function markAsSeen(
     isPersonal: boolean,
     userId: string
 ): Promise<void> {
+    // Sync notification clear state for this specific chat
+    await markNotificationsAsReadForGroup(userId, targetId);
+
     const path = isPersonal
         ? `personal_chats/${targetId}/messages`
         : `groups/${targetId}/messages`;
@@ -415,10 +418,8 @@ export async function fetchPreviousMessages(
  * Terminate a personal chat and all its messages
  */
 export async function terminatePersonalChat(chatId: string): Promise<void> {
-    // 1. Delete the chat metadata first so UI updates instantly
-    await deleteDoc(doc(db, 'personal_chats', chatId));
-
-    // 2. Cleanup messages in the background/batches
+    // 1. Cleanup messages in the background/batches BEFORE deleting parent document
+    // If we delete the parent first, Firestore rules (isChatParticipant) will fail to verify access
     const messagesRef = collection(db, `personal_chats/${chatId}/messages`);
     const snap = await getDocs(messagesRef);
 
@@ -429,6 +430,9 @@ export async function terminatePersonalChat(chatId: string): Promise<void> {
         chunk.forEach(d => batch.delete(d.ref));
         await batch.commit();
     }
+
+    // 2. Delete the chat metadata after messages are cleanly removed
+    await deleteDoc(doc(db, 'personal_chats', chatId));
 }
 
 /**

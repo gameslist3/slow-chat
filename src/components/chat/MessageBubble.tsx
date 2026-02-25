@@ -80,7 +80,9 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                 `}>
                     {message.type === 'text' && (
                         <div className="max-w-full">
-                            <div className="mb-2">{message.text}</div>
+                            <div className="mb-2 whitespace-pre-wrap break-words" style={{ overflowWrap: 'anywhere' }}>
+                                {message.text}
+                            </div>
                             {linkedGroupId && (
                                 <div className="mt-3 mb-1">
                                     <GroupInviteCard groupId={linkedGroupId} />

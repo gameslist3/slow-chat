@@ -273,7 +273,7 @@ const AuthenticatedSection = () => {
         return sum + (user?.id ? (group.unreadCounts?.[user.id] || 0) : 0);
     }, 0);
 
-    const totalUnread = notificationUnread + friendsUnread + groupsUnread;
+    const totalUnread = notificationUnread;
 
     console.log('[App] Rendering AuthenticatedSection', {
         activeTab,
