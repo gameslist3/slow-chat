@@ -29,13 +29,56 @@ export const CATEGORIES = [
 export const ICONS = ["🌟", "🔥", "💧", "🍀", "🎭", "🎨", "🚀", "🌙", "🎵", "📚", "☕", "🍕"];
 
 /**
+ * Check if a group has expired based on business rules:
+ * - 1 Member AND Inactive for > 5 hours = Expired
+ * - >1 Member AND Inactive for > 10 hours = Expired
+ */
+const isGroupExpired = (g: Group): boolean => {
+    // System Groups don't expire
+    if (g.id === 'system-updates') return false;
+
+    const now = Date.now();
+    const inactivityTime = now - (g.lastActivity || g.createdAt);
+    const mCount = g.memberIds?.length || g.memberCount || 0;
+
+    const hours5 = 5 * 60 * 60 * 1000;
+    const hours10 = 10 * 60 * 60 * 1000;
+
+    if (mCount <= 1 && inactivityTime > hours5) return true;
+    if (mCount > 1 && inactivityTime > hours10) return true;
+
+    return false;
+};
+
+/**
+ * Lazily removes an expired group from Firestore
+ */
+const performLazyCleanup = async (groupId: string) => {
+    try {
+        const groupRef = doc(db, 'groups', groupId);
+        await deleteDoc(groupRef);
+        console.log(`[Auto-Delete] Expired group ${groupId} pruned.`);
+    } catch (e) {
+        console.warn(`[Auto-Delete] Could not prune group ${groupId}.`);
+    }
+};
+
+/**
  * Get all groups (Snapshot)
  */
 export const getGroups = async (): Promise<Group[]> => {
     try {
         const q = query(collection(db, 'groups'), orderBy('lastActivity', 'desc'));
         const snap = await getDocs(q);
-        return snap.docs.map(doc => ({ ...doc.data(), id: doc.id } as Group));
+        const groups = snap.docs.map(doc => ({ ...doc.data(), id: doc.id } as Group));
+
+        return groups.filter(g => {
+            if (isGroupExpired(g)) {
+                performLazyCleanup(g.id);
+                return false;
+            }
+            return true;
+        });
     } catch (error) {
         console.error('Error getting groups:', error);
         return [];
@@ -49,8 +92,18 @@ export const subscribeToGroups = (callback: (groups: Group[]) => void) => {
     const q = query(collection(db, 'groups'), orderBy('lastActivity', 'desc'));
     return onSnapshot(q, (snapshot) => {
         if (!auth.currentUser) return;
-        const groups = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Group));
-        callback(groups);
+
+        const validGroups: Group[] = [];
+        snapshot.docs.forEach(doc => {
+            const g = { ...doc.data(), id: doc.id } as Group;
+            if (isGroupExpired(g)) {
+                performLazyCleanup(g.id);
+            } else {
+                validGroups.push(g);
+            }
+        });
+
+        callback(validGroups);
     }, (error) => {
         if (error.code === 'permission-denied') return;
         console.error('[Firestore] Groups Subscription Error:', error);
@@ -58,17 +111,27 @@ export const subscribeToGroups = (callback: (groups: Group[]) => void) => {
 };
 
 /**
- * Subscribe specifically to groups where user is a member (Phase 6 Fix)
+ * Subscribe specifically to groups where user is a member
  */
 export const subscribeToJoinedGroups = (userId: string, callback: (groups: Group[]) => void) => {
     const q = query(
         collection(db, 'groups'),
-        where('memberIds', 'array-contains', userId),
-        orderBy('lastActivity', 'desc')
+        where('memberIds', 'array-contains', userId)
     );
     return onSnapshot(q, (snapshot) => {
-        const groups = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Group));
-        callback(groups);
+        const validGroups: Group[] = [];
+
+        snapshot.docs.forEach(doc => {
+            const g = { ...doc.data(), id: doc.id } as Group;
+            if (isGroupExpired(g)) {
+                performLazyCleanup(g.id);
+            } else {
+                validGroups.push(g);
+            }
+        });
+
+        validGroups.sort((a, b) => (b.lastActivity || 0) - (a.lastActivity || 0));
+        callback(validGroups);
     }, (error) => {
         if (error.code === 'permission-denied') return;
         console.error('[Firestore] Joined Groups Subscription Error:', error);

@@ -47,23 +47,23 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                 </div>
             )}
 
-            <div className={`max-w-[75%] md:max-w-[60%] flex flex-col ${isMe ? 'items-end' : 'items-start'} relative group/bubble`}>
+            <div className={`max-w-[85%] sm:max-w-[75%] md:max-w-[65%] flex flex-col ${isMe ? 'items-end' : 'items-start'} relative group/bubble shrink-0`}>
                 {!isMe && !isContinual && (
-                    <span className="text-[9px] uppercase font-black text-primary/60 ml-1 mb-1.5 tracking-[0.2em]">{message.sender}</span>
+                    <span className="text-[10px] font-bold text-primary/80 ml-1.5 mb-1">{message.sender}</span>
                 )}
 
                 {/* Reply Context - WhatsApp Style */}
                 {message.replyTo && (
                     <div className={`
-                        mb-1 text-xs mx-1 rounded-lg overflow-hidden flex cursor-pointer hover:bg-black/5 transition-colors relative
+                        mb-1 text-xs mx-1 rounded-lg overflow-hidden flex cursor-pointer hover:bg-black/10 transition-colors relative shadow-sm
                         ${isMe ? 'bg-black/10' : 'bg-black/5'}
                     `}>
                         <div className="w-1 bg-[#7FA6FF] shrink-0" />
-                        <div className="px-2 py-1.5 flex-1 min-w-0">
+                        <div className="px-2.5 py-2 flex-1 min-w-0">
                             <div className="text-[10px] font-bold text-[#7FA6FF] mb-0.5">
                                 {message.replyTo.sender || 'Unknown'}
                             </div>
-                            <div className="text-gray-400 truncate">
+                            <div className="text-white/60 truncate text-[11px]">
                                 {message.replyTo.text || 'Photo'}
                             </div>
                         </div>
@@ -71,10 +71,10 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                 )}
 
                 <div className={`
-                    relative px-5 py-3 text-[15px] font-medium leading-relaxed tracking-wide break-words overflow-hidden shadow-lg
+                    relative px-3.5 py-2 text-[15px] leading-snug break-words shadow-sm overflow-hidden flex flex-col
                     ${isMe
-                        ? 'bg-[rgba(127,166,255,0.18)] text-[#E6ECFF] rounded-[1.25rem] rounded-tr-sm border border-white/5'
-                        : 'bg-[rgba(255,255,255,0.05)] text-[#E6ECFF] rounded-[1.25rem] rounded-tl-sm border border-white/5'
+                        ? 'bg-[rgba(127,166,255,0.18)] text-[#E6ECFF] rounded-2xl rounded-tr-sm'
+                        : 'bg-[rgba(255,255,255,0.08)] text-[#E6ECFF] rounded-2xl rounded-tl-sm'
                     }
                     ${message.type === 'image' || message.type === 'video' ? 'p-1 bg-transparent border-0 shadow-none' : ''}
                 `}>
@@ -91,7 +91,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
 
                     {message.type === 'audio' && message.media && (
                         !message.media.encKey ? (
-                            <div className="flex items-center gap-4 bg-white/5 py-4 px-5 rounded-2xl min-w-[280px]">
+                            <div className="flex items-center gap-3 bg-white/5 py-3 px-4 rounded-xl w-full min-w-[220px] sm:min-w-[280px]">
                                 <AudioPlayer url={message.media.url} name={message.media.name} />
                             </div>
                         ) : (
@@ -99,7 +99,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                                 media={message.media}
                                 type="audio"
                                 render={(url) => (
-                                    <div className="flex items-center gap-4 bg-white/5 py-4 px-5 rounded-2xl min-w-[280px]">
+                                    <div className="flex items-center gap-3 bg-white/5 py-3 px-4 rounded-xl w-full min-w-[220px] sm:min-w-[280px]">
                                         <AudioPlayer url={url} name={message.media?.name || 'VOICE_NOTE'} />
                                     </div>
                                 )}
@@ -135,23 +135,23 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                         )
                     )}
 
-                    <div className={`mt-1 flex items-center gap-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
-                        <span className={`text-[9px] font-bold opacity-40 uppercase tracking-widest ${isMe ? 'text-[#E6ECFF]' : 'text-[#7C89A6]'}`}>
+                    <div className={`mt-1 flex items-center gap-1 ${isMe ? 'self-end' : 'self-start'}`}>
+                        <span className={`text-[10px] font-medium opacity-60 ${isMe ? 'text-[#E6ECFF]' : 'text-[#A9B4D0]'}`}>
                             {formatTime(message.timestamp)}
                         </span>
                         {isMe && (message.status === 'sending' || message.status === 'sent') && (
-                            <div className={`w-3 h-3 opacity-60 text-white flex items-center justify-center ${message.status === 'sending' ? 'animate-pulse' : ''}`}>
-                                <Check className="w-3 h-3 stroke-[3]" />
+                            <div className={`opacity-60 text-white flex items-center justify-center ${message.status === 'sending' ? 'animate-pulse' : ''}`}>
+                                <Check className="w-3.5 h-3.5 stroke-[3]" />
                             </div>
                         )}
                         {isMe && message.status === 'delivered' && (
-                            <div className="w-3 h-3 opacity-60 text-white flex items-center justify-center ml-[-2px]">
-                                <CheckCheck className="w-4 h-4 stroke-[3]" />
+                            <div className="opacity-60 text-white flex items-center justify-center -ml-0.5">
+                                <CheckCheck className="w-[15px] h-[15px] stroke-[3]" />
                             </div>
                         )}
                         {isMe && message.status === 'seen' && (
-                            <div className="w-3 h-3 text-primary flex items-center justify-center ml-[-2px]">
-                                <CheckCheck className="w-4 h-4 stroke-[3]" />
+                            <div className="text-[#3B82F6] flex items-center justify-center -ml-0.5">
+                                <CheckCheck className="w-[15px] h-[15px] stroke-[3]" />
                             </div>
                         )}
                     </div>
@@ -283,13 +283,13 @@ const MediaRenderer = ({ url, type, name }: { url: string; type: string; name?: 
 };
 
 const FileRenderer = ({ url, name, size }: { url: string; name?: string; size?: number }) => (
-    <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl min-w-[280px] border border-white/5 hover:border-white/10 transition-colors">
-        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
-            <File className="w-6 h-6 text-primary" />
+    <div className="flex items-center gap-3 bg-white/5 p-3 rounded-xl w-full min-w-[220px] sm:min-w-[280px] hover:bg-white/10 transition-colors">
+        <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center shrink-0">
+            <File className="w-5 h-5 text-primary" />
         </div>
-        <div className="flex-1 min-w-0">
-            <div className="text-sm font-bold truncate text-[#E6ECFF] mb-0.5">{name}</div>
-            <div className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-black">
+        <div className="flex-1 min-w-0 pr-2">
+            <div className="text-sm font-semibold truncate text-[#E6ECFF] mb-0.5">{name}</div>
+            <div className="text-[11px] text-white/40 uppercase tracking-wider font-semibold">
                 {(size || 0) / 1024 > 1024
                     ? `${((size || 0) / (1024 * 1024)).toFixed(1)} MB`
                     : `${((size || 0) / 1024).toFixed(0)} KB`}
@@ -300,10 +300,10 @@ const FileRenderer = ({ url, name, size }: { url: string; name?: string; size?: 
             download={name || 'file'}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 hover:bg-primary hover:text-white flex items-center justify-center transition-all active:scale-95"
+            className="w-10 h-10 rounded-full bg-black/20 hover:bg-primary hover:text-white flex items-center justify-center transition-all active:scale-95 shrink-0"
             onClick={(e) => e.stopPropagation()}
         >
-            <Download className="w-5 h-5" />
+            <Download className="w-4 h-4" />
         </a>
     </div>
 );
