@@ -72,7 +72,7 @@ export const AILayout: React.FC<AILayoutProps> = ({
                 </header>
 
                 {/* Content Scroll Area */}
-                <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar relative flex flex-col">
+                <div className={`flex-1 overflow-x-hidden custom-scrollbar relative flex flex-col ${activeTab === 'chat' ? 'overflow-y-hidden' : 'overflow-y-auto'}`}>
                     {children}
                 </div>
             </main>

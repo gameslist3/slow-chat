@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Icon } from '../common/Icon';
 import { User } from '../../types';
@@ -91,7 +92,7 @@ export const GroupMemberPopup: React.FC<GroupMemberPopupProps> = ({ groupId, onC
         }
     };
 
-    return (
+    return createPortal(
         <AnimatePresence>
             <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
                 <div className="absolute inset-0 bg-[#0F1C34]/80 backdrop-blur-sm" onClick={onClose} />
@@ -196,6 +197,7 @@ export const GroupMemberPopup: React.FC<GroupMemberPopupProps> = ({ groupId, onC
                     </div>
                 </motion.div>
             </div>
-        </AnimatePresence>
+        </AnimatePresence>,
+        document.body
     );
 };

@@ -258,37 +258,35 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                     </div>
                 ) : (
                     /* Recording State Pill */
-                    <div className="flex items-center gap-4 bg-[#EF4444]/10 backdrop-blur-xl border border-[#EF4444]/20 p-2 rounded-[2rem] shadow-2xl animate-in slide-in-from-bottom-2">
+                    <div className="flex items-center gap-4 bg-[#152238]/90 backdrop-blur-3xl border border-white/10 p-2.5 rounded-[2.5rem] shadow-[0_12px_40px_rgba(0,0,0,0.5)] animate-in slide-in-from-bottom-2 ring-1 ring-[#EF4444]/20">
                         <button
                             onClick={() => { stopRecording(); setRecState('idle'); setAudioBlob(null); setAudioUrl(null); }}
-                            disabled={recState === 'recording'}
-                            className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors
-                                ${recState === 'recording' ? 'bg-white/5 text-white/20 cursor-not-allowed' : 'bg-[#EF4444]/20 hover:bg-[#EF4444]/30 text-[#EF4444]'}
-                            `}
+                            className="w-10 h-10 rounded-full flex items-center justify-center transition-colors bg-white/5 hover:bg-[#EF4444]/20 hover:text-[#EF4444] text-white/50"
                         >
                             <Icon name="trash" className="w-5 h-5" />
                         </button>
 
                         {recState === 'recording' ? (
                             <div className="flex-1 flex items-center gap-4 min-w-[200px]">
-                                <div className="w-3 h-3 rounded-full bg-[#EF4444] animate-pulse shadow-[0_0_10px_#EF4444]" />
-                                <div className="flex-1 h-8 flex items-center gap-1 opacity-80">
-                                    {[...Array(12)].map((_, i) => (
+                                <div className="w-3 h-3 rounded-full bg-[#EF4444] animate-pulse shadow-[0_0_12px_#EF4444]" />
+                                <div className="flex-1 h-8 flex items-center gap-1 opacity-80 justify-center">
+                                    {[...Array(16)].map((_, i) => (
                                         <div
                                             key={i}
-                                            className="w-1 bg-[#EF4444] rounded-full animate-bounce"
+                                            className="w-[3px] bg-primary rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.5)]"
                                             style={{
                                                 height: `${Math.random() * 60 + 20}%`,
+                                                animationDuration: `${Math.random() * 0.5 + 0.5}s`,
                                                 animationDelay: `${i * 0.05}s`
                                             }}
                                         />
                                     ))}
                                 </div>
-                                <span className="font-mono text-sm font-bold text-[#E6ECFF] w-[50px] text-right">
+                                <span className="font-mono text-xs font-black tracking-widest text-[#E6ECFF] w-[50px] text-right drop-shadow-md">
                                     {Math.floor(recordingTime / 60)}:{(recordingTime % 60).toString().padStart(2, '0')}
                                 </span>
-                                <button onClick={stopRecording} className="p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors">
-                                    <div className="w-3 h-3 bg-current rounded-sm" />
+                                <button onClick={stopRecording} className="w-10 h-10 rounded-full bg-primary/20 text-primary hover:bg-primary hover:text-white transition-all flex items-center justify-center shadow-lg active:scale-95">
+                                    <div className="w-3.5 h-3.5 bg-current rounded-[3px]" />
                                 </button>
                             </div>
                         ) : (
@@ -298,14 +296,14 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                                         const a = document.getElementById('preview-audio') as HTMLAudioElement;
                                         if (a.paused) { a.play(); setIsPlaying(true); } else { a.pause(); setIsPlaying(false); }
                                     }}>
-                                        <Icon name={isPlaying ? "pause" : "play"} className="w-3 h-3 text-[#E6ECFF]" />
+                                        <Icon name={isPlaying ? "pause" : "play"} className="w-4 h-4 text-primary transition-colors" />
                                     </button>
                                     <div className="flex-1 h-6 flex items-center gap-0.5 opacity-60">
-                                        {[...Array(20)].map((_, i) => (
+                                        {[...Array(24)].map((_, i) => (
                                             <div
                                                 key={i}
-                                                className={`w-0.5 bg-[#E6ECFF] rounded-full ${isPlaying ? 'animate-pulse' : ''}`}
-                                                style={{ height: isPlaying ? `${Math.random() * 80 + 20}%` : '20%', transition: 'all 0.2s' }}
+                                                className={`w-[2px] bg-[#E6ECFF] rounded-full ${isPlaying ? 'animate-pulse' : ''}`}
+                                                style={{ height: isPlaying ? `${Math.random() * 80 + 20}%` : '20%', transition: 'all 0.2s', animationDelay: `${i * 0.05}s` }}
                                             />
                                         ))}
                                     </div>
@@ -320,9 +318,9 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                                 </div>
                                 <button
                                     onClick={handleSendVoice}
-                                    className="w-10 h-10 rounded-full bg-[#3B82F6] text-white flex items-center justify-center shadow-lg active:scale-95"
+                                    className="w-11 h-11 rounded-full bg-primary text-white flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.6)] active:scale-95 hover:bg-blue-600 transition-all hover:scale-105"
                                 >
-                                    <Icon name="send" className="w-4 h-4 ml-0.5" />
+                                    <Icon name="send" className="w-5 h-5 ml-1" />
                                 </button>
                             </div>
                         )}

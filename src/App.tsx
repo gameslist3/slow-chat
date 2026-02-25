@@ -312,7 +312,7 @@ const AuthenticatedSection = () => {
                 followRequestsCount={followRequestsCount}
                 friendsUnread={friendsUnread}
             >
-                <div className="w-full h-full flex flex-col px-4 md:px-8 lg:px-12 max-w-[1600px] mx-auto">
+                <div className={`w-full h-full flex flex-col max-w-[1600px] mx-auto ${(activeTab === 'chat' && activeId) ? 'px-0' : 'px-4 md:px-8 lg:px-12'}`}>
                     <AnimatePresence mode="wait">
                         {activeTab === 'home' && (
                             <motion.div key="home" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
@@ -484,7 +484,7 @@ const AuthenticatedSection = () => {
                         )}
 
                         {activeTab === 'chat' && activeId && (
-                            <motion.div key="chat" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="h-full overflow-hidden">
+                            <motion.div key="chat" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="flex-1 w-full min-h-0 overflow-hidden">
                                 <ChatInterface
                                     highlightMessageId={highlightMessageId}
                                     chatId={activeId}
