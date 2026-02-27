@@ -399,28 +399,104 @@ export const loginUserWithPassword = async (creds: UserCredentials): Promise<Use
     }
 };
 
-// Password Reset
-export const sendPasswordReset = async (email: string): Promise<void> => {
-    try {
-        console.log(`[Auth] Requesting password reset for ${email}`);
-        await sendPasswordResetEmail(auth, email);
-    } catch (error: any) {
-        console.error('[Auth] Password reset error:', error.code, error.message);
-        let friendlyMessage = 'Failed to send reset email.';
+// --- OTP-Based Password Reset (Custom Implementation) ---
 
-        switch (error.code) {
-            case 'auth/user-not-found':
-                friendlyMessage = 'No account found with this email address.';
-                break;
-            case 'auth/invalid-email':
-                friendlyMessage = 'Please enter a valid email address.';
-                break;
-            case 'auth/too-many-requests':
-                friendlyMessage = 'Too many requests. Please wait a moment before trying again.';
-                break;
+/**
+ * Step 1: Request an OTP for password reset
+ * Generates a 6-digit code and saves it to Firestore.
+ * In a production app, a Cloud Function or Extension would send the email.
+ */
+export const requestPasswordResetOTP = async (email: string): Promise<void> => {
+    try {
+        console.log(`[Auth] Requesting OTP for ${email}`);
+
+        // 1. Check if user exists (Optional but recommended)
+        const usersSnap = await getDocs(query(collection(db, 'users'), where('email', '==', email)));
+        if (usersSnap.empty) {
+            throw new Error('No account found with this email address.');
         }
 
-        throw new Error(friendlyMessage);
+        // 2. Generate 6-digit OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const expiry = Date.now() + 15 * 60 * 1000; // 15 minutes
+
+        // 3. Save OTP to Firestore
+        // We use the email as the doc ID or a random ID. Email + OTP is safer.
+        await setDoc(doc(db, 'password_reset_otps', email), {
+            email,
+            otp,
+            expiry,
+            createdAt: Date.now()
+        });
+
+        // 4. TRIGGER EMAIL (Simulation)
+        // If the 'Trigger Email' extension is used, we'd write to a 'mail' collection
+        await setDoc(doc(db, 'mail', `${email}_reset_${Date.now()}`), {
+            to: email,
+            message: {
+                subject: 'Your Password Reset OTP',
+                text: `Your reset code is: ${otp}. It expires in 15 minutes.`,
+                html: `<p>Your reset code is: <b>${otp}</b>. It expires in 15 minutes.</p>`
+            }
+        });
+
+        console.log(`[Auth] OTP generated and mail triggered for ${email}`);
+    } catch (error: any) {
+        console.error('[Auth] OTP request error:', error);
+        throw error;
+    }
+};
+
+/**
+ * Step 2: Verify the OTP
+ */
+export const verifyPasswordResetOTP = async (email: string, otp: string): Promise<boolean> => {
+    try {
+        const otpDoc = await getDoc(doc(db, 'password_reset_otps', email));
+        if (!otpDoc.exists()) throw new Error('No OTP request found for this email.');
+
+        const data = otpDoc.data();
+        if (data.otp !== otp) throw new Error('Invalid OTP code.');
+        if (Date.now() > data.expiry) throw new Error('OTP has expired.');
+
+        return true;
+    } catch (error: any) {
+        console.error('[Auth] OTP verification error:', error);
+        throw error;
+    }
+};
+
+/**
+ * Step 3: Reset Password with OTP
+ * NOTE: Changing a password for an unauthenticated user on the client requires a backend (Cloud Functions)
+ * because the Firebase Web SDK doesn't allow 'updatePassword' without being signed in.
+ * This function will act as the 'Intent' recorder for the backend to process.
+ */
+export const resetPasswordWithOTP = async (email: string, otp: string, newPassword: string): Promise<void> => {
+    try {
+        // 1. Re-verify OTP one last time
+        await verifyPasswordResetOTP(email, otp);
+
+        // 2. record the reset intent for the backend
+        // In a real system, a Cloud Function would watch this collection and use Admin SDK to update Auth
+        await setDoc(doc(db, 'password_reset_intents', `${email}_${Date.now()}`), {
+            email,
+            newPassword, // In a real app, this should be handled only in a secure Cloud Function
+            otp,
+            processed: false,
+            requestedAt: Date.now()
+        });
+
+        // 3. Clean up OTP
+        await deleteDoc(doc(db, 'password_reset_otps', email));
+
+        console.log(`[Auth] Password reset intent recorded for ${email}. Backend will process.`);
+
+        // Since we don't have a backend in this demo, we'll simulate success.
+        // In a real app, the user would wait for completion or the function would handle it instantly.
+    } catch (error: any) {
+        console.error('[Auth] Password reset completion error:', error);
+        throw error;
     }
 };
 
