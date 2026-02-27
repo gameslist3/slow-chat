@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Icon } from '../common/Icon';
 import { Check } from 'lucide-react';
-import { validateEmail, registerUserStep1, loginUserWithPassword, generateAnonymousName } from '../../services/firebaseAuthService';
+import { validateEmail, registerUserStep1, loginUserWithPassword, generateAnonymousName, sendPasswordReset } from '../../services/firebaseAuthService';
 import { useToast } from '../../context/ToastContext';
 import { Logo } from '../common/Logo';
 import { TermsModal } from './TermsModal';
@@ -309,7 +309,28 @@ export const SignUpScreen = ({ onBack }: any) => {
 // --- Forgot Password ---
 export const ForgotPasswordScreen = ({ onBack }: any) => {
     const [email, setEmail] = useState('');
+    const [loading, setLoading] = useState(false);
     const { toast } = useToast();
+
+    const handleReset = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!validateEmail(email)) {
+            toast("Identity format invalid.", "error");
+            return;
+        }
+
+        setLoading(true);
+        try {
+            await sendPasswordReset(email);
+            toast("Recovery link sent. Check your inbox.", "success");
+            // Optionally redirect back after a delay
+            setTimeout(onBack, 2000);
+        } catch (error: any) {
+            toast(error.message, "error");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="w-full min-h-screen flex items-center justify-center p-6 bg-[#0B1220]">
@@ -322,17 +343,23 @@ export const ForgotPasswordScreen = ({ onBack }: any) => {
                 <h2 className="text-3xl font-black uppercase italic tracking-tighter mb-4 text-white">Reset</h2>
                 <p className="text-xs font-bold text-slate-400 leading-relaxed mb-8">Enter your registered email to receive recovery instructions.</p>
 
-                <div className="space-y-4">
+                <form onSubmit={handleReset} className="space-y-4">
                     <input
                         type="email"
+                        required
                         value={email}
                         onChange={e => setEmail(e.target.value)}
                         className="glass-input w-full h-14 rounded-2xl px-6 bg-black/20 border-white/5 focus:border-blue-500/50 text-center"
                         placeholder="identity@example.com"
                     />
-                    <button className="btn-primary w-full h-14 rounded-2xl text-xs font-black uppercase tracking-widest shadow-lg shadow-blue-500/20">Send Link</button>
-                    <button onClick={onBack} className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors pt-4">Cancel</button>
-                </div>
+                    <button
+                        disabled={loading}
+                        className="btn-primary w-full h-14 rounded-2xl text-xs font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 flex items-center justify-center"
+                    >
+                        {loading ? <Icon name="rotate" className="w-5 h-5 animate-spin" /> : 'Send Link'}
+                    </button>
+                    <button type="button" onClick={onBack} className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors pt-4">Cancel</button>
+                </form>
             </motion.div>
         </div>
     );

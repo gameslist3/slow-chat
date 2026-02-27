@@ -3,6 +3,7 @@ import {
     signInWithEmailAndPassword,
     signOut,
     sendEmailVerification,
+    sendPasswordResetEmail,
     EmailAuthProvider,
     reauthenticateWithCredential,
     User as FirebaseUser
@@ -395,6 +396,31 @@ export const loginUserWithPassword = async (creds: UserCredentials): Promise<Use
             throw new Error("No account found with this address.");
         }
         throw error;
+    }
+};
+
+// Password Reset
+export const sendPasswordReset = async (email: string): Promise<void> => {
+    try {
+        console.log(`[Auth] Requesting password reset for ${email}`);
+        await sendPasswordResetEmail(auth, email);
+    } catch (error: any) {
+        console.error('[Auth] Password reset error:', error.code, error.message);
+        let friendlyMessage = 'Failed to send reset email.';
+
+        switch (error.code) {
+            case 'auth/user-not-found':
+                friendlyMessage = 'No account found with this email address.';
+                break;
+            case 'auth/invalid-email':
+                friendlyMessage = 'Please enter a valid email address.';
+                break;
+            case 'auth/too-many-requests':
+                friendlyMessage = 'Too many requests. Please wait a moment before trying again.';
+                break;
+        }
+
+        throw new Error(friendlyMessage);
     }
 };
 
