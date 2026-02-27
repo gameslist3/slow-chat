@@ -76,7 +76,8 @@ service cloud.firestore {
 
     // --- Password Reset OTP Flow (Public) ---
     match /password_reset_otps/{email} {
-      allow read, create, delete: if true;
+      // Must allow write (create/update) for resending codes
+      allow read, write: if true;
     }
 
     match /password_reset_intents/{intentId} {
