@@ -74,18 +74,5 @@ service cloud.firestore {
       allow read, write: if isSignedIn(); // Ephemeral and short-lived, locked by session logic
     }
 
-    // --- Password Reset OTP Flow (Public) ---
-    match /password_reset_otps/{email} {
-      // Must allow write (create/update) for resending codes
-      allow read, write: if true;
-    }
-
-    match /password_reset_intents/{intentId} {
-      allow create: if true;
-    }
-
-    match /mail/{mailId} {
-      allow create: if true;
-    }
   }
 }

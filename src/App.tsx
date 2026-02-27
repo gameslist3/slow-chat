@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider, useToast } from './context/ToastContext';
-import { WelcomeScreen, SignInScreen, SignUpScreen, ForgotPasswordScreen, NameScreen, VerificationPendingScreen } from './components/auth/AuthScreens';
+import { WelcomeScreen, SignInScreen, SignUpScreen, ForgotPasswordScreen, NameScreen, VerificationPendingScreen, SetNewPasswordScreen } from './components/auth/AuthScreens';
 import { StoragePolicyModal } from './components/auth/StoragePolicyModal';
 import { GroupDiscovery, CreateGroup } from './components/groups/GroupFeatures';
 import { ChatInterface } from './components/chat/ChatFeatures';
@@ -27,6 +27,24 @@ import { markAsSeen } from './services/firebaseMessageService';
 const AuthSection = () => {
     const { user, isVerified, needsNameSetup, completeLogin, loginWithData, logout } = useAuth();
     const [step, setStep] = useState('welcome');
+    const [resetCode, setResetCode] = useState<string | null>(null);
+
+    // Detect Password Reset Link
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const mode = params.get('mode');
+        const oobCode = params.get('oobCode');
+
+        if (mode === 'resetPassword' && oobCode) {
+            console.log('[AuthSection] Detected password reset link in URL');
+            setResetCode(oobCode);
+            setStep('reset-password-verify');
+
+            // Clean URL to prevent re-triggering
+            const newUrl = window.location.origin + window.location.pathname;
+            window.history.replaceState({}, '', newUrl);
+        }
+    }, [window.location.search]);
 
     if (user && !isVerified) {
         return <VerificationPendingScreen onLogout={logout} />;
@@ -43,6 +61,13 @@ const AuthSection = () => {
                 {step === 'signin' && <SignInScreen key="si" onBack={() => setStep('welcome')} onSuccess={loginWithData} onForgotPassword={() => setStep('forgot-password')} />}
                 {step === 'signup' && <SignUpScreen key="su" onBack={() => setStep('welcome')} />}
                 {step === 'forgot-password' && <ForgotPasswordScreen key="fp" onBack={() => setStep('signin')} />}
+                {step === 'reset-password-verify' && resetCode && (
+                    <SetNewPasswordScreen
+                        key="rsv"
+                        oobCode={resetCode}
+                        onSuccess={() => setStep('signin')}
+                    />
+                )}
             </AnimatePresence>
         </div>
     );

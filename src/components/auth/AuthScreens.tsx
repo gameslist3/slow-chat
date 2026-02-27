@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Icon } from '../common/Icon';
 import { Check } from 'lucide-react';
-import { validateEmail, registerUserStep1, loginUserWithPassword, generateAnonymousName, requestPasswordResetOTP, verifyPasswordResetOTP, resetPasswordWithOTP } from '../../services/firebaseAuthService';
+import { validateEmail, registerUserStep1, loginUserWithPassword, generateAnonymousName, sendPasswordReset, verifyResetCode, confirmReset } from '../../services/firebaseAuthService';
 import { useToast } from '../../context/ToastContext';
 import { Logo } from '../common/Logo';
 import { TermsModal } from './TermsModal';
@@ -308,55 +308,20 @@ export const SignUpScreen = ({ onBack }: any) => {
 
 // --- Forgot Password ---
 export const ForgotPasswordScreen = ({ onBack }: any) => {
-    const [step, setStep] = useState<'email' | 'otp' | 'password' | 'success'>('email');
+    const [sent, setSent] = useState(false);
     const [email, setEmail] = useState('');
-    const [otp, setOtp] = useState('');
-    const [newPassword, setNewPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const { toast } = useToast();
 
-    const handleSendOTP = async (e: React.FormEvent) => {
+    const handleSendLink = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!validateEmail(email)) return toast("Format invalid.", "error");
 
         setLoading(true);
         try {
-            await requestPasswordResetOTP(email);
-            toast("Identity verification code sent!", "success");
-            setStep('otp');
-        } catch (error: any) {
-            toast(error.message, "error");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleVerifyOTP = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (otp.length !== 6) return toast("Enter 6-digit code.", "error");
-
-        setLoading(true);
-        try {
-            await verifyPasswordResetOTP(email, otp);
-            setStep('password');
-        } catch (error: any) {
-            toast(error.message, "error");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleResetPassword = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (newPassword.length < 8) return toast("Min 8 characters.", "error");
-        if (newPassword !== confirmPassword) return toast("Passwords mismatch.", "error");
-
-        setLoading(true);
-        try {
-            await resetPasswordWithOTP(email, otp, newPassword);
-            setStep('success');
-            toast("Identity restored.", "success");
+            await sendPasswordReset(email);
+            setSent(true);
+            toast("Identity recovery link sent!", "success");
         } catch (error: any) {
             toast(error.message, "error");
         } finally {
@@ -374,15 +339,15 @@ export const ForgotPasswordScreen = ({ onBack }: any) => {
                 className="w-full max-w-sm glass-panel p-10 rounded-[2.5rem] border border-white/5 relative z-10"
             >
                 <AnimatePresence mode="wait">
-                    {step === 'email' && (
-                        <motion.div key="email" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="text-center">
+                    {!sent ? (
+                        <motion.div key="form" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="text-center">
                             <div className="w-20 h-20 bg-blue-500/20 rounded-[2rem] flex items-center justify-center text-blue-400 text-4xl mx-auto mb-8 border border-blue-500/20">
                                 <Icon name="shield" className="w-8 h-8" />
                             </div>
                             <h2 className="text-3xl font-black uppercase italic tracking-tighter mb-4 text-white">Recovery</h2>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-8">Enter email for verification code</p>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-8">Enter email for recovery link</p>
 
-                            <form onSubmit={handleSendOTP} className="space-y-4">
+                            <form onSubmit={handleSendLink} className="space-y-4">
                                 <input
                                     type="email"
                                     required
@@ -395,51 +360,100 @@ export const ForgotPasswordScreen = ({ onBack }: any) => {
                                     disabled={loading}
                                     className="btn-primary w-full h-14 rounded-2xl text-xs font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 flex items-center justify-center"
                                 >
-                                    {loading ? <Icon name="rotate" className="w-5 h-5 animate-spin" /> : 'Send Code'}
+                                    {loading ? <Icon name="rotate" className="w-5 h-5 animate-spin" /> : 'Send Link'}
                                 </button>
                                 <button type="button" onClick={onBack} className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors pt-4">Cancel</button>
                             </form>
                         </motion.div>
-                    )}
-
-                    {step === 'otp' && (
-                        <motion.div key="otp" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="text-center">
+                    ) : (
+                        <motion.div key="sent" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center">
                             <div className="w-20 h-20 bg-emerald-500/20 rounded-[2rem] flex items-center justify-center text-emerald-400 text-4xl mx-auto mb-8 border border-emerald-500/20">
-                                <Icon name="lock" className="w-8 h-8" />
+                                <Icon name="shield" className="w-8 h-8" />
                             </div>
-                            <h2 className="text-3xl font-black uppercase italic tracking-tighter mb-4 text-white">Verify</h2>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-8">Enter 6-digit code sent to<br />{email}</p>
+                            <h2 className="text-3xl font-black uppercase italic tracking-tighter mb-4 text-white">Sent</h2>
+                            <p className="text-sm text-slate-400 mb-10">We've sent a recovery link to <b>{email}</b>. Please check your inbox and click the link to continue.</p>
 
-                            <form onSubmit={handleVerifyOTP} className="space-y-4">
-                                <input
-                                    type="text"
-                                    required
-                                    maxLength={6}
-                                    value={otp}
-                                    onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
-                                    className="glass-input w-full h-16 rounded-2xl px-6 bg-black/20 border-white/5 focus:border-emerald-500/50 text-center text-2xl font-black tracking-[0.5em]"
-                                    placeholder="000000"
-                                />
-                                <button
-                                    disabled={loading}
-                                    className="w-full h-14 rounded-2xl bg-emerald-500 text-white text-xs font-black uppercase tracking-widest shadow-lg shadow-emerald-500/20 flex items-center justify-center hover:bg-emerald-400 transition-all"
-                                >
-                                    {loading ? <Icon name="rotate" className="w-5 h-5 animate-spin" /> : 'Verify Code'}
-                                </button>
-                                <button type="button" onClick={() => setStep('email')} className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors pt-4">Change Email</button>
-                            </form>
+                            <button
+                                onClick={onBack}
+                                className="w-full h-14 rounded-2xl bg-[#5B79B7] text-white text-xs font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                            >
+                                Back to Access
+                            </button>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </motion.div>
+        </div>
+    );
+};
+
+export const SetNewPasswordScreen = ({ oobCode, onSuccess }: { oobCode: string, onSuccess: () => void }) => {
+    const [step, setStep] = useState<'verifying' | 'input' | 'success'>('verifying');
+    const [email, setEmail] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+    const { toast } = useToast();
+
+    useEffect(() => {
+        const verify = async () => {
+            try {
+                const verifiedEmail = await verifyResetCode(oobCode);
+                setEmail(verifiedEmail);
+                setStep('input');
+                toast("Identity verified. Set your new keys.", "success");
+            } catch (error: any) {
+                toast(error.message, "error");
+                setTimeout(onSuccess, 3000);
+            }
+        };
+        verify();
+    }, [oobCode]);
+
+    const handleUpdate = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (newPassword.length < 8) return toast("Min 8 characters.", "error");
+        if (newPassword !== confirmPassword) return toast("Passwords mismatch.", "error");
+
+        setLoading(true);
+        try {
+            await confirmReset(oobCode, newPassword);
+            setStep('success');
+            toast("Identity re-secured.", "success");
+        } catch (error: any) {
+            toast(error.message, "error");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="w-full min-h-screen flex items-center justify-center p-6 bg-[#0B1220] relative overflow-hidden">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-500/5 blur-[120px] rounded-full pointer-events-none" />
+
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="w-full max-w-sm glass-panel p-10 rounded-[2.5rem] border border-white/5 relative z-10"
+            >
+                <AnimatePresence mode="wait">
+                    {step === 'verifying' && (
+                        <motion.div key="verifying" className="text-center">
+                            <Icon name="rotate" className="w-12 h-12 text-blue-400 animate-spin mx-auto mb-6" />
+                            <h2 className="text-2xl font-black uppercase italic tracking-tighter mb-4 text-white">Verifying Link</h2>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Connecting to secure authentication layer...</p>
                         </motion.div>
                     )}
 
-                    {step === 'password' && (
-                        <motion.div key="password" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="text-center">
+                    {step === 'input' && (
+                        <motion.div key="input" className="text-center">
                             <div className="w-20 h-20 bg-primary/20 rounded-[2rem] flex items-center justify-center text-primary text-4xl mx-auto mb-8 border border-primary/20">
                                 <Icon name="lock" className="w-8 h-8" />
                             </div>
                             <h2 className="text-3xl font-black uppercase italic tracking-tighter mb-4 text-white">Secure</h2>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-8">Set your new identity access key</p>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-8">Setting new identity keys for<br /><b>{email}</b></p>
 
-                            <form onSubmit={handleResetPassword} className="space-y-4">
+                            <form onSubmit={handleUpdate} className="space-y-4">
                                 <input
                                     type="password"
                                     required
@@ -468,14 +482,14 @@ export const ForgotPasswordScreen = ({ onBack }: any) => {
 
                     {step === 'success' && (
                         <motion.div key="success" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center">
-                            <div className="w-24 h-24 bg-emerald-500/20 rounded-[2.5rem] flex items-center justify-center text-emerald-400 text-5xl mx-auto mb-8 border border-emerald-500/20 shadow-xl shadow-emerald-500/10">
+                            <div className="w-24 h-24 bg-emerald-500/20 rounded-[2.5rem] flex items-center justify-center text-emerald-400 text-5xl mx-auto mb-8 border border-emerald-500/20">
                                 <Check className="w-12 h-12" />
                             </div>
                             <h2 className="text-3xl font-black uppercase italic tracking-tighter mb-4 text-white">Restored</h2>
                             <p className="text-sm text-slate-400 mb-10">Your digital identity has been re-secured. You can now access your profile.</p>
 
                             <button
-                                onClick={onBack}
+                                onClick={onSuccess}
                                 className="w-full h-14 rounded-2xl bg-[#5B79B7] text-white text-xs font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
                             >
                                 Back to Access
