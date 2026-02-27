@@ -18,7 +18,7 @@ service cloud.firestore {
     
     // Users collection
     match /users/{userId} {
-      allow read: if isSignedIn();
+      allow read: if true; // Allow public email lookup for reset flow
       allow create: if isSignedIn();
       allow update, delete: if request.auth.uid == userId;
     }
@@ -72,6 +72,19 @@ service cloud.firestore {
     // Sync Sessions (QR Device Pairing)
     match /sync_sessions/{sessionId} {
       allow read, write: if isSignedIn(); // Ephemeral and short-lived, locked by session logic
+    }
+
+    // --- Password Reset OTP Flow (Public) ---
+    match /password_reset_otps/{email} {
+      allow read, create, delete: if true;
+    }
+
+    match /password_reset_intents/{intentId} {
+      allow create: if true;
+    }
+
+    match /mail/{mailId} {
+      allow create: if true;
     }
   }
 }
