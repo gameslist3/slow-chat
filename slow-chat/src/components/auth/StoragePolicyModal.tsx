@@ -14,7 +14,7 @@ export const StoragePolicyModal = ({ onAccept }: { onAccept: () => void }) => {
 
                 <div className="space-y-4 text-gray-600 mb-8 text-sm leading-relaxed">
                     <p>
-                        SlowChat is designed with a <span className="font-bold text-gray-900">Local-First</span> architecture.
+                        Gapes is designed with a <span className="font-bold text-gray-900">Local-First</span> architecture.
                         This means we do not store your messages or groups on a central cloud database.
                     </p>
                     <div className="bg-gray-50 p-4 rounded-xl flex gap-3 items-start">

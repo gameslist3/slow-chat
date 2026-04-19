@@ -3,7 +3,7 @@
  * Manages secure storage of private keys and ratchet states in IndexedDB.
  */
 
-const DB_NAME = 'SlowChatVault';
+const DB_NAME = 'GapesVault';
 const STORE_NAME = 'secrets';
 const DB_VERSION = 1;
 

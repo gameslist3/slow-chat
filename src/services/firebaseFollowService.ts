@@ -50,7 +50,7 @@ export const sendFollowRequest = async (toUserId: string, toUsername: string): P
         if (activeDoc?.data().status === 'accepted') {
             throw new Error("Protocol already active. Connection established.");
         }
-        throw new Error("A connection protocol is already pending between these users.");
+        throw new Error("A follow request is already pending between these users.");
     }
 
     // Reuse or Create: If a declined request exists, overwrite it.

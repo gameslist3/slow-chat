@@ -202,32 +202,8 @@ export const initializeSystemGroup = async (): Promise<void> => {
  * Seed initial groups if none exist
  */
 export const initializeSeedGroups = async (): Promise<void> => {
-    const q = query(collection(db, 'groups'), limit(1));
-    const snap = await getDocs(q);
-
-    // Only seed if we only have the system group or none at all
-    if (snap.size <= 1) {
-        const now = Date.now();
-        const seeds = [
-            { id: 'nexus-philosophy', name: 'Philosophy', category: 'Philosophy', image: '🎭' },
-            { id: 'nexus-tech', name: 'Future Tech', category: 'Technology', image: '🚀' },
-            { id: 'nexus-art', name: 'Digital Art', category: 'Art', image: '🎨' },
-            { id: 'nexus-music', name: 'Deep Beats', category: 'Music', image: '🎵' }
-        ];
-
-        for (const s of seeds) {
-            await setDoc(doc(db, 'groups', s.id), {
-                ...s,
-                members: 0,
-                memberIds: [],
-                createdAt: now,
-                createdBy: 'system',
-                description: `A place for asynchronous ${s.category.toLowerCase()} coordination.`,
-                lastActivity: now,
-                mutedBy: []
-            });
-        }
-    }
+    // Disabled per user request: We no longer auto-generate seed groups.
+    return;
 };
 
 // --- End of Service ---

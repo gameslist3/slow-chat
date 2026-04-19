@@ -38,7 +38,7 @@ export const AILayout: React.FC<AILayoutProps> = ({
     onOpenSettings,
     user,
     onLogout,
-    mobileTitle = "SlowChat"
+    mobileTitle = "Gapes"
 }) => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
@@ -113,7 +113,7 @@ export const AILayout: React.FC<AILayoutProps> = ({
                         </button>
                         <div className="flex items-center gap-3">
                             <div className="flex flex-col">
-                                <span className="font-black text-xs uppercase tracking-[0.2em] text-primary italic">SlowChat</span>
+                                <span className="font-black text-xs uppercase tracking-[0.2em] text-primary italic">Gapes</span>
                                 <span className="font-bold text-sm tracking-tight truncate max-w-[200px]">{sidebarOpen ? '' : mobileTitle}</span>
                             </div>
 
@@ -189,7 +189,7 @@ const AISidebar: React.FC<AISidebarProps> = ({
     return (
         <div className="flex flex-col h-full p-4 gap-4">
             <div className="flex items-center justify-between px-2">
-                <span className="font-black text-2xl tracking-tighter text-primary italic">SLOWCHAT</span>
+                <span className="font-black text-2xl tracking-tighter text-primary italic">GAPES</span>
                 {onClose && <button onClick={onClose} className="md:hidden opacity-50"><X /></button>}
             </div>
 

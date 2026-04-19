@@ -147,7 +147,7 @@ export const AccountSettings = ({ onBack }: { onBack: () => void }) => {
                         <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Support</h2>
 
                         <div className="grid grid-cols-2 gap-4">
-                            <a href="mailto:support@slowchat.com" className="flex flex-col items-center justify-center gap-3 p-6 bg-gray-50 hover:bg-indigo-50 hover:text-indigo-600 rounded-3xl transition-colors group cursor-pointer border border-transparent hover:border-indigo-100">
+                            <a href="mailto:support@gapes.com" className="flex flex-col items-center justify-center gap-3 p-6 bg-gray-50 hover:bg-indigo-50 hover:text-indigo-600 rounded-3xl transition-colors group cursor-pointer border border-transparent hover:border-indigo-100">
                                 <div className="p-3 bg-white rounded-full text-gray-600 group-hover:text-indigo-600 shadow-sm"><Mail className="w-6 h-6" /></div>
                                 <span className="font-bold text-sm">Email Support</span>
                             </a>

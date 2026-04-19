@@ -333,7 +333,7 @@ const UserProfileCard = ({ userId, currentUserId, onClose }: { userId: string, c
             try {
                 await cancelFollowRequest(profile.id);
                 setStatus('none');
-                toast(`Connection protocol withdrawn.`, 'info');
+                toast(`Follow request withdrawn.`, 'info');
             } catch (err: any) {
                 toast(err.message || "Failed to withdraw request", 'error');
             } finally {
@@ -390,7 +390,7 @@ const UserProfileCard = ({ userId, currentUserId, onClose }: { userId: string, c
                         </div>
                         <div className="space-y-1">
                             <h3 className="text-3xl font-black tracking-tighter uppercase italic">{profile.username}</h3>
-                            <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.2em] opacity-40 italic">SlowChat Member</p>
+                            <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.2em] opacity-40 italic">Gapes Member</p>
                         </div>
 
                         {userId !== currentUserId && (

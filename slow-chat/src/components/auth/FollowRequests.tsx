@@ -33,14 +33,14 @@ export const FollowRequests: React.FC<FollowRequestsProps> = ({ onBack }) => {
         <div className="flex flex-col h-full bg-background animate-in fade-in slide-in-from-bottom-4 duration-500">
             <header className="px-6 py-8 border-b border-border/50">
                 <button onClick={onBack} className="ui-button-ghost mb-6 -ml-2 text-muted-foreground flex items-center gap-2">
-                    <ArrowLeft className="w-4 h-4" /> Back to Workspace
+                    <ArrowLeft className="w-4 h-4" /> Back to Home / Sidebar
                 </button>
                 <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
                         <UserPlus className="w-6 h-6" />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-black tracking-tighter uppercase italic leading-none">Connection Protocols</h1>
+                        <h1 className="text-3xl font-black tracking-tighter uppercase italic leading-none">Follow Requests</h1>
                         <p className="text-muted-foreground text-xs font-bold uppercase tracking-widest mt-1">Pending Follow Requests</p>
                     </div>
                 </div>
@@ -56,7 +56,7 @@ export const FollowRequests: React.FC<FollowRequestsProps> = ({ onBack }) => {
                                 className="py-20 text-center flex flex-col items-center gap-4"
                             >
                                 <Clock className="w-12 h-12" />
-                                <p className="font-bold uppercase tracking-[0.3em] text-sm italic">All transmission protocols synchronized</p>
+                                <p className="font-bold uppercase tracking-[0.3em] text-sm italic">All messages protocols synchronized</p>
                             </motion.div>
                         ) : (
                             requests.map(req => (

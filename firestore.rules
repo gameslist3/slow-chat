@@ -27,7 +27,7 @@ service cloud.firestore {
     match /groups/{groupId} {
       allow read: if isSignedIn(); // Allow discovery
       allow create: if isSignedIn();
-      allow update: if isGroupMember(groupId); // Allow joining/leaving only via controlled service logic
+      allow update: if isSignedIn(); // Allow joining, leaving, and updating activity.
       allow delete: if isOwner(resource.data.creatorId);
       
       // Messages subcollection

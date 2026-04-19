@@ -38,7 +38,7 @@ export const sendFollowRequest = async (toUserId: string, toUsername: string): P
     const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
 
     if (!snap1.empty || !snap2.empty) {
-        throw new Error("A connection protocol is already active between these users.");
+        throw new Error("A follow request is already active between these users.");
     }
 
     await addDoc(requestsRef, {

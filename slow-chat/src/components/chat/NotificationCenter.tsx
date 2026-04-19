@@ -85,10 +85,10 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose,
                             </div>
                         ) : (
                             <div className="space-y-6">
-                                {/* Connection Protocols Section */}
+                                {/* Follow Requests Section */}
                                 {notifications.filter(n => n.type === 'follow_request' && !n.read).length > 0 && (
                                     <div className="px-2">
-                                        <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-3 pl-2 italic">Connection Protocols</h3>
+                                        <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-3 pl-2 italic">Follow Requests</h3>
                                         {notifications
                                             .filter(n => n.type === 'follow_request' && !n.read)
                                             .map(note => (
@@ -205,7 +205,7 @@ const FollowRequestItem = ({ note }: { note: Notification }) => {
                 </div>
                 <div className="flex-1">
                     <p className="text-sm font-black uppercase tracking-tight">{note.senderName}</p>
-                    <p className="text-xs text-muted-foreground font-medium italic">Sent a connection protocol</p>
+                    <p className="text-xs text-muted-foreground font-medium italic">Sent a follow request</p>
                 </div>
             </div>
             <div className="flex gap-2">

@@ -4,7 +4,7 @@
  */
 
 const CLOUD_NAME = 'dn16gm6ka';
-const UPLOAD_PRESET = 'slowchat_unsigned';
+const UPLOAD_PRESET = 'gapes_unsigned';
 const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`;
 
 export interface UploadResult {
@@ -19,7 +19,7 @@ export interface UploadResult {
  */
 export async function uploadToCloudinary(
     file: File,
-    folder: string = 'slowchat-media'
+    folder: string = 'gapes-media'
 ): Promise<UploadResult> {
     try {
         const formData = new FormData();
@@ -71,7 +71,7 @@ export async function uploadImage(file: File, subfolder?: string): Promise<strin
         throw new Error('Image must be less than 10MB');
     }
 
-    const folder = subfolder ? `slowchat-media/${subfolder}/images` : 'slowchat-media/images';
+    const folder = subfolder ? `gapes-media/${subfolder}/images` : 'gapes-media/images';
     const result = await uploadToCloudinary(file, folder);
     return result.url;
 }
@@ -86,7 +86,7 @@ export async function uploadAudio(blob: Blob, subfolder?: string): Promise<strin
         throw new Error('Audio must be less than 10MB');
     }
 
-    const folder = subfolder ? `slowchat-media/${subfolder}/audio` : 'slowchat-media/audio';
+    const folder = subfolder ? `gapes-media/${subfolder}/audio` : 'gapes-media/audio';
     const result = await uploadToCloudinary(file, folder);
     return result.url;
 }
@@ -138,7 +138,7 @@ export const uploadMedia = async (
     // Cloudinary fetch doesn't easily support progress for unsigned uploads without XHR,
     // so we simulate it or just let it be.
     onProgress(50);
-    const result = await uploadToCloudinary(file, `slowchat-media/${groupId}/${userId}`);
+    const result = await uploadToCloudinary(file, `gapes-media/${groupId}/${userId}`);
     onProgress(100);
     return result.url;
 };

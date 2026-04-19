@@ -11,7 +11,7 @@ export const WelcomeScreen = ({ onSignIn, onSignUp }: { onSignIn: () => void, on
     <div className="w-full max-w-md mx-auto p-4 animate-in fade-in slide-in-from-bottom-8 duration-700">
         <div className="text-center mb-10 space-y-4">
             <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 text-3xl shadow-sm rotate-3">👋</div>
-            <h1 className="text-3xl font-black tracking-tighter text-foreground leading-none">SLOWCHAT</h1>
+            <h1 className="text-3xl font-black tracking-tighter text-foreground leading-none">GAPES</h1>
             <p className="text-muted-foreground font-medium">Step into a calmer way of connecting.</p>
         </div>
         <div className="space-y-4">
@@ -168,7 +168,7 @@ export const SignUpScreen = ({ onBack, onSuccess }: any) => {
             <button onClick={onBack} className="ui-button-ghost mb-6 -ml-2 text-muted-foreground text-sm flex items-center gap-2">
                 <ArrowLeft className="w-4 h-4" /> Back
             </button>
-            <h1 className="text-3xl font-black tracking-tight mb-2">Join SlowChat</h1>
+            <h1 className="text-3xl font-black tracking-tight mb-2">Join Gapes</h1>
             <p className="text-muted-foreground mb-8">Start your journey toward meaningful connection.</p>
 
             <form onSubmit={handleSignUp} className="space-y-5">
@@ -326,7 +326,7 @@ export const NameScreen = ({ onNameSelected }: { onNameSelected: (name: string) 
         <div className="w-full max-w-md mx-auto p-4 animate-in zoom-in-95 duration-500">
             <div className="text-center mb-10">
                 <div className="text-5xl mb-6 drop-shadow-xl animate-bounce">🎭</div>
-                <h1 className="text-4xl font-black tracking-tighter mb-2 italic text-primary">CHOOSE ARCANA</h1>
+                <h1 className="text-4xl font-black tracking-tighter mb-2 italic text-primary">CHOOSE IDENTITY/USERNAME</h1>
                 <p className="text-muted-foreground font-medium">Your identity is your choice.</p>
             </div>
 
@@ -341,7 +341,7 @@ export const NameScreen = ({ onNameSelected }: { onNameSelected: (name: string) 
                         className="ui-button-ghost flex-1 h-12 border border-border"
                         onClick={() => setName(generateAnonymousName())}
                     >
-                        <Shuffle className="mr-2 w-4 h-4" /> Cycle
+                        <Shuffle className="mr-2 w-4 h-4" /> Shuffle
                     </button>
                     <button
                         className="ui-button-primary flex-[1.5] h-12 text-sm font-black tracking-widest uppercase flex items-center justify-center"

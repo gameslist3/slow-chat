@@ -18,7 +18,7 @@ export const AIMessage: React.FC<AIMessageProps> = ({ role, content }) => {
 
                 <div className="flex-1 min-w-0 flex flex-col gap-2">
                     <p className="font-bold text-sm tracking-wide uppercase opacity-50">
-                        {isAssistant ? 'SlowChat AI' : 'You'}
+                        {isAssistant ? 'Gapes AI' : 'You'}
                     </p>
 
                     <div className="text-[15px] leading-relaxed text-foreground/90 markdown-content space-y-4">

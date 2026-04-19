@@ -95,11 +95,11 @@ const AppContent = () => {
 
     useEffect(() => {
         document.documentElement.classList.add('dark');
-        localStorage.setItem('slowchat_theme', 'dark');
+        localStorage.setItem('gapes_theme', 'dark');
     }, []);
 
     useEffect(() => {
-        const accepted = localStorage.getItem('slowchat_storage_accepted');
+        const accepted = localStorage.getItem('gapes_storage_accepted');
         if (!accepted) setShowPolicy(true);
     }, []);
 
@@ -128,7 +128,7 @@ const AppContent = () => {
     }, [isAuthenticated, user?.id]);
 
     const handleAcceptPolicy = () => {
-        localStorage.setItem('slowchat_storage_accepted', 'true');
+        localStorage.setItem('gapes_storage_accepted', 'true');
         setShowPolicy(false);
     };
 

@@ -37,14 +37,14 @@ export const KeyBackup: React.FC<KeyBackupProps> = ({ onClose }) => {
                 version: 1,
                 timestamp: Date.now(),
                 ...backup,
-                type: 'slowchat_identity_v1'
+                type: 'gapes_identity_v1'
             };
 
             const blob = new Blob([JSON.stringify(backupData)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `SlowChat_Recovery_Key_${new Date().toISOString().split('T')[0]}.json`;
+            a.download = `Gapes_Recovery_Key_${new Date().toISOString().split('T')[0]}.json`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -73,7 +73,7 @@ export const KeyBackup: React.FC<KeyBackupProps> = ({ onClose }) => {
             const text = await file.text();
             const backup = JSON.parse(text);
 
-            if (backup.type !== 'slowchat_identity_v1') {
+            if (backup.type !== 'gapes_identity_v1') {
                 throw new Error('This is not a valid recovery file.');
             }
 

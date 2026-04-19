@@ -19,12 +19,12 @@ const AppContent = () => {
     const [showPolicy, setShowPolicy] = useState(false);
 
     useEffect(() => {
-        const accepted = localStorage.getItem('slowchat_storage_accepted');
+        const accepted = localStorage.getItem('gapes_storage_accepted');
         if (!accepted) setShowPolicy(true);
     }, []);
 
     const handleAcceptPolicy = () => {
-        localStorage.setItem('slowchat_storage_accepted', 'true');
+        localStorage.setItem('gapes_storage_accepted', 'true');
         setShowPolicy(false);
     };
 
@@ -96,9 +96,9 @@ const AuthenticatedSection = () => {
         try {
             await joinGroup(id, user.id);
             joinContext(id);
-            toast("Successfully joined Nexus", "success");
+            toast("Successfully joined Group System", "success");
         } catch (error) {
-            toast("Failed to initiate sync", "error");
+            toast("Failed to initiate join / follow", "error");
         }
     };
 
@@ -127,7 +127,7 @@ const AuthenticatedSection = () => {
     const activePersonalChat = isPersonal ? personalChats.find(c => c.id === activeId) : null;
     const otherUserId = activePersonalChat?.userIds.find(id => id !== user?.id);
     const personalChatTitle = isPersonal
-        ? (activePersonalChat?.usernames?.[otherUserId || ''] || `Direct Sync ${activeId?.slice(0, 4)}`)
+        ? (activePersonalChat?.usernames?.[otherUserId || ''] || `Personal Chat ${activeId?.slice(0, 4)}`)
         : '';
 
     return (
@@ -144,7 +144,7 @@ const AuthenticatedSection = () => {
             onOpenSettings={() => setView('settings')}
             user={user}
             onLogout={logout}
-            mobileTitle={isPersonal ? personalChatTitle : (activeGroup?.name || "SlowChat")}
+            mobileTitle={isPersonal ? personalChatTitle : (activeGroup?.name || "Gapes")}
         >
             {view === 'home' && (
                 <div className="h-full overflow-y-auto p-6 md:p-12 space-y-12 animate-in fade-in duration-700">

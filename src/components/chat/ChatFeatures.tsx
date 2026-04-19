@@ -168,7 +168,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             <div className="absolute bottom-0 left-0 right-0 z-50">
                 {(title === 'Gapes Team' || title === 'System Intelligence') ? (
                     <div className="mx-4 mb-6 p-4 rounded-3xl bg-secondary/10 border border-secondary/20 backdrop-blur-xl text-center">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-secondary opacity-60">Transmission Restricted: Gapes Team Only</p>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-secondary opacity-60">Messages Restricted: Gapes Team Only</p>
                     </div>
                 ) : (
                     <AIComposer

@@ -23,7 +23,7 @@ export const AIComposer = () => {
                     <textarea
                         ref={textareaRef}
                         rows={1}
-                        placeholder="Message SlowChat AI..."
+                        placeholder="Message Gapes AI..."
                         className="flex-1 bg-transparent border-0 focus:ring-0 px-2 py-3 text-[15px] resize-none max-h-[200px] placeholder:text-muted-foreground/50 transition-colors"
                         value={text}
                         onChange={(e) => setText(e.target.value)}
@@ -45,7 +45,7 @@ export const AIComposer = () => {
                 </div>
             </div>
             <p className="text-[11px] text-center mt-3 text-muted-foreground/60">
-                SlowChat can make mistakes. Consider checking important information.
+                Gapes can make mistakes. Consider checking important information.
             </p>
         </div>
     );

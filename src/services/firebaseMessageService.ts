@@ -53,7 +53,7 @@ export async function sendMessage(
             const chatRef = doc(db, 'personal_chats', targetId);
             const chatSnap = await getDoc(chatRef);
             if (!chatSnap.exists()) {
-                throw new Error("No established connection protocol found. Connection required for direct messaging.");
+                throw new Error("No established follow request found. Connection required for direct messaging.");
             }
         }
 
