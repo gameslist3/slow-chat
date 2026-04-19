@@ -4,11 +4,11 @@ import { getFirestore, enableIndexedDbPersistence } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 // Your web app's Firebase configuration
-const firebaseConfig = {
+const firebaseConfig = const firebaseConfig = {
     apiKey: "AIzaSyAHeRwgi7rPT2u-PueQ4Pz2mjhA5paWxPA",
-    authDomain: "gapes-ba812.firebaseapp.com",
-    projectId: "gapes-ba812",
-    storageBucket: "gapes-ba812.appspot.com",
+    authDomain: "slowchat-ba812.firebaseapp.com",
+    projectId: "slowchat-ba812",
+    storageBucket: "slowchat-ba812.firebasestorage.app",
     messagingSenderId: "310630321728",
     appId: "1:310630321728:web:d03e74b00d1a50ceb419a5",
     measurementId: "G-JB5GRC7YLF"
