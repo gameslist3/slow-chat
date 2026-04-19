@@ -100,9 +100,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     if (err.code === 'permission-denied') return;
                     console.error('[AuthContext] Notifications Snapshot error:', err);
                 });
-                setIsVerified(false);
-                setUser(null);
-                setLoading(false);
+
             } else {
                 // EXPLICIT LOGOUT CLEANUP
                 if (snapshotUnsubscribe) {

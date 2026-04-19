@@ -6,6 +6,21 @@ import { validateEmail, registerUserStep1, loginUserWithPassword, generateAnonym
 import { useToast } from '../../context/ToastContext';
 import Lottie from 'lottie-react';
 
+const LottieFromUrl = ({ path, ...props }: { path: string } & any) => {
+    const [animationData, setAnimationData] = React.useState<any>(null);
+
+    React.useEffect(() => {
+        fetch(path)
+            .then(res => res.json())
+            .then(data => setAnimationData(data))
+            .catch(err => console.error("Lottie fetch error:", err));
+    }, [path]);
+
+    if (!animationData) return null;
+    return <Lottie animationData={animationData} {...props} />;
+};
+
+
 // --- Welcome Screen ---
 export const WelcomeScreen = ({ onSignIn, onSignUp }: { onSignIn: () => void, onSignUp: () => void }) => (
     <div className="w-full max-w-md mx-auto p-4 animate-in fade-in slide-in-from-bottom-8 duration-700">
@@ -94,7 +109,7 @@ export const SignInScreen = ({ onBack, onSuccess, onForgotPassword }: any) => {
                 >
                     {loading ? (
                         <div className="w-8 h-8">
-                            <Lottie
+                            <LottieFromUrl
                                 path="https://lottie.host/5ad263fd-441f-445a-8b17-73d09a56391a/g4nsc9vN7b.json"
                                 loop={true}
                             />
@@ -226,7 +241,7 @@ export const SignUpScreen = ({ onBack, onSuccess }: any) => {
                     >
                         {loading ? (
                             <div className="w-10 h-10">
-                                <Lottie
+                                <LottieFromUrl
                                     path="https://lottie.host/5ad263fd-441f-445a-8b17-73d09a56391a/g4nsc9vN7b.json"
                                     loop={true}
                                 />
@@ -274,7 +289,7 @@ export const ForgotPasswordScreen = ({ onBack }: any) => {
     if (sent) return (
         <div className="w-full max-w-md mx-auto p-4 text-center animate-in fade-in zoom-in-95">
             <div className="w-32 h-32 mx-auto mb-6">
-                <Lottie
+                <LottieFromUrl
                     path="https://lottie.host/8099684c-70d5-494b-919a-3286f9260124/H1u49uQv7V.json"
                     loop={false}
                 />
@@ -305,7 +320,7 @@ export const ForgotPasswordScreen = ({ onBack }: any) => {
                 <button type="submit" disabled={loading} className="ui-button-primary w-full h-14 shadow-lg disabled:opacity-50 flex items-center justify-center">
                     {loading ? (
                         <div className="w-8 h-8">
-                            <Lottie
+                            <LottieFromUrl
                                 path="https://lottie.host/5ad263fd-441f-445a-8b17-73d09a56391a/g4nsc9vN7b.json"
                                 loop={true}
                             />
@@ -349,7 +364,7 @@ export const NameScreen = ({ onNameSelected }: { onNameSelected: (name: string) 
                     >
                         {loading ? (
                             <div className="w-10 h-10">
-                                <Lottie
+                                <LottieFromUrl
                                     path="https://lottie.host/5ad263fd-441f-445a-8b17-73d09a56391a/g4nsc9vN7b.json"
                                     loop={true}
                                 />
