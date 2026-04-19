@@ -15,6 +15,7 @@ interface AIMessageListProps {
     onReply?: (msg: Message) => void;
     onReaction?: (messageId: string, emoji: string) => void;
     onProfileClick?: (userId: string) => void;
+    onRepairSession?: () => void;
 }
 
 export const AIMessageList: React.FC<AIMessageListProps> = ({
@@ -23,7 +24,8 @@ export const AIMessageList: React.FC<AIMessageListProps> = ({
     highlightId,
     onReply,
     onReaction,
-    onProfileClick
+    onProfileClick,
+    onRepairSession
 }) => {
     const bottomRef = useRef<HTMLDivElement>(null);
     const [selectedUser, setSelectedUser] = useState<string | null>(null);
@@ -60,6 +62,7 @@ export const AIMessageList: React.FC<AIMessageListProps> = ({
                             onReply={() => onReply?.(msg)}
                             onReaction={(emoji) => onReaction?.(msg.id, emoji)}
                             onProfileClick={onProfileClick}
+                            onRepairSession={onRepairSession}
                         />
                     );
                 })}
@@ -91,7 +94,8 @@ const MessageItem = ({
     isSequence: boolean,
     onReply: () => void,
     onReaction: (emoji: string) => void,
-    onProfileClick?: (userId: string) => void
+    onProfileClick?: (userId: string) => void,
+    onRepairSession?: () => void
 }) => {
     return (
         <div id={`msg-${message.id}`}>
@@ -101,6 +105,7 @@ const MessageItem = ({
                 onReact={onReaction}
                 onReply={onReply}
                 onProfileClick={onProfileClick}
+                onRepair={onRepairSession}
             />
         </div>
     );

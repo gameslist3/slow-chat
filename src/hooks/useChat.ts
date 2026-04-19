@@ -37,60 +37,71 @@ export const useChat = (chatId: string, isPersonal: boolean = false) => {
         if (!chatId || !user?.id) return;
         setLoading(true);
 
+        const retriedMessages = new Set<string>();
+
         const decryptMessages = async (msgs: Message[]) => {
             const processed = await Promise.all(msgs.map(async (m) => {
                 if (!m.encrypted || !m.iv) return m;
 
-                try {
-                    const peerId = isPersonal
-                        ? (m.senderId === user.id ? chatId.split('_').find(id => id !== user.id) : m.senderId)
-                        : m.senderId;
+                const attemptDecryption = async (retry: boolean = false): Promise<Message> => {
+                    try {
+                        const peerId = isPersonal
+                            ? (m.senderId === user.id ? chatId.split('_').find(id => id !== user.id) : m.senderId)
+                            : m.senderId;
 
-                    if (!peerId) return m;
+                        if (!peerId) return m;
 
-                    let sessionKey: CryptoKey | null = null;
-                    if (isPersonal) {
-                        sessionKey = await CryptoUtils.getSessionKey(peerId);
-                        if (!sessionKey) {
-                            const peerDoc = await getUserById(peerId);
-                            const pubKey = peerDoc?.publicKeys?.identity;
-                            if (pubKey) {
-                                sessionKey = await CryptoUtils.establishSession(peerId, pubKey);
+                        let sessionKey: CryptoKey | null = null;
+                        if (isPersonal) {
+                            sessionKey = await CryptoUtils.getSessionKey(peerId);
+                            if (!sessionKey || retry) {
+                                const peerDoc = await getUserById(peerId);
+                                const pubKey = peerDoc?.publicKeys?.identity;
+                                if (pubKey) {
+                                    sessionKey = await CryptoUtils.establishSession(peerId, pubKey);
+                                }
+                            }
+                        } else {
+                            // Group logic
+                            if (m.senderId === user.id) {
+                                sessionKey = await GroupEncryptionService.getMySenderKey(chatId);
+                            } else {
+                                sessionKey = await GroupEncryptionService.getPeerSenderKey(chatId, peerId, user.id);
                             }
                         }
-                    } else {
-                        // FIX: If I am the sender, use my own sender key
-                        if (m.senderId === user.id) {
-                            sessionKey = await GroupEncryptionService.getMySenderKey(chatId);
-                        } else {
-                            sessionKey = await GroupEncryptionService.getPeerSenderKey(chatId, peerId, user.id);
-                        }
-                    }
 
-                    if (sessionKey) {
-                        const decrypted = await CryptoUtils.decryptAES(m.text, m.iv, sessionKey);
-                        try {
-                            const parsed = JSON.parse(decrypted);
-                            return {
-                                ...m,
-                                text: parsed.text || '',
-                                media: m.media || parsed.media, // Prioritize root-level unencrypted media
-                                replyTo: parsed.replyTo,
-                                encrypted: false
-                            };
-                        } catch (e) {
-                            // Fallback for legacy plain-text encryption
-                            return { ...m, text: decrypted, encrypted: false };
+                        if (sessionKey) {
+                            const decrypted = await CryptoUtils.decryptAES(m.text, m.iv, sessionKey);
+                            try {
+                                const parsed = JSON.parse(decrypted);
+                                return {
+                                    ...m,
+                                    text: parsed.text || '',
+                                    media: m.media || parsed.media,
+                                    replyTo: parsed.replyTo,
+                                    encrypted: false
+                                };
+                            } catch (e) {
+                                return { ...m, text: decrypted, encrypted: false };
+                            }
+                        } else {
+                            if (!isPersonal) return { ...m, encrypted: false };
+                            return { ...m, text: "🔒 Decryption pending: Connecting to peer security identity..." };
                         }
-                    } else {
-                        if (!isPersonal) return { ...m, encrypted: false }; // Fallback for groups
-                        return { ...m, text: "🔒 Decryption pending: Connecting to peer security identity..." };
+                    } catch (err) {
+                        if (!retry && isPersonal && !retriedMessages.has(m.id)) {
+                            console.warn("[useChat] Decryption failed, attempting auto-repair for message:", m.id);
+                            retriedMessages.add(m.id);
+                            return attemptDecryption(true); // Recursive retry once
+                        }
+                        
+                        console.error("[useChat] Decryption failed for message:", m.id, err);
+                        if (!isPersonal) return { ...m, encrypted: false };
+                        return { ...m, text: "🔒 Decryption error: Secure channel corrupted or key mismatch." };
                     }
-                } catch (err) {
-                    console.error("[useChat] Decryption failed for message:", m.id, err);
-                    if (!isPersonal) return { ...m, encrypted: false };
-                    return { ...m, text: "🔒 Decryption error: Secure channel corrupted or key mismatch." };
-                }
+                };
+
+                return attemptDecryption();
             }));
             return processed;
         };
@@ -116,6 +127,56 @@ export const useChat = (chatId: string, isPersonal: boolean = false) => {
         return () => unsubscribe();
     }, [chatId, isPersonal, user?.id, startTime]);
 
+    const repairSession = useCallback(async () => {
+        if (!isPersonal || !chatId || !user?.id) return;
+        setLoading(true);
+        try {
+            const peerId = chatId.split('_').find(id => id !== user.id);
+            if (!peerId) return;
+            const peerDoc = await getUserById(peerId);
+            const pubKey = peerDoc?.publicKeys?.identity;
+            if (pubKey) {
+                await CryptoUtils.establishSession(peerId, pubKey);
+                // Trigger a re-render of current messages by re-decrypting
+                const decryptedRealtime = await decryptMessagesAndRetry(realtimeMessages);
+                const decryptedHistory = await decryptMessagesAndRetry(history);
+                setRealtimeMessages(decryptedRealtime);
+                setHistory(decryptedHistory);
+            }
+        } catch (err) {
+            console.error("[useChat] Session repair failed:", err);
+        } finally {
+            setLoading(false);
+        }
+    }, [chatId, isPersonal, user?.id, realtimeMessages, history]);
+
+    // Helper for manual repair
+    const decryptMessagesAndRetry = async (msgs: Message[]) => {
+        const processed = await Promise.all(msgs.map(async (m) => {
+            if (!m.encrypted || !m.iv) return m;
+            try {
+                const peerId = isPersonal
+                    ? (m.senderId === user.id ? chatId.split('_').find(id => id !== user.id) : m.senderId)
+                    : m.senderId;
+                if (!peerId) return m;
+                const sessionKey = await CryptoUtils.getSessionKey(peerId);
+                if (sessionKey) {
+                    const decrypted = await CryptoUtils.decryptAES(m.text, m.iv, sessionKey);
+                    try {
+                        const parsed = JSON.parse(decrypted);
+                        return { ...m, text: parsed.text || '', encrypted: false };
+                    } catch (e) {
+                        return { ...m, text: decrypted, encrypted: false };
+                    }
+                }
+                return m;
+            } catch (err) {
+                return m;
+            }
+        }));
+        return processed;
+    };
+
     const loadMore = useCallback(async () => {
         if (loadingMore || !hasMore || !chatId) return;
 
@@ -126,58 +187,55 @@ export const useChat = (chatId: string, isPersonal: boolean = false) => {
         if (!user) return;
 
         const decryptMessages = async (msgs: Message[]) => {
+            const retried = new Set<string>();
             const processed = await Promise.all(msgs.map(async (m) => {
                 if (!m.encrypted || !m.iv) return m;
 
-                try {
-                    const peerId = isPersonal
-                        ? (m.senderId === user.id ? chatId.split('_').find(id => id !== user.id) : m.senderId)
-                        : m.senderId;
+                const attempt = async (retry: boolean = false): Promise<Message> => {
+                    try {
+                        const peerId = isPersonal
+                            ? (m.senderId === user.id ? chatId.split('_').find(id => id !== user.id) : m.senderId)
+                            : m.senderId;
 
-                    if (!peerId) return m;
+                        if (!peerId) return m;
 
-                    let sessionKey: CryptoKey | null = null;
-                    if (isPersonal) {
-                        sessionKey = await CryptoUtils.getSessionKey(peerId);
-                        if (!sessionKey) {
-                            const peerDoc = await getUserById(peerId);
-                            const pubKey = peerDoc?.publicKeys?.identity;
-                            if (pubKey) {
-                                sessionKey = await CryptoUtils.establishSession(peerId, pubKey);
+                        let sessionKey: CryptoKey | null = null;
+                        if (isPersonal) {
+                            sessionKey = await CryptoUtils.getSessionKey(peerId);
+                            if (!sessionKey || retry) {
+                                const peerDoc = await getUserById(peerId);
+                                const pubKey = peerDoc?.publicKeys?.identity;
+                                if (pubKey) {
+                                    sessionKey = await CryptoUtils.establishSession(peerId, pubKey);
+                                }
+                            }
+                        } else {
+                            if (m.senderId === user.id) {
+                                sessionKey = await GroupEncryptionService.getMySenderKey(chatId);
+                            } else {
+                                sessionKey = await GroupEncryptionService.getPeerSenderKey(chatId, peerId, user.id);
                             }
                         }
-                    } else {
-                        // FIX: If I am the sender, use my own sender key
-                        if (m.senderId === user.id) {
-                            sessionKey = await GroupEncryptionService.getMySenderKey(chatId);
-                        } else {
-                            sessionKey = await GroupEncryptionService.getPeerSenderKey(chatId, peerId, user.id);
-                        }
-                    }
 
-                    if (sessionKey) {
-                        const decrypted = await CryptoUtils.decryptAES(m.text, m.iv, sessionKey);
-                        try {
-                            const parsed = JSON.parse(decrypted);
-                            return {
-                                ...m,
-                                text: parsed.text || '',
-                                media: m.media || parsed.media, // Prioritize root-level unencrypted media
-                                replyTo: parsed.replyTo,
-                                encrypted: false
-                            };
-                        } catch (e) {
-                            return { ...m, text: decrypted, encrypted: false };
+                        if (sessionKey) {
+                            const decrypted = await CryptoUtils.decryptAES(m.text, m.iv, sessionKey);
+                            try {
+                                const parsed = JSON.parse(decrypted);
+                                return { ...m, text: parsed.text || '', encrypted: false };
+                            } catch (e) {
+                                return { ...m, text: decrypted, encrypted: false };
+                            }
                         }
-                    } else {
-                        if (!isPersonal) return { ...m, encrypted: false }; // Fallback for groups
-                        return { ...m, text: "🔒 Decryption pending: Connecting to peer security identity..." };
+                        return m;
+                    } catch (err) {
+                        if (!retry && isPersonal && !retried.has(m.id)) {
+                            retried.add(m.id);
+                            return attempt(true);
+                        }
+                        return { ...m, text: "🔒 Decryption error: Secure channel corrupted or key mismatch." };
                     }
-                } catch (err) {
-                    console.error("[useChat] Decryption failed for message:", m.id, err);
-                    if (!isPersonal) return { ...m, encrypted: false };
-                    return { ...m, text: "🔒 Decryption error: Secure channel corrupted or key mismatch." };
-                }
+                };
+                return attempt();
             }));
             return processed;
         };
@@ -283,6 +341,7 @@ export const useChat = (chatId: string, isPersonal: boolean = false) => {
         replyingTo,
         handleReply,
         cancelReply,
+        repairSession,
         loading,
         loadingMore,
         loadMore,

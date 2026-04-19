@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Reply, File, Download, Play, Pause, Music, Film, Check, CheckCheck } from 'lucide-react';
 import { GroupInviteCard } from './GroupInviteCard';
 import { EncryptedMedia } from './EncryptedMedia';
+import { DecryptionErrorMessage } from './DecryptionErrorMessage';
 
 interface MessageBubbleProps {
     message: Message;
@@ -11,11 +12,15 @@ interface MessageBubbleProps {
     onReact: (emoji: string) => void;
     onReply: () => void;
     onProfileClick?: (userId: string) => void;
+    onRepair?: () => void;
 }
 
-export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinual, onReact, onReply, onProfileClick }) => {
+export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinual, onReact, onReply, onProfileClick, onRepair }) => {
     const { user } = useAuth();
     const isMe = message.senderId === user?.id;
+
+    const DECRYPTION_ERROR_TEXT = "🔒 Decryption error: Secure channel corrupted or key mismatch.";
+    const isDecryptionError = message.text === DECRYPTION_ERROR_TEXT;
 
     // Detect internal group links
     const groupLinkRegex = /\/chat\/([a-f0-9-]{36}|nexus-[a-z-]+|system-updates)/i;
@@ -76,19 +81,28 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                         ? 'bg-[rgba(127,166,255,0.18)] text-[#E6ECFF] rounded-2xl rounded-tr-sm'
                         : 'bg-[rgba(255,255,255,0.08)] text-[#E6ECFF] rounded-2xl rounded-tl-sm'
                     }
-                    ${message.type === 'image' || message.type === 'video' ? 'p-1 bg-transparent border-0 shadow-none' : ''}
+                    ${message.type === 'image' || message.type === 'video' || isDecryptionError ? 'p-1 bg-transparent border-0 shadow-none' : ''}
                 `}>
-                    {message.type === 'text' && (
-                        <div className="max-w-full">
-                            <div className="mb-2 whitespace-pre-wrap break-words" style={{ overflowWrap: 'anywhere' }}>
-                                {message.text}
-                            </div>
-                            {linkedGroupId && (
-                                <div className="mt-3 mb-1">
-                                    <GroupInviteCard groupId={linkedGroupId} />
+                    {isDecryptionError ? (
+                        <DecryptionErrorMessage 
+                            onRepair={() => onRepair?.()} 
+                            isPersonal={true} 
+                        />
+                    ) : (
+                        <>
+                        {message.type === 'text' && (
+                            <div className="max-w-full">
+                                <div className="mb-2 whitespace-pre-wrap break-words" style={{ overflowWrap: 'anywhere' }}>
+                                    {message.text}
                                 </div>
-                            )}
-                        </div>
+                                {linkedGroupId && (
+                                    <div className="mt-3 mb-1">
+                                        <GroupInviteCard groupId={linkedGroupId} />
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                        </>
                     )}
 
                     {message.type === 'audio' && message.media && (

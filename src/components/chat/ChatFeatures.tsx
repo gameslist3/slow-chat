@@ -44,7 +44,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         loadMore,
         hasMore,
         addOptimisticMessage,
-        removeOptimisticMessage
+        removeOptimisticMessage,
+        repairSession
     } = useChat(chatId, isPersonal);
 
     const { user } = useAuth();
@@ -157,6 +158,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                                     onReply={handleReply}
                                     onReaction={toggleReaction}
                                     onProfileClick={onProfileClick}
+                                    onRepairSession={repairSession}
                                 />
                             </div>
                         )}
