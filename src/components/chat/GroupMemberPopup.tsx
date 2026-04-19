@@ -186,7 +186,7 @@ export const GroupMemberPopup: React.FC<GroupMemberPopupProps> = ({ groupId, onC
                                                             : 'bg-primary text-white hover:scale-105 active:scale-95 shadow-primary/20'
                                                         }`}
                                                 >
-                                                    {isFollowing ? 'Prune' : isPending ? 'Pending' : 'Sync'}
+                                                    {isFollowing ? 'Prune' : isPending ? 'Pending' : 'Establish Link'}
                                                 </button>
                                             </div>
                                         )}

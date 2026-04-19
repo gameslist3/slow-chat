@@ -88,7 +88,8 @@ const MessageItem = ({
     isSequence,
     onReply,
     onReaction,
-    onProfileClick
+    onProfileClick,
+    onRepairSession
 }: {
     message: Message,
     isSequence: boolean,
