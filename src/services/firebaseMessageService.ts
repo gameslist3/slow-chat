@@ -68,49 +68,10 @@ export async function sendMessage(
             reactions: []
         };
 
-        // E2EE Logic for Personal Chats
-        if (content.isPersonal && content.recipientId) {
-            let sessionKey = await CryptoUtils.getSessionKey(content.recipientId);
-
-            if (!sessionKey) {
-                console.log(`[E2EE] No session for ${content.recipientId}. Establishing handshake...`);
-                const recipientDoc = await getDoc(doc(db, 'users', content.recipientId));
-                if (!recipientDoc.exists()) throw new Error("Recipient protocol unavailable.");
-
-                const pubKeys = recipientDoc.data().publicKeys;
-                if (!pubKeys?.identity) throw new Error("Recipient has not initialized E2EE protocol.");
-
-                sessionKey = await CryptoUtils.establishSession(content.recipientId, pubKeys.identity);
-            }
-
-            const payload = {
-                text: content.text || '',
-                media: content.media,
-                replyTo: content.replyTo
-            };
-
-            const { ciphertext, iv } = await CryptoUtils.encryptAES(JSON.stringify(payload), sessionKey);
-            messageData.text = ciphertext;
-            messageData.iv = iv;
-            messageData.encrypted = true;
-
-            // Keep media unencrypted at the root level if present
-            if (content.media) {
-                messageData.media = content.media;
-            }
-
-            delete messageData.replyTo;
-        } else if (!content.isPersonal && (content.text || content.media)) {
-            // Group Messaging: Plaintext (E2EE removed to allow all members to see historic messages)
-            if (content.text) messageData.text = content.text;
-            if (content.media) messageData.media = content.media;
-            if (content.replyTo) messageData.replyTo = content.replyTo;
-        }
-
-        if (!messageData.encrypted) {
-            if (content.replyTo) messageData.replyTo = content.replyTo;
-            if (content.media) messageData.media = content.media;
-        }
+        // Plaintext Logic for Personal and Group Chats
+        if (content.text) messageData.text = content.text;
+        if (content.media) messageData.media = content.media;
+        if (content.replyTo) messageData.replyTo = content.replyTo;
 
         if (content.isPersonal) {
             messageData.status = 'sent';

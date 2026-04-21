@@ -19,9 +19,6 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
     const { user } = useAuth();
     const isMe = message.senderId === user?.id;
 
-    const DECRYPTION_ERROR_TEXT = "🔒 Decryption error: Secure channel corrupted or key mismatch.";
-    const isDecryptionError = message.text === DECRYPTION_ERROR_TEXT;
-
     // Detect internal group links
     const groupLinkRegex = /\/chat\/([a-f0-9-]{36}|nexus-[a-z-]+|system-updates)/i;
     const groupLinkMatch = message.text?.match(groupLinkRegex);
@@ -81,15 +78,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                         ? 'bg-[rgba(127,166,255,0.18)] text-[#E6ECFF] rounded-2xl rounded-tr-sm'
                         : 'bg-[rgba(255,255,255,0.08)] text-[#E6ECFF] rounded-2xl rounded-tl-sm'
                     }
-                    ${message.type === 'image' || message.type === 'video' || isDecryptionError ? 'p-1 bg-transparent border-0 shadow-none' : ''}
+                    ${message.type === 'image' || message.type === 'video' ? 'p-1 bg-transparent border-0 shadow-none' : ''}
                 `}>
-                    {isDecryptionError ? (
-                        <DecryptionErrorMessage 
-                            onRepair={() => onRepair?.()} 
-                            isPersonal={true} 
-                        />
-                    ) : (
-                        <>
                         {message.type === 'text' && (
                             <div className="max-w-full">
                                 <div className="mb-2 whitespace-pre-wrap break-words" style={{ overflowWrap: 'anywhere' }}>
@@ -102,8 +92,6 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                                 )}
                             </div>
                         )}
-                        </>
-                    )}
 
                     {message.type === 'audio' && message.media && (
                         !message.media.encKey ? (

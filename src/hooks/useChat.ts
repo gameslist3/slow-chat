@@ -93,7 +93,12 @@ export const useChat = (chatId: string, isPersonal: boolean = false) => {
                     
                     console.error("[useChat] Decryption failed for message:", m.id, err);
                     if (!isPersonal) return { ...m, encrypted: false };
-                    return { ...m, text: "🔒 Decryption error: Secure channel corrupted or key mismatch." };
+                    
+                    // Fallback silently without throwing an error message in the UI
+                    if (m.media) {
+                        return { ...m, text: "", encrypted: false };
+                    }
+                    return { ...m, text: "🔒 Encrypted Message", encrypted: false };
                 }
             };
 
