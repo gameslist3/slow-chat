@@ -201,7 +201,7 @@ const UserProfileCard = ({ userId, currentUserId, onClose }: { userId: string, c
 
                         {userId !== currentUserId && (
                             <button className="w-full h-14 rounded-2xl bg-primary text-white font-black uppercase tracking-widest text-xs hover:scale-105 transition-transform">
-                                Establish Link
+                                follow
                             </button>
                         )}
                         <button onClick={onClose} className="mt-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 hover:text-white transition-colors">Close</button>

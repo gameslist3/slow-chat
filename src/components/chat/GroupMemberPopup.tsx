@@ -106,7 +106,6 @@ export const GroupMemberPopup: React.FC<GroupMemberPopupProps> = ({ groupId, onC
                     {/* Header */}
                     <div className="p-5 border-b border-white/5 flex items-center justify-between bg-black/40">
                         <div className="flex flex-col">
-                            <h3 className="font-black uppercase tracking-[0.2em] text-[10px] text-primary mb-0.5">Community Roster</h3>
                             <div className="flex items-center gap-2 text-xs font-bold text-white/90">
                                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 hover:bg-emerald-400 group-hover:bg-emerald-400 transition-colors animate-[pulse_2s_ease-in-out_infinite]" />
                                 {members.length} {members.length === 1 ? 'Member' : 'Members'} Listed
@@ -186,7 +185,7 @@ export const GroupMemberPopup: React.FC<GroupMemberPopupProps> = ({ groupId, onC
                                                             : 'bg-primary text-white hover:scale-105 active:scale-95 shadow-primary/20'
                                                         }`}
                                                 >
-                                                    {isFollowing ? 'Prune' : isPending ? 'Pending' : 'Establish Link'}
+                                                    {isFollowing ? 'Prune' : isPending ? 'Pending' : 'follow'}
                                                 </button>
                                             </div>
                                         )}
