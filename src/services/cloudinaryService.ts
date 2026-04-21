@@ -4,7 +4,7 @@
  */
 
 const CLOUD_NAME = 'dn16gm6ka';
-const UPLOAD_PRESET = 'mediaflows_d8983fd3-b4ef-4a23-8e7b-1b85a6dfc8ca';
+const UPLOAD_PRESET = 'slowchat_unsigned'; 
 const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`;
 
 export interface UploadResult {
@@ -19,7 +19,7 @@ export interface UploadResult {
  */
 export async function uploadToCloudinary(
     file: File | Blob,
-    folder: string = 'gapes-media'
+    folder: string = 'slowchat-media'
 ): Promise<UploadResult> {
     try {
         const formData = new FormData();
@@ -76,7 +76,7 @@ export async function uploadImage(file: File, subfolder?: string): Promise<strin
         throw new Error('Image must be less than 10MB');
     }
 
-    const folder = subfolder ? `gapes-media/${subfolder}/images` : 'gapes-media/images';
+    const folder = subfolder ? `slowchat-media/${subfolder}/images` : 'slowchat-media/images';
     const result = await uploadToCloudinary(file, folder);
     return result.url;
 }
@@ -91,7 +91,7 @@ export async function uploadAudio(blob: Blob, subfolder?: string): Promise<strin
         throw new Error('Audio must be less than 10MB');
     }
 
-    const folder = subfolder ? `gapes-media/${subfolder}/audio` : 'gapes-media/audio';
+    const folder = subfolder ? `slowchat-media/${subfolder}/audio` : 'slowchat-media/audio';
     const result = await uploadToCloudinary(file, folder);
     return result.url;
 }
@@ -143,7 +143,7 @@ export const uploadMedia = async (
     // Cloudinary fetch doesn't easily support progress for unsigned uploads without XHR,
     // so we simulate it or just let it be.
     onProgress(50);
-    const result = await uploadToCloudinary(file, `gapes-media/${groupId}/${userId}`);
+    const result = await uploadToCloudinary(file, `slowchat-media/${groupId}/${userId}`);
     onProgress(100);
     return result.url;
 };
@@ -159,7 +159,7 @@ export const uploadVoice = async (
 ): Promise<string> => {
     onProgress(50);
     const file = new File([blob], `audio-${Date.now()}.webm`, { type: 'audio/webm' });
-    const result = await uploadToCloudinary(file, `gapes-media/${groupId}/${userId}`);
+    const result = await uploadToCloudinary(file, `slowchat-media/${groupId}/${userId}`);
     onProgress(100);
     return result.url;
 };
