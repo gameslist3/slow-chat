@@ -20,6 +20,8 @@ import {
 import { db, auth } from '../config/firebase';
 import { FollowRequest, User } from '../types';
 import { createNotification } from './firebaseNotificationService';
+import { terminatePersonalChat } from './firebaseMessageService';
+import { vault } from './crypto/LocalVault';
 
 /**
  * Send a follow request
@@ -249,6 +251,14 @@ export const unfollowUser = async (otherUserId: string): Promise<void> => {
         const chatIds = [currentUser.uid, otherUserId].sort();
         const chatId = chatIds.join('_');
         await terminatePersonalChat(chatId);
+
+        // 4. Destroy local cryptographic sessions to ensure a fresh start if followed again
+        try {
+            await vault.deleteSecret(`session_${otherUserId}`);
+            await vault.deleteSecret(`shared_secret_${otherUserId}`);
+        } catch (e) {
+            console.error("[FollowService] Failed to clear local vault keys:", e);
+        }
 
         console.log('[FollowService] Unfollow and bidirectional cleanup complete.');
 

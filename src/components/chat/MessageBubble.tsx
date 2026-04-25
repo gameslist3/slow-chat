@@ -268,14 +268,6 @@ const MediaRenderer = ({ url, type, name, onPreview }: { url: string; type: stri
                 onClick={onPreview}
             >
                 <img src={url} alt="media" className="max-h-72 w-full object-cover transition-transform duration-500 group-hover/media:scale-105" />
-                <div className="absolute inset-0 opacity-0 group-hover/media:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[4px] bg-black/40 z-10">
-                    <button
-                        className="px-6 py-2.5 bg-white text-black rounded-full font-black text-[10px] tracking-widest uppercase hover:scale-105 transition-transform shadow-2xl flex items-center gap-2"
-                        onClick={(e) => { e.stopPropagation(); onPreview?.(); }}
-                    >
-                        <Maximize2 size={16} /> View Preview
-                    </button>
-                </div>
             </div>
         );
     }

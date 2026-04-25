@@ -46,9 +46,7 @@ export const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({ isOpen, on
                         {/* Header */}
                         <div className="flex items-center justify-between p-4 border-b border-white/5 bg-white/5 backdrop-blur-md">
                             <div className="flex items-center gap-3 overflow-hidden">
-                                <div className="p-2 rounded-xl bg-primary/10 text-primary">
-                                    {isImage ? <Maximize2 size={18} /> : <FileIcon size={18} />}
-                                </div>
+
                                 <div className="overflow-hidden">
                                     <h3 className="text-sm font-bold text-white truncate">{media.name}</h3>
                                     <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
@@ -59,10 +57,10 @@ export const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({ isOpen, on
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={handleDownload}
-                                    className="p-2.5 rounded-full bg-primary text-white hover:bg-blue-600 transition-all shadow-lg flex items-center gap-2 px-4 group"
+                                    className="p-2.5 rounded-full bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-all"
+                                    title="Download"
                                 >
-                                    <Download size={16} className="group-hover:translate-y-0.5 transition-transform" />
-                                    <span className="text-[11px] font-black uppercase tracking-wider">Download</span>
+                                    <Download size={20} />
                                 </button>
                                 <button
                                     onClick={onClose}
@@ -119,17 +117,7 @@ export const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({ isOpen, on
                             )}
                         </div>
 
-                        {/* Footer/Meta */}
-                        <div className="p-4 bg-black/20 border-t border-white/5 flex items-center justify-center gap-8">
-                           <a 
-                             href={media.url} 
-                             target="_blank" 
-                             rel="noopener noreferrer"
-                             className="text-[10px] font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-1.5 uppercase tracking-widest"
-                           >
-                             <ExternalLink size={12} /> Open in New Tab
-                           </a>
-                        </div>
+
                     </motion.div>
                 </motion.div>
             )}

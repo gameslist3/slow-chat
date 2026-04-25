@@ -101,10 +101,9 @@ export const markAllAsRead = async (uid: string): Promise<void> => {
         });
         await batch.commit(); // Commit the user document update separately
 
-        // 2. Mark existing unread activity as read (Excluding follow requests)
+        // 2. Delete all existing activity (Excluding follow requests) to clean up the screen
         const q = query(collection(db, 'notifications'),
             where('userId', '==', uid),
-            where('read', '==', false),
             where('type', '!=', 'follow_request')
         );
         const snap = await getDocs(q);
@@ -114,12 +113,8 @@ export const markAllAsRead = async (uid: string): Promise<void> => {
             const b = writeBatch(db);
             const chunk = docs.slice(i, i + 450);
             chunk.forEach(d => {
-                const data = d.data();
-                // Mark as read instead of deleting
-                b.update(d.ref, {
-                    read: true,
-                    updatedAt: Date.now()
-                });
+                // Delete instead of just marking as read to completely clear the screen
+                b.delete(d.ref);
             });
             await b.commit();
         }
