@@ -356,7 +356,7 @@ const AuthenticatedSection = () => {
 
                                         const handleUnfollow = async (e: React.MouseEvent) => {
                                             e.stopPropagation();
-                                            if (!confirm(`End chat with ${name}?`)) return;
+                                            if (!confirm(`Are you sure you want to unfollow ${name}?`)) return;
                                             try {
                                                 if (otherId) await unfollowUser(otherId);
                                                 toast("successfully unfollowed", "success");
@@ -364,7 +364,7 @@ const AuthenticatedSection = () => {
                                                 setActiveId(null);
                                                 if (user?.id) updateActiveChat(user.id, null);
                                             } catch (e) {
-                                                toast("Failed to end chat", "error");
+                                                toast("Failed to unfollow", "error");
                                             }
                                         };
 

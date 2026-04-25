@@ -91,40 +91,30 @@ export const AISidebar: React.FC<AISidebarProps> = ({
 
             {/* Bottom Section: User & Config */}
             <div className="mt-auto flex flex-col gap-6 items-center md:items-stretch">
-                {/* Daily Usage Limitation Bar */}
-                <div className="hidden md:flex flex-col gap-2.5 px-4 py-4 rounded-3xl bg-white/[0.03] border border-white/5 mb-2 shadow-inner">
-                    <div className="flex items-center justify-between px-1">
-                        <div className="flex items-center gap-2 text-[#7C89A6]">
-                            <Icon name="rotate" className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
-                            <span className="text-[10px] font-black uppercase tracking-widest">Daily Storage</span>
+                {/* File Sent Limitation Bar */}
+                <div className="flex flex-col gap-2 w-full px-2 mb-4">
+                    <div className="flex items-center justify-between text-[#7C89A6]">
+                        <div className="flex items-center gap-2">
+                            <Icon name="file" className={`w-4 h-4 ${loading ? 'animate-pulse' : ''}`} />
+                            <span className="text-[10px] font-black uppercase tracking-widest hidden md:inline">File Sent Limit</span>
                         </div>
-                        <span className="text-[10px] font-black text-white/40">
-                            {stats ? `${(stats.size / (1024 * 1024)).toFixed(1)} / 40 MB` : '0 / 40 MB'}
+                        <span className="text-[10px] font-black text-white/60">
+                            {stats ? `${stats.count}/${stats.limitCount}` : '0/20'}
                         </span>
                     </div>
                     
                     {/* Progress Bar Container */}
-                    <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden relative border border-white/5">
+                    <div className="h-1 md:h-1.5 w-full bg-white/5 rounded-full overflow-hidden relative">
                         <motion.div 
                             initial={{ width: 0 }}
-                            animate={{ width: stats ? `${Math.min((stats.size / stats.limitSize) * 100, 100)}%` : '0%' }}
+                            animate={{ width: stats ? `${Math.min((stats.count / stats.limitCount) * 100, 100)}%` : '0%' }}
                             transition={{ duration: 1, ease: "easeOut" }}
                             className={`h-full relative z-10 rounded-full ${
-                                stats && (stats.size / stats.limitSize) > 0.9 ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]' : 
-                                stats && (stats.size / stats.limitSize) > 0.7 ? 'bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]' :
+                                stats && (stats.count / stats.limitCount) > 0.9 ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]' : 
+                                stats && (stats.count / stats.limitCount) > 0.7 ? 'bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]' :
                                 'bg-gradient-to-r from-blue-600 to-primary shadow-[0_0_10px_rgba(59,130,246,0.3)]'
                             }`}
                         />
-                    </div>
-
-                    <div className="flex items-center justify-between px-1">
-                        <span className="text-[9px] font-bold text-[#7C89A6] opacity-60">
-                            {stats ? `${stats.count} / ${stats.limitCount} Files` : '0 / 20 Files'}
-                        </span>
-                        <div className="flex items-center gap-1 group/timer">
-                             <Icon name="clock" className="w-2.5 h-2.5 text-[#7C89A6] group-hover/timer:text-primary transition-colors" />
-                             <span className="text-[9px] font-bold text-[#7C89A6] opacity-60">Resetting at Midnight</span>
-                        </div>
                     </div>
                 </div>
 

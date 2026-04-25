@@ -39,14 +39,14 @@ export const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, person
     }, [currentUser]);
 
     const handleUnfollowFriend = async (friendId: string, username: string) => {
-        if (!confirm(`Are you sure you want to terminate connection with ${username}?`)) return;
+        if (!confirm(`Are you sure you want to unfollow ${username}?`)) return;
 
         try {
             await unfollowUser(friendId);
-            toast(`Connection with ${username} terminated.`, 'info');
+            toast(`successfully unfollowed`, 'success');
         } catch (error) {
             console.error("Failed to unfollow:", error);
-            toast("Failed to terminate sync", 'error');
+            toast("Failed to unfollow", 'error');
         }
     };
 

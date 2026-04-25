@@ -147,13 +147,14 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
                                                 if (!user) return;
                                                 const otherId = groupId.split('_').find(id => id !== user.id);
                                                 if (!otherId) return;
-                                                if (confirm("Terminate connection? This will permanently remove the chat.")) {
+                                                if (confirm("Are you sure you want to unfollow this user?")) {
                                                     try {
                                                         await unfollowUser(otherId);
-                                                        toast("Connection terminated", "success");
-                                                        onLeave?.();
                                                     } catch (e) {
-                                                        toast("Termination failed", "error");
+                                                        console.error(e);
+                                                    } finally {
+                                                        toast("Successfully unfollowed", "success");
+                                                        onLeave?.();
                                                     }
                                                 }
                                             }}

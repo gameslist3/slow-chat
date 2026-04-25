@@ -75,7 +75,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                                 groupJoinTimes: userData.groupJoinTimes || {},
                                 sessions: userData.sessions || [],
                                 autoDeleteHours: userData.autoDeleteHours || 5,
-                                lastTimerChange: userData.lastTimerChange || 0
+                                lastTimerChange: userData.lastTimerChange || 0,
+                                dailyUploadCount: userData.dailyUploadCount || 0,
+                                dailyUploadSize: userData.dailyUploadSize || 0,
+                                lastUploadReset: userData.lastUploadReset || 0
                             };
                             return base;
                         });
