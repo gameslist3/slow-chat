@@ -7,7 +7,6 @@ import { generateAnonymousName, logoutUser } from '../../services/firebaseAuthSe
 import { deleteAccount } from '../../services/deleteAccountService';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../config/firebase';
-import { KeyBackup } from './KeyBackup';
 import { vault } from '../../services/crypto/LocalVault';
 
 export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout: () => void }) => {
@@ -18,7 +17,6 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
     const [isEditing, setIsEditing] = useState(false);
     const [tempName, setTempName] = useState('');
     const [lockDate, setLockDate] = useState<Date | null>(null);
-    const [showBackup, setShowBackup] = useState(false);
     const [showDeleteInfo, setShowDeleteInfo] = useState(false);
 
     // Get current device info
@@ -319,25 +317,6 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
                                     </motion.button>
                                 </div>
 
-                                <div className="pt-4 border-t border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 bg-white/5 rounded-lg text-gray-400 flex items-center justify-center">
-                                            <Icon name="key" className="w-4 h-4" />
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-bold text-foreground">Identity Recovery</p>
-                                            <p className="text-sm font-medium text-gray-500 text-left">Advanced identity recovery options</p>
-                                        </div>
-                                    </div>
-                                    <motion.button
-                                        whileHover={{ scale: 1.02 }}
-                                        whileTap={{ scale: 0.98 }}
-                                        onClick={() => setShowBackup(true)}
-                                        className="w-full md:w-auto px-6 py-3 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-bold text-primary uppercase tracking-widest hover:bg-white/10 transition-all shadow-lg"
-                                    >
-                                        Manage
-                                    </motion.button>
-                                </div>
                             </div>
 
                             {/* Options */}
@@ -362,13 +341,6 @@ export const AccountSettings = ({ onBack, logout }: { onBack: () => void, logout
                             </div>
 
                         </div>
-
-
-                        <AnimatePresence>
-                            {showBackup && (
-                                <KeyBackup onClose={() => setShowBackup(false)} />
-                            )}
-                        </AnimatePresence>
                     </div>
                 </div>
             </div>

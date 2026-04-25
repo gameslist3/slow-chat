@@ -13,13 +13,15 @@ interface UserProfileModalProps {
     currentUserId: string;
     onClose: () => void;
     onMessage?: (userId: string) => void;
+    onUnfollow?: () => void;
 }
 
 export const UserProfileModal: React.FC<UserProfileModalProps> = ({
     userId,
     currentUserId,
     onClose,
-    onMessage
+    onMessage,
+    onUnfollow
 }) => {
     const [user, setUser] = useState<any>(null);
     const [status, setStatus] = useState<string>('none');
@@ -92,7 +94,10 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
             await unfollowUser(userId);
             setStatus('none');
             toast("Unfollowed", "success");
-            setTimeout(() => onClose(), 500); // Small delay for toast visibility
+            setTimeout(() => {
+                onClose();
+                onUnfollow?.();
+            }, 500); 
         } catch (e) {
             toast("Failed to unfollow", "error");
         }

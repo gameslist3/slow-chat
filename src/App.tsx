@@ -8,7 +8,6 @@ import { GroupDiscovery, CreateGroup } from './components/groups/GroupFeatures';
 import { ChatInterface } from './components/chat/ChatFeatures';
 import { AccountSettings } from './components/auth/AccountSettings';
 import { UserProfileModal } from './components/user/UserProfileModal';
-import { DeviceSync } from './components/auth/DeviceSync';
 import { FollowRequests } from './components/auth/FollowRequests';
 import { subscribeToGroups, subscribeToJoinedGroups, joinGroup } from './services/firebaseGroupService';
 import { Group, User, PersonalChat } from './types';
@@ -165,7 +164,6 @@ const AuthenticatedSection = () => {
     const [viewingUserId, setViewingUserId] = useState<string | null>(null);
     const [highlightMessageId, setHighlightMessageId] = useState<string | undefined>(undefined);
     const [followRequestsCount, setFollowRequestsCount] = useState(0);
-    const [showSyncModal, setShowSyncModal] = useState(true);
     const { personalChats } = useInbox();
 
     console.log('[AuthenticatedSection] Rendering', { user: user?.username, activeTab, myGroupsCount: myGroups.length });
@@ -311,11 +309,6 @@ const AuthenticatedSection = () => {
 
     return (
         <div className="relative w-full h-full flex flex-col">
-            <AnimatePresence>
-                {!isE2EEReady && showSyncModal && (
-                    <DeviceSync key="sync" onClose={() => setShowSyncModal(false)} />
-                )}
-            </AnimatePresence>
 
             <AILayout
                 activeTab={activeTab === 'chat' ? (isPersonal ? 'friends' : 'home') : (showDiscovery ? 'explore' : activeTab)}
@@ -365,6 +358,9 @@ const AuthenticatedSection = () => {
                                             try {
                                                 if (otherId) await unfollowUser(otherId);
                                                 toast(`Connection with ${name} ended.`, 'info');
+                                                setActiveTab('home');
+                                                setActiveId(null);
+                                                if (user?.id) updateActiveChat(user.id, null);
                                             } catch (e) {
                                                 toast("Failed to end chat", "error");
                                             }
@@ -553,6 +549,11 @@ const AuthenticatedSection = () => {
                                 setViewingUserId(null);
                                 const combinedId = [user?.id, targetId].sort().join('_');
                                 handleSelectPersonal(combinedId);
+                            }}
+                            onUnfollow={() => {
+                                setActiveTab('home');
+                                setActiveId(null);
+                                if (user?.id) updateActiveChat(user.id, null);
                             }}
                         />
                     )}

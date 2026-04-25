@@ -35,7 +35,8 @@ export const AIComposer: React.FC<AIComposerProps> = ({
     const [recordingTime, setRecordingTime] = useState(0);
     const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
     const [audioUrl, setAudioUrl] = useState<string | null>(null);
-    const [isPlaying, setIsPlaying] = useState(false);
+    const [pendingFile, setPendingFile] = useState<File | null>(null);
+    const [isDragging, setIsDragging] = useState(false);
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -145,10 +146,18 @@ export const AIComposer: React.FC<AIComposerProps> = ({
         if (replyingTo) onCancelReply?.();
     };
 
-    const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
         if (file.size > 10 * 1024 * 1024) return toast('File exceeds 10MB limit', 'error');
+        setPendingFile(file);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    const handleSendPendingFile = async () => {
+        if (!pendingFile) return;
+        const file = pendingFile;
+        setPendingFile(null);
 
         const isImage = file.type.startsWith('image/');
         const type = isImage ? 'image' : 'file';
@@ -168,8 +177,6 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                 status: 'sending'
             });
         }
-
-        if (fileInputRef.current) fileInputRef.current.value = '';
 
         console.log(`[AIComposer] Starting media upload. Personal: ${isPersonal}`);
         try {
@@ -193,9 +200,34 @@ export const AIComposer: React.FC<AIComposerProps> = ({
         }
     };
 
+    const onDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(true);
+    };
+
+    const onDragLeave = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+    };
+
+    const onDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+        const file = e.dataTransfer.files?.[0];
+        if (file) {
+            if (file.size > 10 * 1024 * 1024) return toast('File exceeds 10MB limit', 'error');
+            setPendingFile(file);
+        }
+    };
+
     return (
-        <div className="w-full z-50 px-4 pb-10 md:pb-6 pt-2 pointer-events-none shrink-0 flex justify-center">
-            <div className="w-full max-w-3xl pointer-events-auto relative">
+        <div 
+            className={`w-full z-50 px-4 pb-10 md:pb-6 pt-2 shrink-0 flex justify-center transition-colors ${isDragging ? 'bg-primary/10 border-2 border-dashed border-primary rounded-t-3xl' : ''}`}
+            onDragOver={onDragOver}
+            onDragLeave={onDragLeave}
+            onDrop={onDrop}
+        >
+            <div className="w-full max-w-3xl relative">
                 <AnimatePresence>
                     {replyingTo && (
                         <motion.div
@@ -213,6 +245,32 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                             </button>
                         </motion.div>
                     )}
+                    {pendingFile && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                            className="absolute bottom-full mb-2 left-0 right-0 bg-[#0F1C34]/95 border border-white/10 rounded-2xl p-3 flex items-center gap-4 shadow-2xl backdrop-blur-xl mx-4"
+                        >
+                            {pendingFile.type.startsWith('image/') ? (
+                                <img src={URL.createObjectURL(pendingFile)} alt="preview" className="w-12 h-12 object-cover rounded-xl border border-white/10" />
+                            ) : (
+                                <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-primary border border-white/10">
+                                    <Icon name="file" className="w-6 h-6" />
+                                </div>
+                            )}
+                            <div className="flex-1 overflow-hidden">
+                                <p className="text-sm font-bold text-white truncate">{pendingFile.name}</p>
+                                <p className="text-[10px] text-gray-400">{(pendingFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                            </div>
+                            <button onClick={() => setPendingFile(null)} className="p-2 hover:bg-red-500/10 rounded-full transition-colors text-gray-400 hover:text-red-500">
+                                <Icon name="trash" className="w-5 h-5" />
+                            </button>
+                            <button onClick={handleSendPendingFile} className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-lg hover:bg-blue-600 transition-all hover:scale-105 active:scale-95">
+                                <Icon name="send" className="w-4 h-4 ml-1" />
+                            </button>
+                        </motion.div>
+                    )}
                 </AnimatePresence>
 
                 {recState === 'idle' ? (
@@ -226,7 +284,7 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                                 <Icon name="plus" className="w-5 h-5" />
                             </button>
                         </div>
-                        <input type="file" ref={fileInputRef} className="hidden" onChange={handleFile} />
+                        <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileInputChange} />
 
                         {/* Text Input */}
                         <div className="flex-1 py-3 px-1">
