@@ -120,16 +120,8 @@ export const AIComposer: React.FC<AIComposerProps> = ({
 
         console.log(`[AIComposer] Starting voice upload for user: ${userId}, group: ${groupId}`);
         
-        const limitCheck = await checkUploadLimit(userId, audioBlob.size);
-        if (!limitCheck.allowed) {
-            toast(`${limitCheck.reason}. Wait until ${limitCheck.resetIn}`, 'error');
-            if (onOptimisticRemove) onOptimisticRemove(tempId);
-            return;
-        }
-
         try {
             const url = await uploadVoice(audioBlob, groupId, userId, (p) => { });
-            await updateUsage(userId, audioBlob.size);
 
             onSend({
                 media: {

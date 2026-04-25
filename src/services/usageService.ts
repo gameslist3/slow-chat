@@ -2,7 +2,7 @@ import { doc, getDoc, updateDoc, increment } from 'firebase/firestore';
 import { db } from '../config/firebase';
 
 const DAILY_FILE_LIMIT = 20;
-const DAILY_SIZE_LIMIT = 40 * 1024 * 1024; // 40 MB
+const DAILY_SIZE_LIMIT = 20 * 1024 * 1024; // 20 MB
 
 export interface UsageStats {
     count: number;
@@ -77,7 +77,7 @@ export const checkUploadLimit = async (userId: string, nextFileSize: number): Pr
     if (stats.size + nextFileSize > stats.limitSize) {
         return { 
             allowed: false, 
-            reason: 'Daily data transfer limit reached (40MB)',
+            reason: 'Daily data transfer limit reached (20MB)',
             resetIn: formatRemainingTime(stats.resetTime)
         };
     }

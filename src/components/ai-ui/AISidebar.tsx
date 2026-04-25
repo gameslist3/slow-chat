@@ -17,6 +17,14 @@ interface AISidebarProps {
     friendsUnread?: number;
 }
 
+const formatRemainingTime = (resetTime: number): string => {
+    const remaining = resetTime - Date.now();
+    if (remaining <= 0) return 'Resetting...';
+    const hours = Math.floor(remaining / (1000 * 60 * 60));
+    const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+    return `${hours}h ${minutes}m`;
+};
+
 export const AISidebar: React.FC<AISidebarProps> = ({
     activeTab,
     onTabChange,
@@ -91,30 +99,58 @@ export const AISidebar: React.FC<AISidebarProps> = ({
 
             {/* Bottom Section: User & Config */}
             <div className="mt-auto flex flex-col gap-6 items-center md:items-stretch">
-                {/* File Sent Limitation Bar */}
-                <div className="flex flex-col gap-2 w-full px-2 mb-4">
-                    <div className="flex items-center justify-between text-[#7C89A6]">
-                        <div className="flex items-center gap-2">
-                            <Icon name="file" className={`w-4 h-4 ${loading ? 'animate-pulse' : ''}`} />
-                            <span className="text-[10px] font-black uppercase tracking-widest hidden md:inline">File Sent Limit</span>
+                {/* Daily Resource Usage Section */}
+                <div className="flex flex-col gap-4 w-full px-2 mb-6 bg-white/5 p-4 rounded-2xl border border-white/5 backdrop-blur-md">
+                    <div className="flex items-center justify-between mb-1">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-[#7C89A6]">Daily Usage</span>
+                        <div className="flex items-center gap-1.5 text-[9px] font-bold text-primary animate-pulse">
+                            <Icon name="clock" className="w-3 h-3" />
+                            {stats ? formatRemainingTime(stats.resetTime) : '--'}
                         </div>
-                        <span className="text-[10px] font-black text-white/60">
-                            {stats ? `${stats.count}/${stats.limitCount}` : '0/20'}
-                        </span>
                     </div>
-                    
-                    {/* Progress Bar Container */}
-                    <div className="h-1 md:h-1.5 w-full bg-white/5 rounded-full overflow-hidden relative">
-                        <motion.div 
-                            initial={{ width: 0 }}
-                            animate={{ width: stats ? `${Math.min((stats.count / stats.limitCount) * 100, 100)}%` : '0%' }}
-                            transition={{ duration: 1, ease: "easeOut" }}
-                            className={`h-full relative z-10 rounded-full ${
-                                stats && (stats.count / stats.limitCount) > 0.9 ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]' : 
-                                stats && (stats.count / stats.limitCount) > 0.7 ? 'bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]' :
-                                'bg-gradient-to-r from-blue-600 to-primary shadow-[0_0_10px_rgba(59,130,246,0.3)]'
-                            }`}
-                        />
+
+                    {/* Files Count Limit */}
+                    <div className="space-y-1.5">
+                        <div className="flex items-center justify-between text-[#E6ECFF]">
+                            <div className="flex items-center gap-2">
+                                <Icon name="file" className="w-3.5 h-3.5 text-[#7FA6FF]" />
+                                <span className="text-[11px] font-bold">Files Sent</span>
+                            </div>
+                            <span className="text-[11px] font-black opacity-80">
+                                {stats ? `${stats.count}/${stats.limitCount}` : '0/20'}
+                            </span>
+                        </div>
+                        <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                            <motion.div 
+                                initial={{ width: 0 }}
+                                animate={{ width: stats ? `${Math.min((stats.count / stats.limitCount) * 100, 100)}%` : '0%' }}
+                                className={`h-full rounded-full ${
+                                    stats && stats.count >= stats.limitCount ? 'bg-red-500' : 'bg-gradient-to-r from-blue-500 to-primary'
+                                }`}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Data Transfer Limit */}
+                    <div className="space-y-1.5">
+                        <div className="flex items-center justify-between text-[#E6ECFF]">
+                            <div className="flex items-center gap-2">
+                                <Icon name="database" className="w-3.5 h-3.5 text-[#7FA6FF]" />
+                                <span className="text-[11px] font-bold">Data Transfer</span>
+                            </div>
+                            <span className="text-[11px] font-black opacity-80">
+                                {stats ? `${(stats.size / (1024 * 1024)).toFixed(1)}/${(stats.limitSize / (1024 * 1024)).toFixed(0)} MB` : '0/20 MB'}
+                            </span>
+                        </div>
+                        <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                            <motion.div 
+                                initial={{ width: 0 }}
+                                animate={{ width: stats ? `${Math.min((stats.size / stats.limitSize) * 100, 100)}%` : '0%' }}
+                                className={`h-full rounded-full ${
+                                    stats && stats.size >= stats.limitSize ? 'bg-red-500' : 'bg-gradient-to-r from-purple-500 to-blue-500'
+                                }`}
+                            />
+                        </div>
                     </div>
                 </div>
 

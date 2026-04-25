@@ -5,7 +5,7 @@ import { updateDoc, doc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 
 const DAILY_FILE_LIMIT = 20;
-const DAILY_SIZE_LIMIT = 40 * 1024 * 1024; // 40 MB
+const DAILY_SIZE_LIMIT = 20 * 1024 * 1024; // 20 MB
 
 export function useUsageStats() {
     const { user } = useAuth();
