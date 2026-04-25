@@ -99,57 +99,59 @@ export const AISidebar: React.FC<AISidebarProps> = ({
 
             {/* Bottom Section: User & Config */}
             <div className="mt-auto flex flex-col gap-6 items-center md:items-stretch">
-                {/* Daily Resource Usage Section */}
-                <div className="flex flex-col gap-4 w-full px-2 mb-6 bg-white/5 p-4 rounded-2xl border border-white/5 backdrop-blur-md">
-                    <div className="flex items-center justify-between mb-1">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-[#7C89A6]">Daily Usage</span>
-                        <div className="flex items-center gap-1.5 text-[9px] font-bold text-primary animate-pulse">
-                            <Icon name="clock" className="w-3 h-3" />
-                            {stats ? formatRemainingTime(stats.resetTime) : '--'}
+                {/* Minimalist Daily Resource Usage */}
+                <div className="w-full px-2 mb-4 space-y-4">
+                    <div className="flex items-center justify-between px-1">
+                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#7C89A6] hidden md:block">Daily Quota</span>
+                        <div className="flex items-center gap-1 text-[9px] font-bold text-primary/80">
+                            <Icon name="clock" className="w-2.5 h-2.5" />
+                            <span>{stats ? formatRemainingTime(stats.resetTime) : '--'}</span>
                         </div>
                     </div>
 
-                    {/* Files Count Limit */}
-                    <div className="space-y-1.5">
-                        <div className="flex items-center justify-between text-[#E6ECFF]">
-                            <div className="flex items-center gap-2">
-                                <Icon name="file" className="w-3.5 h-3.5 text-[#7FA6FF]" />
-                                <span className="text-[11px] font-bold">Files Sent</span>
+                    <div className="flex flex-col gap-3">
+                        {/* Files Sent */}
+                        <div className="group cursor-help">
+                            <div className="flex items-center justify-between mb-1.5 px-1">
+                                <div className="flex items-center gap-2">
+                                    <Icon name="file" className="w-3 h-3 text-[#7FA6FF]" />
+                                    <span className="text-[10px] font-bold text-[#7C89A6] group-hover:text-white transition-colors hidden md:block">Files</span>
+                                </div>
+                                <span className="text-[10px] font-black text-white/40 group-hover:text-white/80 transition-colors">
+                                    {stats ? `${stats.count}/${stats.limitCount}` : '0/20'}
+                                </span>
                             </div>
-                            <span className="text-[11px] font-black opacity-80">
-                                {stats ? `${stats.count}/${stats.limitCount}` : '0/20'}
-                            </span>
+                            <div className="h-0.5 w-full bg-white/5 rounded-full overflow-hidden">
+                                <motion.div 
+                                    initial={{ width: 0 }}
+                                    animate={{ width: stats ? `${Math.min((stats.count / stats.limitCount) * 100, 100)}%` : '0%' }}
+                                    className={`h-full rounded-full ${
+                                        stats && stats.count >= stats.limitCount ? 'bg-red-500' : 'bg-primary'
+                                    }`}
+                                />
+                            </div>
                         </div>
-                        <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                            <motion.div 
-                                initial={{ width: 0 }}
-                                animate={{ width: stats ? `${Math.min((stats.count / stats.limitCount) * 100, 100)}%` : '0%' }}
-                                className={`h-full rounded-full ${
-                                    stats && stats.count >= stats.limitCount ? 'bg-red-500' : 'bg-gradient-to-r from-blue-500 to-primary'
-                                }`}
-                            />
-                        </div>
-                    </div>
 
-                    {/* Data Transfer Limit */}
-                    <div className="space-y-1.5">
-                        <div className="flex items-center justify-between text-[#E6ECFF]">
-                            <div className="flex items-center gap-2">
-                                <Icon name="database" className="w-3.5 h-3.5 text-[#7FA6FF]" />
-                                <span className="text-[11px] font-bold">Data Transfer</span>
+                        {/* Data Transfer */}
+                        <div className="group cursor-help">
+                            <div className="flex items-center justify-between mb-1.5 px-1">
+                                <div className="flex items-center gap-2">
+                                    <Icon name="database" className="w-3 h-3 text-[#7FA6FF]" />
+                                    <span className="text-[10px] font-bold text-[#7C89A6] group-hover:text-white transition-colors hidden md:block">Data</span>
+                                </div>
+                                <span className="text-[10px] font-black text-white/40 group-hover:text-white/80 transition-colors">
+                                    {stats ? `${(stats.size / (1024 * 1024)).toFixed(1)}/20MB` : '0/20MB'}
+                                </span>
                             </div>
-                            <span className="text-[11px] font-black opacity-80">
-                                {stats ? `${(stats.size / (1024 * 1024)).toFixed(1)}/${(stats.limitSize / (1024 * 1024)).toFixed(0)} MB` : '0/20 MB'}
-                            </span>
-                        </div>
-                        <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                            <motion.div 
-                                initial={{ width: 0 }}
-                                animate={{ width: stats ? `${Math.min((stats.size / stats.limitSize) * 100, 100)}%` : '0%' }}
-                                className={`h-full rounded-full ${
-                                    stats && stats.size >= stats.limitSize ? 'bg-red-500' : 'bg-gradient-to-r from-purple-500 to-blue-500'
-                                }`}
-                            />
+                            <div className="h-0.5 w-full bg-white/5 rounded-full overflow-hidden">
+                                <motion.div 
+                                    initial={{ width: 0 }}
+                                    animate={{ width: stats ? `${Math.min((stats.size / stats.limitSize) * 100, 100)}%` : '0%' }}
+                                    className={`h-full rounded-full ${
+                                        stats && stats.size >= stats.limitSize ? 'bg-red-500' : 'bg-blue-500'
+                                    }`}
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
