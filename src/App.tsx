@@ -313,7 +313,7 @@ const AuthenticatedSection = () => {
         <div className="relative w-full h-full flex flex-col">
 
             <AILayout
-                activeTab={activeTab === 'chat' ? (isPersonal ? 'friends' : 'home') : (showDiscovery ? 'explore' : activeTab)}
+                activeTab={activeTab === 'chat' ? 'chat' : (showDiscovery ? 'explore' : activeTab)}
                 onTabChange={(tab) => {
                     setActiveTab(tab as any);
                     setActiveId(null);
@@ -359,7 +359,7 @@ const AuthenticatedSection = () => {
                                             if (!confirm(`End chat with ${name}?`)) return;
                                             try {
                                                 if (otherId) await unfollowUser(otherId);
-                                                toast(`Connection with ${name} ended.`, 'info');
+                                                toast("Successfully unfollowed", "success");
                                                 setActiveTab('home');
                                                 setActiveId(null);
                                                 if (user?.id) updateActiveChat(user.id, null);

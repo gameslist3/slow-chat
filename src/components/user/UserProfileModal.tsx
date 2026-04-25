@@ -93,7 +93,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
         try {
             await unfollowUser(userId);
             setStatus('none');
-            toast("Unfollowed", "success");
+            toast("Successfully unfollowed", "success");
             setTimeout(() => {
                 onClose();
                 onUnfollow?.();

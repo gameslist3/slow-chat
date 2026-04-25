@@ -40,6 +40,7 @@ export const AIComposer: React.FC<AIComposerProps> = ({
     const [audioUrl, setAudioUrl] = useState<string | null>(null);
     const [pendingFile, setPendingFile] = useState<File | null>(null);
     const [isDragging, setIsDragging] = useState(false);
+    const [isPlaying, setIsPlaying] = useState(false);
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
