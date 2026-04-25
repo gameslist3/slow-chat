@@ -23,6 +23,9 @@ export interface User {
     };
     autoDeleteHours?: number; // 5, 10, 20
     lastTimerChange?: number; // timestamp
+    dailyUploadCount?: number;
+    dailyUploadSize?: number;
+    lastUploadReset?: number;
 }
 
 export interface UserCredentials {

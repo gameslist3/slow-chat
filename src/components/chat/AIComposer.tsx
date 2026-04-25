@@ -4,6 +4,8 @@ import { Icon } from '../common/Icon';
 import { uploadVoice, uploadMedia } from '../../services/cloudinaryService';
 import { Message, FileMetadata } from '../../types';
 import { useToast } from '../../context/ToastContext';
+import { checkUploadLimit, updateUsage } from '../../services/usageService';
+import { useUsageStats } from '../../hooks/useUsageStats';
 
 interface AIComposerProps {
     onSend: (content: { text?: string, media?: FileMetadata, type: Message['type'] }) => void;
@@ -30,6 +32,7 @@ export const AIComposer: React.FC<AIComposerProps> = ({
     onOptimisticAdd,
     onOptimisticRemove
 }) => {
+    const { stats } = useUsageStats();
     const [text, setText] = useState('');
     const [recState, setRecState] = useState<RecordingState>('idle');
     const [recordingTime, setRecordingTime] = useState(0);
@@ -115,9 +118,17 @@ export const AIComposer: React.FC<AIComposerProps> = ({
         setRecState('idle');
 
         console.log(`[AIComposer] Starting voice upload for user: ${userId}, group: ${groupId}`);
+        
+        const limitCheck = await checkUploadLimit(userId, audioBlob.size);
+        if (!limitCheck.allowed) {
+            toast(`${limitCheck.reason}. Wait until ${limitCheck.resetIn}`, 'error');
+            if (onOptimisticRemove) onOptimisticRemove(tempId);
+            return;
+        }
 
         try {
             const url = await uploadVoice(audioBlob, groupId, userId, (p) => { });
+            await updateUsage(userId, audioBlob.size);
 
             onSend({
                 media: {
@@ -179,8 +190,17 @@ export const AIComposer: React.FC<AIComposerProps> = ({
         }
 
         console.log(`[AIComposer] Starting media upload. Personal: ${isPersonal}`);
+        
+        const limitCheck = await checkUploadLimit(userId, file.size);
+        if (!limitCheck.allowed) {
+            toast(`${limitCheck.reason}. Wait until ${limitCheck.resetIn}`, 'error');
+            if (onOptimisticRemove) onOptimisticRemove(tempId);
+            return;
+        }
+
         try {
             const url = await uploadMedia(file, groupId, userId, (p) => { });
+            await updateUsage(userId, file.size);
 
             onSend({
                 media: {
@@ -278,8 +298,19 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                         {/* Attachment Button */}
                         <div className="pb-1.5 flex items-center justify-center">
                             <button
-                                onClick={() => fileInputRef.current?.click()}
-                                className="w-11 h-11 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-all text-[#A9B4D0] hover:text-white shrink-0"
+                                onClick={() => {
+                                    if (stats && (stats.count >= stats.limitCount || stats.size >= stats.limitSize)) {
+                                        toast(`Daily limit reached. Reset in ${stats.resetTime - Date.now() > 0 ? Math.floor((stats.resetTime - Date.now()) / (1000 * 60 * 60)) + 'h' : 'soon'}`, 'error');
+                                        return;
+                                    }
+                                    fileInputRef.current?.click();
+                                }}
+                                disabled={stats ? (stats.count >= stats.limitCount || stats.size >= stats.limitSize) : false}
+                                className={`w-11 h-11 rounded-full flex items-center justify-center transition-all shrink-0
+                                    ${stats && (stats.count >= stats.limitCount || stats.size >= stats.limitSize)
+                                        ? 'bg-white/5 text-gray-600 cursor-not-allowed'
+                                        : 'bg-white/5 hover:bg-white/10 text-[#A9B4D0] hover:text-white'}
+                                `}
                             >
                                 <Icon name="plus" className="w-5 h-5" />
                             </button>

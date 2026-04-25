@@ -1,7 +1,7 @@
 import React from 'react';
 import { Message } from '../../types';
 import { useAuth } from '../../context/AuthContext';
-import { Reply, File, Download, Play, Pause, Music, Film, Check, CheckCheck } from 'lucide-react';
+import { Reply, File, Maximize2, Download, Play, Pause, Music, Film, Check, CheckCheck } from 'lucide-react';
 import { GroupInviteCard } from './GroupInviteCard';
 import { EncryptedMedia } from './EncryptedMedia';
 import { DecryptionErrorMessage } from './DecryptionErrorMessage';
@@ -12,10 +12,11 @@ interface MessageBubbleProps {
     onReact: (emoji: string) => void;
     onReply: () => void;
     onProfileClick?: (userId: string) => void;
+    onPreviewMedia?: (media: any) => void;
     onRepair?: () => void;
 }
 
-export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinual, onReact, onReply, onProfileClick, onRepair }) => {
+export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinual, onReact, onReply, onProfileClick, onPreviewMedia, onRepair }) => {
     const { user } = useAuth();
     const isMe = message.senderId === user?.id;
 
@@ -113,29 +114,29 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
 
                     {(message.type === 'image' || message.type === 'video') && message.media && (
                         !message.media.encKey ? (
-                            <MediaRenderer url={message.media.url} type={message.type} name={message.media.name} />
+                             <MediaRenderer url={message.media.url} type={message.type} name={message.media.name} onPreview={() => onPreviewMedia?.(message.media)} />
                         ) : (
                             <EncryptedMedia
                                 media={message.media}
                                 type={message.type}
-                                render={(url) => (
-                                    <MediaRenderer url={url} type={message.type} name={message.media?.name} />
-                                )}
-                            />
+                                 render={(url) => (
+                                     <MediaRenderer url={url} type={message.type} name={message.media?.name} onPreview={() => onPreviewMedia?.({ ...message.media, url })} />
+                                 )}
+                             />
                         )
                     )}
 
                     {message.type === 'file' && message.media && (
                         !message.media.encKey ? (
-                            <FileRenderer url={message.media.url} name={message.media.name} size={message.media.size} />
+                             <FileRenderer url={message.media.url} name={message.media.name} size={message.media.size} onPreview={() => onPreviewMedia?.(message.media)} />
                         ) : (
                             <EncryptedMedia
                                 media={message.media}
                                 type="file"
-                                render={(url) => (
-                                    <FileRenderer url={url} name={message.media?.name} size={message.media?.size} />
-                                )}
-                            />
+                                 render={(url) => (
+                                     <FileRenderer url={url} name={message.media?.name} size={message.media?.size} onPreview={() => onPreviewMedia?.({ ...message.media, url })} />
+                                 )}
+                             />
                         )
                     )}
 
@@ -259,35 +260,41 @@ const AudioPlayer = ({ url, name }: { url: string; name?: string }) => {
     );
 };
 
-const MediaRenderer = ({ url, type, name }: { url: string; type: string; name?: string }) => {
+const MediaRenderer = ({ url, type, name, onPreview }: { url: string; type: string; name?: string; onPreview?: () => void }) => {
     if (type === 'image') {
         return (
-            <div className="relative group/media overflow-hidden rounded-2xl shadow-2xl border border-white/5">
+            <div 
+                className="relative group/media overflow-hidden rounded-2xl shadow-2xl border border-white/5 cursor-pointer"
+                onClick={onPreview}
+            >
                 <img src={url} alt="media" className="max-h-72 w-full object-cover transition-transform duration-500 group-hover/media:scale-105" />
                 <div className="absolute inset-0 opacity-0 group-hover/media:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[4px] bg-black/40 z-10">
-                    <a
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                    <button
                         className="px-6 py-2.5 bg-white text-black rounded-full font-black text-[10px] tracking-widest uppercase hover:scale-105 transition-transform shadow-2xl flex items-center gap-2"
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => { e.stopPropagation(); onPreview?.(); }}
                     >
-                        <Download className="w-4 h-4" /> View Full
-                    </a>
+                        <Maximize2 size={16} /> View Preview
+                    </button>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="relative overflow-hidden rounded-2xl shadow-2xl border border-white/5 bg-[#0B1221]">
-            <video src={url} controls preload="metadata" className="max-h-72 w-full object-contain" onClick={(e) => e.stopPropagation()} />
+        <div className="relative overflow-hidden rounded-2xl shadow-2xl border border-white/5 bg-[#0B1221] cursor-pointer" onClick={onPreview}>
+            <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-all z-10 pointer-events-none">
+                 <Play size={32} className="text-white opacity-80" />
+            </div>
+            <video src={url} preload="metadata" className="max-h-72 w-full object-contain pointer-events-none" />
         </div>
     );
 };
 
-const FileRenderer = ({ url, name, size }: { url: string; name?: string; size?: number }) => (
-    <div className="flex items-center gap-3 bg-white/5 p-3 rounded-xl w-full min-w-[220px] sm:min-w-[280px] hover:bg-white/10 transition-colors">
+const FileRenderer = ({ url, name, size, onPreview }: { url: string; name?: string; size?: number; onPreview?: () => void }) => (
+    <div 
+        className="flex items-center gap-3 bg-white/5 p-3 rounded-xl w-full min-w-[220px] sm:min-w-[280px] hover:bg-white/10 transition-colors cursor-pointer"
+        onClick={onPreview}
+    >
         <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center shrink-0">
             <File className="w-5 h-5 text-primary" />
         </div>
@@ -299,15 +306,11 @@ const FileRenderer = ({ url, name, size }: { url: string; name?: string; size?: 
                     : `${((size || 0) / 1024).toFixed(0)} KB`}
             </div>
         </div>
-        <a
-            href={url}
-            download={name || 'file'}
-            target="_blank"
-            rel="noopener noreferrer"
+        <button
             className="w-10 h-10 rounded-full bg-black/20 hover:bg-primary hover:text-white flex items-center justify-center transition-all active:scale-95 shrink-0"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => { e.stopPropagation(); onPreview?.(); }}
         >
-            <Download className="w-4 h-4" />
-        </a>
+            <Maximize2 size={16} />
+        </button>
     </div>
 );

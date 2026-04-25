@@ -15,6 +15,7 @@ interface AIMessageListProps {
     onReply?: (msg: Message) => void;
     onReaction?: (messageId: string, emoji: string) => void;
     onProfileClick?: (userId: string) => void;
+    onPreviewMedia?: (media: any) => void;
     onRepairSession?: () => void;
 }
 
@@ -25,6 +26,7 @@ export const AIMessageList: React.FC<AIMessageListProps> = ({
     onReply,
     onReaction,
     onProfileClick,
+    onPreviewMedia,
     onRepairSession
 }) => {
     const bottomRef = useRef<HTMLDivElement>(null);
@@ -62,6 +64,7 @@ export const AIMessageList: React.FC<AIMessageListProps> = ({
                             onReply={() => onReply?.(msg)}
                             onReaction={(emoji) => onReaction?.(msg.id, emoji)}
                             onProfileClick={onProfileClick}
+                            onPreviewMedia={onPreviewMedia}
                             onRepairSession={onRepairSession}
                         />
                     );
@@ -96,6 +99,7 @@ const MessageItem = ({
     onReply: () => void,
     onReaction: (emoji: string) => void,
     onProfileClick?: (userId: string) => void,
+    onPreviewMedia?: (media: any) => void,
     onRepairSession?: () => void
 }) => {
     return (
@@ -106,6 +110,7 @@ const MessageItem = ({
                 onReact={onReaction}
                 onReply={onReply}
                 onProfileClick={onProfileClick}
+                onPreviewMedia={onPreviewMedia}
                 onRepair={onRepairSession}
             />
         </div>

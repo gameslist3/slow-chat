@@ -8,6 +8,7 @@ import { GroupDiscovery, CreateGroup } from './components/groups/GroupFeatures';
 import { ChatInterface } from './components/chat/ChatFeatures';
 import { AccountSettings } from './components/auth/AccountSettings';
 import { UserProfileModal } from './components/user/UserProfileModal';
+import { MediaPreviewModal } from './components/chat/MediaPreviewModal';
 import { FollowRequests } from './components/auth/FollowRequests';
 import { subscribeToGroups, subscribeToJoinedGroups, joinGroup } from './services/firebaseGroupService';
 import { Group, User, PersonalChat } from './types';
@@ -162,6 +163,7 @@ const AuthenticatedSection = () => {
     const [showDiscovery, setShowDiscovery] = useState(false);
     const [showCreateGroup, setShowCreateGroup] = useState(false);
     const [viewingUserId, setViewingUserId] = useState<string | null>(null);
+    const [previewMedia, setPreviewMedia] = useState<any | null>(null);
     const [highlightMessageId, setHighlightMessageId] = useState<string | undefined>(undefined);
     const [followRequestsCount, setFollowRequestsCount] = useState(0);
     const { personalChats } = useInbox();
@@ -521,6 +523,7 @@ const AuthenticatedSection = () => {
                                         if (user?.id) updateActiveChat(user.id, null);
                                     }}
                                     onProfileClick={(userId) => setViewingUserId(userId)}
+                                    onPreviewMedia={(media) => setPreviewMedia(media)}
                                 />
                             </motion.div>
                         )}
@@ -558,7 +561,17 @@ const AuthenticatedSection = () => {
                         />
                     )}
                 </AnimatePresence>
-            </AILayout>
+
+                 <AnimatePresence>
+                    {previewMedia && (
+                        <MediaPreviewModal 
+                            isOpen={!!previewMedia}
+                            onClose={() => setPreviewMedia(null)}
+                            media={previewMedia}
+                        />
+                    )}
+                </AnimatePresence>
+             </AILayout>
         </div>
     );
 };

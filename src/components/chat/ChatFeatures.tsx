@@ -18,6 +18,7 @@ interface ChatInterfaceProps {
     onType?: (isDirty: boolean) => void;
     onLeave?: () => void;
     onProfileClick?: (userId: string) => void;
+    onPreviewMedia?: (media: any) => void;
 }
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({
@@ -30,7 +31,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     memberIds = [],
     createdAt,
     onLeave,
-    onProfileClick
+    onProfileClick,
+    onPreviewMedia
 }) => {
     const {
         messages,
@@ -158,6 +160,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                                     onReply={handleReply}
                                     onReaction={toggleReaction}
                                     onProfileClick={onProfileClick}
+                                    onPreviewMedia={onPreviewMedia}
                                     onRepairSession={repairSession}
                                 />
                             </div>
