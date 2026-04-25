@@ -101,54 +101,57 @@ export const AISidebar: React.FC<AISidebarProps> = ({
             <div className="mt-auto flex flex-col gap-6 items-center md:items-stretch">
                 {/* Minimalist Daily Resource Usage */}
                 <div className="w-full px-2 mb-4 space-y-4">
-                    <div className="flex items-center justify-between px-1">
-                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#7C89A6] hidden md:block">Daily Quota</span>
-                        <div className="flex items-center gap-1 text-[9px] font-bold text-primary/80">
-                            <Icon name="clock" className="w-2.5 h-2.5" />
+                    {/* Header: Hidden on mobile */}
+                    <div className="hidden md:flex items-center justify-between px-1">
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/60">Daily Quota</span>
+                        <div className="flex items-center gap-1 text-[10px] font-bold text-primary">
+                            <Icon name="clock" className="w-3 h-3" />
                             <span>{stats ? formatRemainingTime(stats.resetTime) : '--'}</span>
                         </div>
                     </div>
 
                     <div className="flex flex-col gap-3">
                         {/* Files Sent */}
-                        <div className="group cursor-help">
-                            <div className="flex items-center justify-between mb-1.5 px-1">
+                        <div className="group">
+                            <div className="flex items-center justify-between mb-2 px-1">
                                 <div className="flex items-center gap-2">
-                                    <Icon name="file" className="w-3 h-3 text-[#7FA6FF]" />
-                                    <span className="text-[10px] font-bold text-[#7C89A6] group-hover:text-white transition-colors hidden md:block">Files</span>
+                                    <Icon name="file" className="w-3.5 h-3.5 text-blue-400" />
+                                    <span className="text-[11px] font-bold text-white/90 hidden md:block">Files</span>
                                 </div>
-                                <span className="text-[10px] font-black text-white/40 group-hover:text-white/80 transition-colors">
+                                {/* Progress Value: Hidden on mobile */}
+                                <span className="text-[11px] font-black text-white hidden md:block">
                                     {stats ? `${stats.count}/${stats.limitCount}` : '0/20'}
                                 </span>
                             </div>
-                            <div className="h-0.5 w-full bg-white/5 rounded-full overflow-hidden">
+                            <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden">
                                 <motion.div 
                                     initial={{ width: 0 }}
                                     animate={{ width: stats ? `${Math.min((stats.count / stats.limitCount) * 100, 100)}%` : '0%' }}
                                     className={`h-full rounded-full ${
-                                        stats && stats.count >= stats.limitCount ? 'bg-red-500' : 'bg-primary'
+                                        stats && stats.count >= stats.limitCount ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]' : 'bg-primary shadow-[0_0_8px_rgba(59,130,246,0.4)]'
                                     }`}
                                 />
                             </div>
                         </div>
 
                         {/* Data Transfer */}
-                        <div className="group cursor-help">
-                            <div className="flex items-center justify-between mb-1.5 px-1">
+                        <div className="group">
+                            <div className="flex items-center justify-between mb-2 px-1">
                                 <div className="flex items-center gap-2">
-                                    <Icon name="database" className="w-3 h-3 text-[#7FA6FF]" />
-                                    <span className="text-[10px] font-bold text-[#7C89A6] group-hover:text-white transition-colors hidden md:block">Data</span>
+                                    <Icon name="database" className="w-3.5 h-3.5 text-purple-400" />
+                                    <span className="text-[11px] font-bold text-white/90 hidden md:block">Data</span>
                                 </div>
-                                <span className="text-[10px] font-black text-white/40 group-hover:text-white/80 transition-colors">
+                                {/* Progress Value: Hidden on mobile */}
+                                <span className="text-[11px] font-black text-white hidden md:block">
                                     {stats ? `${(stats.size / (1024 * 1024)).toFixed(1)}/20MB` : '0/20MB'}
                                 </span>
                             </div>
-                            <div className="h-0.5 w-full bg-white/5 rounded-full overflow-hidden">
+                            <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden">
                                 <motion.div 
                                     initial={{ width: 0 }}
                                     animate={{ width: stats ? `${Math.min((stats.size / stats.limitSize) * 100, 100)}%` : '0%' }}
                                     className={`h-full rounded-full ${
-                                        stats && stats.size >= stats.limitSize ? 'bg-red-500' : 'bg-blue-500'
+                                        stats && stats.size >= stats.limitSize ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]' : 'bg-gradient-to-r from-purple-500 to-blue-500 shadow-[0_0_8px_rgba(168,85,247,0.4)]'
                                     }`}
                                 />
                             </div>
