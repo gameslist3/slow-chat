@@ -120,11 +120,6 @@ export const acceptFollowRequest = async (requestId: string): Promise<void> => {
             updatedAt: Date.now()
         });
 
-        transaction.update(fromUserRef, {
-            following: arrayUnion(data.toId),
-            followers: arrayUnion(data.toId)
-        });
-
         transaction.update(toUserRef, {
             following: arrayUnion(data.fromId),
             followers: arrayUnion(data.fromId)
@@ -207,7 +202,6 @@ export const cancelFollowRequest = async (toUserId: string): Promise<void> => {
     await batch.commit();
 };
 
-import { terminatePersonalChat } from './firebaseMessageService';
 
 /**
  * Unfollow a user (Redo for Phase 24/32)
@@ -228,10 +222,6 @@ export const unfollowUser = async (otherUserId: string): Promise<void> => {
         batch.update(userRef, {
             following: arrayRemove(otherUserId),
             followers: arrayRemove(otherUserId)
-        });
-        batch.update(otherRef, {
-            following: arrayRemove(currentUser.uid),
-            followers: arrayRemove(currentUser.uid)
         });
 
         // 2. Clear Active Connections (Requests) - Completely delete to allow re-requesting

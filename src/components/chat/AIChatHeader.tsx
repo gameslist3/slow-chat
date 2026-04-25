@@ -150,11 +150,11 @@ export const AIChatHeader: React.FC<AIChatHeaderProps> = ({
                                                 if (confirm("Are you sure you want to unfollow this user?")) {
                                                     try {
                                                         await unfollowUser(otherId);
-                                                    } catch (e) {
-                                                        console.error(e);
-                                                    } finally {
                                                         toast("Successfully unfollowed", "success");
                                                         onLeave?.();
+                                                    } catch (e) {
+                                                        console.error(e);
+                                                        toast("Failed to unfollow", "error");
                                                     }
                                                 }
                                             }}
