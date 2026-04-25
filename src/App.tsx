@@ -359,7 +359,7 @@ const AuthenticatedSection = () => {
                                             if (!confirm(`End chat with ${name}?`)) return;
                                             try {
                                                 if (otherId) await unfollowUser(otherId);
-                                                toast("Successfully unfollowed", "success");
+                                                toast("successfully unfollowed", "success");
                                                 setActiveTab('home');
                                                 setActiveId(null);
                                                 if (user?.id) updateActiveChat(user.id, null);

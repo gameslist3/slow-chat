@@ -92,6 +92,7 @@ const MessageItem = ({
     onReply,
     onReaction,
     onProfileClick,
+    onPreviewMedia,
     onRepairSession
 }: {
     message: Message,
