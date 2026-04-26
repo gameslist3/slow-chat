@@ -125,6 +125,11 @@ export const acceptFollowRequest = async (requestId: string): Promise<void> => {
             followers: arrayUnion(data.fromId)
         });
 
+        transaction.update(fromUserRef, {
+            following: arrayUnion(data.toId),
+            followers: arrayUnion(data.toId)
+        });
+
         const chatIds = [data.fromId, data.toId].sort();
         const chatId = chatIds.join('_');
         const chatRef = doc(db, 'personal_chats', chatId);

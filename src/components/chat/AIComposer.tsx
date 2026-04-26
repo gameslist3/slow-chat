@@ -17,6 +17,7 @@ interface AIComposerProps {
     isPersonal: boolean;
     onOptimisticAdd?: (msg: Message) => void;
     onOptimisticRemove?: (id: string) => void;
+    onType?: (isTyping: boolean) => void;
 }
 
 type RecordingState = 'idle' | 'recording' | 'review';
@@ -30,7 +31,8 @@ export const AIComposer: React.FC<AIComposerProps> = ({
     userId,
     isPersonal,
     onOptimisticAdd,
-    onOptimisticRemove
+    onOptimisticRemove,
+    onType
 }) => {
     const { stats } = useUsageStats();
     const [text, setText] = useState('');
@@ -47,6 +49,7 @@ export const AIComposer: React.FC<AIComposerProps> = ({
     const mediaRecorder = useRef<MediaRecorder | null>(null);
     const timerRef = useRef<any>(null);
     const audioChunks = useRef<Blob[]>([]);
+    const typingTimeout = useRef<any>(null);
     const { toast } = useToast();
 
     useEffect(() => {
@@ -148,6 +151,21 @@ export const AIComposer: React.FC<AIComposerProps> = ({
         onSend({ text: text.trim(), type: 'text' });
         setText('');
         if (replyingTo) onCancelReply?.();
+        if (onType) {
+            onType(false);
+            if (typingTimeout.current) clearTimeout(typingTimeout.current);
+        }
+    };
+
+    const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setText(e.target.value);
+        if (onType) {
+            onType(true);
+            if (typingTimeout.current) clearTimeout(typingTimeout.current);
+            typingTimeout.current = setTimeout(() => {
+                onType(false);
+            }, 3000);
+        }
     };
 
     const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -315,7 +333,7 @@ export const AIComposer: React.FC<AIComposerProps> = ({
                             <textarea
                                 ref={textareaRef}
                                 value={text}
-                                onChange={e => setText(e.target.value)}
+                                onChange={handleTextChange}
                                 onKeyDown={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendText())}
                                 placeholder="Message"
                                 className="w-full bg-transparent border-none focus:ring-0 outline-none p-0 text-[15px] placeholder:text-[#64748B] text-[#E6ECFF] resize-none max-h-[120px] min-h-[24px] custom-scrollbar leading-relaxed"

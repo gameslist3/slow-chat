@@ -47,7 +47,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         hasMore,
         addOptimisticMessage,
         removeOptimisticMessage,
-        repairSession
+        repairSession,
+        typingUsers,
+        updateTyping
     } = useChat(chatId, isPersonal);
 
     const { user } = useAuth();
@@ -163,6 +165,11 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                                     onPreviewMedia={onPreviewMedia}
                                     onRepairSession={repairSession}
                                 />
+                                {typingUsers.length > 0 && (
+                                    <div className="text-xs text-muted-foreground/60 italic px-4 py-2 animate-pulse">
+                                        Someone is typing...
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
@@ -186,6 +193,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                         cooldown={remaining}
                         onOptimisticAdd={addOptimisticMessage}
                         onOptimisticRemove={removeOptimisticMessage}
+                        onType={updateTyping}
                     />
                 )}
             </div>

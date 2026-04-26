@@ -118,11 +118,24 @@ const AppContent = () => {
 
     useEffect(() => {
         if (!isAuthenticated || !user?.id) return;
-        updateUserStatus(user.id, 'online');
+
+        const updateVisibility = () => {
+            if (document.visibilityState === 'visible') {
+                updateUserStatus(user.id, 'online');
+            } else {
+                updateUserStatus(user.id, 'offline');
+            }
+        };
+
+        updateVisibility();
+
+        document.addEventListener('visibilitychange', updateVisibility);
         const handleUnload = () => updateUserStatus(user.id, 'offline');
         window.addEventListener('beforeunload', handleUnload);
+
         return () => {
             handleUnload();
+            document.removeEventListener('visibilitychange', updateVisibility);
             window.removeEventListener('beforeunload', handleUnload);
         };
     }, [isAuthenticated, user?.id]);

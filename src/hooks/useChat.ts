@@ -7,7 +7,9 @@ import {
     subscribeToMessages,
     markAsSeen as markFirebaseSeen,
     subscribeToPersonalChats,
-    fetchPreviousMessages
+    fetchPreviousMessages,
+    setTypingStatus,
+    subscribeToChatMetadata
 } from '../services/firebaseMessageService';
 import { getUserById } from '../services/firebaseAuthService';
 import { CryptoUtils } from '../services/crypto/CryptoUtils';
@@ -22,6 +24,7 @@ export const useChat = (chatId: string, isPersonal: boolean = false) => {
     const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
     const [hasMore, setHasMore] = useState(true);
+    const [typingUsers, setTypingUsers] = useState<string[]>([]);
 
     // Initial window: Last 24 hours OR since user joined (for Clean Slate groups)
     const [startTime] = useState(() => {
@@ -133,6 +136,28 @@ export const useChat = (chatId: string, isPersonal: boolean = false) => {
         }, startTime);
         return () => unsubscribe();
     }, [chatId, isPersonal, user?.id, startTime, processMessages]);
+
+    // Typing listener
+    useEffect(() => {
+        if (!chatId) return;
+        const unsub = subscribeToChatMetadata(chatId, isPersonal, (data) => {
+            if (data?.typing) {
+                const now = Date.now();
+                const activeTypers = Object.entries(data.typing)
+                    .filter(([uid, ts]) => uid !== user?.id && typeof ts === 'number' && ts > 0 && (now - ts) < 5000)
+                    .map(([uid]) => uid);
+                setTypingUsers(activeTypers);
+            } else {
+                setTypingUsers([]);
+            }
+        });
+        return () => unsub();
+    }, [chatId, isPersonal, user?.id]);
+
+    const updateTyping = useCallback(async (isTyping: boolean) => {
+        if (!user?.id || !chatId) return;
+        await setTypingStatus(chatId, isPersonal, user.id, isTyping);
+    }, [user?.id, chatId, isPersonal]);
 
     const repairSession = useCallback(async () => {
         if (!isPersonal || !chatId || !user?.id) return;
@@ -269,7 +294,9 @@ export const useChat = (chatId: string, isPersonal: boolean = false) => {
         loading,
         loadingMore,
         loadMore,
-        hasMore
+        hasMore,
+        typingUsers,
+        updateTyping
     };
 };
 

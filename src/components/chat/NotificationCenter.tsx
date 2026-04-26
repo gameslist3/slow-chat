@@ -193,13 +193,7 @@ export const NotificationList: React.FC<{
     const activity = notifications
         .filter(n => {
             if (n.type === 'follow_request') return false;
-
-            // NEW RULE: If it's UNREAD, always show it (bypass timer)
-            if (!n.read) return true;
-
-            // If it IS read, keep it visible until the 5-hour window expires
-            const isWithinTimer = (now - n.timestamp) < autoDeleteWindow;
-            return isWithinTimer;
+            return !n.read;
         })
         .sort((a, b) => b.timestamp - a.timestamp);
 
@@ -240,15 +234,15 @@ export const NotificationList: React.FC<{
                                             <motion.div
                                                 key={note.id}
                                                 layout
-                                                initial={{ opacity: 0, y: 20 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                exit={{ opacity: 0, scale: 0.95 }}
-                                                transition={{ delay: index * 0.05, type: 'spring', damping: 20, stiffness: 100 }}
+                                                initial={{ opacity: 0, x: -20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                exit={{ opacity: 0, x: 20 }}
+                                                transition={{ duration: 0.2 }}
                                                 onClick={() => handleSelect(note)}
-                                                className={`group relative p-4 rounded-3xl transition-all cursor-pointer border ${note.read ? 'opacity-40 grayscale bg-foreground/5 border-transparent' : 'bg-foreground/5 border-white/5 hover:border-primary/40 hover:bg-primary/5'}`}
+                                                className={`group relative p-4 bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border-b border-white/5 last:border-0`}
                                             >
                                                 <div className="flex gap-4 items-start text-left">
-                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-transform group-hover:scale-110 ${note.type === 'mention' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' : note.type === 'reply' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : note.type === 'follow_accept' ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-foreground/5 text-muted-foreground border-white/5'}`}>
+                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${note.type === 'mention' ? 'bg-purple-500/20 text-purple-400' : note.type === 'reply' ? 'bg-blue-500/20 text-blue-400' : note.type === 'follow_accept' ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-white/70'}`}>
                                                         {note.groupImage ? (
                                                             <span className="text-xl">{note.groupImage}</span>
                                                         ) : (
@@ -312,11 +306,15 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose,
     }, [user?.id, user?.autoDeleteHours]);
 
     return (
-        <div ref={containerRef} className="flex flex-col h-full glass-panel rounded-none md:rounded-[2.5rem] overflow-hidden shadow-2xl border-white/5 bg-[#0B1221]/95">
-            <div className="flex items-center justify-end p-2 md:hidden">
-                <button onClick={onClose} className="p-2"><X className="w-6 h-6" /></button>
+        <div ref={containerRef} className="flex flex-col h-full bg-[#0B1221] border-l border-white/10 md:rounded-none overflow-hidden shadow-2xl">
+            <div className="flex items-center justify-between p-6 border-b border-white/5">
+                <h2 className="text-xl font-bold text-white">Notifications</h2>
+                <div className="flex gap-4">
+                    <button onClick={() => user?.id && markAllAsRead(user.id)} className="text-xs font-bold text-primary hover:text-white transition-colors">Mark all read</button>
+                    <button onClick={onClose} className="text-white/50 hover:text-white transition-colors md:hidden"><X className="w-6 h-6" /></button>
+                </div>
             </div>
-            <NotificationList notifications={notifications} onSelectChat={onSelectChat} onMarkAllRead={() => user?.id && markAllAsRead(user.id)} />
+            <NotificationList notifications={notifications} onSelectChat={onSelectChat} onMarkAllRead={() => {}} />
         </div>
     );
 };

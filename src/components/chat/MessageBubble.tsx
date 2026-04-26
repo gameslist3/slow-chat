@@ -166,9 +166,9 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                 {message.reactions && message.reactions.length > 0 && (
                     <div className={`flex flex-wrap gap-1 mt-1 z-10 ${isMe ? 'justify-end mr-1' : 'justify-start ml-1'}`}>
                         {message.reactions.map((r, i) => (
-                            <span key={i} className="bg-[#0F1C34] border border-white/10 shadow-sm rounded-full px-1.5 py-0.5 text-[10px] animate-in zoom-in text-white/90">
-                                {r.emoji}
-                            </span>
+                            <button key={i} onClick={() => onReact(r.emoji)} className="bg-primary/10 hover:bg-primary/20 border border-primary/20 shadow-sm rounded-full px-2 py-0.5 text-[11px] animate-in zoom-in text-primary flex items-center gap-1 transition-colors font-semibold">
+                                {r.emoji} {r.userIds?.length > 1 ? r.userIds.length : ''}
+                            </button>
                         ))}
                     </div>
                 )}

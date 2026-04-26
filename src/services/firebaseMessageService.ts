@@ -284,7 +284,7 @@ export async function toggleReaction(
             if (!messageDoc.exists()) throw new Error("Message not found");
 
             const currentReactions: Reaction[] = messageDoc.data().reactions || [];
-            let newReactions = [...currentReactions];
+            let newReactions = currentReactions.map(r => ({ ...r, userIds: [...r.userIds] }));
 
             const existingEmojiIndex = newReactions.findIndex(r => r.emoji === emoji);
 
@@ -445,3 +445,22 @@ export async function deletePersonalChat(chatId: string): Promise<void> {
         throw error;
     }
 }
+
+export async function setTypingStatus(targetId: string, isPersonal: boolean, userId: string, isTyping: boolean) {
+    const chatRef = doc(db, isPersonal ? 'personal_chats' : 'groups', targetId);
+    try {
+        await updateDoc(chatRef, {
+            [`typing.${userId}`]: isTyping ? Date.now() : 0
+        });
+    } catch (e) {}
+}
+
+export function subscribeToChatMetadata(targetId: string, isPersonal: boolean, callback: (data: any) => void) {
+    const chatRef = doc(db, isPersonal ? 'personal_chats' : 'groups', targetId);
+    return onSnapshot(chatRef, (snap) => {
+        if (snap.exists()) {
+            callback(snap.data());
+        }
+    });
+}
+
