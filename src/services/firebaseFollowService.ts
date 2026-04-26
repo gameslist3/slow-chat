@@ -95,71 +95,49 @@ export const sendFollowRequest = async (toUserId: string, toUsername: string): P
  */
 export const acceptFollowRequest = async (requestId: string): Promise<void> => {
     const requestRef = doc(db, 'follow_requests', requestId);
+    const snap = await getDoc(requestRef);
+    if (!snap.exists()) throw new Error("Request no longer active.");
 
-    const res = await runTransaction(db, async (transaction) => {
-        const requestSnap = await transaction.get(requestRef);
-        if (!requestSnap.exists()) throw new Error("Request no longer active.");
+    const data = snap.data() as FollowRequest;
+    if (data.status !== 'pending') return;
 
-        const data = requestSnap.data() as FollowRequest;
-        if (data.status !== 'pending') return null;
+    const fromUserSnap = await getDoc(doc(db, 'users', data.fromId));
+    const toUserSnap = await getDoc(doc(db, 'users', data.toId));
 
-        const fromUserRef = doc(db, 'users', data.fromId);
-        const toUserRef = doc(db, 'users', data.toId);
+    if (!fromUserSnap.exists() || !toUserSnap.exists()) {
+        throw new Error("User profiles not found.");
+    }
 
-        // READ ALL DATA FIRST
-        const fromUserSnap = await transaction.get(fromUserRef);
-        const toUserSnap = await transaction.get(toUserRef);
+    const batch = writeBatch(db);
 
-        if (!fromUserSnap.exists() || !toUserSnap.exists()) {
-            throw new Error("User profiles not found.");
-        }
-
-        // PERFORM ALL WRITES SECOND
-        transaction.update(requestRef, {
-            status: 'accepted',
-            updatedAt: Date.now()
-        });
-
-        transaction.update(toUserRef, {
-            following: arrayUnion(data.fromId),
-            followers: arrayUnion(data.fromId)
-        });
-
-        transaction.update(fromUserRef, {
-            following: arrayUnion(data.toId),
-            followers: arrayUnion(data.toId)
-        });
-
-        const chatIds = [data.fromId, data.toId].sort();
-        const chatId = chatIds.join('_');
-        const chatRef = doc(db, 'personal_chats', chatId);
-
-        transaction.set(chatRef, {
-            id: chatId,
-            userIds: chatIds,
-            usernames: {
-                [data.fromId]: fromUserSnap.data()?.username || 'User',
-                [data.toId]: toUserSnap.data()?.username || 'User'
-            },
-            lastActivity: Date.now(),
-            unreadCounts: { [data.fromId]: 0, [data.toId]: 0 }
-        }, { merge: true });
-
-        return {
-            fromId: data.fromId,
-            toUsername: toUserSnap.data()?.username || 'Someone',
-            chatId: chatId
-        };
+    batch.update(requestRef, {
+        status: 'accepted',
+        updatedAt: Date.now()
     });
 
-    if (res) {
-        await createNotification(res.fromId, {
-            type: 'follow_accept',
-            senderName: res.toUsername,
-            text: 'accepted your follow request!',
-            groupId: res.chatId
-        });
-    }
+    const chatIds = [data.fromId, data.toId].sort();
+    const chatId = chatIds.join('_');
+    const chatRef = doc(db, 'personal_chats', chatId);
+
+    batch.set(chatRef, {
+        id: chatId,
+        userIds: chatIds,
+        usernames: {
+            [data.fromId]: fromUserSnap.data()?.username || 'User',
+            [data.toId]: toUserSnap.data()?.username || 'User'
+        },
+        lastActivity: Date.now(),
+        unreadCounts: { [data.fromId]: 0, [data.toId]: 0 }
+    }, { merge: true });
+
+    await batch.commit();
+
+    await createNotification(data.fromId, {
+        type: 'follow_accept',
+        senderName: toUserSnap.data()?.username || 'Someone',
+        text: 'accepted your follow request!',
+        groupId: chatId
+    });
 };
 
 /**
@@ -219,22 +197,8 @@ export const unfollowUser = async (otherUserId: string): Promise<void> => {
     console.log("[Social] Unfollow + delete chat running for:", otherUserId);
 
     try {
-        // 1. Prune Social Graph (Bidirectional arrayRemove)
+        // 1. Clear Active Connections (Requests) - Completely delete to allow re-requesting
         const batch = writeBatch(db);
-        const userRef = doc(db, 'users', currentUser.uid);
-        const otherRef = doc(db, 'users', otherUserId);
-
-        batch.update(userRef, {
-            following: arrayRemove(otherUserId),
-            followers: arrayRemove(otherUserId)
-        });
-
-        batch.update(otherRef, {
-            following: arrayRemove(currentUser.uid),
-            followers: arrayRemove(currentUser.uid)
-        });
-
-        // 2. Clear Active Connections (Requests) - Completely delete to allow re-requesting
         const requestsRef = collection(db, 'follow_requests');
         const q1 = query(requestsRef, where('fromId', '==', currentUser.uid), where('toId', '==', otherUserId));
         const q2 = query(requestsRef, where('fromId', '==', otherUserId), where('toId', '==', currentUser.uid));

@@ -19,7 +19,9 @@ export const GroupMemberPopup: React.FC<GroupMemberPopupProps> = ({ groupId, onC
     const { user: currentUser } = useAuth();
     const { toast } = useToast();
     const [members, setMembers] = useState<User[]>([]);
-    const [pendingRequests, setPendingRequests] = useState<string[]>([]);
+    const [pendingSent, setPendingSent] = useState<string[]>([]);
+    const [acceptedSent, setAcceptedSent] = useState<string[]>([]);
+    const [acceptedReceived, setAcceptedReceived] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
 
     // Real-time listener for group members and pending requests
@@ -28,13 +30,29 @@ export const GroupMemberPopup: React.FC<GroupMemberPopupProps> = ({ groupId, onC
 
         const groupRef = doc(db, 'groups', groupId);
 
-        // 1. Subscribe to Pending Sent Requests to show 'Pending' state
-        const q = query(collection(db, 'follow_requests'),
-            where('fromId', '==', currentUser.id),
-            where('status', '==', 'pending')
-        );
-        const unsubPending = onSnapshot(q, (snapshot) => {
-            setPendingRequests(snapshot.docs.map((d: any) => d.data().toId));
+        // 1. Subscribe to ALL Requests where we are sender
+        const q1 = query(collection(db, 'follow_requests'), where('fromId', '==', currentUser.id));
+        const unsub1 = onSnapshot(q1, (snapshot) => {
+            const pending: string[] = [];
+            const accepted: string[] = [];
+            snapshot.docs.forEach((d: any) => {
+                const data = d.data();
+                if (data.status === 'pending') pending.push(data.toId);
+                if (data.status === 'accepted') accepted.push(data.toId);
+            });
+            setPendingSent(pending);
+            setAcceptedSent(accepted);
+        });
+
+        // 2. Subscribe to ALL Requests where we are receiver
+        const q2 = query(collection(db, 'follow_requests'), where('toId', '==', currentUser.id));
+        const unsub2 = onSnapshot(q2, (snapshot) => {
+            const accepted: string[] = [];
+            snapshot.docs.forEach((d: any) => {
+                const data = d.data();
+                if (data.status === 'accepted') accepted.push(data.fromId);
+            });
+            setAcceptedReceived(accepted);
         });
 
         // 2. Subscribe to Group for Member List
@@ -71,7 +89,8 @@ export const GroupMemberPopup: React.FC<GroupMemberPopupProps> = ({ groupId, onC
         });
 
         return () => {
-            unsubPending();
+            unsub1();
+            unsub2();
             unsubscribe();
         };
     }, [groupId, currentUser?.id]);
@@ -80,7 +99,8 @@ export const GroupMemberPopup: React.FC<GroupMemberPopupProps> = ({ groupId, onC
         if (!currentUser) return;
 
         try {
-            if (currentUser.following?.includes(targetUser.id)) {
+            const isFollowing = acceptedSent.includes(targetUser.id) || acceptedReceived.includes(targetUser.id);
+            if (isFollowing) {
                 await unfollowUser(targetUser.id);
                 toast(`Unfollowed ${targetUser.username}`, 'info');
             } else {
@@ -147,8 +167,8 @@ export const GroupMemberPopup: React.FC<GroupMemberPopupProps> = ({ groupId, onC
                         ) : (
                             members.map(member => {
                                 const isMe = currentUser?.id === member.id;
-                                const isFollowing = currentUser?.following?.includes(member.id);
-                                const isPending = pendingRequests.includes(member.id);
+                                const isFollowing = acceptedSent.includes(member.id) || acceptedReceived.includes(member.id);
+                                const isPending = pendingSent.includes(member.id);
 
                                 return (
                                     <div key={member.id} className="flex items-center justify-between p-4 rounded-3xl bg-white/[0.03] border border-white/5 hover:border-primary/20 transition-all group overflow-hidden relative">

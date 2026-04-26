@@ -193,7 +193,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                             <button
                                 key={emoji}
                                 className="w-6 h-6 rounded-full hover:bg-white/10 flex items-center justify-center text-sm transition-transform hover:scale-110 active:scale-90"
-                                onClick={(e) => { e.stopPropagation(); onReact(emoji); setShowActions(false); }}
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); onReact(emoji); setShowActions(false); }}
                             >
                                 {emoji}
                             </button>
@@ -201,7 +201,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                         <div className="w-px h-3 bg-white/10 mx-0.5" />
                         <button
                             className="w-6 h-6 rounded-full hover:bg-white/10 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
-                            onClick={(e) => { e.stopPropagation(); onReply(); setShowActions(false); }}
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onReply(); setShowActions(false); }}
                         >
                             <Reply className="w-3 h-3" />
                         </button>
