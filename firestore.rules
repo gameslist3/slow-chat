@@ -20,7 +20,8 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if true; // Allow public email lookup for reset flow
       allow create: if isSignedIn();
-      allow update, delete: if request.auth.uid == userId;
+      allow update: if isSignedIn();
+      allow delete: if request.auth.uid == userId;
     }
     
     // Groups collection

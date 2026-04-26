@@ -229,6 +229,11 @@ export const unfollowUser = async (otherUserId: string): Promise<void> => {
             followers: arrayRemove(otherUserId)
         });
 
+        batch.update(otherRef, {
+            following: arrayRemove(currentUser.uid),
+            followers: arrayRemove(currentUser.uid)
+        });
+
         // 2. Clear Active Connections (Requests) - Completely delete to allow re-requesting
         const requestsRef = collection(db, 'follow_requests');
         const q1 = query(requestsRef, where('fromId', '==', currentUser.uid), where('toId', '==', otherUserId));

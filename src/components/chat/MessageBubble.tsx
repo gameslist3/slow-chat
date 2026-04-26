@@ -18,6 +18,7 @@ interface MessageBubbleProps {
 
 export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinual, onReact, onReply, onProfileClick, onPreviewMedia, onRepair }) => {
     const { user } = useAuth();
+    const [showActions, setShowActions] = React.useState(false);
     const isMe = message.senderId === user?.id;
 
     // Detect internal group links
@@ -50,7 +51,10 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                 </div>
             )}
 
-            <div className={`max-w-[85%] sm:max-w-[75%] md:max-w-[65%] flex flex-col ${isMe ? 'items-end' : 'items-start'} relative group/bubble shrink-0`}>
+            <div 
+                className={`max-w-[85%] sm:max-w-[75%] md:max-w-[65%] flex flex-col ${isMe ? 'items-end' : 'items-start'} relative group/bubble shrink-0`}
+                onClick={() => setShowActions(!showActions)}
+            >
                 {!isMe && !isContinual && (
                     <span className="text-[10px] font-bold text-primary/80 ml-1.5 mb-1">{message.sender}</span>
                 )}
@@ -166,7 +170,11 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                 {message.reactions && message.reactions.length > 0 && (
                     <div className={`flex flex-wrap gap-1 mt-1 z-10 ${isMe ? 'justify-end mr-1' : 'justify-start ml-1'}`}>
                         {message.reactions.map((r, i) => (
-                            <button key={i} onClick={() => onReact(r.emoji)} className="bg-primary/10 hover:bg-primary/20 border border-primary/20 shadow-sm rounded-full px-2 py-0.5 text-[11px] animate-in zoom-in text-primary flex items-center gap-1 transition-colors font-semibold">
+                            <button 
+                                key={i} 
+                                onClick={(e) => { e.stopPropagation(); onReact(r.emoji); setShowActions(false); }} 
+                                className="bg-primary/10 hover:bg-primary/20 border border-primary/20 shadow-sm rounded-full px-2 py-0.5 text-[11px] animate-in zoom-in text-primary flex items-center gap-1 transition-colors font-semibold"
+                            >
                                 {r.emoji} {r.userIds?.length > 1 ? r.userIds.length : ''}
                             </button>
                         ))}
@@ -175,16 +183,17 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
 
                 {/* Action Bar (Anchored to Bubble) */}
                 <div className={`
-                    absolute -top-7 opacity-0 group-hover/bubble:opacity-100 transition-all duration-200 flex gap-1 z-20 
-                    scale-90 group-hover/bubble:scale-100 origin-bottom
+                    absolute -top-7 transition-all duration-200 flex gap-1 z-20 
+                    origin-bottom
                     ${isMe ? 'right-0' : 'left-0'}
+                    ${showActions ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-90 md:group-hover/bubble:opacity-100 md:group-hover/bubble:scale-100 pointer-events-none md:group-hover/bubble:pointer-events-auto'}
                 `}>
                     <div className="flex items-center gap-1 bg-[#0F1C34]/90 backdrop-blur-md p-1 rounded-full border border-white/10 shadow-xl">
                         {['❤️', '😂', '😮', '😢'].map(emoji => (
                             <button
                                 key={emoji}
                                 className="w-6 h-6 rounded-full hover:bg-white/10 flex items-center justify-center text-sm transition-transform hover:scale-110 active:scale-90"
-                                onClick={() => onReact(emoji)}
+                                onClick={(e) => { e.stopPropagation(); onReact(emoji); setShowActions(false); }}
                             >
                                 {emoji}
                             </button>
@@ -192,7 +201,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isContinu
                         <div className="w-px h-3 bg-white/10 mx-0.5" />
                         <button
                             className="w-6 h-6 rounded-full hover:bg-white/10 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
-                            onClick={onReply}
+                            onClick={(e) => { e.stopPropagation(); onReply(); setShowActions(false); }}
                         >
                             <Reply className="w-3 h-3" />
                         </button>
