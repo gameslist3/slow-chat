@@ -283,7 +283,8 @@ export async function toggleReaction(
             const messageDoc = await transaction.get(messageRef);
             if (!messageDoc.exists()) throw new Error("Message not found");
 
-            const currentReactions: Reaction[] = messageDoc.data().reactions || [];
+            const data = messageDoc.data();
+            const currentReactions: Reaction[] = data?.reactions || [];
             let newReactions = currentReactions.map(r => ({ ...r, userIds: [...r.userIds] }));
 
             const existingEmojiIndex = newReactions.findIndex(r => r.emoji === emoji);
